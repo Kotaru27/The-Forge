@@ -20,6 +20,22 @@ export type Bucket = { bucket: string; ads: string[] };
 export type AdWorkbook = { entries: AdEntry[]; buckets: Bucket[]; skipped: number; inferred: number };
 export const MAX_ASSET_BYTES = 350 * 1024 * 1024;
 export const MAX_BATCH = 250;
+export const MAX_WORKBOOK_BYTES = 20 * 1024 * 1024;
+const MAX_WORKSHEET_ROWS = 20_000;
+const MAX_WORKSHEET_COLUMNS = 128;
+const MAX_WORKSHEET_CELLS = 1_000_000;
+
+/** A malformed worksheet dimension must not allocate millions of empty cells. */
+export function assertWorksheetBounds(range: XLSX.Range): void {
+  const rows = range.e.r - range.s.r + 1;
+  // extractRows includes columns before the first populated column.
+  const cols = range.e.c + 1;
+  if (!Number.isSafeInteger(rows) || rows < 1 || rows > MAX_WORKSHEET_ROWS ||
+      !Number.isSafeInteger(cols) || cols < 1 || cols > MAX_WORKSHEET_COLUMNS ||
+      rows * cols > MAX_WORKSHEET_CELLS) {
+    throw Error('Excel worksheet dimensions exceed the 20,000-row / 128-column / 1,000,000-cell safety limit.');
+  }
+}
 
 export function normalize(text: unknown): string {
   return String(text ?? '').replace(/\s+/g, '').replace(/_/g, '').toUpperCase();
@@ -73,6 +89,7 @@ export function extensionHint(url: string, label: string, type: string): Extensi
 function extractRows(sheet: XLSX.WorkSheet): (XLSX.CellObject | null)[][] {
   if (!sheet['!ref']) return [];
   const range = XLSX.utils.decode_range(sheet['!ref']);
+  assertWorksheetBounds(range);
   const rows: (XLSX.CellObject | null)[][] = [];
   for (let r = range.s.r; r <= range.e.r; r++) {
     const cells: (XLSX.CellObject | null)[] = [];
@@ -86,6 +103,7 @@ export function extractBucketData(book: XLSX.WorkBook, adTypeMap: Map<string, st
   const sheet = book.Sheets[book.SheetNames[1]];
   if (!sheet?.['!ref']) return [];
   const range = XLSX.utils.decode_range(sheet['!ref']);
+  assertWorksheetBounds(range);
   const rows: Bucket[] = [];
   // Original second sheet: row 1 is headings, column A holds the bucket.
   for (let r = 1; r <= range.e.r; r++) {
@@ -103,6 +121,7 @@ export function extractBucketData(book: XLSX.WorkBook, adTypeMap: Map<string, st
   return rows;
 }
 export function parseWorkbook(data: ArrayBuffer | Uint8Array): AdWorkbook {
+  if (data.byteLength > MAX_WORKBOOK_BYTES) throw Error('Excel workbook exceeds the 20 MB upload safety limit.');
   const book = XLSX.read(data, { type: 'array' });
   if (!book.SheetNames.length) throw Error('The workbook has no sheets.');
   const sheet = book.Sheets[book.SheetNames[0]];
@@ -148,15 +167,33 @@ export function parseWorkbook(data: ArrayBuffer | Uint8Array): AdWorkbook {
   }
   return { entries, buckets: extractBucketData(book, adTypeMap), skipped, inferred };
 }
+/** Keep pasted spreadsheet cells as text, not formula commands or extra rows. */
+function spreadsheetCell(value: string): string {
+  const flattened = String(value).replace(/[\t\r\n\u2028\u2029]/g, ' ');
+  return /^[\s]*[=+\-@]/.test(flattened) ? "'" + flattened : flattened;
+}
 export function copyBucketTable(rows: Bucket[]): string {
-  return 'Bucket\tAds\n' + rows.map(r => r.bucket + '\t' + r.ads.map(a => `'${a}'`).join(',') + '\n').join('');
+  return 'Bucket\tAds\n' + rows.map(r =>
+    spreadsheetCell(r.bucket) + '\t' + r.ads.map(a => "'" + spreadsheetCell(a).replace(/'/g, "''") + "'").join(',') + '\n'
+  ).join('');
+}
+/** Serialize spreadsheet cells as JavaScript string literals, never executable source. */
+function quoteForsta(value: string): string {
+  return "'" + String(value).replace(/[\\'\u0000-\u001f\u007f\u2028\u2029]/g, character => {
+    if (character === '\\') return '\\\\';
+    if (character === "'") return "\\'";
+    if (character === '\n') return '\\n';
+    if (character === '\r') return '\\r';
+    return '\\u' + character.charCodeAt(0).toString(16).padStart(4, '0');
+  }) + "'";
 }
 export function copyForstaScript(rows: Bucket[]): string {
   let script = 'var s = set()\n\n';
   for (const r of rows) {
-    script += '// Bucket ' + r.bucket + '\n';
-    script += "if (f('cq42000').any('" + r.bucket + "')) {\n";
-    script += '    s = s.union(set(' + r.ads.map(a => `'${a}'`).join(',') + '))\n';
+    // The line comment is also derived from workbook data: strip its line breaks.
+    script += '// Bucket ' + String(r.bucket).replace(/[\r\n\u2028\u2029]/g, ' ') + '\n';
+    script += "if (f('cq42000').any(" + quoteForsta(r.bucket) + ")) {\n";
+    script += '    s = s.union(set(' + r.ads.map(quoteForsta).join(',') + '))\n';
     script += '}\n\n';
   }
   return script;

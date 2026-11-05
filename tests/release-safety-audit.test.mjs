@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import JSZip from 'jszip';
-import { parseWorkbook, copyForstaScript } from '../src/tools/ad-downloader/engine.ts';
+import { parseWorkbook, assertWorksheetBounds, copyForstaScript, copyBucketTable } from '../src/tools/ad-downloader/engine.ts';
 import { fetchZip } from '../src/tools/ad-downloader/assets.ts';
 
 // Copying generated Forsta scripts should never turn spreadsheet cells into code.
@@ -63,4 +63,23 @@ test('ZIP aggregate budget is enforced across multiple separate downloads', asyn
     assert.deepEqual(Object.keys(files.files).filter(name => !files.files[name].dir), ['AD1_Logo.jpg']);
     assert.equal(updates.at(-1).done, 2);
   } finally { globalThis.fetch = originalFetch; }
+});
+
+test('spreadsheet bucket copy cannot introduce extra TSV rows or active Excel formulas', () => {
+  const text = copyBucketTable([{ bucket: '=HYPERLINK("https://example.com")\n=1+1', ads: ['200\n=2+2'] }]);
+  const lines = text.trimEnd().split('\n');
+  assert.equal(lines.length, 2, 'One bucket must produce exactly one row');
+  assert.match(lines[1], /^'=/, 'Formula-looking buckets must be literal text');
+  assert.ok(!lines[1].includes('\n'));
+  assert.ok(!lines[1].includes('\t=2+2'));
+});
+test('untrusted worksheet range metadata is rejected before allocating rows', () => {
+  assert.throws(() => assertWorksheetBounds({ s: { r: 0, c: 0 }, e: { r: 1048575, c: 16383 } }), /safety limit/);
+  assert.throws(() => assertWorksheetBounds({ s: { r: 0, c: 0 }, e: { r: 20000, c: 1 } }), /safety limit/);
+  assert.throws(() => assertWorksheetBounds({ s: { r: 0, c: 0 }, e: { r: 10, c: 128 } }), /safety limit/);
+  assert.doesNotThrow(() => assertWorksheetBounds({ s: { r: 0, c: 0 }, e: { r: 500, c: 5 } }));
+});
+test('bucket output remains unchanged for ordinary workbook text', () => {
+  assert.equal(copyBucketTable([{ bucket: 'West', ads: ['101', '102'] }]),
+    "Bucket\tAds\nWest\t'101','102'\n");
 });

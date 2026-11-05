@@ -30,12 +30,15 @@ export function guessType(blob: Blob, hint: ExtensionHint, signature: Uint8Array
       (mime.startsWith('image/') && hint.ext === '.jpg'))) return hint.ext;
   return '.bin';
 }
-export async function getAsset(entry: AdEntry, signal?: AbortSignal): Promise<{blob: Blob; name: string}> {
+export async function getAsset(entry: AdEntry, signal?: AbortSignal, availableBytes = MAX_ASSET_BYTES): Promise<{blob: Blob; name: string}> {
+  // Callers building a ZIP pass the *remaining* global budget, not just a per-file cap.
+  const limit = Math.min(MAX_ASSET_BYTES, availableBytes);
+  if (!Number.isSafeInteger(limit) || limit < 1) throw Error('ZIP memory budget exhausted.');
   if (isSharePoint(entry.url)) throw Error('Protected SharePoint files cannot be read into a browser ZIP. Use the native Download button.');
   const response = await fetch(entry.url, {mode:'cors',credentials:'omit',redirect:'follow',signal});
   if (!response.ok) throw Error(`HTTP ${response.status}`);
   const size = Number(response.headers.get('content-length')) || 0;
-  if (size > MAX_ASSET_BYTES) throw Error('File exceeds 350 MB browser memory safety limit');
+  if (size > limit) throw Error('File exceeds the remaining 350 MB ZIP/download safety budget');
   let blob: Blob;
   if (response.body?.getReader) {
     const reader = response.body.getReader(), chunks: Uint8Array<ArrayBuffer>[] = [];
@@ -45,38 +48,49 @@ export async function getAsset(entry: AdEntry, signal?: AbortSignal): Promise<{b
         const { done, value } = await reader.read();
         if (done) break;
         bytes += value.byteLength;
-        if (bytes > MAX_ASSET_BYTES) { await reader.cancel(); throw Error('File exceeds 350 MB browser memory safety limit'); }
+        if (bytes > limit) { await reader.cancel(); throw Error('File exceeds the remaining 350 MB ZIP/download safety budget'); }
         chunks.push(new Uint8Array(value));
       }
     } finally { reader.releaseLock(); }
     blob = new Blob(chunks, {type: response.headers.get('content-type') || 'application/octet-stream'});
   } else blob = await response.blob();
   if (!blob.size) throw Error('Empty download');
-  if (blob.size > MAX_ASSET_BYTES) throw Error('File exceeds 350 MB browser memory safety limit');
+  if (blob.size > limit) throw Error('File exceeds the remaining 350 MB ZIP/download safety budget');
   const ext = guessType(blob, entry, new Uint8Array(await blob.slice(0,256).arrayBuffer()));
   return { blob, name: entry.displayName + ext };
 }
 export type BatchResult = {blob: Blob | null; successes: AdEntry[]; failures: {name:string;reason:string}[]};
-export async function fetchZip(selection: AdEntry[], onProgress: (done:number, success:number, failed:number)=>void): Promise<BatchResult> {
+/** Sequential downloads keep concurrent in-flight bytes inside the shared ZIP budget. */
+export async function fetchZip(
+  selection: AdEntry[],
+  onProgress: (done: number, success: number, failed: number) => void,
+  maxTotalBytes = MAX_ASSET_BYTES,
+): Promise<BatchResult> {
   if (!selection.length) throw Error('No files selected.');
   if (selection.length > MAX_BATCH) throw Error('Select at most 250 files per batch.');
-  if (selection.some(entry => isSharePoint(entry.url)))
-    throw Error('SharePoint cannot be added to a browser ZIP. Download those files individually.');
-  const zip = new JSZip(), successes: AdEntry[] = [], failures: BatchResult['failures'] = [];
-  let index = 0, totalBytes = 0, stopped = false;
-  async function worker() {
-    while (!stopped && index < selection.length) {
-      const entry = selection[index++];
-      try {
-        const {blob,name} = await getAsset(entry);
-        totalBytes += blob.size;
-        if (totalBytes > MAX_ASSET_BYTES) { stopped = true; throw Error('ZIP exceeds 350 MB safety limit'); }
-        zip.file(name,blob);
-        successes.push(entry);
-      } catch(error) {failures.push({name:entry.displayName,reason:error instanceof Error ? error.message : String(error)});}
-      onProgress(successes.length+failures.length, successes.length, failures.length);
-    }
+  if (!Number.isSafeInteger(maxTotalBytes) || maxTotalBytes < 1 || maxTotalBytes > MAX_ASSET_BYTES) {
+    throw Error('Invalid ZIP memory budget.');
   }
-  await Promise.all(Array.from({length:Math.min(3,selection.length)}, () => worker()));
-  return {blob: successes.length ? await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:2}}) : null,successes,failures};
+  if (selection.some(entry => isSharePoint(entry.url))) {
+    throw Error('SharePoint cannot be added to a browser ZIP. Download those files individually.');
+  }
+  const zip = new JSZip();
+  const successes: AdEntry[] = [];
+  const failures: BatchResult['failures'] = [];
+  let totalBytes = 0;
+  for (const entry of selection) {
+    try {
+      const { blob, name } = await getAsset(entry, undefined, maxTotalBytes - totalBytes);
+      totalBytes += blob.size;
+      zip.file(name, blob);
+      successes.push(entry);
+    } catch (error) {
+      failures.push({ name: entry.displayName, reason: error instanceof Error ? error.message : String(error) });
+    }
+    onProgress(successes.length + failures.length, successes.length, failures.length);
+  }
+  return {
+    blob: successes.length ? await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 2 } }) : null,
+    successes, failures,
+  };
 }
