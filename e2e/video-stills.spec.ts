@@ -19,6 +19,17 @@ async function downloadZip(page: import('@playwright/test').Page, button: import
   return { download, zip: await JSZip.loadAsync(buffer) };
 }
 
+async function assertStoryboardOpened(page: import('@playwright/test').Page) {
+  try {
+    await expect(page.getByRole('heading', { name: 'Storyboard' })).toBeVisible({ timeout: 30_000 });
+  } catch (cause) {
+    const errors = await page.locator('.vs-error').allTextContents();
+    const messages = await page.locator('.vs-notice').allTextContents();
+    const frameReady = await page.locator('iframe[title="The Forge tool workspace"]').getAttribute('data-ready');
+    throw new Error(`Storyboard transfer did not open. Errors: ${errors.join(' | ')}; notices: ${messages.join(' | ')}; frame ready: ${frameReady}; underlying: ${String(cause)}`);
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto('#/video-stills');
   await expect(page.getByRole('heading', { name: 'Video Stills' })).toBeVisible();
@@ -101,7 +112,7 @@ test('clear is confirmed and cancel keeps videos intact', async ({ page }) => {
 test('Send to Board creates new Storyboard project with chosen JPEG stills', async ({ page }) => {
   await upload(page);
   await page.getByRole('button', { name: 'Send to Board' }).click();
-  await expect(page.getByRole('heading', { name: 'Storyboard' })).toBeVisible({ timeout: 30_000 });
+  await assertStoryboardOpened(page);
   const story = page.frameLocator('iframe[title="The Forge tool workspace"]');
   await expect(story.locator('#stillsTabContentStory')).toBeVisible();
   await expect(story.locator('#storyFileList .story-asset-row')).toHaveCount(3);
@@ -111,7 +122,7 @@ test('Send to Filmstrip sends only checked stills and opens Filmstrip', async ({
   await (await upload(page)).click();
   await page.getByLabel('Select frame 2').uncheck();
   await page.getByRole('button', { name: 'Send to Filmstrip' }).click();
-  await expect(page.getByRole('heading', { name: 'Storyboard' })).toBeVisible({ timeout: 30_000 });
+  await assertStoryboardOpened(page);
   const filmstrip = page.frameLocator('iframe[title="The Forge tool workspace"]');
   await expect(filmstrip.locator('#stillsTabContentFilmstrip')).toBeVisible();
   await expect(filmstrip.locator('#filmstripFileList .story-asset-row')).toHaveCount(2);
@@ -139,7 +150,7 @@ test('two video sources become separate boards and repeated transfer does not du
   ]);
   await expect(page.getByText('3 items')).toHaveCount(2, { timeout: 60_000 });
   await page.getByRole('button', { name: 'Send to Board' }).click();
-  await expect(page.getByRole('heading', { name: 'Storyboard' })).toBeVisible({ timeout: 30_000 });
+  await assertStoryboardOpened(page);
   const story = page.frameLocator('iframe[title="The Forge tool workspace"]');
   const chooser = story.locator('#storyBoardSelect');
   await expect(chooser.locator('option')).toHaveCount(2);
