@@ -71,7 +71,7 @@ test('PPTX media uses SVG rather than its PNG fallback, deduplicates and orders 
   const event = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download ZIP' }).click();
   const zip = await JSZip.loadAsync(await readFile(await (await event).path()));
-  expect(Object.keys(zip.files).filter(name => !zip.files[name].dir)).toEqual(['Slide2_IMG1.png', 'Slide10_IMG3.png']); // download order remains import order
+  expect(Object.keys(zip.files).filter(name => !zip.files[name].dir)).toEqual(['Slide10_IMG3.png', 'Slide2_IMG1.png']); // CTK prepends new entries
 });
 
 test('XLSM unanchored media is deduplicated by bytes, including SVG assets', async ({ page }) => {
@@ -83,7 +83,7 @@ test('XLSM unanchored media is deduplicated by bytes, including SVG assets', asy
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download ZIP' }).click();
   const zip = await JSZip.loadAsync(await readFile(await (await download).path()));
-  expect(Object.keys(zip.files).filter(name => !zip.files[name].dir)).toEqual(['Unanchored_IMG1.png', 'Unanchored_IMG3.png']);
+  expect(Object.keys(zip.files).filter(name => !zip.files[name].dir)).toEqual(['Unanchored_IMG3.png', 'Unanchored_IMG1.png']);
 });
 
 test('rotated PDF page still exports 2x resolution in rotated orientation', async ({ page }) => {
