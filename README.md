@@ -1,40 +1,28 @@
-# The Forge — React + TypeScript migration
+# The Forge — React migration
 
-Phase 1 is the compatibility foundation. React and TypeScript own the application shell while existing CTK engines continue to run in an isolated workspace. All eight tool routes remain available. The UI is deliberately basic: AMOLED black, one sidebar, one title, no decorative CTK homepage, intro, or extra widgets.
+**Phase 1: functional compatibility foundation**, not the Windows installer. React + TypeScript + Vite own the application shell; the eight existing CTK engines stay in an isolated compatibility workspace while they are migrated tool by tool. The UI is deliberately minimal and AMOLED black. No imported intro, extra homepage elements, animations, or unrelated features.
 
-This is not yet a full TypeScript rewrite of processing engines, a Windows executable, or a Tauri updater.
+## Work locally
 
-## Local development
+Prerequisites: Node.js 22.12+ and Git. The first setup fetches the **pinned CTK commit** into a local ignored directory; GitHub CI does the same. To use a local CTK source folder instead, set `CTK_SOURCE_DIR` to its absolute path.
 
-Requirements: Node.js 22.12+, Git and npm.
+```bash
+npm install
+npm run dev
+```
 
-Install dependencies with `npm install`, then run `npm run dev`. The first setup fetches a pinned, public CTK baseline, or set the CTK_SOURCE_DIR environment variable to a local copy of the uploaded CTK source.
+`npm run build` generates production assets, and `npm run test` runs bridge checks plus the original CTK regression tests. `public/legacy` is generated; don't hand-edit it. This first phase intentionally retains the original processing algorithms and some classic DOM dependencies. No native Windows APIs or updater yet.
 
-Commands:
-- `npm run prepare:legacy` generates a local compatibility workspace.
-- `npm test` runs bridge checks and original CTK regression tests.
-- `npm run build` produces a Vite application build.
+## Migration boundaries
 
-The generator copies the original tested engine into ignored public/legacy and hides the legacy homepage and navigation while preserving tool controls. React navigates through a typed, origin-checked message bridge. The compatibility source remains pinned to commit 617615c0b4370c795ddfd6dc4c300920cd595883 of Kotaru27/CTK until each engine is migrated.
+- React owns navigation, top-level layout, state and future tool components.
+- The compatibility iframe runs the pinned existing CTK logic, with its legacy navigation and decorative homepage hidden.
+- Processed local files remain in the browser, not uploaded to GitHub.
+- Before replacing any tool, add golden output fixtures and browser end-to-end tests, then migrate its logic into typed services.
+- Do not remove the compatibility bridge until all tool flows and the video compressor are verified.
 
-This is a static client-side app. Do not treat the public site as access-controlled or upload confidential files there.
+## Deployment
 
-## Migration order
+`FORGE_BASE_PATH=/The-Forge/ npm run build` for GitHub Pages project URLs. GitHub Pages must be configured with **Settings → Pages → GitHub Actions** before deployment can occur. Keep the working CTK deployment separate during migration.
 
-1. Record baseline outputs and browser workflows for every tool.
-2. Move the shared shell and navigational state into React (started).
-3. Migrate Link Generator and Logo Resizer into typed services and components.
-4. Migrate Image Splitter, PDF to Image, Video Stills and Ad Downloader.
-5. Migrate Storyboard and Video Compressor after output comparison.
-6. Remove the compatibility bridge when all workflows pass regression tests.
-7. Only then integrate Tauri 2, Windows packaging and GitHub-based updates.
-
-## GitHub Pages
-
-The preview workflow is manually triggered to prevent publishing an unverified migration. Configure Settings → Pages → GitHub Actions and run the Publish web preview workflow after verification. Vite uses FORGE_BASE_PATH=/The-Forge/.
-
-Automated bridge checks do not establish full functional parity. Browser-based workflows and generated file outputs must still be tested.
-
-## Tool migration status
-
-Link Generator is now a native React component backed by a TypeScript processing service, with compatibility output tests. Seven other tools and the original Video Compressor still use the preserved CTK runtime. Browser E2E tests remain outstanding.
+Logo Resizer migration checklist and E2E coverage are documented in `docs/LOGO_RESIZER_MIGRATION.md`. The new Logo Resizer is being tested on a separate branch; full functional parity is not claimed until representative real-file browser tests pass.
