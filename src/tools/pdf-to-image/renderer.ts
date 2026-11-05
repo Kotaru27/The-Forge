@@ -39,7 +39,7 @@ export async function convertPdf(
   signal.addEventListener('abort', cancel, { once: true });
 
   try {
-    loading = getDocument({ data, isEvalSupported: false });
+    loading = getDocument({ data });
     if (signal.aborted) throw abortError();
     const doc = await loading.promise;
     if (signal.aborted) throw abortError();
