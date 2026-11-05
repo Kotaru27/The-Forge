@@ -119,10 +119,14 @@ export function VideoStills({ onTransfer }: Props) {
       }
     } finally {
       running.current = false;
-      if (version === generation.current && alive.current) {
-        setBusy(false);
-        setUploadProgress('');
+      if (alive.current) {
+        // A new video may be added just after Clear canceled the previous generation.
+        // Always restart that new queue even when this worker belonged to the old generation.
         if (pending.current.length) void processQueue();
+        else if (version === generation.current) {
+          setBusy(false);
+          setUploadProgress('');
+        }
       }
     }
   }
