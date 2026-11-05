@@ -19,8 +19,7 @@ export type VideoCollection = {
 };
 export type TransferFrame = { num: number; blob: Blob };
 export type TransferGroup = { id: string; name: string; frames: TransferFrame[] };
-export type TransferDestination = 'board' | 'filmstrip';
-export type TransferResult = { imported: number; created?: number; rejected: number; mode: 'story' | 'filmstrip' };
+export type TransferResult = { imported: number; created?: number; rejected: number; mode: 'story' };
 
 /** Original sampling: one full-resolution JPEG for each completed second, evenly placed. */
 export function frameTimes(duration: number): number[] {

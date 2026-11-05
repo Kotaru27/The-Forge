@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { VideoStills } from './tools/video-stills/VideoStills';
 import { Storyboard } from './tools/storyboard/Storyboard';
 import type { StoryboardRef } from './tools/storyboard/engine';
-import type { TransferDestination, TransferGroup, TransferResult } from './tools/video-stills/engine';
+import type { TransferGroup, TransferResult } from './tools/video-stills/engine';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
@@ -17,7 +17,6 @@ function initialTool(): ToolId {
 
 export default function App() {
   const [activeTool, setActiveTool] = useState<ToolId>(initialTool);
-  const [storyboardMode, setStoryboardMode] = useState<'story' | 'filmstrip'>('story');
   const storyboardRef = useRef<StoryboardRef>(null);
 
   const openTool = useCallback((tool: ToolId) => {
@@ -34,11 +33,10 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, [openTool]);
 
-  const handleStillsTransfer = useCallback(async (destination: TransferDestination, groups: TransferGroup[]): Promise<TransferResult> => {
+  const handleStillsTransfer = useCallback(async (groups: TransferGroup[]): Promise<TransferResult> => {
     if (!storyboardRef.current) throw Error('Storyboard is not ready.');
-    const result = await storyboardRef.current.importStills(destination, groups);
+    const result = await storyboardRef.current.importStills(groups);
     if (result.imported) {
-      setStoryboardMode(destination === 'filmstrip' ? 'filmstrip' : 'story');
       openTool('storyboard');
     }
     return result;
@@ -57,7 +55,7 @@ export default function App() {
               type="button"
               key={tool.id}
               aria-current={activeTool === tool.id ? 'page' : undefined}
-              onClick={() => { if (tool.id === 'storyboard') setStoryboardMode('story'); openTool(tool.id); }}
+              onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
             >{tool.label}</button>
           ))}
         </nav>
@@ -69,7 +67,7 @@ export default function App() {
         <div className="native-tool" hidden={activeTool !== 'image-splitter'}><ImageSplitter /></div>
         <div className="native-tool" hidden={activeTool !== 'pdf-to-image'}><PdfToImage /></div>
         <div className="native-tool" hidden={activeTool !== 'video-stills'}><VideoStills onTransfer={handleStillsTransfer} /></div>
-        <div className="native-tool" hidden={activeTool !== 'storyboard'}><Storyboard ref={storyboardRef} preferredMode={storyboardMode} /></div>
+        <div className="native-tool" hidden={activeTool !== 'storyboard'}><Storyboard ref={storyboardRef} /></div>
         <div className="native-tool" hidden={activeTool !== 'ad-downloader'}><AdDownloader /></div>
       </main>
     </div>

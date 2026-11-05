@@ -101,30 +101,17 @@ test('folder import creates one board per subfolder, natural frame order',async 
   await expect(page.locator('.sb-frame').first()).toContainText('frame_2.png');
 });
 
-test('Filmstrip supports frame order, strip count, PNG/JPG and Grid Board handoff',async ({page})=>{
-  await add(page,['scene_1.png','scene_2.png','scene_3.png']);
-  await page.getByRole('button',{name:'View in Filmstrip'}).click();
-  await expect(page.getByRole('tab',{name:'Filmstrip'})).toHaveAttribute('aria-selected','true');
-  await expect(page.locator('.sb-frame')).toHaveCount(3);
-  await page.getByLabel('Strip Rows').selectOption('2');
-  await expect(page.locator('.sb-canvas canvas').first()).toHaveJSProperty('width',1920);
-  const data=await downloaded(page,'Filmstrip_1.png',()=>page.getByRole('button',{name:'Save PNG'}).click());
-  expect(data.toString('ascii',1,4)).toBe('PNG');
-  await page.getByRole('button',{name:'Send to Board'}).click();
-  await expect(page.getByRole('tab',{name:'Grid Board'})).toHaveAttribute('aria-selected','true');
-  await expect(page.locator('.sb-frame')).toHaveCount(6);
-});
-
-test('Filmstrip sorts ascending and removes one item without affecting board',async ({page})=>{
-  await page.getByRole('tab',{name:'Filmstrip'}).click();
-  const buffer=await png(page);
-  await page.getByLabel('Choose filmstrip assets').setInputFiles([
-    {name:'still_10.png',mimeType:'image/png',buffer},
-    {name:'still_2.png',mimeType:'image/png',buffer},
-  ]);
-  await expect(page.locator('.sb-frame')).toHaveCount(2);
-  await expect(page.locator('.sb-frame').first()).toContainText('still_2.png');
-  await page.getByRole('button',{name:'Remove still_2.png'}).click();
+test('Storyboard exposes only Grid Board and Fit to Platform',async ({page})=>{
+  const tabs = page.getByRole('tablist',{name:'Storyboard modes'}).getByRole('tab');
+  await expect(tabs).toHaveCount(2);
+  await expect(tabs).toHaveText(['Grid Board','Fit to Platform']);
+  await expect(page.getByRole('button',{name:'View in Filmstrip'})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Send to Filmstrip'})).toHaveCount(0);
+  await add(page,['keep.png']);
+  await tabs.getByText('Fit to Platform').click();
+  await page.getByRole('button',{name:'Use Grid Board'}).click();
+  await expect(page.getByRole('button',{name:'Save PNG'})).toBeEnabled();
+  await tabs.getByText('Grid Board').click();
   await expect(page.locator('.sb-frame')).toHaveCount(1);
 });
 
@@ -157,17 +144,3 @@ test('navigation away preserves multiple board state',async ({page})=>{
   await expect(page.locator('.sb-frame')).toHaveCount(1);
 });
 
-test('Filmstrip imports a larger batch in natural order without failed decodes', async ({page}) => {
-  await page.getByRole('tab',{name:'Filmstrip'}).click();
-  const buffer = await png(page, '#4179ab');
-  const files = Array.from({length: 24}, (_, i) => ({
-    name: 'still_' + (24 - i) + '.png',
-    mimeType: 'image/png',
-    buffer,
-  }));
-  await page.getByLabel('Choose filmstrip assets').setInputFiles(files);
-  await expect(page.locator('.sb-frame')).toHaveCount(24,{timeout:30000});
-  await expect(page.locator('.sb-frame').first()).toContainText('still_1.png');
-  await expect(page.locator('.sb-frame').last()).toContainText('still_24.png');
-  await expect(page.getByText('24 stills imported.')).toBeVisible();
-});

@@ -1,25 +1,16 @@
 # Video Stills — React + TypeScript migration
 
-## Scope and original behavior
+The native Video Stills tool preserves bulk video upload, sequential frame extraction, optional contact sheets, per-video review, frame selection, ZIP downloads, cancel and clear controls, and browser-local processing.
 
-- Batch upload and drag/drop video files; process sequentially without uploading to a server.
-- Preserve deterministic extraction: `Math.floor(duration)` equally spaced full-resolution JPEGs, quality 0.9 (one per completed second).
-- Keep optional contact sheet (4, 6, or 9 input frames, white background, JPEG quality 0.95); original UI kept this setting hidden/disabled, but the processing contract still exists.
-- Keep each video collection, clickable review/contact sheet, individual frame selection, select all, arrow-key preview and Escape to close.
-- Keep `name_stills.zip` for selected frames and `video_extras.zip` for all collections; each video gets its own ZIP directory and still images remain sequentially numbered.
-- Keep clear confirmation, cancel active processing, prevent missing/duplicate ZIP names, and release temporary media/object URLs.
-- The `Send to Board` action should create a separate storyboard per source video and only transfer checked frames; repeated imports should not duplicate frames.
-- The `Send to Filmstrip` action should transfer checked frames from the active video to the pre-existing Filmstrip functionality.
+## Current Storyboard transfer
 
-## Implementation boundary
-
-- New UI is AMOLED black with only functional controls; React + TypeScript own video decoding, per-file frame state and ZIP exports.
-- `scripts/legacy-stills-transfer.js` runs in the pinned CTK compatibility iframe to use the original Storyboard/Filmstrip internals until Storyboard is migrated.
-- The transfer bridge passes local Blobs over same-origin `postMessage`. It does not upload user videos/stills to GitHub, external services or a server.
-- Storyboard code is not rewritten in this PR; PDF to Image, Image Splitter, Logo Resizer, and Link Generator remain unchanged.
+- **Send to Board** from the main toolbar transfers selected frames from all video collections.
+- **Send to Board** in an open video collection transfers only the checked frames for that video.
+- The destination is the native Storyboard **Grid Board**. The transfer preserves existing project grouping, avoids duplicate frames using collection and frame numbers, and opens the Grid Board after a successful transfer.
+- **Filmstrip has been retired by request.** The old Filmstrip action, transfer destination and related bridge code have been removed.
 
 ## Verification
 
-- Unit tests validate frame cadence, selected frame handling, safe ZIP contents, and naming behavior.
-- Browser tests use an actual VP8 WebM fixture to validate extraction, JPEG dimensions and ZIP contents, optional contact sheets, keyboard selection, cancellation/clear, navigation persistence, and both cross-tool transfers.
-- This migration remains a draft PR pending comparison with actual working videos of differing codecs, long recordings, and real storyboards.
+Node tests validate sampling cadence, selected frame naming and safe ZIP layouts. Browser tests validate actual sample WebM decoding, downloads, keyboard navigation, selected-frame transfers to Grid Board and persistence when navigating away.
+
+All processing occurs locally in the user's browser. The pinned original CTK repository is still used only as a regression test reference, not as part of the deployed application.

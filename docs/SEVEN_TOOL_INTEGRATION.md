@@ -3,7 +3,7 @@
 Scope: combine the existing stacked React migration branches into one web release candidate. Base: `migration/logic-skills` (which already contains all seven native tool implementations and their source-tested migrations).
 
 ## Release route policy
-- Ship: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (including Filmstrip and Fit), Link Generator, Ad Downloader.
+- Ship: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (Grid Board and Fit to Platform; Filmstrip removed), Link Generator, Ad Downloader.
 - Defer: Video Compressor. It is omitted from the user-facing navigation and direct hash links fall back to Logo Resizer. **Do not rebuild it now.**
 - Preserve the legacy CTK source/bridge files and their baseline tests for now. The old embedded UI is no longer loaded while a native release tool is in use; removing pinned legacy assets is a separate, gated cleanup.
 

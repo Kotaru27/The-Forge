@@ -3,7 +3,7 @@
 ## Current focus
 - Work on **logic, feature preservation, debugging, testing, React/TypeScript migration, and GitHub Pages readiness only**.
 - Do not redesign the UI, change the AMOLED palette, add animations, or add unrelated features without a new user request.
-- The web release targets seven migrated tools: Link Generator, Logo Resizer, Image Splitter, PDF to Image, Video Stills, Storyboard (including Filmstrip/Fit), and Ad Downloader.
+- The web release targets seven migrated tools: Link Generator, Logo Resizer, Image Splitter, PDF to Image, Video Stills, Storyboard (Grid Board and Fit to Platform; Filmstrip retired), and Ad Downloader.
 - **Video Compressor is deferred** for a future from-scratch implementation, after the GitHub Pages toolset is verified. The original CTK remains a test-only reference; do not ship its iframe or rebuild the compressor now.
 - Draft migration pull requests are stacked. Never assume `main` already contains their changes. Compare branch heads before modifications.
 

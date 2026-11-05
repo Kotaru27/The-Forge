@@ -1,15 +1,14 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
-import { boardExportNames, DEFAULT_BOARD_SETTINGS, DEFAULT_FILM_SETTINGS, DEFAULT_FIT_SETTINGS,
-  exportName, filmRowSizes, folderGroups, MAX_BOARD_FRAMES, MAX_FILE_BYTES, naturalCompare, safeBoardName,
+import { boardExportNames, DEFAULT_BOARD_SETTINGS, DEFAULT_FIT_SETTINGS,
+  exportName, folderGroups, MAX_BOARD_FRAMES, MAX_FILE_BYTES, safeBoardName,
   uniqueBoardName, validateStills, validBoardSettings, type BoardSettings, type CanvasSource,
-  type FilmSettings, type FitSettings, type StoryBoard, type StoryFrame, type StoryMode, type StoryboardRef } from './engine';
-import { encodeCanvas, renderBoard, renderFilmstrip, renderFit } from './renderer';
+  type FitSettings, type StoryBoard, type StoryFrame, type StoryMode, type StoryboardRef } from './engine';
+import { encodeCanvas, renderBoard, renderFit } from './renderer';
 import type { TransferGroup, TransferResult } from '../video-stills/engine';
 import './storyboard.css';
 
-type Props = { preferredMode?: 'story' | 'filmstrip' };
 type ConfirmAction = { title: string; text: string; onConfirm: () => void } | null;
 let nextId = 0;
 function id(): string { return `board-${Date.now()}-${++nextId}`; }
@@ -85,16 +84,13 @@ async function loadSource(file: Blob, name: string, owned: Set<string>): Promise
     ? loadVideo(file, name) : loadImage(file, name, owned);
 }
 
-export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({ preferredMode = 'story' }, ref) {
-  const [mode, setMode] = useState<StoryMode>(preferredMode);
+export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, ref) {
+  const [mode, setMode] = useState<StoryMode>('story');
   const [boards, setBoards] = useState<StoryBoard[]>(() => [makeBoard('Board_1')]);
   const boardsRef = useRef(boards);
   const [activeId, setActiveId] = useState<string>(() => boards[0].id);
   const activeRef = useRef(activeId);
   const [boardLayout, setBoardLayout] = useState<'compact' | 'list'>('compact');
-  const [film, setFilm] = useState<StoryFrame[]>([]);
-  const filmRef = useRef(film);
-  const [filmSettings, setFilmSettings] = useState<FilmSettings>({ ...DEFAULT_FILM_SETTINGS });
   const [fitSettings, setFitSettings] = useState<FitSettings>({ ...DEFAULT_FIT_SETTINGS });
   const [fitSource, setFitSource] = useState<{ kind: 'board' | 'upload'; image: CanvasSource; name: string; url?: string } | null>(null);
   const [fitMessage, setFitMessage] = useState('Upload a storyboard image or use the current Grid Board.');
@@ -108,15 +104,12 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [progress, setProgress] = useState('');
   const boardPreview = useRef<HTMLDivElement>(null);
-  const filmPreview = useRef<HTMLDivElement>(null);
   const fitPreview = useRef<HTMLCanvasElement>(null);
   const fitFileInput = useRef<HTMLInputElement>(null);
   const folderInput = useRef<HTMLInputElement>(null);
   const imagesInput = useRef<HTMLInputElement>(null);
-  const filmInput = useRef<HTMLInputElement>(null);
   const urls = useRef(new Set<string>());
   const lastBoardCanvas = useRef<HTMLCanvasElement | null>(null);
-  const lastFilmCanvas = useRef<HTMLCanvasElement | null>(null);
   const lastFitCanvas = useRef<HTMLCanvasElement | null>(null);
   const keepAlive = useRef(true);
 
@@ -124,11 +117,6 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
     const updated = change(boardsRef.current);
     boardsRef.current = updated;
     if (keepAlive.current) setBoards(updated);
-  }, []);
-  const commitFilm = useCallback((change: (before: StoryFrame[]) => StoryFrame[]) => {
-    const updated = change(filmRef.current);
-    filmRef.current = updated;
-    if (keepAlive.current) setFilm(updated);
   }, []);
   const selectBoard = useCallback((value: string) => { activeRef.current = value; setActiveId(value); }, []);
   const disposeFrame = useCallback((frame: StoryFrame) => {
@@ -147,7 +135,6 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
       urls.current.clear();
     };
   }, []);
-  useEffect(() => setMode(preferredMode), [preferredMode]);
 
   const active = boards.find(board => board.id === activeId) || boards[0];
   const other = boards.filter(board => board.images.length);
@@ -172,18 +159,6 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
   }, [active]);
 
   useEffect(() => {
-    try {
-      const canvas = renderFilmstrip(film, filmSettings);
-      lastFilmCanvas.current = canvas;
-      if (filmPreview.current) {
-        filmPreview.current.replaceChildren(canvas);
-        canvas.title = 'Open full-size filmstrip';
-        canvas.onclick = () => setLightbox(canvas.toDataURL('image/jpeg', .95));
-      }
-    } catch (cause) {setError('Filmstrip preview: ' + describe(cause));}
-  }, [film, filmSettings]);
-
-  useEffect(() => {
     const source = fitSource?.kind === 'board' ? lastBoardCanvas.current : fitSource?.image ?? null;
     try {
       const rendered = renderFit(source, fitSettings);
@@ -205,7 +180,6 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
       defaultColumnsPending: patch.cols === undefined ? board.defaultColumnsPending : false,
     } : board));
   }
-  function updateFilmSettings(patch: Partial<FilmSettings>) { setFilmSettings(before => ({ ...before, ...patch })); }
   function updateFitSettings(patch: Partial<FitSettings>) { setFitSettings(before => ({ ...before, ...patch })); }
   function newBoard() {
     const project = makeBoard(uniqueBoardName(`Board_${boardsRef.current.length + 1}`, boardsRef.current));
@@ -306,130 +280,53 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
     event.preventDefault(); setDragging(false);
     const files = Array.from(event.dataTransfer.files);
     if (mode === 'story') void importFiles(files);
-    if (mode === 'filmstrip') void importFilmFiles(files);
     if (mode === 'fit' && files[0]) void loadFitFile(files[0]);
   }
 
-  async function importFilmFiles(files: File[]) {
-    if (!files.length || busy) return;
-    setBusy('Importing filmstrip assets'); setError('');
-    const sorted = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/')).sort((a,b) => naturalCompare(a.name,b.name));
-    const ready: StoryFrame[] = [];
-    let rejected = files.length - sorted.length;
-    // Decode large campaigns sequentially instead of opening hundreds of media decoders at once.
-    for (const file of sorted) {
-      if (!keepAlive.current) break;
-      try {
-        const frame = await loadSource(file, file.name, urls.current);
-        if (!keepAlive.current) { disposeFrame(frame); break; }
-        ready.push(frame);
-      } catch { rejected++; }
-      await new Promise<void>(resolve => window.setTimeout(resolve, 0));
-    }
-    if (!keepAlive.current) { ready.forEach(disposeFrame); return; }
-    commitFilm(old => [...old, ...ready].sort((a,b) => naturalCompare(a.name,b.name)));
-    if (rejected) setError(`${rejected} invalid or unreadable filmstrip assets skipped.`);
-    setMessage(`${ready.length} still${ready.length === 1 ? '' : 's'} imported.`);
-    setBusy('');
-  }
-  function sortFilm() { commitFilm(old => [...old].sort((a,b) => naturalCompare(a.name,b.name))); }
-  function moveFilm(index: number, dir: number) {
-    const target = index + dir;
-    commitFilm(old => {
-      if (target < 0 || target >= old.length) return old;
-      const copy = [...old]; [copy[index], copy[target]] = [copy[target], copy[index]]; return copy;
-    });
-  }
-  function removeFilm(index: number) {
-    const item = filmRef.current[index]; if (item) disposeFrame(item);
-    commitFilm(old => old.filter((_, i) => i !== index));
-  }
-  function clearFilm(confirmFirst = true) {
-    const clear = () => { filmRef.current.forEach(disposeFrame); commitFilm(() => []); setMessage('Filmstrip cleared.'); };
-    if (confirmFirst) setConfirm({ title: 'Clear filmstrip?', text: 'This removes all stills from the current filmstrip.', onConfirm: clear });
-    else clear();
-  }
-  async function sendBoardToFilm() {
-    if (!active?.images.length) { setError('Add frames to the Grid Board first.'); return; }
-    await importFilmFiles(active.images.map(item => new File([item.file], item.name, { type: item.file.type || 'image/jpeg' })));
-    setMode('filmstrip');
-  }
-  async function sendFilmToBoard() {
-    if (!filmRef.current.length) { setError('Add filmstrip frames first.'); return; }
-    const project = boardsRef.current.find(board => board.id === activeRef.current) || boardsRef.current[0];
-    if (!project) return;
-    setBusy('Sending to Grid Board');
-    let accepted = 0, rejected = 0;
-    for (const item of filmRef.current) {
-      const target = boardsRef.current.find(board => board.id === project.id);
-      if (!target || target.images.length >= MAX_BOARD_FRAMES) {rejected++;continue;}
-      try {
-        const frame = await loadSource(item.file, item.name, urls.current);
-        commitBoards(old => old.map(board => board.id === project.id ? {...board, images:[...board.images,frame]}:board));
-        accepted++;
-      } catch { rejected++; }
-    }
-    setMode('story'); setBusy('');
-    setMessage(`${accepted} stills sent to Grid Board.`);
-    if (rejected) setError(`${rejected} stills rejected.`);
-  }
-
-  const importStills = useCallback(async (destination: 'board' | 'filmstrip', groups: TransferGroup[]): Promise<TransferResult> => {
+  const importStills = useCallback(async (groups: TransferGroup[]): Promise<TransferResult> => {
     validateStills(groups);
     let imported = 0, rejected = 0, created = 0;
     let firstId: string | null = null;
-    if (destination === 'board') {
-      for (const group of groups) {
-        if (!group.frames.length) continue;
-        let target = boardsRef.current.find(board => board.stillsSourceId === group.id);
-        const missing = group.frames.filter(frame => !target?.images.some(img => img.stillsSourceId === group.id && img.stillsFrameNum === frame.num));
-        if (!missing.length) continue;
-        let newBoard = false;
-        if (!target) {
-          const blank = boardsRef.current.find(board => board.id === activeRef.current && !board.images.length && /^Board_\d+$/.test(board.name) && !board.stillsSourceId);
-          target = blank || makeBoard(uniqueBoardName(group.name, boardsRef.current));
-          if (!blank) commitBoards(old => [...old, target!]);
-          newBoard = true;
-          const title = uniqueBoardName(group.name, boardsRef.current, target.id);
-          const targetId = target.id;
-          commitBoards(old => old.map(board => board.id === targetId ? {...board, name: title, stillsSourceId: group.id} : board));
-        }
+    for (const group of groups) {
+      if (!group.frames.length) continue;
+      let target = boardsRef.current.find(board => board.stillsSourceId === group.id);
+      const missing = group.frames.filter(frame => !target?.images.some(img => img.stillsSourceId === group.id && img.stillsFrameNum === frame.num));
+      if (!missing.length) continue;
+      let newBoard = false;
+      if (!target) {
+        const blank = boardsRef.current.find(board => board.id === activeRef.current && !board.images.length && /^Board_\d+$/.test(board.name) && !board.stillsSourceId);
+        target = blank || makeBoard(uniqueBoardName(group.name, boardsRef.current));
+        if (!blank) commitBoards(old => [...old, target!]);
+        newBoard = true;
+        const title = uniqueBoardName(group.name, boardsRef.current, target.id);
         const targetId = target.id;
-        const before = boardsRef.current.find(board => board.id === targetId)?.images.length || 0;
-        for (const frame of missing) {
-          if ((boardsRef.current.find(board => board.id === targetId)?.images.length || 0) >= MAX_BOARD_FRAMES) {rejected++;continue;}
-          try {
-            const file = new File([frame.blob], `${group.name} #${frame.num}.jpg`, { type: frame.blob.type || 'image/jpeg' });
-            const loaded = await loadImage(file, file.name, urls.current);
-            loaded.stillsSourceId = group.id; loaded.stillsFrameNum = frame.num;
-            commitBoards(old => old.map(board => board.id === targetId ? { ...board, images: [...board.images, loaded] } : board));
-            imported++;
-          } catch { rejected++; }
-        }
-        if ((boardsRef.current.find(board => board.id === targetId)?.images.length || 0) > before) {
-          if (newBoard) created++;
-          if (!firstId) firstId = targetId;
-        } else if (newBoard) {
-          commitBoards(old => old.map(board => board.id === targetId ? {...board, stillsSourceId: undefined} : board));
-        }
+        commitBoards(old => old.map(board => board.id === targetId ? {...board, name: title, stillsSourceId: group.id} : board));
       }
-      if (firstId) selectBoard(firstId);
-      setMode('story');
-    } else {
-      const added: StoryFrame[] = [];
-      for (const group of groups) for (const frame of group.frames) {
+      const targetId = target.id;
+      const before = boardsRef.current.find(board => board.id === targetId)?.images.length || 0;
+      for (const frame of missing) {
+        if ((boardsRef.current.find(board => board.id === targetId)?.images.length || 0) >= MAX_BOARD_FRAMES) {rejected++;continue;}
         try {
-          const file = new File([frame.blob], `${group.name} #${frame.num}.jpg`, {type: frame.blob.type || 'image/jpeg'});
-          added.push(await loadImage(file, file.name, urls.current)); imported++;
-        } catch {rejected++;}
+          const file = new File([frame.blob], `${group.name} #${frame.num}.jpg`, { type: frame.blob.type || 'image/jpeg' });
+          const loaded = await loadImage(file, file.name, urls.current);
+          loaded.stillsSourceId = group.id; loaded.stillsFrameNum = frame.num;
+          commitBoards(old => old.map(board => board.id === targetId ? { ...board, images: [...board.images, loaded] } : board));
+          imported++;
+        } catch { rejected++; }
       }
-      commitFilm(old => [...old, ...added].sort((a,b)=>naturalCompare(a.name,b.name)));
-      setMode('filmstrip');
+      if ((boardsRef.current.find(board => board.id === targetId)?.images.length || 0) > before) {
+        if (newBoard) created++;
+        if (!firstId) firstId = targetId;
+      } else if (newBoard) {
+        commitBoards(old => old.map(board => board.id === targetId ? {...board, stillsSourceId: undefined} : board));
+      }
     }
+    if (firstId) selectBoard(firstId);
+    setMode('story');
     if (rejected) setError(`${rejected} frame(s) could not be decoded.`);
-    setMessage(`${imported} stills sent to ${destination === 'board' ? 'Storyboard' : 'Filmstrip'}.`);
-    return { imported, created, rejected, mode: destination === 'board' ? 'story' : 'filmstrip' };
-  }, [commitBoards, commitFilm, selectBoard]);
+    setMessage(`${imported} stills sent to Storyboard.`);
+    return { imported, created, rejected, mode: 'story' };
+  }, [commitBoards, selectBoard]);
   useImperativeHandle(ref, () => ({ importStills, openMode: setMode }), [importStills]);
 
   async function saveBoard() {
@@ -463,14 +360,6 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
       if (failed) setError(`${failed} invalid boards skipped.`);
     } catch (cause) {setError('Storyboard ZIP failed: ' + describe(cause));}
     finally {setBusy('');setProgress('');}
-  }
-  async function saveFilm(format: 'png' | 'jpeg') {
-    if (!filmRef.current.length || busy) return;
-    try {
-      const canvas = renderFilmstrip(filmRef.current, filmSettings);
-      const ext = format === 'png' ? 'png' : 'jpg';
-      downloadBlob(await encodeCanvas(canvas, format === 'png' ? 'image/png' : 'image/jpeg'), `${exportName(filmSettings.title)}.${ext}`);
-    } catch (cause) {setError('Filmstrip export failed: ' + describe(cause));}
   }
   async function loadFitFile(file: File) {
     if (!file?.type.startsWith('image/')) {setError('Please upload a PNG, JPG or WebP image.');return;}
@@ -508,7 +397,7 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
     <section className="storyboard-tool" aria-label="Storyboard">
       <div className="sb-topline">
         <div role="tablist" aria-label="Storyboard modes" className="sb-modes">
-          {([['story','Grid Board'],['filmstrip','Filmstrip'],['fit','Fit to Platform']] as const).map(([key,label]) =>
+          {([['story','Grid Board'],['fit','Fit to Platform']] as const).map(([key,label]) =>
             <button key={key} role="tab" aria-selected={mode === key} className={mode === key ? 'active' : ''} type="button" onClick={() => setMode(key)}>{label}</button>)}
         </div>
         <div className="sb-toolbar">
@@ -519,12 +408,6 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
             <button disabled={!other.length || !!busy} type="button" onClick={() => void saveAllBoards()}>Download All ZIP</button>
             <button className="danger" disabled={!active?.images.length} type="button" onClick={clearBoard}>Clear</button>
           </>}
-          {mode === 'filmstrip' && <>
-            <button type="button" onClick={() => filmInput.current?.click()}>Add Stills</button>
-            <button type="button" disabled={!film.length} onClick={() => void saveFilm('jpeg')}>Save JPG</button>
-            <button type="button" disabled={!film.length} onClick={() => void saveFilm('png')}>Save PNG</button>
-            <button type="button" className="danger" disabled={!film.length} onClick={() => clearFilm()}>Clear</button>
-          </>}
           {mode === 'fit' && <>
             <button type="button" onClick={() => fitFileInput.current?.click()}>Upload Image</button>
             <button type="button" onClick={useCurrentBoard}>Use Grid Board</button>
@@ -534,7 +417,6 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
         </div>
         <input ref={imagesInput} type="file" accept="image/*,video/*" multiple hidden aria-label="Choose storyboard assets" onChange={event => selectFiles(event)} />
         <input ref={folderInput} type="file" multiple hidden aria-label="Choose storyboard folder" onChange={event => selectFiles(event, true)} />
-        <input ref={filmInput} type="file" accept="image/*,video/*" multiple hidden aria-label="Choose filmstrip assets" onChange={event => { const files = Array.from(event.target.files || []); event.target.value = ''; void importFilmFiles(files); }} />
         <input ref={fitFileInput} type="file" accept="image/png,image/jpeg,image/webp,image/*" hidden aria-label="Choose fit source image" onChange={event => { const file = event.target.files?.[0];event.target.value = ''; if(file)void loadFitFile(file); }} />
       </div>
       <div className="sb-feedback" aria-live="polite">
@@ -573,7 +455,6 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
               <button type="button" aria-label={'Move down ' + frame.name} disabled={i === active.images.length - 1} onClick={() => moveFrame(i,1)}>↓</button>
               <button type="button" className="danger" aria-label={'Remove ' + frame.name} onClick={() => removeFrame(i)}>×</button>
             </div>)}</div>
-            <button type="button" disabled={!active?.images.length} onClick={() => void sendBoardToFilm()}>View in Filmstrip</button>
           </aside>
           <main className="sb-stage" aria-label="Grid Board preview">
             {previewSize && <span className="sb-dimensions">{previewSize}</span>}
@@ -581,34 +462,6 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
             {!active?.images.length && <p>Drop images or videos here, or choose Add Folder to create boards from folders.</p>}
             {active && !validBoardSettings(active.settings) && <p className="sb-error">Invalid board settings. Adjust width, columns or gap.</p>}
           </main>
-        </>}
-        {mode === 'filmstrip' && <>
-          <aside className="sb-controls">
-            <label>Filmstrip Title <input aria-label="Filmstrip Title" value={filmSettings.title} onChange={event => updateFilmSettings({title:event.target.value})}/></label>
-            <div className="sb-section-head"><strong>Loaded Stills ({film.length})</strong><button disabled={!film.length} onClick={sortFilm}>Sort Asc</button></div>
-            <button type="button" disabled={!film.length} onClick={() => void sendFilmToBoard()}>Send to Board</button>
-            <div className="sb-asset-list">{film.map((frame,i) => <div className="sb-frame" key={frame.id}>
-              <img src={frame.url || (frame.image as HTMLImageElement).src} alt="" />
-              <span title={frame.name}>{String(i+1).padStart(2,'0')} · {frame.name}</span>
-              <button disabled={i===0} aria-label={'Move up ' + frame.name} onClick={() => moveFilm(i,-1)}>↑</button>
-              <button disabled={i===film.length-1} aria-label={'Move down ' + frame.name} onClick={() => moveFilm(i,1)}>↓</button>
-              <button className="danger" aria-label={'Remove ' + frame.name} onClick={() => removeFilm(i)}>×</button>
-            </div>)}</div>
-            <div className="sb-section-head"><strong>Strip Configuration</strong></div>
-            <div className="sb-fields"><label>Strip Rows <select aria-label="Strip Rows" value={filmSettings.rows} onChange={event => updateFilmSettings({rows:Number(event.target.value)})}>{[1,2,3,4,5].map(n=><option key={n} value={n}>{n}</option>)}</select></label>
-              <label>Per Row <select aria-label="Per Row" value={filmSettings.framesPerRow} onChange={event => updateFilmSettings({framesPerRow:Number(event.target.value)})}><option value="0">Auto Distribute</option>{[2,3,4,5,6].map(n=><option key={n} value={n}>{n} Frames</option>)}</select></label>
-            </div>
-            <details><summary>More filmstrip settings</summary><div className="sb-fields">
-              <label>Fit <select aria-label="Filmstrip frame fit" value={filmSettings.fitMode} onChange={event => updateFilmSettings({fitMode:event.target.value as FilmSettings['fitMode']})}><option value="cover">Cover</option><option value="contain">Contain</option></select></label>
-              <label>Frame gap <input type="number" min={0} max={200} aria-label="Filmstrip frame gap" value={filmSettings.frameGap} onChange={event => updateFilmSettings({frameGap:Number(event.target.value)})} /></label>
-              <label>Row gap <input type="number" min={0} max={200} aria-label="Filmstrip row gap" value={filmSettings.rowGap} onChange={event => updateFilmSettings({rowGap:Number(event.target.value)})} /></label>
-              <label>Film color <input type="color" aria-label="Filmstrip film color" value={filmSettings.filmColor} onChange={event => updateFilmSettings({filmColor:event.target.value})} /></label>
-              <label>Background <input type="color" aria-label="Filmstrip background" value={filmSettings.bgColor} onChange={event => updateFilmSettings({bgColor:event.target.value})} /></label>
-              <label className="sb-check"><input type="checkbox" checked={filmSettings.showNumbers} onChange={event => updateFilmSettings({showNumbers:event.target.checked})} />Frame numbers</label>
-            </div></details>
-            <span className="sb-caption">{filmRowSizes(film.length, filmSettings.rows, filmSettings.framesPerRow).join(' / ')} frames per strip</span>
-          </aside>
-          <main className="sb-stage" aria-label="Filmstrip preview"><div ref={filmPreview} className="sb-canvas" />{!film.length && <p>Drop still images or videos here.</p>}</main>
         </>}
         {mode === 'fit' && <>
           <aside className="sb-controls">
@@ -632,7 +485,7 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
         </>}
       </div>
       {confirm && <div className="sb-overlay" role="presentation"><div role="alertdialog" aria-modal="true" aria-label={confirm.title} className="sb-dialog"><h2>{confirm.title}</h2><p>{confirm.text}</p><div className="sb-dialog-actions"><button onClick={() => setConfirm(null)}>Cancel</button><button className="danger" onClick={() => {confirm.onConfirm();setConfirm(null);}}>Confirm</button></div></div></div>}
-      {lightbox && <div className="sb-overlay" onClick={() => setLightbox(null)} role="presentation"><div className="sb-lightbox"><button onClick={() => setLightbox(null)} type="button">Close preview</button><img src={lightbox} alt="Full-size board or filmstrip preview" /></div></div>}
+      {lightbox && <div className="sb-overlay" onClick={() => setLightbox(null)} role="presentation"><div className="sb-lightbox"><button onClick={() => setLightbox(null)} type="button">Close preview</button><img src={lightbox} alt="Full-size board preview" /></div></div>}
     </section>
   );
 });
