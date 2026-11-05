@@ -13,10 +13,6 @@ button{font:inherit}
 .main-area{flex:1;min-width:0;display:flex;flex-direction:column;background:#000}
 .topbar{display:flex;align-items:center;height:68px;flex-shrink:0;padding:0 28px;border-bottom:1px solid #1b1b1b}
 .topbar h1{margin:0;font-size:17px;font-weight:650;letter-spacing:-.01em}
-.workspace{position:relative;flex:1;min-height:0;background:#000}
-.workspace iframe{border:0;width:100%;height:100%;display:block;background:#000}
-.workspace-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;background:#000;color:#969696;font-size:13px}
-.workspace-error{position:absolute;right:18px;top:18px;z-index:3;padding:12px;background:#310f0f;border:1px solid #713434;color:#ffbdbd;font-size:13px}
 @media(max-width:850px){.sidebar{width:180px}.brand{padding:0 16px}.topbar{padding:0 18px}.tool-link{font-size:12px;padding:12px 10px}}
 .link-generator{flex:1;min-height:0;display:grid;grid-template-columns:minmax(280px,420px) minmax(320px,1fr);gap:18px;padding:20px 24px;overflow:auto}
 .link-panel{display:flex;flex-direction:column;gap:13px;min-width:0;background:#070707;border:1px solid #222;border-radius:6px;padding:20px}
@@ -37,8 +33,6 @@ button{font:inherit}
 .output-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:6px}
 .output-heading label{font-weight:600}
 @media(max-width:1050px){.link-generator{grid-template-columns:1fr}.link-panel{max-width:none}}
-.legacy-container{display:flex;flex:1;min-height:0;min-width:0}
-.legacy-container[hidden]{display:none}
 
 .native-tool{display:flex;flex:1;min-width:0;min-height:0}
 .native-tool[hidden]{display:none}

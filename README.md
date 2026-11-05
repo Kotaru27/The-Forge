@@ -1,44 +1,54 @@
-# The Forge — React migration
+# The Forge — native React web release candidate
 
-**Phase 1: functional compatibility foundation**, not the Windows installer. React + TypeScript + Vite own the application shell; the eight existing CTK engines stay in an isolated compatibility workspace while they are migrated tool by tool. The UI is deliberately minimal and AMOLED black. No imported intro, extra homepage elements, animations, or unrelated features.
+The Forge is a desktop-first, AMOLED-black **React + TypeScript + Vite** toolkit. The initial GitHub Pages web release contains **seven tools**: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (Grid Board / Filmstrip / Fit), Link Generator and Ad Downloader.
 
-## Work locally
+**Video Compressor is postponed** and will be rebuilt from scratch after the website is stable. Its old CTK iframe, compression worker and bundled legacy CSS/JS are not part of this web build.
 
-Prerequisites: Node.js 22.12+ and Git. The first setup fetches the **pinned CTK commit** into a local ignored directory; GitHub CI does the same. To use a local CTK source folder instead, set `CTK_SOURCE_DIR` to its absolute path.
+## Develop locally
+
+Prerequisite: Node.js >= 22.12.0. For building or developing the seven native tools, no CTK checkout is needed.
 
 ```bash
 npm install
 npm run dev
+npm run build
+npm run preview
 ```
 
-`npm run build` generates production assets, and `npm run test` runs bridge checks plus the original CTK regression tests. `public/legacy` is generated; don't hand-edit it. This first phase intentionally retains the original processing algorithms and some classic DOM dependencies. No native Windows APIs or updater yet.
+The `predev` / `prebuild` commands remove any previously **generated, ignored** `public/legacy` directory before Vite runs, so old CTK assets cannot accidentally re-enter the build. The post-build check verifies the bundled entrypoint and blocks legacy/compressor payloads.
 
-## Migration boundaries
+## Automated verification
 
-- React owns navigation, top-level layout, state and future tool components.
-- The compatibility iframe runs the pinned existing CTK logic, with its legacy navigation and decorative homepage hidden.
-- Processed local files remain in the browser, not uploaded to GitHub.
-- Before replacing any tool, add golden output fixtures and browser end-to-end tests, then migrate its logic into typed services.
-- Do not remove the compatibility bridge until all tool flows and the video compressor are verified.
+```bash
+npm run test:unit
+npm run test:e2e
+```
 
-## Deployment
+`npm test` runs **both** the React/TypeScript unit tests and the original CTK baseline regression tests. For the latter, check out `Kotaru27/CTK` at pinned commit `617615c0b4370c795ddfd6dc4c300920cd595883` into `legacy-source/`, or set `CTK_SOURCE_DIR` to an equivalent local checkout. GitHub Actions does this automatically. **CTK remains a test oracle, not an app/runtime dependency.**
 
-`FORGE_BASE_PATH=/The-Forge/ npm run build` for GitHub Pages project URLs. GitHub Pages must be configured with **Settings → Pages → GitHub Actions** before deployment can occur. Keep the working CTK deployment separate during migration.
+## GitHub Pages
 
-Logo Resizer migration checklist and E2E coverage are documented in `docs/LOGO_RESIZER_MIGRATION.md`. The new Logo Resizer is being tested on a separate branch; full functional parity is not claimed until representative real-file browser tests pass.
+The project site URL base is `/The-Forge/`. On Linux/macOS:
 
-## Image Splitter migration
+```bash
+FORGE_BASE_PATH=/The-Forge/ npm run build
+```
 
-The new Image Splitter is a React + TypeScript tool with whole-pixel cuts and matching numbered ZIP export behavior. It is staged separately from the original PDF to Image tool and from production. See `docs/IMAGE_SPLITTER_MIGRATION.md` and `e2e/image-splitter.spec.ts`. Full real-file parity and large-batch checks are required before merging.
+On Windows PowerShell:
 
-## Video Stills migration
+```powershell
+$env:FORGE_BASE_PATH = '/The-Forge/'
+npm run build
+```
 
-Video Stills runs natively in React + TypeScript. The temporary same-origin bridge keeps its Send to Board and Send to Filmstrip actions connected to the existing Storyboard/Filmstrip engine. See `docs/VIDEO_STILLS_MIGRATION.md`. Tests use a small local WebM fixture; video and image data never leave the browser.
+The build fails if the produced script does not use that base path, or if `dist/` includes any `legacy/` or `compressor/` folder. The Playwright suite runs against the same production-style path.
 
-## Storyboard migration (draft)
+`.github/workflows/pages.yml` supports **manual deployment only**. Publishing is not part of the migration PRs and requires approval and Pages configuration (Settings → Pages → GitHub Actions).
 
-Grid Board, Filmstrip and Fit to Platform are implemented as a connected native React + TypeScript workspace on the staged `migration/storyboard` branch. The Video Stills hand-off now targets that native workspace, with regression tests for board creation and Filmstrip transfer. The pinned CTK compatibility iframe remains for Ad Downloader and Video Compressor. See [Storyboard migration checklist](docs/STORYBOARD_MIGRATION.md). Real-work image and video comparisons remain a release gate.
+## Feature parity status
 
-## Ad Downloader migration
+The React implementations have automated tests for uploads, transforms, ZIP/image exports, cancel/undo, keyboard controls and Video Stills → Storyboard/Filmstrip transfers. Additional tests compare exact Link Generator output against pinned CTK and validate OOXML and rotated PDF edge cases.
 
-Ad Downloader is implemented in React + TypeScript with the original writable-folder gate, .xlsx/.xls parsing, SharePoint native downloads and Auto-name tracking, CORS/ZIP downloads, copy names/bucket/script tools and recovery actions. See [ad downloader checklist](docs/AD_DOWNLOADER_MIGRATION.md). The remaining Video Compressor still runs in the compatibility iframe. Folder renaming needs a user-approved local folder and a secure Chromium browser. The spreadsheet parser uses pinned SheetJS 0.20.3 from the official SheetJS CDN (the npm registry release 0.18.5 is outdated). Excel .xls/.xlsx import has regression coverage.
+**Real-work-file parity is still a release gate.** See [feature parity gate](docs/FEATURE_PARITY_GATE.md), [native runtime cleanup](docs/NATIVE_WEB_CLEANUP.md) and individual migration notes under `docs/`. Authentic SharePoint permissions, real Excel/PPTX files and MP4/MOV compatibility must be verified before calling the website production-ready.
+
+No native Windows executable is included.

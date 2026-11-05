@@ -16,7 +16,11 @@ function nav(page: Page) {
 
 test('seven React tools navigate together without loading the legacy compressor iframe', async ({ page }) => {
   const errors: string[] = [];
+  const legacyRequests: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => {
+    if (/\/(?:legacy|compressor)\//.test(new URL(request.url()).pathname)) legacyRequests.push(request.url());
+  });
   await page.goto('#/logo-resizer');
   await expect(nav(page).getByRole('button')).toHaveCount(7);
   await expect(nav(page).getByRole('button', { name: 'Video Compressor' })).toHaveCount(0);
@@ -28,6 +32,7 @@ test('seven React tools navigate together without loading the legacy compressor 
     await expect(page.locator('iframe')).toHaveCount(0);
   }
   expect(errors).toEqual([]);
+  expect(legacyRequests).toEqual([]);
 });
 
 test('direct Storyboard links work and compressor/invalid links fall back safely', async ({ page }) => {

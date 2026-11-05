@@ -24,9 +24,6 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-audit --no-fund
-      - run: npm run prepare:legacy
-        env:
-          CTK_SOURCE_DIR: legacy-source
       - run: npm test
         env:
           CTK_SOURCE_DIR: legacy-source
