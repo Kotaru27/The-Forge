@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { LegacyWorkspace } from './components/LegacyWorkspace';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
+import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { defaultTool, isToolId, tools, type ToolId } from './tools';
 
 function initialTool(): ToolId {
@@ -13,7 +14,7 @@ export default function App() {
 
   const openTool = useCallback((tool: ToolId) => {
     setActiveTool(tool);
-    if (window.location.hash !== '#/' + tool) history.replaceState(null, '', '#/' + tool);
+    if (window.location.hash !== `#/${tool}`) history.replaceState(null, '', `#/${tool}`);
   }, []);
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function App() {
   }, [openTool]);
 
   const current = tools.find(tool => tool.id === activeTool) ?? tools[0];
+
   return (
     <div className="forge-app">
       <aside className="sidebar" aria-label="Tools">
@@ -30,7 +32,7 @@ export default function App() {
         <nav className="tool-nav" aria-label="Select a tool">
           {tools.map(tool => (
             <button
-              className={'tool-link' + (activeTool === tool.id ? ' is-active' : '')}
+              className={`tool-link${activeTool === tool.id ? ' is-active' : ''}`}
               type="button"
               key={tool.id}
               aria-current={activeTool === tool.id ? 'page' : undefined}
@@ -42,9 +44,10 @@ export default function App() {
       <main className="main-area">
         <header className="topbar"><h1>{current.label}</h1></header>
         {activeTool === 'link-generator' && <LinkGenerator />}
-        <div className="legacy-container" hidden={activeTool === 'link-generator'}>
-          <LegacyWorkspace toolId={activeTool === 'link-generator' ? 'logo-resizer' : activeTool} onToolChange={tool => {
-            if (activeTool !== 'link-generator') openTool(tool);
+        <div className="native-tool" hidden={activeTool !== 'logo-resizer'}><LogoResizer /></div>
+        <div className="legacy-container" hidden={activeTool === 'link-generator' || activeTool === 'logo-resizer'}>
+          <LegacyWorkspace toolId={activeTool === 'link-generator' || activeTool === 'logo-resizer' ? 'pdf-to-image' : activeTool} onToolChange={tool => {
+            if (activeTool !== 'link-generator' && activeTool !== 'logo-resizer') openTool(tool);
           }} />
         </div>
       </main>
