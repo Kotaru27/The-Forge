@@ -154,3 +154,39 @@ test('50 columns supported and too narrow images fail clearly without silently d
   await page.getByRole('button', { name: 'Split Images' }).click();
   await expect(page.locator('.split-status')).toHaveText('Done (5)');
 });
+
+
+test('JPEG pieces are saved as actual JPEG files; unsplit JPEG retains original bytes', async ({ page }) => {
+  const b64 = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 16; canvas.height = 8;
+    const context = canvas.getContext('2d')!;
+    context.fillStyle = '#ffff00'; context.fillRect(0, 0, 8, 8);
+    context.fillStyle = '#0000ff'; context.fillRect(8, 0, 8, 8);
+    return canvas.toDataURL('image/jpeg', .9).split(',')[1];
+  });
+  const input = { name: 'product.jpg', mimeType:'image/jpeg', buffer: Buffer.from(b64,'base64') };
+  await upload(page, [input, {...input, name:'unsplit.jpg'}]);
+  await page.locator('.split-selection input').nth(1).uncheck();
+  await page.getByRole('button', { name:'Split Images' }).click();
+  await expect(page.locator('.split-status').first()).toHaveText('Done (2)');
+  const zip = await zipDownload(page);
+  expect(outputNames(zip)).toEqual(['1.jpg','2.jpg','3.jpg']);
+  for (const name of ['1.jpg','2.jpg']) {
+    const jpg = await zip.file(name)!.async('nodebuffer');
+    expect(Array.from(jpg.subarray(0,3))).toEqual([255,216,255]);
+  }
+  expect(await zip.file('3.jpg')!.async('nodebuffer')).toEqual(input.buffer);
+});
+
+test('24-file batch produces every expected ZIP entry in upload order', async ({ page }) => {
+  const sample = await pngFile(page, 'batch.png', 20, 12);
+  const files = Array.from({length:24},(_,index)=>({...sample,name:`batch-${String(index+1).padStart(2,'0')}.png`}));
+  await upload(page, files);
+  await expect(page.locator('.split-card')).toHaveCount(24);
+  await page.getByRole('button', {name:'Split Images'}).click();
+  await expect(page.locator('.split-status').filter({hasText:'Done (2)'})).toHaveCount(24);
+  const zip = await zipDownload(page);
+  expect(outputNames(zip)).toEqual(Array.from({length:48},(_,index)=>`${index+1}.png`));
+  expect(pngSize(await zip.file('48.png')!.async('nodebuffer'))).toEqual([10,12]);
+});
