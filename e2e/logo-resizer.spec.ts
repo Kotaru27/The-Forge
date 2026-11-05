@@ -98,3 +98,57 @@ test('logo links preserve template, server choice and no-logo fallback', async (
   await page.getByRole('button', { name: 'Proceed anyway' }).click();
   await expect(page.getByRole('dialog', { name: 'Generate logo links' }).getByLabel('Generated HTML')).toHaveValue(/Brand_A\.png/);
 });
+
+test('SVGs can scale up, JPG download remains white and focus arrows work', async ({ page }) => {
+  const vector = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12"><rect width="24" height="12" fill="#ff0000"/></svg>');
+  await addFiles(page, [{ name: 'Vector.svg', mimeType: 'image/svg+xml', buffer: vector }, sample]);
+  await expect(page.locator('.logo-card')).toHaveCount(2);
+  await page.locator('.logo-settings').getByRole('button', { name: '250 × 250' }).click();
+  const svgPreview = page.locator('.logo-card').nth(1).locator('canvas');
+  await expect(svgPreview).toHaveCount(1);
+  const center = await svgPreview.evaluate(canvas => {
+    const c = canvas as HTMLCanvasElement;
+    return [...c.getContext('2d')!.getImageData(125, 125, 1, 1).data].slice(0,3);
+  });
+  expect(center).toEqual([255,0,0]);
+
+  await page.locator('.logo-settings').getByLabel('Font', { exact: true }).selectOption('Georgia');
+  await page.locator('.logo-settings').getByLabel('Download format').selectOption('jpeg');
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
+  const firstFilename = await page.getByLabel('Focus Mode', { exact: true }).getByLabel('Filename').inputValue();
+  await page.keyboard.press('ArrowRight');
+  const secondFilename = await page.getByLabel('Focus Mode', { exact: true }).getByLabel('Filename').inputValue();
+  expect(secondFilename).not.toEqual(firstFilename);
+  await page.keyboard.press('Escape');
+  await expect(page.getByLabel('Focus Mode', { exact: true })).toHaveCount(0);
+  const downloadEvent = page.waitForEvent('download');
+  await page.locator('.logo-card-footer').first().getByRole('button', { name: 'Save' }).click();
+  const download = await downloadEvent;
+  expect(download.suggestedFilename().endsWith('.jpg')).toBe(true);
+  const jpg = await readFile(await download.path());
+  expect(Array.from(jpg.subarray(0, 3))).toEqual([0xff,0xd8,0xff]);
+});
+
+test('per-logo sliders, reset, matching and branded HTML links', async ({ page }) => {
+  await addFiles(page, [sample, { ...sample, name: 'SecondLogo.png' }]);
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
+  const focus = page.getByLabel('Focus Mode', { exact: true });
+  const slider = focus.getByLabel('Image padding');
+  await slider.focus();
+  await slider.press('ArrowRight');
+  await expect(slider).toHaveValue('1');
+  await focus.getByRole('button', { name: 'Reset padding to global' }).click();
+  await expect(slider).toHaveValue('0');
+  await focus.getByLabel('Text Y offset').focus();
+  await focus.getByLabel('Text Y offset').press('ArrowLeft');
+  await expect(focus.getByLabel('Text Y offset')).toHaveValue('89');
+  await focus.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await page.getByRole('button', { name: 'Generate links' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Generate logo links' });
+  await dialog.getByLabel('Brand names (one per line)').fill('SampleLogo\nSecondLogo');
+  await dialog.getByLabel('Server').selectOption('aldi');
+  await dialog.getByLabel('Folder path').fill('campaign');
+  await dialog.getByRole('button', { name: 'Generate', exact: true }).click();
+  await expect(dialog.getByLabel('Generated HTML')).toHaveValue(/aldimediaeu\.blob\.core\.windows\.net/);
+  await expect(dialog.getByLabel('Generated HTML')).toHaveValue(/SecondLogo\.png/);
+});
