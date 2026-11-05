@@ -25,7 +25,7 @@ async function assertStoryboardOpened(page: import('@playwright/test').Page) {
   } catch (cause) {
     const errors = await page.locator('.vs-error').allTextContents();
     const messages = await page.locator('.vs-notice').allTextContents();
-    const frameReady = await page.locator('iframe[title="The Forge tool workspace"]').getAttribute('data-ready');
+    const frameReady = await page.locator('.storyboard-tool').count();
     throw new Error(`Storyboard transfer did not open. Errors: ${errors.join(' | ')}; notices: ${messages.join(' | ')}; frame ready: ${frameReady}; underlying: ${String(cause)}`);
   }
 }
@@ -113,9 +113,8 @@ test('Send to Board creates new Storyboard project with chosen JPEG stills', asy
   await upload(page);
   await page.getByRole('button', { name: 'Send to Board' }).click();
   await assertStoryboardOpened(page);
-  const story = page.frameLocator('iframe[title="The Forge tool workspace"]');
-  await expect(story.locator('#stillsTabContentStory')).toBeVisible();
-  await expect(story.locator('#storyFileList .story-asset-row')).toHaveCount(3);
+  await expect(page.getByRole('tab', { name: 'Grid Board' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('.storyboard-tool .sb-frame')).toHaveCount(3);
 });
 
 test('Send to Filmstrip sends only checked stills and opens Filmstrip', async ({ page }) => {
@@ -123,9 +122,8 @@ test('Send to Filmstrip sends only checked stills and opens Filmstrip', async ({
   await page.getByLabel('Select frame 2').uncheck();
   await page.getByRole('button', { name: 'Send to Filmstrip' }).click();
   await assertStoryboardOpened(page);
-  const filmstrip = page.frameLocator('iframe[title="The Forge tool workspace"]');
-  await expect(filmstrip.locator('#stillsTabContentFilmstrip')).toBeVisible();
-  await expect(filmstrip.locator('#filmstripFileList .story-asset-row')).toHaveCount(2);
+  await expect(page.getByRole('tab', { name: 'Filmstrip' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('.storyboard-tool .sb-frame')).toHaveCount(2);
 });
 
 test('navigating away does not discard extracted frames', async ({ page }) => {
@@ -141,7 +139,6 @@ test('non-video upload reports skipped files without losing workspace', async ({
   await expect(page.getByText('0 videos')).toBeVisible();
 });
 
-
 test('two video sources become separate boards and repeated transfer does not duplicate frames', async ({ page }) => {
   const buffer = await readFile(videoPath);
   await page.getByLabel('Choose video files').setInputFiles([
@@ -151,13 +148,12 @@ test('two video sources become separate boards and repeated transfer does not du
   await expect(page.getByText('3 items')).toHaveCount(2, { timeout: 60_000 });
   await page.getByRole('button', { name: 'Send to Board' }).click();
   await assertStoryboardOpened(page);
-  const story = page.frameLocator('iframe[title="The Forge tool workspace"]');
-  const chooser = story.locator('#storyBoardSelect');
+  const chooser = page.getByLabel('Choose a storyboard');
   await expect(chooser.locator('option')).toHaveCount(2);
   await chooser.selectOption({ label: 'Ad_A' });
-  await expect(story.locator('#storyFileList .story-asset-row')).toHaveCount(3);
+  await expect(page.locator('.storyboard-tool .sb-frame')).toHaveCount(3);
   await chooser.selectOption({ label: 'Ad_B' });
-  await expect(story.locator('#storyFileList .story-asset-row')).toHaveCount(3);
+  await expect(page.locator('.storyboard-tool .sb-frame')).toHaveCount(3);
   await page.getByRole('navigation', { name: 'Select a tool' }).getByRole('button', { name: 'Video Stills' }).click();
   await page.getByRole('button', { name: 'Send to Board' }).click();
   await expect(chooser.locator('option')).toHaveCount(2);
