@@ -29,9 +29,7 @@ The review applied the project-local **Ponytail Audit/Review, Sentry Security Re
 
 ## Should fix — addressed
 
-5. **Filmstrip launched all media decoders at once.** Original: `src/tools/storyboard/Storyboard.tsx:313-324`.
-   - **Case:** Importing hundreds of images could create hundreds of live `Image` / video decoders concurrently.
-   - **Fix:** Decode sequentially and preserve the natural file order. Release loaded object URLs if the workspace unmounts mid-import; add a 24-image browser regression case.
+5. **Filmstrip concurrency issue — retired.** The audited Filmstrip code was removed in the subsequent feature-removal branch. Its import and rendering paths are no longer shipped.
 
 6. **Copied bucket tables could contain active spreadsheet formulas or extra rows.** Original: `src/tools/ad-downloader/engine.ts:151-153`.
    - **Case:** A bucket starting with `=HYPERLINK(...)` could be pasted as an Excel formula, and embedded newlines could split a row.
@@ -40,7 +38,7 @@ The review applied the project-local **Ponytail Audit/Review, Sentry Security Re
 ## Remaining risks / manual acceptance
 
 7. **SharePoint auto-rename still needs real secure Chromium testing.** `src/tools/ad-downloader/auto-name.ts:93-121`: the fallback copy-and-delete implementation cannot guarantee an atomic move if another process creates the same destination filename during the operation. Real folder permission, collision, large-file copy and rename tests are required before production signoff. Do **not** silently overwrite user files or claim this was tested by the mocked API.
-8. **Large video and image batches require memory profiling.** `src/tools/video-stills/engine.ts:26-34` can generate up to 86,400 stills per video; `Storyboard` retains decoded image objects. Sequential Filmstrip decoding reduces peak concurrent work but not long-term retention.
+8. **Large video and image batches require memory profiling.** `src/tools/video-stills/engine.ts:26-34` can generate up to 86,400 stills per video; `Storyboard` retains decoded image objects. Filmstrip was removed; Grid Board still retains its decoded images during an active session.
 9. **Initial bundle still loads all seven tool modules.** `src/App.tsx` statically imports every tool to preserve state and Video Stills ↔ Storyboard transfers; the previous native build measured about 2.62 MB uncompressed. Lazy-loading requires an explicit state/transfer parity design and should not be attempted without browser tests.
 10. **Real-work-file parity remains open.** Generated PPTX/XLSM/PDF/WEBM fixtures do not prove authenticated SharePoint downloads, genuine MP4/MOV codecs, large corporate Excel files, or final campaign board exports match CTK exactly.
 
@@ -52,7 +50,7 @@ No dependency is confirmed unused: React/React DOM, JSZip, Pica, PDF.js, XLSX, T
 
 - Before fixes: a red test run demonstrated **four failing checks** (Forsta injection twice, oversized Excel accepted, and ZIP budget ignored).
 - After fixes: the same cases, existing unit suites, original pinned CTK tests, TypeScript build and Playwright must all pass on the **exact head commit**; record fresh run URLs in the PR discussion.
-- Additional new checks include large worksheet bounds, ordinary output parity, unsafe TSV copy, oversized PDF input and Filmstrip batch ordering.
+- Additional new checks include large worksheet bounds, ordinary output parity, unsafe TSV copy, oversized PDF input and Grid Board/Fit integrity after Filmstrip removal.
 - Keep this PR draft and separate from `release/pages-preview` until checks are green and changes reviewed. **Do not deploy** automatically.
 
 ## Not checked / known limitations

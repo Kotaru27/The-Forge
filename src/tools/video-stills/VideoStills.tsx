@@ -3,14 +3,14 @@ import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
 import {
   collectionName, exportAll, exportSelected, getSelectedGroups, isAbort, isVideoFile,
-  selectedCount, selectedZipName, type TransferDestination, type TransferGroup,
+  selectedCount, selectedZipName, type TransferGroup,
   type TransferResult, type VideoCollection, type VideoFrame,
 } from './engine';
 import { extractVideo } from './decoder';
 import './video-stills.css';
 
 type Pending = { id: string; file: File; contactSheet: 0 | 4 | 6 | 9 };
-type Props = { onTransfer: (destination: TransferDestination, groups: TransferGroup[]) => Promise<TransferResult> };
+type Props = { onTransfer: (groups: TransferGroup[]) => Promise<TransferResult> };
 
 function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -173,17 +173,17 @@ export function VideoStills({ onTransfer }: Props) {
     } catch (cause) { setError(`Download failed: ${describe(cause)}`); }
     finally { if (alive.current) setZipProgress(null); }
   }
-  async function send(destination: TransferDestination, onlyId?: string) {
+  async function send(onlyId?: string) {
     const groups = getSelectedGroups(collectionsRef.current, onlyId);
     if (!groups.length) { setError('Select at least one still to send.'); return; }
     setTransferring(true);
     setError('');
     setNotice('');
     try {
-      const outcome = await onTransfer(destination, groups);
+      const outcome = await onTransfer(groups);
       if (alive.current) {
         setActiveId(null);
-        setNotice(`${outcome.imported} stills sent to ${destination === 'board' ? 'Storyboard' : 'Filmstrip'}.`);
+        setNotice(`${outcome.imported} stills sent to Storyboard.`);
         if (outcome.rejected) setError(`${outcome.rejected} frame(s) could not be decoded.`);
       }
     } catch (cause) { if (alive.current) setError(`Could not send stills: ${describe(cause)}`); }
@@ -224,7 +224,7 @@ export function VideoStills({ onTransfer }: Props) {
           <span>or drop video files here</span>
           <input ref={input} type="file" accept="video/*,.mp4,.webm,.mov,.m4v,.ogg,.ogv,.avi,.mkv" multiple hidden onChange={onFileInput} aria-label="Choose video files" />
         </div>
-        <button type="button" disabled={!totalSelected || transferring} onClick={() => void send('board')}>Send to Board</button>
+        <button type="button" disabled={!totalSelected || transferring} onClick={() => void send()}>Send to Board</button>
         <button type="button" disabled={!downloadable || zipProgress !== null} onClick={() => void download(exportAll(collectionsRef.current), 'video_extras.zip')}>Download All</button>
         <button className="vs-danger" type="button" disabled={!collections.length} onClick={() => setConfirmClear(true)}>Clear</button>
       </div>
@@ -259,7 +259,7 @@ export function VideoStills({ onTransfer }: Props) {
               <label className="vs-selectall"><input type="checkbox" checked={!!current.frames.length && checked === current.frames.length}
                 onChange={event => toggleAll(current.id, event.target.checked)} aria-label="Select all frames" /> Select all</label>
               <button type="button" disabled={!checked || zipProgress !== null} onClick={() => void download(exportSelected(current), selectedZipName(current))}>Download selected</button>
-              <button type="button" disabled={!getSelectedGroups([current]).length || transferring} onClick={() => void send('filmstrip', current.id)}>Send to Filmstrip</button>
+              <button type="button" disabled={!getSelectedGroups([current]).length || transferring} onClick={() => void send(current.id)}>Send to Board</button>
               <button type="button" ref={closeButton} onClick={() => setActiveId(null)} aria-label="Close frame library">Close</button>
             </div>
           </header>

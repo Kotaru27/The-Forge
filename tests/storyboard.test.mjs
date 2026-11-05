@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   boardColumns, boardExportNames, folderGroups, naturalCompare, exportName, uniqueBoardName,
-  validBoardSettings, DEFAULT_BOARD_SETTINGS, filmRowSizes, alreadyOnBoard, validateStills,
+  validBoardSettings, DEFAULT_BOARD_SETTINGS, alreadyOnBoard, validateStills,
 } from '../src/tools/storyboard/engine.ts';
 
 const board = (name, images=[]) => ({id:name,name,images});
@@ -34,11 +34,6 @@ test('Board names remain unique and exported ZIP names never collide',()=>{
   assert.deepEqual(boardExportNames([board('My Board',[1]),board('My Board',[2]),board('My/Board',[3]),board('Empty')]),
     ['My_Board.jpg','My_Board_2.jpg','My_Board_3.jpg']);
   assert.equal(exportName('a/b'),'a_b');
-});
-test('Filmstrip Auto rows and manual frames per row match original arrangement',()=>{
-  assert.deepEqual(filmRowSizes(8,3,0),[3,3,2]);
-  assert.deepEqual(filmRowSizes(4,3,0),[2,1,1]);
-  assert.deepEqual(filmRowSizes(9,2,3),[3,3]);
 });
 test('Transferred stills are identified by collection and frame number',()=>{
   assert.equal(alreadyOnBoard({images:[{stillsSourceId:'video-A',stillsFrameNum:2}]},'video-A',2),true);

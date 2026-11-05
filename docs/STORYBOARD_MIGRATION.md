@@ -1,28 +1,23 @@
-# Storyboard (Grid Board, Filmstrip, Fit to Platform) migration
+# Storyboard migration — Grid Board and Fit to Platform
 
-React + TypeScript replacement for the three connected CTK workspaces. This is intentionally a small desktop-oriented AMOLED-black interface, with the same processing features.
+The Forge now ships **two Storyboard modes**, implemented natively in React and TypeScript.
 
-## Original features mapped
+## Supported
 
-- Grid Board: 0–3 columns, auto 4 frames = 2×2, incomplete final row centered, adaptive output width, manual width 64–8192, background, gap, cover/contain, JPG exports and bulk `boards.zip`.
-- Board manager: multiple boards, compact/list switch, board rename, duplicate-safe names, add/delete/clear with confirmation, per-board settings, move/remove individual frames.
-- Imports: images and videos, one screenshot per video, folder picker (`webkitdirectory`), one board per subfolder, natural frame ordering, 200 frames/board, 100 MB/source limit, rejected-file notices.
-- Filmstrip: auto distribution, 1–5 rows, 2–6 frames per row, sort, reorder/remove, JPEG/PNG exports, file imports including videos, current-board handoff and reverse handoff, advanced settings retained.
-- Fit to Platform: reference geometry (1033×195), 1×/2×/3× export, three circles with image and text, automatic wrapping and clipping prevention, uploaded image or current board, reset controls, PNG/JPG exports.
-- Video Stills: collection-per-board handoff, frame duplicate detection, chosen frames to Filmstrip, stay in React without relying on the old Storyboard iframe.
+- **Grid Board:** Multi-board management; board creation, renaming, deletion and clearing; per-board 0–3 columns, automatic dimensions, manual output width, gaps, background and cover/contain; frame ordering, previews and JPG/ZIP exports.
+- **Imports:** Images/videos, browser folder selection and grouping, natural frame sorting, 200 frames per board, 100 MB per source, visible invalid-file feedback.
+- **Fit to Platform:** Three-circle composition at reference size 1033×195, 1×/2×/3× export, automatic text wrapping and clipping prevention, user image upload or current board source, PNG/JPG.
+- **Video Stills transfer:** Selected still frames transfer directly into Grid Board; repeated transfers use source/frame identifiers to avoid duplication.
 
-## Design and known limits
+## Deliberately removed
 
-- AMOLED black interface, no imported CTK homepage, fancy transitions or decorative elements.
-- Old Storyboard and Filmstrip engines remain in the ignored, pinned CTK compatibility workspace while Ad Downloader and Video Compressor continue to use it. Do not remove the CTK build until those tools are migrated and regression tested.
-- Browser decode support for formats depends on browser/OS codecs (same limit as old app). Video screenshot seeks to up to 1 second within the 15-second timeout.
-- Files stay in the user's browser. No server upload.
-- Very large canvas exports can be limited by the browser. Empty and failed exports are reported rather than saved as blank files.
+The user requested **complete removal of Filmstrip**. The Filmstrip tab, import/edit state, drawing algorithm, exports, media-picker, board/Filmstrip handoff and Video Stills → Filmstrip action are not part of this release. This is not a hidden UI feature; the associated React logic and types were removed. Historical CTK remains a *test-only* reference and is not bundled in the website.
 
-## Test plan
+## Verification
 
-- Unit: auto/manual column layout; folder ordering; unique board and ZIP names; filmstrip distribution; repeated still transfers; file validation.
-- Browser: import/preview/export; rename/settings/reorder; multi-board ZIP; clear/delete confirmation; folder grouping; Filmstrip exports; Fit geometry and long-text handling; preserve state when navigating; Video Stills transfer regressions.
-- Manual parity gate before merging: compare output JPG/PNG dimensions, layout and actual pixels on real campaign images/videos and nested folder imports against original CTK, including large batches and unusual image aspect ratios.
+- Unit tests: board column/layout settings, folder grouping and ordering, board names/export paths, still frame identifiers, validation.
+- Browser tests: two remaining Storyboard tabs, Grid Board import and JPG/ZIP export, board settings and navigation, Fit to Platform output dimensions/exports, Video Stills → Grid Board (all selected and selected-from-one-video).
+- Run Node/CTK regression tests, TypeScript production build, and Chromium Playwright against `/The-Forge/` before release.
+- User has verified actual campaign-file and SharePoint workflows separately. Automated tests still serve as reproducible regressions.
 
-This feature is proposed as a stacked draft PR; the working main branch stays untouched until parity is approved.
+No UI redesign or Video Compressor change is included. The release branch remains unchanged until this dedicated PR is verified and approved.

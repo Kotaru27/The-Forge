@@ -117,12 +117,14 @@ test('Send to Board creates new Storyboard project with chosen JPEG stills', asy
   await expect(page.locator('.storyboard-tool .sb-frame')).toHaveCount(3);
 });
 
-test('Send to Filmstrip sends only checked stills and opens Filmstrip', async ({ page }) => {
+test('Send selected frames from one video directly to Grid Board', async ({ page }) => {
   await (await upload(page)).click();
   await page.getByLabel('Select frame 2').uncheck();
-  await page.getByRole('button', { name: 'Send to Filmstrip' }).click();
+  const modal = page.getByRole('dialog', {name:/Frames from/});
+  await expect(modal.getByRole('button',{name:'Send to Filmstrip'})).toHaveCount(0);
+  await modal.getByRole('button',{name:'Send to Board'}).click();
   await assertStoryboardOpened(page);
-  await expect(page.getByRole('tab', { name: 'Filmstrip' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab',{name:'Grid Board'})).toHaveAttribute('aria-selected','true');
   await expect(page.locator('.storyboard-tool .sb-frame')).toHaveCount(2);
 });
 

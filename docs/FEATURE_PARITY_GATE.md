@@ -13,14 +13,14 @@
 | Image Splitter | Nondivisible pixel widths, JPEG/SVG, 50 columns, ZIP naming, 24-image batch | Existing tests retained; remainder-pixel fix is an *approved deviation* from legacy | High-resolution work images and large mixed batches |
 | PDF to Image | 2×, PNG/JPG, multiple PDFs, cancel, ZIP order and selections | Valid PDF with 90° rotation; assert width and height in real PNG export | Scanned/image-only PDFs, unusual embedded fonts, huge or encrypted PDFs |
 | Video Stills | Uniform JPEG timestamps from sample WebM, ZIP, selected frames, contact sheets | Existing fixture tests retained | Actual MP4/MOV codecs and long videos |
-| Storyboard + Filmstrip + Fit | Folder import, board sorting, rendering dimensions, 1–3× exports, frame transfer | Existing browser tests retained | Real campaign boards, multi-hundred images, visual comparisons |
+| Storyboard (Grid Board + Fit) | Folder import, board sorting, rendering dimensions, 1–3× exports, frame transfer | Existing browser tests retained | Real campaign boards, multi-hundred images, visual comparisons |
 | Ad Downloader | .xls/.xlsx naming, CSV/bucket script, HTTP MIME, SharePoint request handling | Existing unit/browser tests retained | Authenticated SharePoint, folder write/rename in real Chromium, real workbooks |
 
 ## Gates before GitHub Pages release
 
 1. **Automated tests:** `npm test` (which runs the pinned CTK reference tests), `npm run build` with `FORGE_BASE_PATH=/The-Forge/`, `npm run test:e2e`. Verify fresh CI logs, counts, zero failures.
 2. **Actual originals:** Compare representative work files against the *original* CTK build, including image pixels/dimensions/quality, number and names of ZIP entries, media selection and ordering, and folder/SharePoint behavior.
-3. **Cross-tool:** Verify Video Stills to Grid Board/Filmstrip and back; verify navigation retains uploaded data.
+3. **Cross-tool:** Verify Video Stills to Grid Board; verify navigation retains uploaded data.
 4. **Browser:** Secure Chromium with real `showDirectoryPicker` permissions for Ad Downloader. Playwright mocks prove UI logic, not a successful authenticated SharePoint download.
 5. **Platform:** Use `/The-Forge/` base and test the actual GitHub Pages URL after approval. No Windows installer during this stage.
 6. **Safety:** Run Ponytail Review, security review and a final dependency check. Verify the native-only production artifact contains no CTK runtime; retain the pinned CTK source as a test reference.

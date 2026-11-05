@@ -1,7 +1,7 @@
 import type { TransferGroup, TransferResult } from '../video-stills/engine';
 
 export type CanvasSource = HTMLImageElement | HTMLCanvasElement;
-export type StoryMode = 'story' | 'filmstrip' | 'fit';
+export type StoryMode = 'story' | 'fit';
 export type BoardSettings = {
   gap: number; width: number; autoWidth: boolean; cols: number;
   bgColor: string; fitMode: 'cover' | 'contain';
@@ -14,26 +14,18 @@ export type StoryBoard = {
   id: string; name: string; images: StoryFrame[]; settings: BoardSettings;
   defaultColumnsPending: boolean; stillsSourceId?: string;
 };
-export type FilmSettings = {
-  title: string; rows: number; framesPerRow: number; fitMode: 'cover' | 'contain';
-  frameGap: number; rowGap: number; filmColor: string; bgColor: string; showNumbers: boolean;
-};
 export type FitSettings = {
   statement: string; imageFit: 'contain' | 'cover'; imageSize: number;
   fontSize: number; resolution: 1 | 2 | 3;
 };
 export type StoryboardRef = {
-  importStills: (destination: 'board' | 'filmstrip', groups: TransferGroup[]) => Promise<TransferResult>;
+  importStills: (groups: TransferGroup[]) => Promise<TransferResult>;
   openMode: (mode: StoryMode) => void;
 };
 export const MAX_BOARD_FRAMES = 200;
 export const MAX_FILE_BYTES = 100 * 1024 * 1024;
 export const DEFAULT_BOARD_SETTINGS: BoardSettings = {
   gap: 0, width: 1920, autoWidth: true, cols: 0, bgColor: '#ffffff', fitMode: 'cover',
-};
-export const DEFAULT_FILM_SETTINGS: FilmSettings = {
-  title: 'Filmstrip_1', rows: 3, framesPerRow: 0, fitMode: 'cover', frameGap: 9,
-  rowGap: 19, filmColor: '#CBCBCB', bgColor: '#FFFFFF', showNumbers: false,
 };
 export const DEFAULT_FIT_SETTINGS: FitSettings = {
   statement: 'le uniche cose a cui dovrai rinunciare sono i problemi di stomaco.',
@@ -105,12 +97,6 @@ export function folderGroups(files: readonly File[]): { name: string; files: Fil
   return [...map].sort(([a], [b]) => naturalCompare(a, b)).map(([name, items]) => ({
     name, files: items.sort((a, b) => naturalCompare(a.webkitRelativePath || a.name, b.webkitRelativePath || b.name)),
   }));
-}
-export function filmRowSizes(count: number, rows: number, perRow: number): number[] {
-  if (rows < 1 || rows > 12 || perRow < 0 || perRow > 20) throw Error('Invalid filmstrip layout');
-  if (perRow > 0) return Array.from({ length: rows }, (_, i) => Math.max(0, Math.min(perRow, count - i * perRow)));
-  const base = Math.floor(count / rows);
-  return Array.from({ length: rows }, (_, i) => base + (i < count % rows ? 1 : 0));
 }
 export function alreadyOnBoard(board: StoryBoard | undefined, groupId: string, frameNum: number): boolean {
   return !!board?.images.some(image => image.stillsSourceId === groupId && image.stillsFrameNum === frameNum);

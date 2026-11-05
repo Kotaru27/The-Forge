@@ -1,6 +1,6 @@
 # The Forge — native React web release candidate
 
-The Forge is a desktop-first, AMOLED-black **React + TypeScript + Vite** toolkit. The initial GitHub Pages web release contains **seven tools**: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (Grid Board / Filmstrip / Fit), Link Generator and Ad Downloader.
+The Forge is a desktop-first, AMOLED-black **React + TypeScript + Vite** toolkit. The initial GitHub Pages web release contains **seven tools**: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (Grid Board / Fit to Platform), Link Generator and Ad Downloader.
 
 **Video Compressor is postponed** and will be rebuilt from scratch after the website is stable. Its old CTK iframe, compression worker and bundled legacy CSS/JS are not part of this web build.
 
@@ -53,7 +53,7 @@ The build fails if the produced script does not use that base path, or if `dist/
 
 ## Feature parity status
 
-The React implementations have automated tests for uploads, transforms, ZIP/image exports, cancel/undo, keyboard controls and Video Stills → Storyboard/Filmstrip transfers. Additional tests compare exact Link Generator output against pinned CTK and validate OOXML and rotated PDF edge cases.
+The React implementations have automated tests for uploads, transforms, ZIP/image exports, cancel/undo, keyboard controls and Video Stills → Grid Board transfers. Additional tests compare exact Link Generator output against pinned CTK and validate OOXML and rotated PDF edge cases.
 
 **Real-work-file parity is still a release gate.** See [feature parity gate](docs/FEATURE_PARITY_GATE.md), [native runtime cleanup](docs/NATIVE_WEB_CLEANUP.md) and individual migration notes under `docs/`. Authentic SharePoint permissions, real Excel/PPTX files and MP4/MOV compatibility must be verified before calling the website production-ready.
 
