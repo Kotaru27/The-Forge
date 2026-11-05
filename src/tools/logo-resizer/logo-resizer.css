@@ -1,0 +1,67 @@
+.logo-workspace{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;background:#000;color:#f5f5f5;font-size:13px}
+.logo-workspace button,.logo-workspace input,.logo-workspace textarea,.logo-workspace select{font:inherit;color:inherit}
+.logo-workspace button{cursor:pointer;border:1px solid #333;background:#111;border-radius:4px;padding:9px 12px}
+.logo-workspace button:hover:not(:disabled){background:#202020}
+.logo-workspace button:disabled{opacity:.4;cursor:default}
+.logo-workspace button:focus-visible,.logo-workspace :is(input,select,textarea):focus-visible{outline:2px solid #ccc;outline-offset:2px}
+.logo-workspace .logo-primary{color:#000;border-color:#eee;background:#eee;font-weight:650}
+.logo-workspace .logo-primary:hover:not(:disabled){background:#ccc}
+.logo-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:12px 20px;border-bottom:1px solid #222;min-height:62px}
+.logo-toolbar-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.logo-hint,.logo-subtle{color:#999;font-size:11px;margin:0}
+.logo-progress{padding:10px 20px;color:#eee;border-bottom:1px solid #444;background:#101010}
+.logo-error{white-space:pre-wrap;padding:9px 20px;color:#ffaaaa;background:#220606;border-bottom:1px solid #632222;font-size:12px}
+.logo-undo{display:flex;align-items:center;gap:15px;padding:9px 20px;border-bottom:1px solid #333;background:#0e0e0e}
+.logo-body{display:flex;min-height:0;flex:1;overflow:hidden}
+.logo-settings{width:290px;min-width:290px;overflow:auto;display:flex;flex-direction:column;gap:13px;padding:19px 18px;border-right:1px solid #232323;background:#050505}
+.logo-settings h2{font-size:12px;color:#fff;font-weight:700;margin:12px 0 0;padding-top:12px;border-top:1px solid #222}
+.logo-settings h2:first-child{margin:0;padding:0;border:0}
+.logo-workspace label{display:flex;flex-direction:column;gap:7px;color:#aaa;font-size:12px}
+.logo-workspace label span{color:#ddd}
+.logo-workspace input:not([type=checkbox]):not([type=range]):not([type=color]),.logo-workspace select,.logo-workspace textarea{border:1px solid #343434;background:#080808;border-radius:4px;padding:9px 10px;width:100%;min-width:0;color:#f8f8f8}
+.logo-workspace input[type=color]{width:100%;height:36px;border:1px solid #333;background:#111;cursor:pointer;padding:3px}
+.logo-workspace input[type=range]{width:100%;accent-color:#eee}
+.logo-workspace input[type=checkbox]{accent-color:#f5f5f5}
+.logo-settings .logo-check{display:flex;flex-direction:row;align-items:center;gap:9px;color:#ccc}
+.logo-presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.logo-workspace .logo-presets button{font-size:12px;padding:10px 6px;color:#a2a2a2}
+.logo-workspace .logo-presets button.selected{background:#222;border-color:#bcbcbc;color:#fff}
+.logo-two-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.logo-gallery{display:block;min-height:0;flex:1;overflow:auto;padding:20px;background:#000}
+.logo-empty{border:1px dashed #373737;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;height:min(380px,75%);margin:4px;color:#aaa}
+.logo-empty p{margin:0}
+.logo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(224px,1fr));gap:16px;align-items:start}
+.logo-card{min-width:0;background:#080808;border:1px solid #303030;border-radius:5px;overflow:hidden}
+.logo-card-heading{display:flex;justify-content:space-between;align-items:center;padding:9px 10px;gap:8px;border-bottom:1px solid #242424}
+.logo-card-heading input{background:transparent!important;border:0!important;min-width:0!important;padding:4px!important;font-size:12px!important;font-weight:600!important}
+.logo-card-heading button{width:28px;min-width:28px;padding:4px;color:#aaa;font-size:18px}
+.logo-workspace .logo-preview-button{padding:14px 10px;display:flex;justify-content:center;align-items:center;width:100%;height:218px;border:0;border-bottom:1px solid #292929;border-radius:0;background:#080808}
+.logo-workspace .logo-preview-button:hover{background:#141414}
+.logo-preview{display:block;background:#fff;width:auto;height:auto;max-width:100%;max-height:190px;object-fit:contain;border:1px solid #222}
+.logo-card-controls{padding:12px;display:flex;flex-direction:column;gap:12px}
+.logo-card textarea{resize:vertical;min-height:48px}
+.logo-card-footer{display:flex;justify-content:space-between;align-items:end;gap:14px}
+.logo-card-footer label{display:grid;grid-template-columns:1fr 70px;gap:8px;align-items:center}
+.logo-card-footer input{width:70px!important}
+.logo-detail{display:flex;flex-direction:column;gap:15px;overflow:auto;width:340px;min-width:340px;padding:18px 18px 30px;border-left:1px solid #333;background:#070707}
+.logo-detail-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo-detail-heading strong{font-size:14px}
+.logo-detail-buttons{display:flex;gap:5px}
+.logo-detail-buttons button{padding:7px 10px}
+.logo-detail .logo-detail-preview{align-self:center;max-height:240px;max-width:100%}
+.logo-detail label{gap:7px}
+.logo-detail textarea{resize:vertical}
+.logo-detail-actions{display:flex;gap:7px;margin-top:8px}
+.logo-detail-actions button{flex:1}
+.logo-modal-backdrop{z-index:100;position:fixed;inset:0;background:rgba(0,0,0,.86);display:flex;align-items:center;justify-content:center;padding:28px;overflow:auto}
+.logo-modal{width:min(480px,100%);display:flex;flex-direction:column;gap:16px;background:#090909;border:1px solid #3d3d3d;border-radius:6px;padding:26px;box-shadow:0 16px 50px #000}
+.logo-modal h2{font-size:17px;margin:0}
+.logo-modal p{font-size:12px;line-height:1.55;color:#b8b8b8;margin:0}
+.logo-modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.logo-link-dialog{width:min(860px,100%);max-height:90vh;overflow:auto}
+.logo-link-title{display:flex;align-items:center;justify-content:space-between}
+.logo-link-dialog textarea{font-family:Consolas,monospace;font-size:12px;resize:vertical}
+.logo-link-warning{border:1px solid #6c5a35;background:#1e1707;padding:15px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.logo-link-warning p{flex:1;min-width:180px}
+@media(max-width:1150px){.logo-settings{width:245px;min-width:245px}.logo-detail{width:275px;min-width:275px}.logo-gallery{padding:12px}.logo-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
+@media(max-width:850px){.logo-body{overflow:auto}.logo-settings{width:220px;min-width:220px}.logo-detail{min-width:250px}.logo-toolbar-actions{margin-left:0}}
