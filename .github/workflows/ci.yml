@@ -1,7 +1,7 @@
 name: React migration checks
 on:
   push:
-    branches: [main, 'migration/**']
+    branches: [main, 'migration/**', 'release/pages-preview']
   pull_request:
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
           FORGE_BASE_PATH: /The-Forge/
 
   browser:
-    if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/heads/migration/')
+    if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/heads/migration/') || github.ref == 'refs/heads/release/pages-preview'
     runs-on: ubuntu-latest
     needs: verify
     steps:
@@ -42,3 +42,14 @@ jobs:
           FORGE_BASE_PATH: /The-Forge/
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+
+      # Produce a downloadable candidate even before GitHub Pages is enabled.
+      # This artifact is for staging/review; it does not publish the website.
+      - name: Archive reviewed production build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release/pages-preview'
+        uses: actions/upload-artifact@v4
+        with:
+          name: the-forge-pages-preview
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
