@@ -30,3 +30,7 @@ Logo Resizer migration checklist and E2E coverage are documented in `docs/LOGO_R
 ## Image Splitter migration
 
 The new Image Splitter is a React + TypeScript tool with whole-pixel cuts and matching numbered ZIP export behavior. It is staged separately from the original PDF to Image tool and from production. See `docs/IMAGE_SPLITTER_MIGRATION.md` and `e2e/image-splitter.spec.ts`. Full real-file parity and large-batch checks are required before merging.
+
+## PDF to Image migration
+
+PDF to Image now has a native React + TypeScript workbench. It keeps local PDF-to-PNG/JPG conversion, 2× rendering, per-document page selection, individual Save, selected and all-document ZIPs, progress/cancel, keyboard shortcuts, multiple uploads and Clear/Undo. The PDF.js worker is packaged locally with Vite; there is no CDN dependency. This change is staged on a separate migration branch and does not alter Image Splitter or production. See `docs/PDF_TO_IMAGE_MIGRATION.md`. Real-world PDF visual parity and large-document performance still require manual review.
