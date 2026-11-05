@@ -3,6 +3,7 @@ import { isToolId, type ToolId } from '../tools';
 
 interface Props {
   toolId: ToolId;
+  storyboardMode?: 'story' | 'filmstrip';
   onToolChange: (toolId: ToolId) => void;
 }
 type BridgeMessage =
@@ -10,7 +11,7 @@ type BridgeMessage =
   | { source: 'the-forge-bridge'; type: 'selected'; toolId: ToolId }
   | { source: 'the-forge-bridge'; type: 'error'; message: string };
 
-export function LegacyWorkspace({ toolId, onToolChange }: Props) {
+export function LegacyWorkspace({ toolId, onToolChange, storyboardMode = 'story' }: Props) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
@@ -30,24 +31,19 @@ export function LegacyWorkspace({ toolId, onToolChange }: Props) {
 
   useEffect(() => {
     if (ready) frame.current?.contentWindow?.postMessage(
-      { source: 'the-forge-shell', type: 'open', toolId }, window.location.origin
+      { source: 'the-forge-shell', type: 'open', toolId, subMode: toolId === 'storyboard' ? storyboardMode : undefined }, window.location.origin,
     );
-  }, [toolId, ready]);
+  }, [toolId, ready, storyboardMode]);
 
   return (
     <div className="workspace">
       {!ready && <div className="workspace-status" role="status">Loading workspace…</div>}
       {error && <div className="workspace-error" role="alert">{error}</div>}
-      <iframe
-        ref={frame}
-        title="The Forge tool workspace"
-        src={import.meta.env.BASE_URL + 'legacy/index.html'}
+      <iframe ref={frame} data-ready={ready ? 'true' : 'false'} title="The Forge tool workspace" src={import.meta.env.BASE_URL + 'legacy/index.html'}
         onLoad={() => {
-          frame.current?.contentWindow?.postMessage(
-            { source: 'the-forge-shell', type: 'hello' }, window.location.origin
-          );
-        }}
-      />
+          setReady(false);
+          frame.current?.contentWindow?.postMessage({ source: 'the-forge-shell', type: 'hello' }, window.location.origin);
+        }} />
     </div>
   );
 }

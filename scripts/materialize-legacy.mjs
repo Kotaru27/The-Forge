@@ -58,13 +58,13 @@ const bridge = [
  "'ad-downloader':['section-adlinks','downloader'],",
  "'video-compressor':['section-yt-helper']};",
  "const send=(type,details={})=>window.parent.postMessage({source:'the-forge-bridge',type,...details},location.origin);",
- "function select(id){const route=routes[id];if(!route)return send('error',{message:'Unknown tool'});",
- "try{UI._openTool(route[0],route[1]);send('selected',{toolId:id});}",
+ "function select(id,subMode){const route=routes[id];if(!route)return send('error',{message:'Unknown tool'});",
+ "try{UI._openTool(route[0],id==='storyboard'&&['story','filmstrip','fit'].includes(subMode)?subMode:route[1]);send('selected',{toolId:id});}",
  "catch(err){send('error',{message:'Could not open this workspace: '+String(err?.message||err)});}}",
  "window.addEventListener('message',event=>{",
  "if(event.origin!==location.origin||event.source!==window.parent||event.data?.source!=='the-forge-shell')return;",
  "if(event.data.type==='hello')send('ready');",
- "if(event.data.type==='open')select(event.data.toolId);",
+ "if(event.data.type==='open')select(event.data.toolId,event.data.subMode);",
  "});",
  "if(typeof UI!=='undefined'){",
  "const original=UI.openTool.bind(UI);",
@@ -84,7 +84,8 @@ html = html
   .replace(/<script id="forge-first-paint-js">[\s\S]*?<\/script>/, '');
 html = html.replace('<head>', "<head>\n<script>window.__forgeDisableSharedHandoff=true;try{sessionStorage.setItem('forge_intro_suppress','1');localStorage.setItem('forge_whatsnew_dismissed_2026_v3','1')}catch(e){}</script>");
 html = html.replace('</head>', '<style id="forge-amoled-bridge">' + minimalCss + '</style></head>');
-html = html.replace('</body>', bridge + '</body>');
+const stillsTransferBridge = readFileSync(join(root, 'scripts', 'legacy-stills-transfer.js'), 'utf8');
+html = html.replace('</body>', bridge + '<script>' + stillsTransferBridge + '</script></body>');
 writeFileSync(join(target, 'index.html'), html);
 
 let compressorHtml = readFileSync(join(target, 'compressor', 'index.html'), 'utf8');

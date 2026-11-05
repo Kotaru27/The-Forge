@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { VideoStills } from './tools/video-stills/VideoStills';
+import { transferStillsToLegacy } from './bridge/stills-transfer';
+import type { TransferDestination, TransferGroup, TransferResult } from './tools/video-stills/engine';
 import { LegacyWorkspace } from './components/LegacyWorkspace';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
@@ -13,6 +16,7 @@ function initialTool(): ToolId {
 
 export default function App() {
   const [activeTool, setActiveTool] = useState<ToolId>(initialTool);
+  const [storyboardMode, setStoryboardMode] = useState<'story' | 'filmstrip'>('story');
 
   const openTool = useCallback((tool: ToolId) => {
     setActiveTool(tool);
@@ -23,6 +27,15 @@ export default function App() {
     function onHashChange() { openTool(initialTool()); }
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
+  }, [openTool]);
+
+  const handleStillsTransfer = useCallback(async (destination: TransferDestination, groups: TransferGroup[]): Promise<TransferResult> => {
+    const result = await transferStillsToLegacy(destination, groups);
+    if (result.imported) {
+      setStoryboardMode(destination === 'filmstrip' ? 'filmstrip' : 'story');
+      openTool('storyboard');
+    }
+    return result;
   }, [openTool]);
 
   const current = tools.find(tool => tool.id === activeTool) ?? tools[0];
@@ -38,7 +51,7 @@ export default function App() {
               type="button"
               key={tool.id}
               aria-current={activeTool === tool.id ? 'page' : undefined}
-              onClick={() => openTool(tool.id)}
+              onClick={() => { if (tool.id === 'storyboard') setStoryboardMode('story'); openTool(tool.id); }}
             >{tool.label}</button>
           ))}
         </nav>
@@ -49,9 +62,10 @@ export default function App() {
         <div className="native-tool" hidden={activeTool !== 'logo-resizer'}><LogoResizer /></div>
         <div className="native-tool" hidden={activeTool !== 'image-splitter'}><ImageSplitter /></div>
         <div className="native-tool" hidden={activeTool !== 'pdf-to-image'}><PdfToImage /></div>
-        <div className="legacy-container" hidden={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' || activeTool === 'pdf-to-image'}>
-          <LegacyWorkspace toolId={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' || activeTool === 'pdf-to-image' ? 'video-stills' : activeTool} onToolChange={tool => {
-            if (activeTool !== 'link-generator' && activeTool !== 'logo-resizer' && activeTool !== 'image-splitter' && activeTool !== 'pdf-to-image') openTool(tool);
+        <div className="native-tool" hidden={activeTool !== 'video-stills'}><VideoStills onTransfer={handleStillsTransfer} /></div>
+        <div className="legacy-container" hidden={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' || activeTool === 'pdf-to-image' || activeTool === 'video-stills'}>
+          <LegacyWorkspace storyboardMode={storyboardMode} toolId={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' || activeTool === 'pdf-to-image' || activeTool === 'video-stills' ? 'video-stills' : activeTool} onToolChange={tool => {
+            if (activeTool !== 'link-generator' && activeTool !== 'logo-resizer' && activeTool !== 'image-splitter' && activeTool !== 'pdf-to-image' && activeTool !== 'video-stills') openTool(tool);
           }} />
         </div>
       </main>
