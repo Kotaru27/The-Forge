@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
 import { boardExportNames, DEFAULT_BOARD_SETTINGS, DEFAULT_FIT_SETTINGS,
-  exportName, folderGroups, MAX_BOARD_FRAMES, MAX_FILE_BYTES, naturalCompare, safeBoardName,
+  exportName, folderGroups, MAX_BOARD_FRAMES, MAX_FILE_BYTES, safeBoardName,
   uniqueBoardName, validateStills, validBoardSettings, type BoardSettings, type CanvasSource,
   type FitSettings, type StoryBoard, type StoryFrame, type StoryMode, type StoryboardRef } from './engine';
 import { encodeCanvas, renderBoard, renderFit } from './renderer';
@@ -84,7 +84,7 @@ async function loadSource(file: Blob, name: string, owned: Set<string>): Promise
     ? loadVideo(file, name) : loadImage(file, name, owned);
 }
 
-export const Storyboard = forwardRef<StoryboardRef, Record<string, never>>(function Storyboard(_props, ref) {
+export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, ref) {
   const [mode, setMode] = useState<StoryMode>('story');
   const [boards, setBoards] = useState<StoryBoard[]>(() => [makeBoard('Board_1')]);
   const boardsRef = useRef(boards);
