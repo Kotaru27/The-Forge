@@ -49,7 +49,7 @@ test('Excel import parses names and exposes all copy/bucket controls',async({pag
   await expect(app(page).getByRole('button',{name:'Copy Bucket Table'})).toBeEnabled();
   await app(page).getByRole('button',{name:'Deselect ready'}).click();
   await expect(app(page).getByRole('button',{name:'Download selected (0)'})).toBeDisabled();
-  await app(page).getByRole('button',{name:'Select ready'}).click();
+  await app(page).getByRole('button',{name:'Select ready',exact:true}).click();
   await expect(app(page).getByRole('button',{name:'Download selected (2)'})).toBeEnabled();
 });
 test('Single file download uses actual JPEG signature and generated name',async({page})=>{
@@ -77,7 +77,7 @@ test('ZIP includes valid selected assets but rejects HTML/login previews',async(
   await expect(app(page).getByRole('alert')).toContainText('1 failed');
 });
 test('SharePoint remains a native request and cannot enter browser ZIP',async({page})=>{
-  await page.addInitScript(()=>{
+  await page.evaluate(()=>{
     (window as Window & {__opened?:string[]}).__opened=[];
     const original=HTMLAnchorElement.prototype.click;
     HTMLAnchorElement.prototype.click=function(){
