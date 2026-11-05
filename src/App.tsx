@@ -3,6 +3,7 @@ import { LegacyWorkspace } from './components/LegacyWorkspace';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
+import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { defaultTool, isToolId, tools, type ToolId } from './tools';
 
 function initialTool(): ToolId {
@@ -47,9 +48,10 @@ export default function App() {
         {activeTool === 'link-generator' && <LinkGenerator />}
         <div className="native-tool" hidden={activeTool !== 'logo-resizer'}><LogoResizer /></div>
         <div className="native-tool" hidden={activeTool !== 'image-splitter'}><ImageSplitter /></div>
-        <div className="legacy-container" hidden={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter'}>
-          <LegacyWorkspace toolId={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' ? 'pdf-to-image' : activeTool} onToolChange={tool => {
-            if (activeTool !== 'link-generator' && activeTool !== 'logo-resizer' && activeTool !== 'image-splitter') openTool(tool);
+        <div className="native-tool" hidden={activeTool !== 'pdf-to-image'}><PdfToImage /></div>
+        <div className="legacy-container" hidden={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' || activeTool === 'pdf-to-image'}>
+          <LegacyWorkspace toolId={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' || activeTool === 'pdf-to-image' ? 'video-stills' : activeTool} onToolChange={tool => {
+            if (activeTool !== 'link-generator' && activeTool !== 'logo-resizer' && activeTool !== 'image-splitter' && activeTool !== 'pdf-to-image') openTool(tool);
           }} />
         </div>
       </main>

@@ -1,0 +1,64 @@
+/* The Forge PDF workspace — plain AMOLED black, no CTK decorative elements. */
+.pdf-workspace{display:grid;grid-template-columns:294px minmax(0,1fr);width:100%;height:100%;min-height:0;min-width:0;background:#000;color:#f0f0f0}
+.pdf-workspace *{box-sizing:border-box}
+.pdf-setup{display:flex;flex-direction:column;gap:16px;padding:24px 20px;border-right:1px solid #242424;overflow:auto;background:#000}
+.pdf-setup h2,.pdf-results h2,.pdf-detail h2,.pdf-confirm h2{margin:0;font-size:16px;line-height:1.4;font-weight:650;letter-spacing:-.01em;color:#eee}
+.pdf-muted{font-size:12px;color:#999;line-height:1.5;margin:0}
+.pdf-drop{border:1px dashed #414141;min-height:122px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;padding:15px 10px;background:#060606}
+.pdf-drop.is-dragging{border-color:#eee;background:#141414}
+.pdf-drop input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.pdf-drop span{font-size:11px;color:#888}
+.pdf-workspace button,.pdf-workspace select{font:inherit}
+.pdf-workspace button{cursor:pointer;border:1px solid #3a3a3a;border-radius:4px;padding:10px 13px;background:#151515;color:#f2f2f2;font-size:12px}
+.pdf-workspace button:hover:not(:disabled){background:#252525}
+.pdf-workspace button:disabled{opacity:.4;cursor:not-allowed}
+.pdf-workspace button:focus-visible,.pdf-workspace input:focus-visible,.pdf-workspace select:focus-visible{outline:2px solid #f0f0f0;outline-offset:2px}
+.pdf-field{font-size:12px;color:#c3c3c3;display:flex;flex-direction:column;gap:8px}
+.pdf-field select{background:#090909;color:#eee;border:1px solid #353535;border-radius:4px;padding:10px 12px;min-height:40px}
+.pdf-workspace button.pdf-primary{background:#eee;color:#090909;border-color:#eee;font-weight:650}
+.pdf-workspace button.pdf-primary:hover:not(:disabled){background:#cacaca}
+.pdf-workspace button.pdf-cancel{border-color:#694545;background:#210e0e;color:#ffcece}
+.pdf-workspace button.pdf-secondary{background:#101010}
+.pdf-local-note{margin-top:auto;padding-top:20px;border-top:1px solid #222}
+.pdf-undo{font-size:12px;color:#bdbdbd;display:flex;align-items:center;gap:10px}
+.pdf-undo button{padding:5px 8px}
+.pdf-results{display:flex;min-height:0;flex-direction:column;overflow:hidden;background:#000}
+.pdf-results-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:21px 25px;border-bottom:1px solid #222}
+.pdf-results-head h2{margin-bottom:4px}
+.pdf-results-head button{white-space:nowrap}
+.pdf-progress{margin:12px 25px 0;background:#0d0d0d;border:1px solid #292929;padding:11px 13px;border-radius:4px}
+.pdf-progress-label{display:flex;gap:12px;justify-content:space-between;font-size:12px;color:#c0c0c0}
+.pdf-progress-track{height:4px;background:#292929;border-radius:8px;margin-top:10px;overflow:hidden}
+.pdf-progress-track>div{height:100%;background:#d2d2d2;transition:width .2s linear}
+.pdf-error{border:1px solid #6c3030;color:#ffb7b7;background:#240f0f;padding:11px 12px;font-size:12px;line-height:1.5;margin:12px 25px 0;border-radius:4px}
+.pdf-list{padding:24px;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;align-content:start}
+.pdf-empty{padding:34px;color:#898989;font-size:13px;border:1px dashed #333;grid-column:1/-1;text-align:center;border-radius:4px}
+.pdf-workspace button.pdf-doc-card{display:flex;flex-direction:column;padding:0;background:#070707;color:#eee;border:1px solid #292929;overflow:hidden;text-align:left;border-radius:5px;min-height:210px}
+.pdf-workspace button.pdf-doc-card:hover{background:#101010;border-color:#505050}
+.pdf-doc-thumb{height:155px;background:#141414;border-bottom:1px solid #242424;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pdf-doc-thumb img{width:100%;height:100%;object-fit:contain;background:#fff}
+.pdf-doc-thumb span{border:1px solid #333;padding:18px;font-size:20px;color:#9f9f9f;letter-spacing:.12em}
+.pdf-doc-details{display:flex;flex-direction:column;gap:5px;padding:10px 12px;min-width:0;width:100%}
+.pdf-doc-details strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pdf-doc-details span,.pdf-doc-details small{font-size:11px;color:#aaa;word-break:break-word}
+.pdf-doc-details small[role=alert]{color:#ffb5b5}
+.pdf-detail-backdrop,.pdf-confirm-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:25px}
+.pdf-detail{display:flex;flex-direction:column;width:min(1200px,96vw);height:min(820px,92vh);border:1px solid #363636;border-radius:6px;background:#080808;min-width:0;min-height:0;overflow:hidden}
+.pdf-detail-head{display:flex;align-items:center;gap:18px;justify-content:space-between;padding:20px 22px;border-bottom:1px solid #2b2b2b;flex-wrap:wrap}
+.pdf-detail-head h2{max-width:550px;overflow-wrap:anywhere}
+.pdf-detail-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.pdf-select-all{display:flex;align-items:center;gap:8px;font-size:12px;color:#ddd;cursor:pointer}
+.pdf-select-all input,.pdf-page-foot input{accent-color:#dedede}
+.pdf-page-grid{overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));align-content:start;gap:14px;padding:20px}
+.pdf-page-card{border:1px solid #2d2d2d;background:#101010;border-radius:5px;min-width:0;overflow:hidden}
+.pdf-page-preview{height:200px;display:flex;align-items:center;justify-content:center;background:#171717;padding:10px}
+.pdf-page-preview img{height:100%;width:100%;object-fit:contain;background:#fff}
+.pdf-page-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px}
+.pdf-page-foot label{display:flex;align-items:center;gap:7px;font-size:12px;color:#ddd;cursor:pointer}
+.pdf-workspace .pdf-page-foot button{padding:7px 9px}
+.pdf-confirm{width:min(430px,92vw);padding:23px;background:#0b0b0b;border:1px solid #444;border-radius:6px}
+.pdf-confirm p{color:#aaa;font-size:13px;line-height:1.5}
+.pdf-confirm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:23px}
+@media(max-width:1000px){.pdf-workspace{grid-template-columns:245px minmax(0,1fr)}.pdf-setup{padding:20px 14px}.pdf-results-head{padding:18px}}
+@media(max-width:740px){.pdf-workspace{display:flex;flex-direction:column;overflow:auto}.pdf-setup{border-right:0;border-bottom:1px solid #292929;flex-shrink:0;min-height:0}.pdf-results{flex:1;min-height:350px}.pdf-list{padding:15px;overflow:visible}.pdf-detail-backdrop{padding:10px}.pdf-detail-head{padding:12px}.pdf-page-grid{padding:12px}}
+@media(prefers-reduced-motion:reduce){.pdf-progress-track>div{transition:none}}
