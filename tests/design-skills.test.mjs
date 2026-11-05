@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 
 const root = '.agents/skills/';
 const skills = {
@@ -41,4 +42,21 @@ test('Vercel interface rules are pinned and vendored, not loaded as live instruc
   const skill = readFileSync(root + 'web-design-guidelines/SKILL.md', 'utf8');
   assert.match(skill, /reference\/web-interface-guidelines\.md/);
   assert.ok(existsSync(root + 'web-design-guidelines/reference/web-interface-guidelines.md'));
+});
+
+test('UI Pro Max Python search returns React-specific matches and design systems', (t) => {
+  const executable = process.platform === 'win32' ? 'py' : 'python3';
+  const prefix = process.platform === 'win32' ? ['-3'] : [];
+  const probe = spawnSync(executable, [...prefix, '--version'], { encoding: 'utf8', timeout: 5000 });
+  if (probe.error || probe.status !== 0) {
+    t.skip('Python 3 not available; verify local design guidance statically');
+    return;
+  }
+  const script = root + 'ui-ux-pro-max/scripts/search.py';
+  const react = spawnSync(executable, [...prefix, script, 'desktop app accessibility', '--stack', 'react', '--max-results', '2'], { encoding: 'utf8', timeout: 20000 });
+  assert.equal(react.status, 0, react.stderr || react.error?.message);
+  assert.ok(react.stdout.trim().length > 30, 'Empty React search response');
+  const design = spawnSync(executable, [...prefix, script, 'desktop creative productivity toolkit', '--design-system', '-p', 'The Forge'], { encoding: 'utf8', timeout: 20000 });
+  assert.equal(design.status, 0, design.stderr || design.error?.message);
+  assert.ok(design.stdout.trim().length > 60, 'Empty design-system recommendation');
 });
