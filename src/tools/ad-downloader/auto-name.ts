@@ -1,5 +1,5 @@
-import type { AdEntry } from './engine';
-import { matchStrength, matchesOriginal, originalKey, sourceFilename, targetFilename } from './sharepoint';
+import type { AdEntry } from './engine.ts';
+import { matchStrength, matchesOriginal, originalKey, sourceFilename, targetFilename } from './sharepoint.ts';
 
 // File System Access API is only available in supported secure Chromium browsers.
 interface FileHandle {

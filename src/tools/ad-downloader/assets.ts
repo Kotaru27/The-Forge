@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
-import type { AdEntry, ExtensionHint } from './engine';
-import { MAX_ASSET_BYTES, MAX_BATCH } from './engine';
-import { isSharePoint } from './sharepoint';
+import type { AdEntry, ExtensionHint } from './engine.ts';
+import { MAX_ASSET_BYTES, MAX_BATCH } from './engine.ts';
+import { isSharePoint } from './sharepoint.ts';
 
 const mimeToExt: Record<string, string> = {
   'video/mp4':'mp4', 'video/webm':'webm', 'video/quicktime':'mov', 'audio/mpeg':'mp3',
