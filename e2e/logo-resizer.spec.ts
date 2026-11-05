@@ -112,7 +112,7 @@ test('SVGs can scale up, JPG download remains white and focus arrows work', asyn
   });
   expect(center).toEqual([255,0,0]);
 
-  await page.locator('.logo-settings').getByLabel('Font', { exact: true }).selectOption('Georgia');
+  await page.locator('.logo-settings select').nth(1).selectOption('Georgia');
   await page.locator('.logo-settings').getByLabel('Download format').selectOption('jpeg');
   await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
   const firstFilename = await page.getByLabel('Focus Mode', { exact: true }).getByLabel('Filename').inputValue();
