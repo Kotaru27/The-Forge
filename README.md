@@ -34,3 +34,7 @@ This is a static client-side app. Do not treat the public site as access-control
 The preview workflow is manually triggered to prevent publishing an unverified migration. Configure Settings → Pages → GitHub Actions and run the Publish web preview workflow after verification. Vite uses FORGE_BASE_PATH=/The-Forge/.
 
 Automated bridge checks do not establish full functional parity. Browser-based workflows and generated file outputs must still be tested.
+
+## Tool migration status
+
+Link Generator is now a native React component backed by a TypeScript processing service, with compatibility output tests. Seven other tools and the original Video Compressor still use the preserved CTK runtime. Browser E2E tests remain outstanding.

@@ -18,3 +18,26 @@ button{font:inherit}
 .workspace-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;background:#000;color:#969696;font-size:13px}
 .workspace-error{position:absolute;right:18px;top:18px;z-index:3;padding:12px;background:#310f0f;border:1px solid #713434;color:#ffbdbd;font-size:13px}
 @media(max-width:850px){.sidebar{width:180px}.brand{padding:0 16px}.topbar{padding:0 18px}.tool-link{font-size:12px;padding:12px 10px}}
+
+
+.legacy-container{display:flex;flex:1;min-height:0;min-width:0}
+.legacy-container[hidden]{display:none}
+.link-generator{flex:1;min-height:0;display:grid;grid-template-columns:minmax(280px,420px) minmax(320px,1fr);gap:18px;padding:20px 24px;overflow:auto}
+.link-panel{display:flex;flex-direction:column;gap:13px;min-width:0;background:#070707;border:1px solid #222;border-radius:6px;padding:20px}
+.link-panel h2{font-size:15px;letter-spacing:0;margin:0 0 6px;font-weight:650}
+.link-panel label{display:flex;flex-direction:column;gap:7px;color:#bbb;font-size:12px}
+.link-panel :is(input:not([type='checkbox']),select,textarea){width:100%;border:1px solid #303030;border-radius:4px;padding:11px 12px;font-family:inherit;color:#f6f6f6;background:#050505;outline:none}
+.link-panel :is(input,select,textarea):focus-visible{border-color:#b9b9b9}
+.link-panel textarea{resize:vertical;font-family:Consolas,monospace;font-size:12px;line-height:1.6}
+.link-panel .checkline{flex-direction:row;gap:9px;align-items:center;color:#dedede;cursor:pointer}
+.link-panel input[type='checkbox']{accent-color:#dedede}
+.link-panel button{border:1px solid #353535;background:#171717;color:#fff;cursor:pointer;border-radius:4px;padding:9px 15px;font-size:12px}
+.link-panel button:hover{background:#272727}
+.link-panel button:disabled{opacity:.4;cursor:default}
+.link-panel button.primary{background:#efefef;color:#080808;border-color:#efefef;padding:12px;font-weight:650}
+.link-panel button.primary:hover{background:#cecece}
+.link-error{margin:0;color:#f0a1a1;font-size:12px;line-height:1.5}
+.link-outputs{gap:11px}
+.output-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:6px}
+.output-heading label{font-weight:600}
+@media(max-width:1050px){.link-generator{grid-template-columns:1fr}.link-panel{max-width:none}}

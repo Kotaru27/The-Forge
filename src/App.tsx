@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { LegacyWorkspace } from './components/LegacyWorkspace';
+import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { defaultTool, isToolId, tools, type ToolId } from './tools';
 
 function initialTool(): ToolId {
@@ -40,7 +41,12 @@ export default function App() {
       </aside>
       <main className="main-area">
         <header className="topbar"><h1>{current.label}</h1></header>
-        <LegacyWorkspace toolId={activeTool} onToolChange={openTool} />
+        {activeTool === 'link-generator' && <LinkGenerator />}
+        <div className="legacy-container" hidden={activeTool === 'link-generator'}>
+          <LegacyWorkspace toolId={activeTool === 'link-generator' ? 'logo-resizer' : activeTool} onToolChange={tool => {
+            if (activeTool !== 'link-generator') openTool(tool);
+          }} />
+        </div>
       </main>
     </div>
   );

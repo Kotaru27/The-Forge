@@ -11,3 +11,5 @@
 - Generated public/legacy and dist folders are ignored.
 - Regression baseline: 63 passing CTK Node tests; browser-based file-output testing remains to do.
 - Before desktop packaging, vendor the verified engines into The-Forge to remove the upstream fetch.
+
+- Link Generator ported to TypeScript with original HTML/URL output formats preserved in dedicated tests.

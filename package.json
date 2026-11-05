@@ -9,7 +9,7 @@
     "dev": "npm run prepare:legacy && vite --host 0.0.0.0",
     "build": "npm run prepare:legacy && tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test:bridge": "node --test tests/*.test.mjs",
+    "test:bridge": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:legacy": "node scripts/test-legacy.mjs",
     "test": "npm run test:bridge && npm run test:legacy"
   },
