@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   isPdfFile, extensionFor, safePdfBaseName, selectedEntries,
-  singlePageFilename, allEntries, PAGE_SCALE, JPEG_QUALITY, DEFAULT_FORMAT,
+  singlePageFilename, allEntries, PAGE_SCALE, JPEG_QUALITY, DEFAULT_FORMAT, assertPdfRasterSize,
 } from '../src/tools/pdf-to-image/engine.ts';
 
 const smallPage = (num, checked = true) => ({ num, checked, blob: new Blob([`page-${num}`]) });
@@ -46,4 +46,14 @@ test('Documents with zero converted pages are skipped in Download All', () => {
   const ready = {name:'ready.pdf',format:'image/png',pages:[smallPage(1)]};
   assert.deepEqual(allEntries([pending, ready]).map(entry=>entry.path),['001.png']);
   assert.deepEqual(allEntries([pending]),[]);
+});
+
+test('PDF raster dimensions are checked before allocating a canvas', () => {
+  assert.doesNotThrow(() => assertPdfRasterSize(240, 160));
+  assert.doesNotThrow(() => assertPdfRasterSize(6400, 4096));
+  assert.throws(() => assertPdfRasterSize(100000, 100000), /safe browser canvas/);
+  assert.throws(() => assertPdfRasterSize(8000, 8000), /safe browser canvas/);
+  for (const dimension of [0, -10, Infinity, NaN, 1.5]) {
+    assert.throws(() => assertPdfRasterSize(dimension, 100), /safe browser canvas/);
+  }
 });

@@ -314,13 +314,23 @@ export const Storyboard = forwardRef<StoryboardRef, Props>(function Storyboard({
     if (!files.length || busy) return;
     setBusy('Importing filmstrip assets'); setError('');
     const sorted = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/')).sort((a,b) => naturalCompare(a.name,b.name));
-    const results = await Promise.allSettled(sorted.map(file => loadSource(file, file.name, urls.current)));
-    const ready = results.filter((r): r is PromiseFulfilledResult<StoryFrame> => r.status === 'fulfilled').map(r => r.value);
-    const rejected = results.length - ready.length + files.length - sorted.length;
+    const ready: StoryFrame[] = [];
+    let rejected = files.length - sorted.length;
+    // Decode large campaigns sequentially instead of opening hundreds of media decoders at once.
+    for (const file of sorted) {
+      if (!keepAlive.current) break;
+      try {
+        const frame = await loadSource(file, file.name, urls.current);
+        if (!keepAlive.current) { disposeFrame(frame); break; }
+        ready.push(frame);
+      } catch { rejected++; }
+      await new Promise<void>(resolve => window.setTimeout(resolve, 0));
+    }
+    if (!keepAlive.current) { ready.forEach(disposeFrame); return; }
     commitFilm(old => [...old, ...ready].sort((a,b) => naturalCompare(a.name,b.name)));
     if (rejected) setError(`${rejected} invalid or unreadable filmstrip assets skipped.`);
     setMessage(`${ready.length} still${ready.length === 1 ? '' : 's'} imported.`);
-    if (keepAlive.current) setBusy('');
+    setBusy('');
   }
   function sortFilm() { commitFilm(old => [...old].sort((a,b) => naturalCompare(a.name,b.name))); }
   function moveFilm(index: number, dir: number) {

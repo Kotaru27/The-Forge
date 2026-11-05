@@ -156,3 +156,18 @@ test('navigation away preserves multiple board state',async ({page})=>{
   await page.getByRole('navigation',{name:'Select a tool'}).getByRole('button',{name:'Storyboard'}).click();
   await expect(page.locator('.sb-frame')).toHaveCount(1);
 });
+
+test('Filmstrip imports a larger batch in natural order without failed decodes', async ({page}) => {
+  await page.getByRole('tab',{name:'Filmstrip'}).click();
+  const buffer = await png(page, '#4179ab');
+  const files = Array.from({length: 24}, (_, i) => ({
+    name: 'still_' + (24 - i) + '.png',
+    mimeType: 'image/png',
+    buffer,
+  }));
+  await page.getByLabel('Choose filmstrip assets').setInputFiles(files);
+  await expect(page.locator('.sb-frame')).toHaveCount(24,{timeout:30000});
+  await expect(page.locator('.sb-frame').first()).toContainText('still_1.png');
+  await expect(page.locator('.sb-frame').last()).toContainText('still_24.png');
+  await expect(page.getByText('24 stills imported.')).toBeVisible();
+});

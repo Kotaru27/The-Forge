@@ -15,6 +15,17 @@ export type ArchiveFile = { path: string; blob: Blob };
 export const PAGE_SCALE = 2;
 export const JPEG_QUALITY = 0.9;
 export const DEFAULT_FORMAT: PdfOutputFormat = 'image/png';
+export const MAX_PDF_RASTER_SIDE = 8192;
+export const MAX_PDF_RASTER_PIXELS = 32 * 1024 * 1024;
+
+/** Reject hostile PDF page dimensions before allocating any browser canvas. */
+export function assertPdfRasterSize(width: number, height: number): void {
+  if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) ||
+      width < 1 || height < 1 || width > MAX_PDF_RASTER_SIDE ||
+      height > MAX_PDF_RASTER_SIDE || width * height > MAX_PDF_RASTER_PIXELS) {
+    throw Error('PDF page exceeds the safe browser canvas size limit.');
+  }
+}
 
 export function isPdfFile(file: Pick<File, 'type' | 'name'>): boolean {
   return file.type.toLowerCase() === 'application/pdf' || /\.pdf$/i.test(file.name);

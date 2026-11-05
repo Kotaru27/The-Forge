@@ -1,6 +1,6 @@
 import { getDocument, GlobalWorkerOptions, type RenderTask, type PDFDocumentLoadingTask } from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { abortError, isAbortError, JPEG_QUALITY, PAGE_SCALE, type PdfOutputFormat } from './engine';
+import { abortError, isAbortError, JPEG_QUALITY, PAGE_SCALE, assertPdfRasterSize, type PdfOutputFormat } from './engine';
 
 // Vite copies the real worker into the build, including GitHub Pages subpaths.
 // Never rely on a global CDN worker or a version that differs from pdfjs-dist.
@@ -52,10 +52,11 @@ export async function convertPdf(
       const page = await doc.getPage(num);
       if (signal.aborted) throw abortError();
       const viewport = page.getViewport({ scale: PAGE_SCALE });
+      const width = Math.floor(viewport.width), height = Math.floor(viewport.height);
+      assertPdfRasterSize(width, height);
       const canvas = document.createElement('canvas');
-      canvas.width = Math.floor(viewport.width);
-      canvas.height = Math.floor(viewport.height);
-      if (canvas.width === 0 || canvas.height === 0) throw new Error('This page has invalid dimensions.');
+      canvas.width = width;
+      canvas.height = height;
       const context = canvas.getContext('2d');
       if (!context) throw new Error('Unable to create an image canvas.');
       try {

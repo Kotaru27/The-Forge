@@ -1,5 +1,5 @@
 /** Valid vector-only PDF fixture, generated locally without network dependencies. */
-export function createPdf(pageCount: number, color: 'red' | 'blue' | 'green' = 'red'): Buffer {
+export function createPdf(pageCount: number, color: 'red' | 'blue' | 'green' = 'red', pageSize: readonly [number, number] = [120, 80]): Buffer {
   const rgb = color === 'red' ? '1 0 0' : color === 'blue' ? '0 0 1' : '0 1 0';
   const kids = Array.from({ length: pageCount }, (_, index) => `${3 + index * 2} 0 R`).join(' ');
   const objects = [
@@ -9,7 +9,7 @@ export function createPdf(pageCount: number, color: 'red' | 'blue' | 'green' = '
   for (let i = 0; i < pageCount; i++) {
     const contentRef = 4 + i * 2;
     const commands = `q\n${rgb} rg\n0 0 50 80 re\nf\nQ\n`;
-    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 120 80] /Resources << >> /Contents ${contentRef} 0 R >>`);
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageSize[0]} ${pageSize[1]}] /Resources << >> /Contents ${contentRef} 0 R >>`);
     objects.push(`<< /Length ${Buffer.byteLength(commands, 'ascii')} >>\nstream\n${commands}endstream`);
   }
   let pdf = '%PDF-1.4\n%forge-test\n';

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import JSZip from 'jszip';
+import { createPdf } from './helpers/pdf-fixture';
 import { readFile } from 'node:fs/promises';
 
 // Controlled OOXML/PDF fixtures: regression coverage, NOT substitutes for customer files.
@@ -99,4 +100,17 @@ test('rotated PDF page still exports 2x resolution in rotated orientation', asyn
   const bytes = await zip.file('001.png')!.async('nodebuffer');
   expect(bytes.subarray(0, 8)).toEqual(Buffer.from([137,80,78,71,13,10,26,10]));
   expect([bytes.readUInt32BE(16), bytes.readUInt32BE(20)]).toEqual([160, 240]);
+});
+
+test('PDF with massive page dimensions fails without allocating an enormous canvas', async ({ page }) => {
+  await page.goto('#/pdf-to-image');
+  await page.getByLabel('Upload PDF files').setInputFiles({
+    name: 'oversized-page.pdf',
+    mimeType: 'application/pdf',
+    buffer: createPdf(1, 'red', [50000, 50000]),
+  });
+  const alert = page.locator('.pdf-doc-details small[role="alert"]');
+  await expect(alert).toHaveCount(1, { timeout: 20000 });
+  await expect(alert).toContainText('safe browser canvas size limit');
+  await expect(page.getByRole('button', { name: 'Download all converted PDF pages as a ZIP archive' })).toBeDisabled();
 });
