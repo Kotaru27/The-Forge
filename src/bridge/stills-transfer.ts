@@ -5,7 +5,14 @@ let sequence = 0;
 export async function transferStillsToLegacy(destination: TransferDestination, groups: TransferGroup[]): Promise<TransferResult> {
   const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="The Forge tool workspace"]');
   const target = iframe?.contentWindow;
-  if (!target || iframe?.contentDocument?.readyState !== 'complete') throw new Error('Storyboard is not ready. Try again.');
+  if (!target || !iframe) throw new Error('Storyboard workspace is unavailable.');
+  // The legacy iframe may still be initializing while a short video is processing.
+  // Wait for its explicit ready handshake rather than dropping the frame hand-off.
+  const deadline = Date.now() + 20_000;
+  while (iframe.dataset.ready !== 'true' || iframe.contentDocument?.readyState !== 'complete') {
+    if (Date.now() >= deadline) throw new Error('Storyboard did not finish loading. Try again.');
+    await new Promise<void>(resolve => setTimeout(resolve, 100));
+  }
   if (!groups.length || !groups.some(group => group.frames.length)) throw new Error('No stills selected.');
   const requestId = `stills-${Date.now()}-${++sequence}`;
   return new Promise((resolve, reject) => {
