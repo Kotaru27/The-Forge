@@ -38,3 +38,7 @@ Video Stills runs natively in React + TypeScript. The temporary same-origin brid
 ## Storyboard migration (draft)
 
 Grid Board, Filmstrip and Fit to Platform are implemented as a connected native React + TypeScript workspace on the staged `migration/storyboard` branch. The Video Stills hand-off now targets that native workspace, with regression tests for board creation and Filmstrip transfer. The pinned CTK compatibility iframe remains for Ad Downloader and Video Compressor. See [Storyboard migration checklist](docs/STORYBOARD_MIGRATION.md). Real-work image and video comparisons remain a release gate.
+
+## Ad Downloader migration
+
+Ad Downloader is implemented in React + TypeScript with the original writable-folder gate, .xlsx/.xls parsing, SharePoint native downloads and Auto-name tracking, CORS/ZIP downloads, copy names/bucket/script tools and recovery actions. See [ad downloader checklist](docs/AD_DOWNLOADER_MIGRATION.md). The remaining Video Compressor still runs in the compatibility iframe. Folder renaming needs a user-approved local folder and a secure Chromium browser. The spreadsheet parser uses pinned SheetJS 0.20.3 from the official SheetJS CDN (the npm registry release 0.18.5 is outdated). Excel .xls/.xlsx import has regression coverage.

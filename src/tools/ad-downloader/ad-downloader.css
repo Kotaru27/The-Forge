@@ -1,0 +1,41 @@
+.adw-workspace{flex:1;min-width:0;min-height:0;background:#000;color:#ededed;display:flex;flex-direction:column;gap:14px;padding:22px 26px;overflow:auto;font-family:Inter,'Segoe UI',Arial,sans-serif}
+.adw-header{display:flex;flex-direction:column;gap:18px}
+.adw-header h2{font-size:17px;font-weight:650;margin:0 0 5px}
+.adw-header p{font-size:12px;line-height:1.55;color:#929292;margin:0}
+.adw-controls{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.adw-controls button,.adw-controls .adw-upload,.adw-row-actions button,.adw-filters button{background:#101010;border:1px solid #333;color:#eee;padding:10px 12px;border-radius:5px;cursor:pointer;font-size:12px;text-decoration:none}
+.adw-controls button:hover:not(:disabled),.adw-row-actions button:hover:not(:disabled),.adw-filters button:hover:not(:disabled){border-color:#777;background:#202020}
+.adw-controls button:focus-visible,.adw-row-actions button:focus-visible,.adw-filters button:focus-visible,.adw-upload:focus-within{outline:2px solid #fff;outline-offset:2px}
+.adw-controls button:disabled,.adw-row-actions button:disabled,.adw-filters button:disabled{opacity:.42;cursor:not-allowed}
+.adw-controls .adw-primary{background:#f2f2f2;color:#000;font-weight:650;border-color:#f2f2f2}
+.adw-controls .adw-primary:hover:not(:disabled){background:#d5d5d5;border-color:#d5d5d5}
+.adw-upload{position:relative;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
+.adw-upload input{position:absolute;width:100%;height:100%;inset:0;opacity:0;cursor:pointer}
+.adw-upload.adw-locked{opacity:.38;cursor:not-allowed}
+.adw-upload.adw-locked input{cursor:not-allowed}
+.adw-status{background:#090909;border:1px solid #222;min-height:42px;padding:12px 14px;font-size:12px;line-height:1.5;color:#b2b2b2;border-radius:5px}
+.adw-status[data-error='true']{color:#f0a1a1;border-color:#583131}
+.adw-empty{border:1px dashed #3b3b3b;border-radius:5px;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#eaeaea;text-align:center;padding:35px}
+.adw-empty strong{font-size:16px;font-weight:600}.adw-empty span{font-size:12px;color:#929292;max-width:410px;line-height:1.5}
+.adw-summary{display:flex;align-items:center;flex-wrap:wrap;gap:8px 20px;color:#aaa;font-size:12px;border-bottom:1px solid #202020;padding-bottom:10px}
+.adw-summary span:first-child{color:#fff;font-weight:600}
+.adw-filters{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.adw-filters button{padding:7px 11px;font-size:11px}
+.adw-filters button[aria-pressed='true']{border-color:#999;color:#fff;background:#232323}
+.adw-filters button:nth-last-child(2){margin-left:auto}
+.adw-table-wrap{min-height:0;flex:1;overflow:auto;border:1px solid #222;border-radius:5px;background:#050505}
+.adw-table{width:100%;border-collapse:collapse;font-size:12px;text-align:left}
+.adw-table th{position:sticky;top:0;background:#0c0c0c;color:#999;font-size:11px;font-weight:550;z-index:1;padding:14px 13px;border-bottom:1px solid #303030}
+.adw-table td{padding:12px 13px;border-bottom:1px solid #222;vertical-align:middle}
+.adw-table tbody tr[data-stage='prepared']{background:#0b100d}.adw-table tbody tr[data-stage='requested']{background:#100f0a}
+.adw-table td:first-child label{display:flex;gap:10px;align-items:center}.adw-table input[type='checkbox']{accent-color:#ddd}
+.adw-table .adw-name{font-family:Consolas,'Courier New',monospace;word-break:break-all;line-height:1.5;min-width:230px}
+.adw-stage{font-size:11px;color:#aaa;white-space:nowrap}
+.adw-row-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end;white-space:nowrap}
+.adw-row-actions button{padding:7px 9px;font-size:11px}
+.adw-row-actions details{position:relative}
+.adw-row-actions summary{list-style:none;cursor:pointer;border:1px solid #333;border-radius:5px;padding:8px 11px;font-size:11px;background:#111}
+.adw-row-actions summary::-webkit-details-marker{display:none}
+.adw-row-actions details[open] summary{border-color:#777}
+.adw-more{display:flex;flex-direction:column;gap:6px;position:absolute;right:0;top:100%;z-index:5;background:#151515;border:1px solid #555;padding:9px;min-width:172px;box-shadow:0 8px 22px #000}
+@media(max-width:1080px){.adw-workspace{padding:16px}.adw-table .adw-name{min-width:170px}.adw-filters button:nth-last-child(2){margin-left:0}}

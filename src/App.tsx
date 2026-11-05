@@ -8,6 +8,7 @@ import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
+import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { defaultTool, isToolId, tools, usesLegacyWorkspace, type ToolId } from './tools';
 
 function initialTool(): ToolId {
@@ -68,8 +69,9 @@ export default function App() {
         <div className="native-tool" hidden={activeTool !== 'pdf-to-image'}><PdfToImage /></div>
         <div className="native-tool" hidden={activeTool !== 'video-stills'}><VideoStills onTransfer={handleStillsTransfer} /></div>
         <div className="native-tool" hidden={activeTool !== 'storyboard'}><Storyboard ref={storyboardRef} preferredMode={storyboardMode} /></div>
+        <div className="native-tool" hidden={activeTool !== 'ad-downloader'}><AdDownloader /></div>
         <div className="legacy-container" hidden={!legacyActive}>
-          <LegacyWorkspace storyboardMode={storyboardMode} toolId={legacyActive ? activeTool : 'ad-downloader'} onToolChange={tool => {
+          <LegacyWorkspace storyboardMode={storyboardMode} toolId={legacyActive ? activeTool : 'video-compressor'} onToolChange={tool => {
             if (legacyActive) openTool(tool);
           }} />
         </div>
