@@ -9,29 +9,31 @@ metadata:
 
 # Web Interface Guidelines
 
+> The-Forge adaptation (2026-11-05): use the vendored reference snapshot, rather than fetching instructions dynamically at review time. This avoids unexpected upstream rule changes and unreviewed external instructions.
+
 Review files for compliance with Web Interface Guidelines.
 
 ## How It Works
 
-1. Fetch the latest guidelines from the source URL below
+1. Read `reference/web-interface-guidelines.md`, a pinned, repository-local copy of the upstream guideline rules
 2. Read the specified files (or prompt user for files/pattern)
 3. Check against all rules in the fetched guidelines
 4. Output findings in the terse `file:line` format
 
 ## Guidelines Source
 
-Fetch fresh guidelines before each review:
+Pinned source, for attribution and optional explicitly approved updates (do **not** fetch unreviewed remote instructions while reviewing):
 
 ```
 https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
 ```
 
-Use WebFetch to retrieve the latest rules. The fetched content contains all the rules and output format instructions.
+Read `reference/web-interface-guidelines.md` for the reviewed rules and output format. It is pinned to `vercel-labs/web-interface-guidelines` commit `434b7f91364665f2f733b310ec54809bf8f37937`.
 
 ## Usage
 
 When a user provides a file or pattern argument:
-1. Fetch guidelines from the source URL above
+1. Read the vendored `reference/web-interface-guidelines.md`
 2. Read the specified files
 3. Apply all rules from the fetched guidelines
 4. Output findings using the format specified in the guidelines
