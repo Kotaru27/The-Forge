@@ -13,7 +13,7 @@ Scope: combine the existing stacked React migration branches into one web releas
 3. Invalid and deferred routes normalize to the release default.
 4. Link Generator retains its entered data and generated output while temporarily hidden (as other native tools already do).
 5. Image Splitter retains files and settings across tool navigation.
-6. Browser CI builds under `/The-Forge/` and verifies that production scripts resolve beneath that path.
+6. Browser CI **builds and previews** under `/The-Forge/`, verifying that production scripts resolve beneath that path. The preview server must receive `FORGE_BASE_PATH` too; a matching build alone is insufficient.
 7. Existing per-tool browser and unit tests remain required.
 
 ## Before promoting this integration

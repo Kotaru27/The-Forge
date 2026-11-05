@@ -7,6 +7,8 @@ export default defineConfig({
   use: { baseURL: 'http://127.0.0.1:4173/The-Forge/', ...devices['Desktop Chrome'] },
   webServer: {
     command: 'npm run preview -- --host 127.0.0.1 --port 4173',
+    // Vite reads its base setting at preview startup as well as during build.
+    env: { FORGE_BASE_PATH: '/The-Forge/' },
     url: 'http://127.0.0.1:4173/The-Forge/',
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
