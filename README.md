@@ -34,3 +34,7 @@ The new Image Splitter is a React + TypeScript tool with whole-pixel cuts and ma
 ## Video Stills migration
 
 Video Stills runs natively in React + TypeScript. The temporary same-origin bridge keeps its Send to Board and Send to Filmstrip actions connected to the existing Storyboard/Filmstrip engine. See `docs/VIDEO_STILLS_MIGRATION.md`. Tests use a small local WebM fixture; video and image data never leave the browser.
+
+## Storyboard migration (draft)
+
+Grid Board, Filmstrip and Fit to Platform are implemented as a connected native React + TypeScript workspace on the staged `migration/storyboard` branch. The Video Stills hand-off now targets that native workspace, with regression tests for board creation and Filmstrip transfer. The pinned CTK compatibility iframe remains for Ad Downloader and Video Compressor. See [Storyboard migration checklist](docs/STORYBOARD_MIGRATION.md). Real-work image and video comparisons remain a release gate.
