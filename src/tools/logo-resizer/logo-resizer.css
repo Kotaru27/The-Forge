@@ -121,12 +121,12 @@
 .logo-live-signal{display:inline-block;height:7px;width:7px;background:var(--forge-accent);box-shadow:0 0 0 4px #d8fb721a;border-radius:50%;margin-right:5px}
 .logo-empty{min-height:340px;height:min(460px,75%);border-color:#465246;background:repeating-linear-gradient(0deg,transparent,transparent 31px,#899a8713 32px),repeating-linear-gradient(90deg,transparent,transparent 31px,#899a8713 32px);color:#b9c8b7}
 .logo-empty p{font-size:19px;font-weight:720;letter-spacing:-.035em;color:#edf4e8}
-.logo-grid{grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:18px}
+.logo-grid{grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
 .logo-card{background:#111812;border:1px solid #354336;border-radius:5px}
 .logo-card-heading{border-bottom-color:#334034;padding:11px 12px;background:#151e16}
 .logo-card-heading input{font-size:13px!important}
 .logo-workspace .logo-preview-button{
-  min-height:242px;
+  min-height:0;
   padding:20px 12px;
   background-color:#1a241c;
   background-image:linear-gradient(#83928313 1px,transparent 1px),linear-gradient(90deg,#83928313 1px,transparent 1px);
