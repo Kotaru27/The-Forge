@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { LegacyWorkspace } from './components/LegacyWorkspace';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
+import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { defaultTool, isToolId, tools, type ToolId } from './tools';
 
 function initialTool(): ToolId {
@@ -45,9 +46,10 @@ export default function App() {
         <header className="topbar"><h1>{current.label}</h1></header>
         {activeTool === 'link-generator' && <LinkGenerator />}
         <div className="native-tool" hidden={activeTool !== 'logo-resizer'}><LogoResizer /></div>
-        <div className="legacy-container" hidden={activeTool === 'link-generator' || activeTool === 'logo-resizer'}>
-          <LegacyWorkspace toolId={activeTool === 'link-generator' || activeTool === 'logo-resizer' ? 'pdf-to-image' : activeTool} onToolChange={tool => {
-            if (activeTool !== 'link-generator' && activeTool !== 'logo-resizer') openTool(tool);
+        <div className="native-tool" hidden={activeTool !== 'image-splitter'}><ImageSplitter /></div>
+        <div className="legacy-container" hidden={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter'}>
+          <LegacyWorkspace toolId={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' ? 'pdf-to-image' : activeTool} onToolChange={tool => {
+            if (activeTool !== 'link-generator' && activeTool !== 'logo-resizer' && activeTool !== 'image-splitter') openTool(tool);
           }} />
         </div>
       </main>
