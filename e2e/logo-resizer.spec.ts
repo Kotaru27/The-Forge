@@ -152,3 +152,25 @@ test('per-logo sliders, reset, matching and branded HTML links', async ({ page }
   await expect(dialog.getByLabel('Generated HTML')).toHaveValue(/aldimediaeu\.blob\.core\.windows\.net/);
   await expect(dialog.getByLabel('Generated HTML')).toHaveValue(/SecondLogo\.png/);
 });
+
+
+test('resizing motion changes preview frame, not the white canvas pixels', async ({ page }) => {
+  await addFiles(page, [sample]);
+  const frame = page.locator('.logo-card .logo-preview-frame').first();
+  await expect(frame).toHaveCount(1);
+  const property = await frame.evaluate(element => getComputedStyle(element).transitionProperty);
+  expect(property).toContain('width');
+  expect(property).toContain('height');
+
+  await page.locator('.logo-settings').getByRole('button', { name: '200 × 150' }).click();
+  await expect(frame).toHaveCSS('height', '150px');
+  const pixels = await page.locator('.logo-card .logo-preview').first().evaluate(canvas => {
+    const output = canvas as HTMLCanvasElement;
+    const white = output.getContext('2d')!.getImageData(199, 149, 1, 1).data;
+    return [output.width, output.height, ...white.slice(0, 3)];
+  });
+  expect(pixels).toEqual([200, 150, 255, 255, 255]);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(frame).toHaveCSS('transition-duration', '0s');
+});

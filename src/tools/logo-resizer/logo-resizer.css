@@ -65,3 +65,111 @@
 .logo-link-warning p{flex:1;min-width:180px}
 @media(max-width:1150px){.logo-settings{width:245px;min-width:245px}.logo-detail{width:275px;min-width:275px}.logo-gallery{padding:12px}.logo-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
 @media(max-width:850px){.logo-body{overflow:auto}.logo-settings{width:220px;min-width:220px}.logo-detail{min-width:250px}.logo-toolbar-actions{margin-left:0}}
+
+
+/* Original Forge workspace identity. Processing remains in renderer.ts/office.ts. */
+.logo-workspace{
+  --forge-accent:#d8fb72;
+  --forge-border:#2b332b;
+  --forge-ink:#e9f0e9;
+  background:#0a0e0b;
+  color:var(--forge-ink);
+}
+.logo-toolbar{
+  min-height:108px;
+  padding:18px 28px;
+  gap:22px;
+  background:#101711;
+  border-bottom-color:#2b332b;
+}
+.logo-tool-identity{display:flex;align-items:center;min-width:245px;gap:15px}
+.logo-tool-icon{display:block;flex:0 0 60px;width:60px;height:60px}
+.logo-tool-identity-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.logo-tool-identity-copy span,.logo-gallery-head span{
+  font-size:10px;letter-spacing:.12em;font-weight:700;color:#99ab99;
+}
+.logo-tool-identity-copy strong{font-size:26px;letter-spacing:-.055em;line-height:1.05;font-weight:760;color:#fff}
+.logo-tool-identity-copy small{font-size:11px;color:#91a392;white-space:normal;line-height:1.4}
+.logo-toolbar-actions{gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.logo-workspace button{border-radius:3px;border-color:#3b483c;background:#172019;transition:background-color .14s,border-color .14s,color .14s}
+.logo-workspace button:hover:not(:disabled){background:#26352a;border-color:#718574}
+.logo-workspace .logo-primary{background:var(--forge-accent);color:#142015;border-color:var(--forge-accent);font-weight:750}
+.logo-workspace .logo-primary:hover:not(:disabled){background:#edffa9;border-color:#edffa9}
+.logo-settings{
+  width:300px;min-width:300px;
+  padding:23px 20px 28px;
+  background:#101511;border-right-color:var(--forge-border);
+  gap:15px;
+}
+.logo-settings h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#dce8db;border-top-color:#2e3930;margin-top:14px;padding-top:19px}
+.logo-workspace label{color:#a5b3a5}
+.logo-workspace input:not([type=checkbox]):not([type=range]):not([type=color]),
+.logo-workspace select,.logo-workspace textarea{
+  background:#0c110e;border-color:#344035;border-radius:3px;
+  color:#eef3e9;
+}
+.logo-workspace :is(input,textarea,select):focus-visible{outline:2px solid var(--forge-accent);outline-offset:2px}
+.logo-workspace input[type=range],.logo-workspace input[type=checkbox]{accent-color:#c8e87c}
+.logo-workspace .logo-presets button{background:#141c16;border-color:#364438;color:#c5d2c5;font-variant-numeric:tabular-nums;padding:13px 6px}
+.logo-workspace .logo-presets button.selected{background:var(--forge-accent);border-color:var(--forge-accent);color:#162015;font-weight:760}
+.logo-gallery{background:#0b100c;padding:22px 26px 35px}
+.logo-gallery-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px}
+.logo-gallery-head>div:first-child{display:flex;flex-direction:column;gap:7px}
+.logo-gallery-head strong{font-size:21px;letter-spacing:-.04em;font-weight:720;color:#f0f6f0}
+.logo-live-output{display:flex;align-items:center;gap:8px;color:#e5f0dc;font-size:13px;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}
+.logo-live-output small{font-size:10px;letter-spacing:.08em;color:#93a494}
+.logo-live-signal{display:inline-block;height:7px;width:7px;background:var(--forge-accent);box-shadow:0 0 0 4px #d8fb721a;border-radius:50%;margin-right:5px}
+.logo-empty{min-height:340px;height:min(460px,75%);border-color:#465246;background:repeating-linear-gradient(0deg,transparent,transparent 31px,#899a8713 32px),repeating-linear-gradient(90deg,transparent,transparent 31px,#899a8713 32px);color:#b9c8b7}
+.logo-empty p{font-size:19px;font-weight:720;letter-spacing:-.035em;color:#edf4e8}
+.logo-grid{grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.logo-card{background:#111812;border:1px solid #354336;border-radius:5px}
+.logo-card-heading{border-bottom-color:#334034;padding:11px 12px;background:#151e16}
+.logo-card-heading input{font-size:13px!important}
+.logo-workspace .logo-preview-button{
+  min-height:0;
+  padding:20px 12px;
+  background-color:#1a241c;
+  background-image:linear-gradient(#83928313 1px,transparent 1px),linear-gradient(90deg,#83928313 1px,transparent 1px);
+  background-size:22px 22px;
+  border-bottom:1px solid #344335;
+}
+.logo-workspace .logo-preview-button:hover:not(:disabled){background-color:#202c22}
+.logo-preview-frame{
+  display:block;
+  flex:0 0 auto;
+  max-width:100%;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 0 0 1px #a8b8a3,0 12px 30px #0008;
+  transition:width .30s cubic-bezier(.2,.85,.25,1),height .30s cubic-bezier(.2,.85,.25,1);
+}
+.logo-preview{display:block;width:100%;height:100%;max-height:none;max-width:none;border:0;object-fit:fill;background:#fff}
+.logo-card-controls{padding:14px;gap:13px}
+.logo-card-footer{gap:10px}
+.logo-detail{background:#111812;border-left-color:#334034;padding-top:23px}
+.logo-detail-heading strong{font-size:18px;letter-spacing:-.045em}
+.logo-detail-preview{margin:14px auto 9px}
+.logo-detail .logo-preview{max-width:none;max-height:none}
+.logo-modal{background:#111812;border-color:#465345;box-shadow:0 28px 85px #000d;border-radius:5px}
+.logo-link-warning{background:#2a2514;border-color:#76673e}
+.logo-progress{background:#17281a;border-bottom-color:#4e7253;color:#d7fb72}
+.logo-error{background:#321818}
+.logo-undo{background:#1b2c1d;border-bottom-color:#547157}
+@media(max-width:1200px){
+  .logo-toolbar{align-items:flex-start}
+  .logo-toolbar-actions{margin-left:0}
+  .logo-settings{width:270px;min-width:270px}
+  .logo-gallery{padding:18px}
+}
+@media(max-width:850px){
+  .logo-toolbar{padding:15px;min-height:0}
+  .logo-tool-identity{min-width:210px}
+  .logo-tool-icon{width:44px;height:44px;flex-basis:44px}
+  .logo-tool-identity-copy strong{font-size:21px}
+  .logo-settings{min-width:235px;width:235px}
+  .logo-gallery-head{align-items:flex-start;flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){
+  .logo-preview-frame{transition:none}
+  .logo-workspace button{transition:none}
+}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEv
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
+import { LogoResizerIcon } from './LogoResizerIcon';
 import { logoToBlob } from './renderer';
 import { extractOfficeImages } from './office';
 import { generateLogoLinks } from './links';
@@ -285,9 +286,16 @@ export function LogoResizer() {
     <section className="logo-workspace" aria-label="Logo Resizer">
       <input ref={inputRef} type="file" accept="image/*,.pptx,.xlsx,.xlsm" multiple hidden onChange={onFileInput} />
       <div className="logo-toolbar" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
-        <button className="logo-primary" type="button" onClick={() => inputRef.current?.click()} disabled={busy}>Upload logos</button>
-        <span className="logo-hint">Images · PPTX · XLSX / XLSM · Drop files here</span>
+        <div className="logo-tool-identity">
+          <LogoResizerIcon />
+          <div className="logo-tool-identity-copy">
+            <span>IMAGE WORKSHOP / 01</span>
+            <strong>Logo resizer</strong>
+            <small>Batch images · PPTX · XLSX / XLSM · drag files to add</small>
+          </div>
+        </div>
         <div className="logo-toolbar-actions">
+          <button className="logo-primary" type="button" onClick={() => inputRef.current?.click()} disabled={busy}>Upload logos</button>
           <button type="button" onClick={openLinkDialog}>Generate links</button>
           <button type="button" onClick={() => setConfirmClear(true)} disabled={!cards.length || busy}>Clear all</button>
           <button className="logo-primary" type="button" onClick={() => void exportZip()} disabled={!cards.length || busy}>Download ZIP</button>
@@ -337,6 +345,16 @@ export function LogoResizer() {
           </label>
         </aside>
         <main className="logo-gallery" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
+          <div className="logo-gallery-head">
+            <div>
+              <span>WORKBOARD / LIVE PREVIEW</span>
+              <strong>{cards.length ? `${cards.length} logo${cards.length === 1 ? '' : 's'} in session` : 'Ready for your assets'}</strong>
+            </div>
+            <div className="logo-live-output" aria-label="Current output dimensions">
+              <span className="logo-live-signal" aria-hidden="true" />
+              {settings.width} × {settings.height} <small>PX · {settings.format === 'jpeg' ? 'JPG' : 'PNG'}</small>
+            </div>
+          </div>
           {!cards.length ? (
             <div className="logo-empty">
               <p>No logos uploaded</p>
