@@ -27,8 +27,6 @@ export interface LogoAsset {
   textOffset: number;
 }
 
-export type LogoEdits = Pick<LogoAsset, 'filename' | 'label' | 'fontSizeOverride' | 'paddingOverride' | 'imageOffset' | 'textOffset'>;
-
 export const LOGO_PRESETS = [
   { width: 150, height: 150, label: '150 × 150' },
   { width: 200, height: 200, label: '200 × 200' },

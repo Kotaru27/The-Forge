@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
+import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
 import { logoToBlob } from './renderer';
 import { extractOfficeImages } from './office';
@@ -17,17 +18,6 @@ const isImage = (file: File) => file.type.startsWith('image/') || /\.(png|jpe?g|
 const dimensions = (w: number, h: number) => ({ width: String(w), height: String(h) });
 type Snapshot = { cards: LogoAsset[]; settings: LogoSettings };
 
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
-  // Keep the URL alive while Windows/browser download dispatch finishes.
-  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
-}
 async function loadAsset(file: File): Promise<LogoAsset> {
   const url = URL.createObjectURL(file);
   const image = new Image();
