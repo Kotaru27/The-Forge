@@ -156,7 +156,7 @@ async function extractXlsx(zip: Archive, context: ExtractContext, report: Extrac
       console.error('Rich Excel image extraction failed', error);
     }
   }
-  for (const path of Object.keys(zip.files).filter(path => /^xl\/media\//.test(path) && !anchoredMedia.has(path))) {
+  for (const path of Object.keys(zip.files).filter(path => /^xl\/media\//.test(path) && !zip.files[path].dir && !anchoredMedia.has(path))) {
     report('Importing unanchored worksheet images');
     await collect(zip, path, `Unanchored_IMG${imageCount++}.${path.split('.').pop() || 'png'}`, context);
   }

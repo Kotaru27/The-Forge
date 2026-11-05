@@ -143,7 +143,8 @@ export function LogoResizer() {
           failures.push(`${file.name}: ${cause instanceof Error ? cause.message : String(cause)}`);
         }
       }
-      if (loaded.length) setCards(previous => [...loaded.reverse(), ...previous]);
+      // Keep model/export order identical to CTK; only the visible cards are newest-first.
+      if (loaded.length) setCards(previous => [...previous, ...loaded]);
       if (failures.length) setError(failures.join('\n'));
     } finally {
       setProgress('');
@@ -344,7 +345,7 @@ export function LogoResizer() {
             </div>
           ) : (
             <div className="logo-grid">
-              {cards.map(asset => (
+              {[...cards].reverse().map(asset => (
                 <article key={asset.id} className="logo-card">
                   <div className="logo-card-heading">
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
