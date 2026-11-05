@@ -26,3 +26,7 @@ npm run dev
 `FORGE_BASE_PATH=/The-Forge/ npm run build` for GitHub Pages project URLs. GitHub Pages must be configured with **Settings → Pages → GitHub Actions** before deployment can occur. Keep the working CTK deployment separate during migration.
 
 Logo Resizer migration checklist and E2E coverage are documented in `docs/LOGO_RESIZER_MIGRATION.md`. The new Logo Resizer is being tested on a separate branch; full functional parity is not claimed until representative real-file browser tests pass.
+
+## Image Splitter migration
+
+The new Image Splitter is a React + TypeScript tool with whole-pixel cuts and matching numbered ZIP export behavior. It is staged separately from the original PDF to Image tool and from production. See `docs/IMAGE_SPLITTER_MIGRATION.md` and `e2e/image-splitter.spec.ts`. Full real-file parity and large-batch checks are required before merging.
