@@ -3,17 +3,16 @@ import { VideoStills } from './tools/video-stills/VideoStills';
 import { Storyboard } from './tools/storyboard/Storyboard';
 import type { StoryboardRef } from './tools/storyboard/engine';
 import type { TransferDestination, TransferGroup, TransferResult } from './tools/video-stills/engine';
-import { LegacyWorkspace } from './components/LegacyWorkspace';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
-import { defaultTool, isReleaseTool, releaseTools, tools, usesLegacyWorkspace, type ToolId } from './tools';
+import { defaultTool, isToolId, tools, type ToolId } from './tools';
 
 function initialTool(): ToolId {
   const saved = window.location.hash.replace(/^#\/?/, '');
-  return isReleaseTool(saved) ? saved : defaultTool;
+  return isToolId(saved) ? saved : defaultTool;
 }
 
 export default function App() {
@@ -22,7 +21,7 @@ export default function App() {
   const storyboardRef = useRef<StoryboardRef>(null);
 
   const openTool = useCallback((tool: ToolId) => {
-    if (!isReleaseTool(tool)) return;
+    if (!isToolId(tool)) return;
     setActiveTool(tool);
     if (window.location.hash !== `#/${tool}`) history.replaceState(null, '', `#/${tool}`);
   }, []);
@@ -46,14 +45,13 @@ export default function App() {
   }, [openTool]);
 
   const current = tools.find(tool => tool.id === activeTool) ?? tools[0];
-  const legacyActive = usesLegacyWorkspace(activeTool);
 
   return (
     <div className="forge-app">
       <aside className="sidebar" aria-label="Tools">
         <div className="brand">THE FORGE</div>
         <nav className="tool-nav" aria-label="Select a tool">
-          {releaseTools.map(tool => (
+          {tools.map(tool => (
             <button
               className={`tool-link${activeTool === tool.id ? ' is-active' : ''}`}
               type="button"
@@ -73,9 +71,6 @@ export default function App() {
         <div className="native-tool" hidden={activeTool !== 'video-stills'}><VideoStills onTransfer={handleStillsTransfer} /></div>
         <div className="native-tool" hidden={activeTool !== 'storyboard'}><Storyboard ref={storyboardRef} preferredMode={storyboardMode} /></div>
         <div className="native-tool" hidden={activeTool !== 'ad-downloader'}><AdDownloader /></div>
-        {legacyActive && <div className="legacy-container">
-          <LegacyWorkspace storyboardMode={storyboardMode} toolId={activeTool} onToolChange={openTool} />
-        </div>}
       </main>
     </div>
   );

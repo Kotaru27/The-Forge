@@ -18,12 +18,12 @@
 
 ## Gates before GitHub Pages release
 
-1. **Automated tests:** `npm run prepare:legacy`, `npm test`, `npm run build` with `FORGE_BASE_PATH=/The-Forge/`, `npm run test:e2e`. Verify fresh CI logs, counts, zero failures.
+1. **Automated tests:** `npm test` (which runs the pinned CTK reference tests), `npm run build` with `FORGE_BASE_PATH=/The-Forge/`, `npm run test:e2e`. Verify fresh CI logs, counts, zero failures.
 2. **Actual originals:** Compare representative work files against the *original* CTK build, including image pixels/dimensions/quality, number and names of ZIP entries, media selection and ordering, and folder/SharePoint behavior.
 3. **Cross-tool:** Verify Video Stills to Grid Board/Filmstrip and back; verify navigation retains uploaded data.
 4. **Browser:** Secure Chromium with real `showDirectoryPicker` permissions for Ad Downloader. Playwright mocks prove UI logic, not a successful authenticated SharePoint download.
 5. **Platform:** Use `/The-Forge/` base and test the actual GitHub Pages URL after approval. No Windows installer during this stage.
-6. **Safety:** Run Ponytail Review, security review and a final dependency check. Remove legacy runtime only after confirming all seven native routes are independent and any deferred code is isolated.
+6. **Safety:** Run Ponytail Review, security review and a final dependency check. Verify the native-only production artifact contains no CTK runtime; retain the pinned CTK source as a test reference.
 
 ## What can honestly be claimed now
 
@@ -36,7 +36,6 @@
 
 ```bash
 npm install
-npm run prepare:legacy
 npm test
 FORGE_BASE_PATH=/The-Forge/ npm run build
 npm run test:e2e

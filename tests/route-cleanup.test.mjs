@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { tools, isToolId, usesLegacyWorkspace } from '../src/tools.ts';
+import { tools, isToolId, defaultTool } from '../src/tools.ts';
 
-test('every migrated tool uses React, and all remaining tools retain the compatibility workspace', () => {
+test('the GitHub Pages release contains exactly the seven native workspaces', () => {
   const native = ['link-generator', 'logo-resizer', 'image-splitter', 'pdf-to-image', 'video-stills', 'storyboard', 'ad-downloader'];
-  const legacy = ['video-compressor'];
-  assert.equal(tools.length, 8);
-  assert.deepEqual(tools.filter(tool => !usesLegacyWorkspace(tool.id)).map(tool => tool.id).sort(), native.sort());
-  assert.deepEqual(tools.filter(tool => usesLegacyWorkspace(tool.id)).map(tool => tool.id).sort(), legacy.sort());
+  assert.equal(tools.length, 7);
+  assert.deepEqual(tools.map(tool => tool.id).sort(), native.sort());
+  assert.equal(defaultTool, 'logo-resizer');
   for (const tool of tools) assert.ok(isToolId(tool.id));
+  assert.equal(isToolId('video-compressor'), false);
   assert.equal(isToolId('not-a-tool'), false);
 });

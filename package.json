@@ -7,13 +7,15 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "prepare:legacy": "node scripts/materialize-legacy.mjs",
-    "dev": "npm run prepare:legacy && vite --host 0.0.0.0",
-    "build": "npm run prepare:legacy && tsc --noEmit && vite build",
+    "clean:generated-legacy": "node scripts/clean-generated-legacy.mjs",
+    "predev": "npm run clean:generated-legacy",
+    "dev": "vite --host 0.0.0.0",
+    "prebuild": "npm run clean:generated-legacy",
+    "build": "tsc --noEmit && vite build && node scripts/verify-native-dist.mjs",
     "preview": "vite preview --host 0.0.0.0",
-    "test:bridge": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test:unit": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:legacy": "node scripts/test-legacy.mjs",
-    "test": "npm run test:bridge && npm run test:legacy",
+    "test": "npm run test:unit && npm run test:legacy",
     "test:e2e": "playwright test"
   },
   "dependencies": {
