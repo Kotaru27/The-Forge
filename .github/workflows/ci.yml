@@ -1,0 +1,33 @@
+name: React migration checks
+on:
+  push:
+    branches: [main, 'migration/**']
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout The Forge
+        uses: actions/checkout@v4
+      - name: Checkout pinned CTK baseline (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: Kotaru27/CTK
+          ref: 617615c0b4370c795ddfd6dc4c300920cd595883
+          path: legacy-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm run prepare:legacy
+        env:
+          CTK_SOURCE_DIR: legacy-source
+      - run: npm test
+        env:
+          CTK_SOURCE_DIR: legacy-source
+      - run: npm run build
+        env:
+          CTK_SOURCE_DIR: legacy-source
+          FORGE_BASE_PATH: /The-Forge/

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+public/legacy/
+legacy-source/
+*.log
+.env
+.env.*
+.DS_Store

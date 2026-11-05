@@ -1,0 +1,41 @@
+name: Publish web preview
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kotaru27/CTK
+          ref: 617615c0b4370c795ddfd6dc4c300920cd595883
+          path: legacy-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm run prepare:legacy
+        env:
+          CTK_SOURCE_DIR: legacy-source
+      - run: npm test
+        env:
+          CTK_SOURCE_DIR: legacy-source
+      - run: npm run build
+        env:
+          CTK_SOURCE_DIR: legacy-source
+          FORGE_BASE_PATH: /The-Forge/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - uses: actions/deploy-pages@v4
