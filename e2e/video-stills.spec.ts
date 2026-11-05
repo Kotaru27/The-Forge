@@ -5,9 +5,9 @@ import JSZip from 'jszip';
 
 const videoPath = path.resolve('e2e/fixtures/stills.webm');
 
-async function upload(page: import('@playwright/test').Page, name = 'Campaign One.webm') {
+async function upload(page: import('@playwright/test').Page, name = 'Campaign One.webm', itemCount = 3) {
   await page.getByLabel('Choose video files').setInputFiles({ name, mimeType: 'video/webm', buffer: await readFile(videoPath) });
-  const card = page.getByRole('button', { name: /Inspect stills from/ }).filter({ hasText: '3 items' });
+  const card = page.getByRole('button', { name: /Inspect stills from/ }).filter({ hasText: `${itemCount} items` });
   await expect(card).toBeEnabled({ timeout: 40_000 });
   return card;
 }
@@ -79,7 +79,7 @@ test('optional contact sheet exports storyboard.jpg and keeps still frame count'
   await page.getByLabel('Create contact sheet').check();
   await page.getByLabel('Contact sheet layout').selectOption('6');
   await expect(page.getByLabel('Contact sheet layout')).toHaveValue('6');
-  const card = await upload(page);
+  const card = await upload(page, 'Campaign One.webm', 4);
   await expect(card).toContainText('4 items');
   await card.click();
   const { zip } = await downloadZip(page, page.getByRole('button', { name: 'Download selected' }));
@@ -102,12 +102,9 @@ test('Send to Board creates new Storyboard project with chosen JPEG stills', asy
   await upload(page);
   await page.getByRole('button', { name: 'Send to Board' }).click();
   await expect(page.getByRole('heading', { name: 'Storyboard' })).toBeVisible({ timeout: 30_000 });
-  const frame = page.frame({ url: /legacy\/index\.html/ });
-  expect(frame).toBeTruthy();
-  await expect.poll(async () => frame!.evaluate(() => {
-    const story = (window as unknown as { Tools: { Story: { projects: { images: unknown[]; stillsSourceId?: string }[] } } }).Tools.Story;
-    return story.projects.some(project => project.stillsSourceId && project.images.length === 3);
-  })).toBe(true);
+  const story = page.frameLocator('iframe[title="The Forge tool workspace"]');
+  await expect(story.locator('#stillsTabContentStory')).toBeVisible();
+  await expect(story.locator('#storyFileList .story-asset-row')).toHaveCount(3);
 });
 
 test('Send to Filmstrip sends only checked stills and opens Filmstrip', async ({ page }) => {
@@ -115,13 +112,9 @@ test('Send to Filmstrip sends only checked stills and opens Filmstrip', async ({
   await page.getByLabel('Select frame 2').uncheck();
   await page.getByRole('button', { name: 'Send to Filmstrip' }).click();
   await expect(page.getByRole('heading', { name: 'Storyboard' })).toBeVisible({ timeout: 30_000 });
-  const frame = page.frame({ url: /legacy\/index\.html/ });
-  expect(frame).toBeTruthy();
-  await expect.poll(async () => frame!.evaluate(() => {
-    const w = window as unknown as { Tools: { Filmstrip: { images: unknown[] } } };
-    return w.Tools.Filmstrip.images.length;
-  })).toBe(2);
-  await expect(page.frameLocator('iframe[title="The Forge tool workspace"]').locator('#stillsTabContentFilmstrip')).toBeVisible();
+  const filmstrip = page.frameLocator('iframe[title="The Forge tool workspace"]');
+  await expect(filmstrip.locator('#stillsTabContentFilmstrip')).toBeVisible();
+  await expect(filmstrip.locator('#filmstripFileList .story-asset-row')).toHaveCount(2);
 });
 
 test('navigating away does not discard extracted frames', async ({ page }) => {
