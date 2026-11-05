@@ -7,7 +7,7 @@ import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
-import { defaultTool, isToolId, tools, type ToolId } from './tools';
+import { defaultTool, isToolId, tools, usesLegacyWorkspace, type ToolId } from './tools';
 
 function initialTool(): ToolId {
   const saved = window.location.hash.replace(/^#\/?/, '');
@@ -39,6 +39,7 @@ export default function App() {
   }, [openTool]);
 
   const current = tools.find(tool => tool.id === activeTool) ?? tools[0];
+  const legacyActive = usesLegacyWorkspace(activeTool);
 
   return (
     <div className="forge-app">
@@ -63,9 +64,9 @@ export default function App() {
         <div className="native-tool" hidden={activeTool !== 'image-splitter'}><ImageSplitter /></div>
         <div className="native-tool" hidden={activeTool !== 'pdf-to-image'}><PdfToImage /></div>
         <div className="native-tool" hidden={activeTool !== 'video-stills'}><VideoStills onTransfer={handleStillsTransfer} /></div>
-        <div className="legacy-container" hidden={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' || activeTool === 'pdf-to-image' || activeTool === 'video-stills'}>
-          <LegacyWorkspace storyboardMode={storyboardMode} toolId={activeTool === 'link-generator' || activeTool === 'logo-resizer' || activeTool === 'image-splitter' || activeTool === 'pdf-to-image' || activeTool === 'video-stills' ? 'video-stills' : activeTool} onToolChange={tool => {
-            if (activeTool !== 'link-generator' && activeTool !== 'logo-resizer' && activeTool !== 'image-splitter' && activeTool !== 'pdf-to-image' && activeTool !== 'video-stills') openTool(tool);
+        <div className="legacy-container" hidden={!legacyActive}>
+          <LegacyWorkspace storyboardMode={storyboardMode} toolId={legacyActive ? activeTool : 'video-stills'} onToolChange={tool => {
+            if (legacyActive) openTool(tool);
           }} />
         </div>
       </main>

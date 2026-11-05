@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
+import { downloadBlob } from '../../utils/download';
 import {
   allEntries, DEFAULT_FORMAT, isAbortError, isPdfFile, selectedEntries,
   singlePageFilename, type ConvertedDocument, type PdfOutputFormat,
@@ -21,20 +22,6 @@ type UndoSnapshot = { documents: Document[]; pending: Pending[] };
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error ?? 'Unknown error');
-}
-
-function downloadBlob(blob: Blob, filename: string, owned: Set<string>) {
-  const url = URL.createObjectURL(blob);
-  owned.add(url);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.style.display = 'none';
-  document.body.append(link);
-  link.click();
-  link.remove();
-  // Do not revoke immediately: some browsers need time to begin the download.
-  window.setTimeout(() => { URL.revokeObjectURL(url); owned.delete(url); }, 60_000);
 }
 
 async function zipFiles(

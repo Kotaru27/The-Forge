@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
+import { downloadBlob } from '../../utils/download';
 import {
   collectionName, exportAll, exportSelected, getSelectedGroups, isAbort, isVideoFile,
   selectedCount, selectedZipName, type TransferDestination, type TransferGroup,
@@ -13,19 +14,6 @@ type Props = { onTransfer: (destination: TransferDestination, groups: TransferGr
 
 function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-function startDownload(blob: Blob, filename: string, urls: Set<string>) {
-  const url = URL.createObjectURL(blob);
-  urls.add(url);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.style.display = 'none';
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
-  // Let browsers complete the click before releasing this download URL.
-  window.setTimeout(() => { URL.revokeObjectURL(url); urls.delete(url); }, 60_000);
 }
 async function makeZip(entries: { path: string; blob: Blob }[], onProgress: (value: number) => void): Promise<Blob> {
   const zip = new JSZip();
@@ -181,7 +169,7 @@ export function VideoStills({ onTransfer }: Props) {
     setZipProgress(0);
     setError('');
     try {
-      startDownload(await makeZip(entries, percent => setZipProgress(percent)), filename, urls.current);
+      downloadBlob(await makeZip(entries, percent => setZipProgress(percent)), filename, urls.current);
     } catch (cause) { setError(`Download failed: ${describe(cause)}`); }
     finally { if (alive.current) setZipProgress(null); }
   }

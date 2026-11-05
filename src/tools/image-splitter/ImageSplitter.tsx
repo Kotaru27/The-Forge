@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
+import { downloadBlob } from '../../utils/download';
 import { DEFAULT_COLUMNS, getExportFiles, isImageFile, safeColumns, splitIntoColumns, type FilePiece } from './engine';
 import './image-splitter.css';
 
@@ -107,14 +108,7 @@ export function ImageSplitter() {
       const files = getExportFiles(items);
       files.forEach(file => zip.file(file.name, file.blob));
       const archive = await zip.generateAsync({ type: 'blob' }, metadata => setProgress(`Creating ZIP: ${Math.round(metadata.percent)}%`));
-      const url = URL.createObjectURL(archive);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = 'split_images.zip';
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      downloadBlob(archive, 'split_images.zip');
       setProgress(`${files.length} file${files.length === 1 ? '' : 's'} exported.`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Unable to create ZIP.');

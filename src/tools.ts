@@ -15,3 +15,12 @@ export const defaultTool: ToolId = 'logo-resizer';
 export function isToolId(value: string): value is ToolId {
   return tools.some(tool => tool.id === value);
 }
+
+// Only these tools have a native React workspace. Keep the older iframe for the others.
+const migratedTools: ReadonlySet<ToolId> = new Set([
+  'link-generator', 'logo-resizer', 'image-splitter', 'pdf-to-image', 'video-stills',
+]);
+
+export function usesLegacyWorkspace(toolId: ToolId): boolean {
+  return !migratedTools.has(toolId);
+}
