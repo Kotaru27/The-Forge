@@ -129,3 +129,38 @@ test('non-video upload reports skipped files without losing workspace', async ({
   await expect(page.getByRole('alert')).toContainText('non-video');
   await expect(page.getByText('0 videos')).toBeVisible();
 });
+
+
+test('two video sources become separate boards and repeated transfer does not duplicate frames', async ({ page }) => {
+  const buffer = await readFile(videoPath);
+  await page.getByLabel('Choose video files').setInputFiles([
+    { name: 'Ad A.webm', mimeType: 'video/webm', buffer },
+    { name: 'Ad B.webm', mimeType: 'video/webm', buffer },
+  ]);
+  await expect(page.getByText('3 items')).toHaveCount(2, { timeout: 60_000 });
+  await page.getByRole('button', { name: 'Send to Board' }).click();
+  await expect(page.getByRole('heading', { name: 'Storyboard' })).toBeVisible({ timeout: 30_000 });
+  const story = page.frameLocator('iframe[title="The Forge tool workspace"]');
+  const chooser = story.locator('#storyBoardSelect');
+  await expect(chooser.locator('option')).toHaveCount(2);
+  await chooser.selectOption({ label: 'Ad_A' });
+  await expect(story.locator('#storyFileList .story-asset-row')).toHaveCount(3);
+  await chooser.selectOption({ label: 'Ad_B' });
+  await expect(story.locator('#storyFileList .story-asset-row')).toHaveCount(3);
+  await page.getByRole('navigation', { name: 'Select a tool' }).getByRole('button', { name: 'Video Stills' }).click();
+  await page.getByRole('button', { name: 'Send to Board' }).click();
+  await expect(chooser.locator('option')).toHaveCount(2);
+});
+
+test('clear during an active batch does not block later uploads', async ({ page }) => {
+  const buffer = await readFile(videoPath);
+  await page.getByLabel('Choose video files').setInputFiles([
+    { name: 'Old A.webm', mimeType: 'video/webm', buffer },
+    { name: 'Old B.webm', mimeType: 'video/webm', buffer },
+  ]);
+  await page.getByRole('button', { name: 'Clear', exact: true }).click();
+  await page.getByRole('button', { name: 'Clear all' }).click();
+  await expect(page.getByText('0 videos')).toBeVisible();
+  await upload(page, 'New Video.webm');
+  await expect(page.getByRole('button', { name: /Inspect stills from/ })).toHaveCount(1);
+});
