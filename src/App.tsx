@@ -9,11 +9,11 @@ import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
-import { defaultTool, isToolId, tools, usesLegacyWorkspace, type ToolId } from './tools';
+import { defaultTool, isReleaseTool, releaseTools, tools, usesLegacyWorkspace, type ToolId } from './tools';
 
 function initialTool(): ToolId {
   const saved = window.location.hash.replace(/^#\/?/, '');
-  return isToolId(saved) ? saved : defaultTool;
+  return isReleaseTool(saved) ? saved : defaultTool;
 }
 
 export default function App() {
@@ -22,11 +22,14 @@ export default function App() {
   const storyboardRef = useRef<StoryboardRef>(null);
 
   const openTool = useCallback((tool: ToolId) => {
+    if (!isReleaseTool(tool)) return;
     setActiveTool(tool);
     if (window.location.hash !== `#/${tool}`) history.replaceState(null, '', `#/${tool}`);
   }, []);
 
   useEffect(() => {
+    // Normalize invalid/deferred deep links to a supported tool on first load.
+    openTool(initialTool());
     function onHashChange() { openTool(initialTool()); }
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
@@ -50,7 +53,7 @@ export default function App() {
       <aside className="sidebar" aria-label="Tools">
         <div className="brand">THE FORGE</div>
         <nav className="tool-nav" aria-label="Select a tool">
-          {tools.map(tool => (
+          {releaseTools.map(tool => (
             <button
               className={`tool-link${activeTool === tool.id ? ' is-active' : ''}`}
               type="button"
@@ -63,18 +66,16 @@ export default function App() {
       </aside>
       <main className="main-area">
         <header className="topbar"><h1>{current.label}</h1></header>
-        {activeTool === 'link-generator' && <LinkGenerator />}
+        <div className="native-tool" hidden={activeTool !== 'link-generator'}><LinkGenerator /></div>
         <div className="native-tool" hidden={activeTool !== 'logo-resizer'}><LogoResizer /></div>
         <div className="native-tool" hidden={activeTool !== 'image-splitter'}><ImageSplitter /></div>
         <div className="native-tool" hidden={activeTool !== 'pdf-to-image'}><PdfToImage /></div>
         <div className="native-tool" hidden={activeTool !== 'video-stills'}><VideoStills onTransfer={handleStillsTransfer} /></div>
         <div className="native-tool" hidden={activeTool !== 'storyboard'}><Storyboard ref={storyboardRef} preferredMode={storyboardMode} /></div>
         <div className="native-tool" hidden={activeTool !== 'ad-downloader'}><AdDownloader /></div>
-        <div className="legacy-container" hidden={!legacyActive}>
-          <LegacyWorkspace storyboardMode={storyboardMode} toolId={legacyActive ? activeTool : 'video-compressor'} onToolChange={tool => {
-            if (legacyActive) openTool(tool);
-          }} />
-        </div>
+        {legacyActive && <div className="legacy-container">
+          <LegacyWorkspace storyboardMode={storyboardMode} toolId={activeTool} onToolChange={openTool} />
+        </div>}
       </main>
     </div>
   );

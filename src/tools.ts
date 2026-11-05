@@ -16,11 +16,14 @@ export function isToolId(value: string): value is ToolId {
   return tools.some(tool => tool.id === value);
 }
 
-// Only these tools have a native React workspace. Keep the older iframe for the others.
-const migratedTools: ReadonlySet<ToolId> = new Set([
-  'link-generator', 'logo-resizer', 'image-splitter', 'pdf-to-image', 'video-stills', 'storyboard', 'ad-downloader',
-]);
+// Video Compressor is postponed; keep its legacy definition until the migration is retired.
+export const releaseTools = tools.filter(tool => tool.id !== 'video-compressor');
+export type ReleaseToolId = Exclude<ToolId, 'video-compressor'>;
+
+export function isReleaseTool(value: string): value is ReleaseToolId {
+  return releaseTools.some(tool => tool.id === value);
+}
 
 export function usesLegacyWorkspace(toolId: ToolId): boolean {
-  return !migratedTools.has(toolId);
+  return !isReleaseTool(toolId);
 }
