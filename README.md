@@ -26,6 +26,12 @@ npm run test:e2e
 
 `npm test` runs **both** the React/TypeScript unit tests and the original CTK baseline regression tests. For the latter, check out `Kotaru27/CTK` at pinned commit `617615c0b4370c795ddfd6dc4c300920cd595883` into `legacy-source/`, or set `CTK_SOURCE_DIR` to an equivalent local checkout. GitHub Actions does this automatically. **CTK remains a test oracle, not an app/runtime dependency.**
 
+## GitHub Pages release candidate
+
+The seven-tool React site is prepared for a **manual, gated** GitHub Pages preview from `release/pages-preview`. The source branch runs build and browser checks without automatically publishing. After enabling GitHub Pages (Settings → Pages → GitHub Actions), use the Actions workflow's branch dropdown to deploy only the reviewed release branch, then inspect the live URL.
+
+See [GitHub Pages release procedure](docs/GITHUB_PAGES_RELEASE.md) for the one-time setting, deployment instructions, live Chromium smoke checks, rollback, and remaining real-file acceptance checks.
+
 ## GitHub Pages
 
 The project site URL base is `/The-Forge/`. On Linux/macOS:
