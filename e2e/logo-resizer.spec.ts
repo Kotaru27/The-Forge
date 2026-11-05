@@ -163,7 +163,7 @@ test('resizing motion changes preview frame, not the white canvas pixels', async
   expect(property).toContain('height');
 
   await page.locator('.logo-settings').getByRole('button', { name: '200 × 150' }).click();
-  await expect(frame).toHaveCSS('height', '143px');
+  await expect(frame).toHaveCSS('height', '150px');
   const pixels = await page.locator('.logo-card .logo-preview').first().evaluate(canvas => {
     const output = canvas as HTMLCanvasElement;
     const white = output.getContext('2d')!.getImageData(199, 149, 1, 1).data;
