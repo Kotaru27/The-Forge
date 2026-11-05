@@ -41,7 +41,7 @@ test('board list navigation, rename, per-board settings and reorder work', async
   await add(page,['one.png','two.png','three.png']);
   await page.getByRole('button',{name:'Move down one.png'}).click();
   await expect(page.locator('.sb-frame').first()).toContainText('two.png');
-  await page.getByLabel('Columns').selectOption('2');
+  await page.getByLabel('Columns', { exact: true }).selectOption('2');
   await page.getByLabel('Auto width').uncheck();
   await page.getByLabel('Board width').fill('1200');
   await expect(page.locator('.sb-canvas canvas').first()).toHaveJSProperty('width',1200);
