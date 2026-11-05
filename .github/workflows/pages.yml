@@ -1,13 +1,8 @@
 name: Publish The Forge GitHub Pages preview
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - release/pages-preview
-    paths:
-      - .github/workflows/pages.yml
 
-# A one-time guarded push triggers the verified Filmstrip-free release; restore manual-only afterward.
+# Publishing is deliberately manual; this workflow never deploys on PR or push.
 # A one-time repository setting is required: Settings > Pages > Source: GitHub Actions.
 permissions:
   contents: read
