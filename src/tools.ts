@@ -18,7 +18,7 @@ export function isToolId(value: string): value is ToolId {
 
 // Only these tools have a native React workspace. Keep the older iframe for the others.
 const migratedTools: ReadonlySet<ToolId> = new Set([
-  'link-generator', 'logo-resizer', 'image-splitter', 'pdf-to-image', 'video-stills', 'storyboard',
+  'link-generator', 'logo-resizer', 'image-splitter', 'pdf-to-image', 'video-stills', 'storyboard', 'ad-downloader',
 ]);
 
 export function usesLegacyWorkspace(toolId: ToolId): boolean {

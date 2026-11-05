@@ -21,7 +21,8 @@
     "react-dom": "^19.2.0",
     "jszip": "^3.10.1",
     "pica": "^9.0.1",
-    "pdfjs-dist": "6.5.438"
+    "pdfjs-dist": "6.5.438",
+    "xlsx": "0.18.5"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
