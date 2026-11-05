@@ -1,6 +1,6 @@
-# Project-local coding skills
+# Project-local coding and design skills
 
-These **14 skills** were copied from the cited upstream repositories at **pinned revisions**, with relevant supporting reference files intact. They are available to coding agents that recognize `.agents/skills/`. They do **not** run automatically during a Vite build or change the deployed website.
+These **21 skill entry points** (14 logic/verification and 7 design) were copied from the cited upstream repositories at **pinned revisions**, with relevant supporting reference files intact. They are available to coding agents that recognize `.agents/skills/`. They do **not** run automatically during a Vite build or change the deployed website.
 
 ## Installed catalog
 
@@ -21,6 +21,14 @@ These **14 skills** were copied from the cited upstream repositories at **pinned
 | codebase-design | Keep module interfaces small and behavior cohesive | mattpocock/skills |
 | diagnosing-bugs | Reproduce and isolate tricky failures | mattpocock/skills |
 
+| impeccable | New visual-world design, critique, typography, layout and polish; reference-only, no downloadable launcher | pbakaus/impeccable |
+| ui-ux-pro-max | Offline design-system search, React/web rules, fonts, layouts and accessibility | nextlevelbuilder/ui-ux-pro-max-skill |
+| frontend-design | Distinctive, original frontend art direction and implementation | anthropics/skills |
+| design-taste-frontend | Premium UI direction and anti-generic pattern guidance | tasteskill/tasteskill |
+| gpt-taste | Optional stronger visual/motion critique, not default for production editors | tasteskill/tasteskill |
+| redesign-existing-projects | Audit an existing UI before replacing the visual presentation | tasteskill/tasteskill |
+| web-design-guidelines | Pinned accessibility and interface-design audit rules | vercel-labs/agent-skills and web-interface-guidelines |
+
 ## Pin and provenance
 
 - [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail/tree/96608e078b2d5ea607c5c3b8b5a54d1c1fba6846): `96608e078b2d5ea607c5c3b8b5a54d1c1fba6846`
@@ -33,6 +41,16 @@ These **14 skills** were copied from the cited upstream repositories at **pinned
 
 Upstream LICENSE documents are preserved under `_licenses/`, and the Sentry `security-review/LICENSE` is kept inside its original skill. The Vercel React skill's upstream frontmatter declares MIT; its source repository has no root LICENSE file at this revision. Do not strip licenses or author attribution when updating skills.
 
+### Design-skill sources (added 2026-11-05)
+
+- [pbakaus/impeccable](https://github.com/pbakaus/impeccable/tree/c8891a9ae865d6ee311836ae5199bfce0fe115b1): `c8891a9ae865d6ee311836ae5199bfce0fe115b1` (Apache-2.0; reference-only adaptation, executable omitted)
+- [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/tree/b7d5353e0130feb8c5574ef1251f8a1db1873ccb): `b7d5353e0130feb8c5574ef1251f8a1db1873ccb` (MIT; local script-path adaptation)
+- [anthropics/skills](https://github.com/anthropics/skills/tree/ca45fc496a3436251f191354091d557da31c15b5/skills/frontend-design): `ca45fc496a3436251f191354091d557da31c15b5` (bundled Apache-2.0)
+- [tasteskill/tasteskill](https://github.com/tasteskill/tasteskill/tree/37c8c376b92ebc02456f7c70776b514fddda88e1): `37c8c376b92ebc02456f7c70776b514fddda88e1` (MIT)
+- [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/tree/1a2c79d4e6c4a2283dc2c614b6538cbe1ed5ca62/skills/web-design-guidelines): `1a2c79d4e6c4a2283dc2c614b6538cbe1ed5ca62`; the rules snapshot is [web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines/tree/434b7f91364665f2f733b310ec54809bf8f37937) at `434b7f91364665f2f733b310ec54809bf8f37937` (MIT).
+
+See [docs/DESIGN_SKILLS.md](../../docs/DESIGN_SKILLS.md) for safe usage and limitations.
+
 ## Installation and use
 
 The portable repository layout is `.agents/skills/<skill-name>/SKILL.md`. A compatible coding agent can discover these on the project. Read only skills relevant to the current task.
@@ -43,4 +61,4 @@ No package installation or configuration change was needed in `package.json`; th
 
 Source scripts were inspected before copying. They are **not** invoked by builds, tests or CI. Inspect them again before running; never execute scripts from an unreviewed update. Update pinned skill sources only in a dedicated reviewed pull request, and rerun repository tests to ensure the migration remains unaffected.
 
-This installation deliberately excludes UI/design and animation skills, Vercel-hosted deployment skills, and the postponed Video Compressor implementation.
+The prior logic-only installation omitted UI/design skills. Seven design entry points are now added solely for the **original The-Forge visual redesign**. They are repository documentation and local Python search data, not Vite/npm runtime dependencies. No Video Compressor or app UI work is included in this installation.

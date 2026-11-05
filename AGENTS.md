@@ -7,6 +7,11 @@
 - **Video Compressor is deferred** for a future from-scratch implementation, after the GitHub Pages toolset is verified. The original CTK remains a test-only reference; do not ship its iframe or rebuild the compressor now.
 - Draft migration pull requests are stacked. Never assume `main` already contains their changes. Compare branch heads before modifications.
 
+## Design-phase policy (new visual identity)
+- The user's verified seven-tool functionality is locked. Create **a new The-Forge desktop visual identity from scratch**; do **not** migrate or imitate the CTK interface.
+- For visual direction, use `.agents/skills/frontend-design`, `impeccable`, `ui-ux-pro-max`, and optional Taste variants; use `web-design-guidelines` and Playwright for review. See `docs/DESIGN_SKILLS.md`.
+- Do not alter processing logic, exports, or cross-tool transfers during appearance-only work. Present demo designs for approval before updating production styles. Video Compressor remains out of scope.
+
 ## Required approach
 1. **Map the original behavior before changing code.** Document each control, file format, size/quality setting, name, download, keyboard shortcut, and cross-tool transfer. Compare real outputs, not just successful function calls.
 2. Read only the relevant project skills in `.agents/skills/<name>/SKILL.md`, including their referenced support files:
