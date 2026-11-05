@@ -12,7 +12,7 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
   // Animate only the on-screen dimensions. The real canvas and export renderer
   // retain exact pixel dimensions, Pica settings, and CTK's white background.
   const focusPreview = className.split(' ').includes('logo-detail-preview');
-  const limit = focusPreview ? 240 : 190;
+  const limit = focusPreview ? 280 : 250;
   const scale = Math.min(1, limit / Math.max(settings.width, settings.height));
   const displayWidth = Math.max(1, Math.round(settings.width * scale));
   const displayHeight = Math.max(1, Math.round(settings.height * scale));
