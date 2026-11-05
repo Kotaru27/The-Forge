@@ -39,7 +39,7 @@ export function LegacyWorkspace({ toolId, onToolChange, storyboardMode = 'story'
     <div className="workspace">
       {!ready && <div className="workspace-status" role="status">Loading workspace…</div>}
       {error && <div className="workspace-error" role="alert">{error}</div>}
-      <iframe ref={frame} title="The Forge tool workspace" src={import.meta.env.BASE_URL + 'legacy/index.html'}
+      <iframe ref={frame} data-ready={ready ? 'true' : 'false'} title="The Forge tool workspace" src={import.meta.env.BASE_URL + 'legacy/index.html'}
         onLoad={() => {
           setReady(false);
           frame.current?.contentWindow?.postMessage({ source: 'the-forge-shell', type: 'hello' }, window.location.origin);
