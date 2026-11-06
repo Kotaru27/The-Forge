@@ -6,7 +6,7 @@ on:
     types: [completed]
     branches: [main]
 
-# Serialize Pages deployments so rapid UI commits never collide.
+# One Pages publish at a time. A fresh run can safely follow an older release.
 concurrency:
   group: forge-pages-preview
   cancel-in-progress: false
@@ -17,11 +17,11 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  build:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
-    environment:
-      name: github-pages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    outputs:
+      artifact_name: ${{ steps.artifact.outputs.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -45,10 +45,23 @@ jobs:
           CTK_SOURCE_DIR: legacy-source
           FORGE_BASE_PATH: /The-Forge/
       - uses: actions/configure-pages@v5
+      - id: artifact
+        run: echo "name=forge-pages-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-          name: forge-pages-${{ github.run_id }}-${{ github.run_attempt }}
-      - uses: actions/deploy-pages@v4
+          name: ${{ steps.artifact.outputs.name }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Allow artifact metadata to propagate
+        run: sleep 20
+      - id: deployment
+        uses: actions/deploy-pages@v4
         with:
-          artifact_name: forge-pages-${{ github.run_id }}-${{ github.run_attempt }}
+          artifact_name: ${{ needs.build.outputs.artifact_name }}
