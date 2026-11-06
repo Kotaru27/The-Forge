@@ -411,6 +411,7 @@ test('V7 sidebar QA: nine logos, restored source canvas and focused right-side i
   expect(hiDpi.backingWidth).toBeGreaterThanOrEqual(Math.floor(hiDpi.displayWidth));
   await expect(sixthCanvas).toHaveJSProperty('width', 200);
   expect(await sixthCanvas.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL())).toBe(before.pixels);
+  await page.waitForTimeout(440); // Measure the settled sidebar, not the opening transition.
   const bounds = await page.evaluate(() => {
     const root = document.querySelector('.logo-body')!.getBoundingClientRect();
     const editor = document.querySelector('.forge-v7-editor')!.getBoundingClientRect();
