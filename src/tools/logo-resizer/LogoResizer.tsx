@@ -286,10 +286,6 @@ export function LogoResizer() {
     <section className="logo-workspace forge-logo-v5" aria-label="Logo Resizer">
       <input ref={inputRef} type="file" accept="image/*,.pptx,.xlsx,.xlsm" multiple hidden onChange={onFileInput} />
       <div className="forge-v5-head" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
-        <div className="forge-v5-intro">
-          <div className="forge-v5-eyebrow">WORKROOM 01 / IMAGE PROCESSING</div>
-          <div className="forge-v5-title"><LogoResizerIcon /><h1>Logo resizer<span>.</span></h1></div>
-        </div>
         <div className="forge-v5-command-deck" aria-label="Global logo settings and actions">
           <div className="forge-v5-control-grid">
             <div className="forge-v5-group forge-v5-import">
