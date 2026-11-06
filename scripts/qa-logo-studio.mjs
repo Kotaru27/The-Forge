@@ -70,11 +70,19 @@ try {
     return {
       section:rect(':scope'), editor:rect('.editor-layout'), view: (() => { const r=document.getElementById('view-app').getBoundingClientRect();return {x:r.x,width:r.width};})(), settings:rect('.sidebar-panel'), board:rect('#logoGrid'),
       card:rect('.logo-card-item'), toolbar:rect('.forge-stage-toolbar'),
-      assetCount:root.querySelector('.forge-stage-count')?.textContent, computedColumns:getComputedStyle(root.querySelector('.editor-layout')).gridTemplateColumns,
+      assetCount:root.querySelector('.forge-stage-count')?.textContent,
+      computedColumns:getComputedStyle(root.querySelector('.editor-layout')).gridTemplateColumns,
+      controls:rect('#logoControls'),
+      controlsLayout:getComputedStyle(root.querySelector('#logoControls')).flexDirection,
+      groupHeights:Array.from(root.querySelectorAll('#logoControls > .glass-panel')).map(e=>Math.round(e.getBoundingClientRect().height)),
     };
   });
   console.log('FORGE_LAYOUT_BASELINE ' + JSON.stringify(initialLayout));
   assert.ok(initialLayout.settings.width >= 215 && initialLayout.settings.width <= 320, 'Settings must be a docked sidebar: ' + JSON.stringify(initialLayout));
+  assert.ok(initialLayout.settings.height > 500, 'Settings rail is still clipped to the old horizontal toolbar: ' + JSON.stringify(initialLayout));
+  assert.ok(initialLayout.controls.width <= initialLayout.settings.width, 'Old 1000px controls grid remains: ' + JSON.stringify(initialLayout));
+  assert.equal(initialLayout.controlsLayout, 'column', 'Settings must form a vertical inspector');
+  assert.ok(initialLayout.groupHeights.every(h => h >= 70), 'Settings groups are vertically clipped: ' + JSON.stringify(initialLayout));
   assert.ok(initialLayout.board.width > 450, 'Asset board too narrow: ' + JSON.stringify(initialLayout));
   assert.ok(Math.abs(initialLayout.settings.right - initialLayout.board.x) < 3, 'Board must be next to settings: ' + JSON.stringify(initialLayout));
   assert.ok(initialLayout.toolbar.height >= 50, 'Board toolbar is missing: ' + JSON.stringify(initialLayout));
