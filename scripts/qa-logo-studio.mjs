@@ -64,7 +64,7 @@ try {
 
   const initialLayout = await iframe.locator('#section-logo').evaluate(root => {
     const rect = selector => {
-      const r = root.querySelector(selector).getBoundingClientRect();
+      const r = (selector === ':scope' ? root : root.querySelector(selector)).getBoundingClientRect();
       return { x:r.x, right:r.right, width:r.width, height:r.height };
     };
     return {
@@ -85,7 +85,7 @@ try {
   await iframe.locator('#logoDetailOverlay.active').waitFor({ state: 'visible', timeout: 10_000 });
   await page.waitForTimeout(650);
   const focus = await iframe.locator('#section-logo').evaluate(root => {
-    const r = s => root.querySelector(s).getBoundingClientRect();
+    const r = s => (s === ':scope' ? root : root.querySelector(s)).getBoundingClientRect();
     return { sectionRight:r(':scope').right, sidebar:r('.sidebar-panel').width,
       board:r('#logoGrid').width, inspector:r('#logoDetailOverlay').width,
       inspectorRight:r('#logoDetailOverlay').right,
