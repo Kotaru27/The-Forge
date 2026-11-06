@@ -414,10 +414,11 @@ test('V7 visual QA: nine real logos, scrolled sixth card, independent preview ca
   expect(bounds.documentWidth).toBeLessThanOrEqual(bounds.viewportWidth + 1);
   expect(bounds.scrollbar).not.toBe('auto');
   await page.screenshot({ path: testInfo.outputPath('v7-editor-1536.png'), fullPage: true });
+  const startingFilename = await editor.getByLabel('Filename').inputValue();
   await editor.getByRole('button', { name: 'Next logo' }).click();
-  await expect(editor.getByLabel('Filename')).not.toHaveValue('Brand-6');
+  await expect(editor.getByLabel('Filename')).not.toHaveValue(startingFilename);
   await editor.getByRole('button', { name: 'Previous logo' }).click();
-  await expect(editor.getByLabel('Filename')).toHaveValue('Brand-6');
+  await expect(editor.getByLabel('Filename')).toHaveValue(startingFilename);
   await editor.getByRole('button', { name: 'Close Focus Mode' }).click();
   await expect(editor).toHaveCount(0);
   await expect(sixth.locator('.logo-preview-button')).toBeFocused();
