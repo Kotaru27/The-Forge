@@ -6,6 +6,7 @@ import type { TransferGroup, TransferResult } from './tools/video-stills/engine'
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { LogoResizerIcon } from './tools/logo-resizer/LogoResizerIcon';
+import { ForgeNavIcon } from './components/ForgeNavIcon';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
@@ -60,7 +61,7 @@ export default function App() {
               title={tool.label}
               onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
             >{activeTool === 'logo-resizer' ? (
-              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <span>{tool.label.split(' ').map(word => word[0]).join('').substring(0,2)}</span>}</span>
+              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <ForgeNavIcon tool={tool.id} />}</span>
             ) : tool.label}</button>
           ))}
         </nav>
