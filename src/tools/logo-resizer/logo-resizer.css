@@ -219,8 +219,7 @@
 .forge-logo-v5 .logo-undo{background:#17291b;border-color:#526e53}
 
 /* Focus Mode remains the only right-hand panel */
-.forge-v5-focus-shade{position:fixed;inset:0;z-index:110;background:#030703aa;border:none!important;cursor:default}
-.forge-logo-v5 .logo-detail{position:fixed;z-index:111;top:0;right:0;bottom:0;width:min(455px,100vw);min-width:0;padding:26px;overflow-y:auto;background:#111a13;border-left:1px solid #455844;box-shadow:-15px 0 55px #0009;gap:15px}
+.forge-logo-v5 .logo-detail{position:relative;z-index:2;top:auto;right:auto;bottom:auto;width:min(390px,32vw);min-width:0;flex:0 0 min(390px,32vw);padding:26px;overflow-y:auto;background:#111a13;border-left:1px solid #455844;box-shadow:none;gap:15px}
 .forge-logo-v5 .logo-detail-heading{border-bottom:1px solid #3b493c;padding-bottom:15px}
 .forge-logo-v5 .logo-detail-heading strong{font-size:23px;letter-spacing:-.05em;color:#f0f5eb}
 .forge-logo-v5 .logo-detail-preview{margin:9px auto 16px;align-self:center}
@@ -266,6 +265,10 @@
  .forge-v5-shell .sidebar{width:60px;min-width:60px}
  .forge-v5-shell .tool-link{width:45px}
  .forge-v5-shell .tool-link.is-active:before{left:-8px}
+}
+@media(max-width:960px){
+ .forge-logo-v5 .logo-body{position:relative}
+ .forge-logo-v5 .logo-detail{position:absolute;top:0;right:0;bottom:0;width:min(390px,90%);height:100%;flex-basis:auto;box-shadow:-12px 0 40px #0009}
 }
 @media(max-width:760px){
  .forge-v5-shell .sidebar{width:54px;min-width:54px}
