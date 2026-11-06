@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
 import { LogoResizerIcon } from './LogoResizerIcon';
@@ -18,6 +19,7 @@ const isOffice = (file: File) => /\.(pptx|xlsx|xlsm)$/i.test(file.name);
 const isImage = (file: File) => file.type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp|svg|avif)$/i.test(file.name);
 const dimensions = (w: number, h: number) => ({ width: String(w), height: String(h) });
 type Snapshot = { cards: LogoAsset[]; settings: LogoSettings };
+type WorkProgress = { phase: string; done: number; total: number };
 
 async function loadAsset(file: File): Promise<LogoAsset> {
   const url = URL.createObjectURL(file);
@@ -71,12 +73,34 @@ export function LogoResizer() {
   const [linkMessage, setLinkMessage] = useState('');
   const [confirmNoLogos, setConfirmNoLogos] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const dragDepth = useRef(0);
+  const [notice, setNotice] = useState('');
+  const [workProgress, setWorkProgress] = useState<WorkProgress | null>(null);
+  const focusOrigin = useRef<string | null>(null);
+  const prefersReducedMotion = Boolean(useReducedMotion());
 
   useEffect(() => {
     return () => {
       cardsRef.current.forEach(asset => URL.revokeObjectURL(asset.url));
       snapshotRef.current?.cards.forEach(asset => URL.revokeObjectURL(asset.url));
       if (snapshotTimer.current) window.clearTimeout(snapshotTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timeout = window.setTimeout(() => setNotice(''), 6000);
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
+
+  useEffect(() => {
+    const resetDrag = () => { dragDepth.current = 0; setDragActive(false); };
+    window.addEventListener('dragend', resetDrag);
+    window.addEventListener('drop', resetDrag);
+    return () => {
+      window.removeEventListener('dragend', resetDrag);
+      window.removeEventListener('drop', resetDrag);
     };
   }, []);
 
@@ -110,7 +134,20 @@ export function LogoResizer() {
   }
   function onDrop(event: DragEvent<HTMLElement>) {
     event.preventDefault();
+    dragDepth.current = 0;
+    setDragActive(false);
     if (event.dataTransfer.files.length) askToUpload(event.dataTransfer.files);
+  }
+  function onGalleryDragEnter(event: DragEvent<HTMLElement>) {
+    if (!Array.from(event.dataTransfer.types).includes('Files')) return;
+    event.preventDefault();
+    dragDepth.current += 1;
+    setDragActive(true);
+  }
+  function onGalleryDragLeave(event: DragEvent<HTMLElement>) {
+    event.preventDefault();
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (dragDepth.current === 0) setDragActive(false);
   }
   async function importPending() {
     if (!pending) return;
@@ -124,12 +161,15 @@ export function LogoResizer() {
     setPending(null);
     setBusy(true);
     setError('');
+    setNotice('');
+    setWorkProgress({ phase: 'Importing assets', done: 0, total: uploads.length });
     const loaded: LogoAsset[] = [];
     const failures: string[] = [];
     try {
       for (let index = 0; index < uploads.length; index++) {
         const file = uploads[index];
         setProgress(`Importing ${index + 1} of ${uploads.length}: ${file.name}`);
+        setWorkProgress({ phase: 'Importing assets', done: index, total: uploads.length });
         try {
           const sources = isOffice(file)
             ? await extractOfficeImages(file, message => setProgress(`${file.name}: ${message}`))
@@ -144,10 +184,14 @@ export function LogoResizer() {
           failures.push(`${file.name}: ${cause instanceof Error ? cause.message : String(cause)}`);
         }
       }
-      if (loaded.length) setCards(previous => [...loaded.reverse(), ...previous]);
+      if (loaded.length) {
+        setCards(previous => [...loaded.reverse(), ...previous]);
+        setNotice(`Added ${loaded.length} ${loaded.length === 1 ? 'logo' : 'logos'} to your workboard.`);
+      }
       if (failures.length) setError(failures.join('\n'));
     } finally {
       setProgress('');
+      setWorkProgress(null);
       setBusy(false);
     }
   }
@@ -156,37 +200,53 @@ export function LogoResizer() {
     setBusy(true);
     setError('');
     setProgress(`Exporting ${asset.filename || asset.source.name}`);
+    setNotice('');
+    setWorkProgress(null);
     try {
       const blob = await logoToBlob(asset, settings);
       downloadBlob(blob, `${sanitizeLogoFilename(asset.filename || 'logo') || 'logo'}.${outputExtension(settings.format)}`);
+      setNotice('Image download started.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
       setBusy(false);
       setProgress('');
+      setWorkProgress(null);
     }
   }
   async function exportZip() {
     if (!cards.length || busy) return;
     setBusy(true);
     setError('');
+    setNotice('');
+    setWorkProgress({ phase: 'Rendering logos', done: 0, total: cards.length });
     try {
       const zip = new JSZip();
       const names = uniqueExportNames(cards, outputExtension(settings.format));
       for (let i = 0; i < cards.length; i++) {
         setProgress(`Rendering ${i + 1} / ${cards.length} logos`);
         zip.file(names[i], await logoToBlob(cards[i], settings));
+        setWorkProgress({ phase: 'Rendering logos', done: i + 1, total: cards.length });
       }
       setProgress('Creating ZIP archive');
+      setWorkProgress({ phase: 'Compressing ZIP', done: 0, total: 100 });
+      let lastPercent = -1;
       const zipBlob = await zip.generateAsync({ type: 'blob' }, meta => {
-        setProgress(`Compressing ZIP: ${Math.round(meta.percent)}%`);
+        const percent = Math.round(meta.percent);
+        if (percent !== lastPercent) {
+          lastPercent = percent;
+          setProgress(`Compressing ZIP: ${percent}%`);
+          setWorkProgress({ phase: 'Compressing ZIP', done: percent, total: 100 });
+        }
       });
       downloadBlob(zipBlob, 'batch_logos.zip');
+      setNotice(`ZIP download started — ${cards.length} ${cards.length === 1 ? 'logo' : 'logos'}.`);
     } catch (cause) {
       setError(`Export failed: ${cause instanceof Error ? cause.message : String(cause)}`);
     } finally {
       setBusy(false);
       setProgress('');
+      setWorkProgress(null);
     }
   }
   function removeAsset(asset: LogoAsset) {
@@ -228,6 +288,18 @@ export function LogoResizer() {
     setSettings(saved.settings);
     setDraft(dimensions(saved.settings.width, saved.settings.height));
   }
+  function openFocus(id: string) {
+    focusOrigin.current = id;
+    setFocused(id);
+  }
+  function closeFocus() {
+    const restoreId = focusOrigin.current;
+    setFocused(null);
+    window.requestAnimationFrame(() => {
+      const origin = [...document.querySelectorAll<HTMLButtonElement>('.logo-preview-button')].find(button => button.dataset.previewId === restoreId);
+      (origin ?? document.querySelector<HTMLButtonElement>('.forge-v5-import .forge-v5-action'))?.focus();
+    });
+  }
   function navigateFocus(direction: number) {
     if (!focused || !cards.length) return;
     const index = cards.findIndex(asset => asset.id === focused);
@@ -239,7 +311,7 @@ export function LogoResizer() {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         if (event.key !== 'Escape') return;
       }
-      if (event.key === 'Escape') setFocused(null);
+      if (event.key === 'Escape') closeFocus();
       if (event.key === 'ArrowLeft') { event.preventDefault(); navigateFocus(-1); }
       if (event.key === 'ArrowRight') { event.preventDefault(); navigateFocus(1); }
     };
@@ -249,6 +321,9 @@ export function LogoResizer() {
   }, [focused, cards]);
 
   const detail = cards.find(asset => asset.id === focused) ?? null;
+  // Avoid expensive FLIP measurements and staggered animation on large logo batches.
+  const animateGallery = !prefersReducedMotion && cards.length <= 18;
+  const layoutChange = `${cards.length}:${focused ?? ''}`;
   const updateLabel = (asset: LogoAsset, value: string) => {
     patchCard(asset.id, {
       label: value,
