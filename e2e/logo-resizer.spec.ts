@@ -353,3 +353,14 @@ test('motion: reduced motion preserves focus and notices without spatial travel'
   await focus.getByRole('button', { name: 'Close Focus Mode' }).click();
   await expect(focus).toHaveCount(0);
 });
+
+
+test('motion: final card exits without removing its animation parent', async ({ page }) => {
+  await addFiles(page, [sample]);
+  await expect(page.locator('.logo-grid')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Remove SampleLogo.png' }).click();
+  await expect(page.locator('.logo-grid')).toHaveCount(1);
+  await expect(page.locator('.logo-card')).toHaveCount(0);
+  await expect(page.locator('.logo-empty')).toBeVisible();
+  await expect(page.locator('.forge-v5-board-heading')).toContainText('Your workboard is empty');
+});
