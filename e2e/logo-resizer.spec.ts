@@ -382,6 +382,9 @@ test('V7 visual QA: nine real logos, scrolled sixth card, independent preview ca
   await addFiles(page, assets);
   await expect(page.locator('.logo-card')).toHaveCount(9);
   await expect(page.locator('.logo-card canvas')).toHaveCount(9);
+  const dismiss = page.getByRole('button', { name: 'Dismiss notification' });
+  if (await dismiss.isVisible()) await dismiss.click();
+  await page.waitForTimeout(350); // Capture the settled visual state, not the entry animation.
   await page.screenshot({ path: testInfo.outputPath('v7-gallery-1536.png'), fullPage: true });
 
   const sixth = page.locator('.logo-card').nth(5);
@@ -401,6 +404,11 @@ test('V7 visual QA: nine real logos, scrolled sixth card, independent preview ca
   await expect(editor.locator('.forge-v7-editor-inspector')).toBeVisible();
   await expect(editor.locator('.logo-detail-preview canvas')).toHaveCount(1);
   await expect(page.locator('.logo-card canvas')).toHaveCount(9);
+  const hiDpi = await editor.locator('.logo-detail-preview canvas').evaluate(node => {
+    const canvas = node as HTMLCanvasElement;
+    return { backingWidth: canvas.width, displayWidth: canvas.getBoundingClientRect().width };
+  });
+  expect(hiDpi.backingWidth).toBeGreaterThanOrEqual(Math.floor(hiDpi.displayWidth));
   await expect(sixthCanvas).toHaveJSProperty('width', 200);
   expect(await sixthCanvas.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL())).toBe(before.pixels);
   const bounds = await page.evaluate(() => {
@@ -414,6 +422,7 @@ test('V7 visual QA: nine real logos, scrolled sixth card, independent preview ca
   expect(bounds.artWidth).toBeGreaterThan(300);
   expect(bounds.documentWidth).toBeLessThanOrEqual(bounds.viewportWidth + 1);
   expect(bounds.scrollbar).not.toBe('auto');
+  await page.waitForTimeout(460); // Capture the finished spring, not a translucent intermediate frame.
   await page.screenshot({ path: testInfo.outputPath('v7-editor-1536.png'), fullPage: true });
   for (const width of [1024, 1920]) {
     await page.setViewportSize({ width, height: 950 });
