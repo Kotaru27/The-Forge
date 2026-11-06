@@ -70,7 +70,7 @@ test('PPTX media uses SVG rather than its PNG fallback, deduplicates and orders 
   const names = await page.locator('.logo-card-heading input').evaluateAll(inputs => inputs.map(input => (input as HTMLInputElement).value));
   expect(names).toEqual(['Slide10_IMG3', 'Slide2_IMG1']); // CTK prepends cards visually
   const event = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Download ZIP' }).click();
+  await page.getByRole('button', { name: /Export batch ZIP/ }).click();
   const zip = await JSZip.loadAsync(await readFile(await (await event).path()));
   expect(Object.keys(zip.files).filter(name => !zip.files[name].dir)).toEqual(['Slide10_IMG3.png', 'Slide2_IMG1.png']); // CTK prepends new entries
 });
@@ -82,7 +82,7 @@ test('XLSM unanchored media is deduplicated by bytes, including SVG assets', asy
   expect(names).toEqual(['Unanchored_IMG3', 'Unanchored_IMG1']); // newest card appears first
   await expect(page.locator('.logo-error')).toHaveCount(0);
   const download = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Download ZIP' }).click();
+  await page.getByRole('button', { name: /Export batch ZIP/ }).click();
   const zip = await JSZip.loadAsync(await readFile(await (await download).path()));
   expect(Object.keys(zip.files).filter(name => !zip.files[name].dir)).toEqual(['Unanchored_IMG3.png', 'Unanchored_IMG1.png']);
 });
