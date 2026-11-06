@@ -617,20 +617,20 @@ export function LogoResizer() {
                 <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={detail.fontSizeOverride ?? ''} onChange={event => patchCard(detail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
                 <div className="forge-v5-focus-section-label">POSITIONING</div>
                 <label className="forge-v7-range-control">
-                  <span>Image padding <output>{detail.paddingOverride ?? settings.padding}px</output></span>
+                  <span>Image padding <span className="forge-v7-value">{detail.paddingOverride ?? settings.padding}px</span></span>
                   <input aria-label="Focus image padding" type="range" min="0" max="150" value={detail.paddingOverride ?? settings.padding}
                     style={rangeStyle(detail.paddingOverride ?? settings.padding, 0, 150)}
                     onChange={event => patchCard(detail.id, { paddingOverride: Number(event.target.value) })} />
                 </label>
                 <button type="button" className="forge-v7-reset" onClick={() => patchCard(detail.id, { paddingOverride: null })}>↶ Reset padding to global</button>
                 <label className="forge-v7-range-control">
-                  <span>Image Y offset <output>{detail.imageOffset}</output></span>
+                  <span>Image Y offset <span className="forge-v7-value">{detail.imageOffset}</span></span>
                   <input aria-label="Focus image Y offset" type="range" min="-50" max="50" value={detail.imageOffset}
                     style={rangeStyle(detail.imageOffset, -50, 50)}
                     onChange={event => patchCard(detail.id, { imageOffset: Number(event.target.value) })} />
                 </label>
                 <label className="forge-v7-range-control">
-                  <span>Text Y offset <output>{detail.textOffset}</output></span>
+                  <span>Text Y offset <span className="forge-v7-value">{detail.textOffset}</span></span>
                   <input aria-label="Focus text Y offset" type="range" min="0" max="100" value={detail.textOffset}
                     style={rangeStyle(detail.textOffset, 0, 100)}
                     onChange={event => patchCard(detail.id, { textOffset: Number(event.target.value) })} />
