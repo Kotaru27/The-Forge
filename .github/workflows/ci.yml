@@ -42,14 +42,6 @@ jobs:
           FORGE_BASE_PATH: /The-Forge/
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-      - name: Upload V7 screenshots for visual approval
-        if: github.event_name == 'pull_request' && github.head_ref == 'design/logo-resizer-v7-full-workroom'
-        uses: actions/upload-artifact@v4
-        with:
-          name: logo-resizer-v7-visual-review
-          path: test-results/**/v7-*.png
-          retention-days: 14
-          if-no-files-found: error
 
       # Produce a downloadable candidate even before GitHub Pages is enabled.
       # This artifact is for staging/review; it does not publish the website.
