@@ -437,3 +437,75 @@
 @media(prefers-reduced-motion:reduce){
   .forge-logo-v5 .logo-card,.forge-logo-v5 .logo-preview-button{transition:none}
 }
+
+
+/* Precision interaction layer. Motion handles spatial changes; CSS handles short feedback. */
+.forge-logo-v5 .logo-grid{position:relative}
+.forge-logo-v5 .logo-gallery{position:relative;isolation:isolate}
+.forge-logo-v5 .forge-v6-art{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 auto;max-width:100%;position:relative;
+  transform-origin:center center;
+}
+.forge-logo-v5 .forge-v6-focus-art{display:flex;margin:auto;max-width:100%}
+.forge-logo-v5 .forge-v6-art .logo-preview-frame{max-width:100%}
+.forge-logo-v5 .logo-preview-button .forge-v6-art{pointer-events:none}
+.forge-logo-v5 .logo-preview-button .forge-v5-card-size{transition:color .15s ease,background-color .15s ease}
+.forge-logo-v5 .logo-preview-button:hover:not(:disabled) .forge-v5-card-size,
+.forge-logo-v5 .logo-preview-button:focus-visible .forge-v5-card-size{color:#f6ffe9;background:#1b2c1ee8}
+.forge-logo-v5 .forge-v5-preset-grid button{
+  transition:background-color .13s ease,border-color .13s ease,color .13s ease;
+}
+.forge-logo-v5 .forge-v5-preset-grid button:active:not(:disabled){background:#bce961;color:#142315}
+.forge-logo-v5 .forge-v5-checkboxes label{transition:background-color .14s ease,border-color .14s ease}
+.forge-logo-v5 .forge-v5-checkboxes label:hover{background:#263627;border-color:#87a784}
+.forge-logo-v5 .forge-v5-sliders output{font-variant-numeric:tabular-nums}
+.forge-logo-v5 .forge-v6-progress{
+  padding:11px clamp(16px,2vw,34px) 12px;
+  background:#17281a;border-bottom:1px solid #547354;color:#e6f7dc;
+}
+.forge-logo-v5 .forge-v6-progress-meta{display:flex;align-items:center;gap:11px;min-width:0;font-size:12px}
+.forge-logo-v5 .forge-v6-progress-meta strong{
+  font-family:Consolas,monospace;font-size:12px;color:#d8fb72;
+  font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap;
+}
+.forge-logo-v5 .forge-v6-progress-message{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.forge-v6-processing-dot{height:9px;width:9px;flex:0 0 9px;background:#d8fb72;border-radius:50%;box-shadow:0 0 0 3px #d8fb721e;animation:forge-v6-breathe 1s ease-in-out infinite alternate}
+.forge-logo-v5 .forge-v6-progress progress{
+  display:block;width:100%;height:6px;border:0;border-radius:99px;
+  margin-top:10px;overflow:hidden;background:#394f3b;accent-color:#d8fb72;
+}
+.forge-logo-v5 .forge-v6-progress progress::-webkit-progress-bar{background:#394f3b;border-radius:99px}
+.forge-logo-v5 .forge-v6-progress progress::-webkit-progress-value{background:#d8fb72;border-radius:99px;transition:width .12s linear}
+.forge-logo-v5 .forge-v6-progress progress::-moz-progress-bar{background:#d8fb72;border-radius:99px}
+@keyframes forge-v6-breathe{from{opacity:.65}to{opacity:1}}
+.forge-logo-v5 .forge-v6-notice{
+  display:flex;align-items:center;gap:11px;
+  padding:11px clamp(16px,2vw,34px);
+  border-bottom:1px solid #537b52;
+  background:#1c2e1e;color:#e5f5df;font-size:13px;line-height:1.4;
+}
+.forge-logo-v5 .forge-v6-notice svg{flex:0 0 18px;color:#d9fb79}
+.forge-logo-v5 .forge-v6-notice span{flex:1}
+.forge-logo-v5 .forge-v6-notice button{
+  min-width:28px;min-height:28px;padding:2px;background:transparent;
+  border:1px solid transparent;color:#c3d9be;font-size:20px;line-height:1;
+}
+.forge-logo-v5 .forge-v6-notice button:hover{color:#f6fff3;border-color:#759675}
+.forge-logo-v5 .forge-v6-drop-overlay{
+  position:absolute;inset:10px;z-index:5;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+  background:#1c2f22ef;border:2px dashed #d9fb79;box-shadow:inset 0 0 0 8px #d9fb7914;
+  color:#eaffcf;text-align:center;letter-spacing:.04em;
+}
+.forge-logo-v5 .forge-v6-drop-overlay span{font:750 clamp(19px,2vw,27px)/1.1 'Segoe UI',Arial,sans-serif;letter-spacing:-.025em}
+.forge-logo-v5 .forge-v6-drop-overlay small{font:12px Consolas,monospace;color:#bfddb3}
+.forge-logo-v5 .forge-v6-drag-active .logo-grid{filter:saturate(.82)}
+.forge-logo-v5 .logo-detail{will-change:auto}
+@media(prefers-reduced-motion:reduce){
+  .forge-v6-processing-dot{animation:none}
+  .forge-logo-v5 .forge-v5-preset-grid button,
+  .forge-logo-v5 .forge-v5-checkboxes label,
+  .forge-logo-v5 .logo-preview-button .forge-v5-card-size,
+  .forge-logo-v5 .forge-v6-progress progress::-webkit-progress-value{transition:none!important}
+}

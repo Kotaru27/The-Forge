@@ -281,3 +281,86 @@ test('audit polish: preview adapts by canvas size, multiline labels and focus co
   await expect(focus.locator('.forge-v5-focus-stage .logo-preview-frame')).toHaveCount(1);
   await expect(focus.locator('label').first()).toHaveCSS('font-size', '13px');
 });
+
+
+test('motion: gallery focus connection, keyboard return, and import completion', async ({ page }) => {
+  await addFiles(page, [sample, { ...sample, name: 'SecondLogo.png' }]);
+  await expect(page.locator('.logo-card')).toHaveCount(2);
+  await expect(page.locator('.forge-v6-notice')).toContainText('Added 2 logos');
+  await expect(page.locator('.logo-card .forge-v6-art')).toHaveCount(2);
+
+  const opener = page.getByRole('button', { name: /Open Focus Mode for/ }).first();
+  await opener.click();
+  const focus = page.getByLabel('Focus Mode', { exact: true });
+  await expect(focus).toBeVisible();
+  await expect(focus.locator('.forge-v6-focus-art')).toHaveCount(1);
+  await focus.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(focus).toHaveCount(0);
+  await expect(opener).toBeFocused();
+});
+
+test('motion: dragging files highlights only the gallery and clears on leave', async ({ page }) => {
+  const gallery = page.locator('.logo-gallery');
+  await gallery.evaluate(element => {
+    const transfer = new DataTransfer();
+    transfer.items.add(new File(['image'], 'logo.png', { type: 'image/png' }));
+    element.dispatchEvent(new DragEvent('dragenter', { bubbles: true, dataTransfer: transfer }));
+  });
+  await expect(gallery).toHaveClass(/forge-v6-drag-active/);
+  await expect(gallery.locator('.forge-v6-drop-overlay')).toContainText('DROP ASSETS TO IMPORT');
+  await gallery.evaluate(element => {
+    element.dispatchEvent(new DragEvent('dragleave', { bubbles: true, dataTransfer: new DataTransfer() }));
+  });
+  await expect(gallery).not.toHaveClass(/forge-v6-drag-active/);
+  await expect(gallery.locator('.forge-v6-drop-overlay')).toHaveCount(0);
+});
+
+test('motion: ZIP export reports a download-start confirmation and no false saved claim', async ({ page }) => {
+  await addFiles(page, [sample]);
+  const event = page.waitForEvent('download');
+  await page.getByRole('button', { name: /Export batch ZIP/ }).click();
+  const download = await event;
+  expect(download.suggestedFilename()).toBe('batch_logos.zip');
+  await expect(page.locator('.forge-v6-notice')).toContainText('ZIP download started');
+  await expect(page.locator('.forge-v6-progress')).toHaveCount(0);
+});
+
+test('motion: large batches keep labels, previews, and keyboard access', async ({ page }) => {
+  const many = Array.from({ length: 20 }, (_, i) => ({ ...sample, name: `Logo_${i + 1}.png` }));
+  await addFiles(page, many);
+  await expect(page.locator('.logo-card')).toHaveCount(20);
+  await expect(page.locator('.logo-card .logo-preview')).toHaveCount(20);
+  const layout = await page.evaluate(() => ({
+    pageWidth: document.documentElement.scrollWidth,
+    viewportWidth: innerWidth,
+    firstCard: document.querySelector('.logo-card')?.getBoundingClientRect().width,
+  }));
+  expect(layout.pageWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+  expect(layout.firstCard).toBeGreaterThan(200);
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
+  await expect(page.getByLabel('Focus Mode', { exact: true })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByLabel('Focus Mode', { exact: true })).toHaveCount(0);
+});
+
+test('motion: reduced motion preserves focus and notices without spatial travel', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await addFiles(page, [sample]);
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).click();
+  const focus = page.getByLabel('Focus Mode', { exact: true });
+  await expect(focus).toBeVisible();
+  await expect(focus.locator('.forge-v6-focus-art')).toHaveCount(1);
+  await focus.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(focus).toHaveCount(0);
+});
+
+
+test('motion: final card exits without removing its animation parent', async ({ page }) => {
+  await addFiles(page, [sample]);
+  await expect(page.locator('.logo-grid')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Remove SampleLogo.png' }).click();
+  await expect(page.locator('.logo-grid')).toHaveCount(1);
+  await expect(page.locator('.logo-card')).toHaveCount(0);
+  await expect(page.locator('.logo-empty')).toBeVisible();
+  await expect(page.locator('.forge-v5-board-heading')).toContainText('Your workboard is empty');
+});
