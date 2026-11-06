@@ -530,7 +530,8 @@ export function LogoResizer() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: prefersReducedMotion ? 0 : .17 }}>
+              // Empty state must not occupy space after import; cards start at the board top.
+              transition={{ duration: 0 }}>
               <div className="forge-v5-drop-icon"><LogoResizerIcon /></div>
               <h3>Make room for your logos.</h3>
               <p>Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually.</p>
@@ -579,10 +580,10 @@ export function LogoResizer() {
         <AnimatePresence initial={false}>
         {detail && <motion.aside ref={editorRef} tabIndex={-1} className="logo-detail forge-v7-editor" aria-label="Focus Mode"
           key="focus-panel"
-          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 12, scale: prefersReducedMotion ? 1 : .992 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: prefersReducedMotion ? 0 : 8, scale: prefersReducedMotion ? 1 : .994 }}
-          transition={{ duration: prefersReducedMotion ? .01 : .32, ease: [.2, 1, .25, 1] }}>
+          initial={{ x: prefersReducedMotion ? 0 : 28 }}
+          animate={{ x: 0 }}
+          exit={{ x: prefersReducedMotion ? 0 : 22 }}
+          transition={{ type: 'spring', stiffness: 380, damping: 43, mass: .9 }}>
           <div className="logo-detail-heading">
             <div className="forge-v7-editor-title">
               <span className="forge-v7-eyebrow">THE FORGE / IMAGE EDITOR</span>
