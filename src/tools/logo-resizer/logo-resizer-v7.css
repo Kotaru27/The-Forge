@@ -377,3 +377,198 @@
 @media(prefers-reduced-motion:reduce){
  .forge-v5-shell .tool-link{transition:none!important;transform:none!important}
 }
+
+
+/* V7.1 — Impeccable: continuity before spectacle.
+   Focus stays beside the workboard; the artwork never changes owners.
+   A bounded spring moves the inspector while the gallery adjusts once. */
+.forge-v7-workroom .logo-body.forge-v7-body{
+  display:grid;grid-template-columns:minmax(0,1fr) 0px;
+  min-width:0;min-height:0;align-items:stretch;overflow:hidden;
+  transition:grid-template-columns .34s cubic-bezier(.2,.9,.2,1);
+}
+.forge-v7-workroom .logo-body.forge-v7-body.forge-v7-has-focus{
+  grid-template-columns:minmax(0,1fr) clamp(350px,29vw,420px);
+}
+.forge-v7-workroom .forge-v7-body .logo-gallery{
+  grid-column:1;grid-row:1;min-width:0;min-height:0;
+  height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
+}
+.forge-v7-workroom .forge-v7-body .logo-detail.forge-v7-editor{
+  grid-column:2;grid-row:1;
+  position:relative!important;inset:auto!important;width:100%!important;
+  height:100%!important;min-height:0!important;min-width:0!important;
+  max-width:100%!important;flex:0 0 auto!important;z-index:4;
+  display:flex;flex-direction:column;gap:0;
+  padding:0!important;overflow:hidden;
+  background:#131f17;border:0;border-left:1px solid #4b694f;
+  box-shadow:-9px 0 35px #0005;
+  transform-origin:right center;
+}
+.forge-v7-workroom .forge-v7-editor .logo-detail-heading{
+  min-height:69px;flex:0 0 69px;
+  padding:10px 15px!important;gap:8px;border-bottom-color:#435d46;
+}
+.forge-v7-workroom .forge-v7-editor-title{min-width:0;gap:4px}
+.forge-v7-workroom .forge-v7-editor-title strong{font-size:23px;letter-spacing:-.05em;white-space:nowrap}
+.forge-v7-workroom .forge-v7-editor .forge-v7-eyebrow{font-size:9px;letter-spacing:.04em}
+.forge-v7-workroom .forge-v7-editor-counter{font-size:11px}
+.forge-v7-workroom .forge-v7-editor .logo-detail-buttons{gap:4px;flex:0 0 auto}
+.forge-v7-workroom .forge-v7-editor .logo-detail-buttons button{
+  height:33px;min-height:33px;width:33px;min-width:33px;
+  border-radius:8px;font-size:17px;padding:3px;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-editor-content{
+  flex:1;min-height:0;height:auto;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-editor-stage{
+  flex:0 0 auto;min-width:0;min-height:0;overflow:visible;
+  display:flex;flex-direction:column;padding:13px 16px 12px;
+  border-bottom:1px solid #3d5942;
+  background:radial-gradient(ellipse at 50% 30%,#38684221,transparent 70%),#121c15;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-stage-topline{font-size:9px;letter-spacing:.03em}
+.forge-v7-workroom .forge-v7-editor .forge-v7-stage-bottomline{
+  margin:0;padding-top:10px;font-size:10px;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-stage-bottomline span:last-child{display:none}
+.forge-v7-workroom .forge-v7-editor .forge-v5-focus-stage{
+  margin:10px 0 0;flex:0 0 238px;height:238px;min-height:0;
+  padding:10px;overflow:hidden;border-radius:12px;
+  background-color:#1b2b20;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v5-focus-stage .forge-v6-focus-art{
+  max-width:100%;max-height:100%;width:auto;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v5-focus-stage .logo-preview-frame{
+  max-width:100%;max-height:215px;
+  border-radius:3px;box-shadow:0 15px 40px #0008,0 0 0 1px #dbe8d8;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-editor-inspector{
+  flex:1;min-height:0;width:100%;overflow:hidden;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  border:0;background:#162119;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-heading{
+  min-height:61px;padding:12px 16px 13px;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-heading h3{font-size:19px}
+.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields{
+  overflow-x:hidden;overflow-y:auto;min-height:0;
+  padding:14px 16px 21px;gap:12px;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields label{font-size:12px;gap:6px}
+.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields textarea{min-height:76px;resize:vertical}
+.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields .forge-v5-focus-section-label{
+  margin-top:8px;padding-bottom:9px;
+}
+.forge-v7-workroom .forge-v7-editor .logo-detail-actions{
+  min-height:63px;margin:0;padding:10px 16px;
+}
+.forge-v7-workroom .forge-v7-editor .logo-detail-actions button{min-height:41px}
+.forge-v7-workroom .forge-v7-editor .forge-v7-range-control input[type=range]{margin:7px 0 4px}
+.forge-v7-workroom .forge-v7-body .logo-gallery::-webkit-scrollbar{width:8px}
+.forge-v7-workroom .forge-v7-body .logo-gallery::-webkit-scrollbar-track{background:#121c15}
+.forge-v7-workroom .forge-v7-body .logo-gallery::-webkit-scrollbar-thumb{background:#5d795f;border:2px solid #121c15;border-radius:9px}
+
+/* The second screenshot exposed a real font-field collision.
+   Guarantee space for the family name, numeric size and color swatch. */
+@media(min-width:1481px){
+  .forge-v7-workroom .forge-v5-control-grid{
+    grid-template-columns:130px 155px 80px 81px 243px 114px minmax(185px,1fr) 152px;
+  }
+}
+.forge-v7-workroom .forge-v5-typography{min-width:0}
+.forge-v7-workroom .forge-v5-type-controls{
+  display:grid;grid-template-columns:minmax(110px,1fr) 53px 39px;
+  gap:6px;width:100%;min-width:0;align-items:center;
+}
+.forge-v7-workroom .forge-v5-type-controls select{
+  width:100%!important;max-width:none!important;min-width:110px;
+  font-size:12px;min-height:39px;overflow:hidden;
+}
+.forge-v7-workroom .forge-v5-type-controls input[type=number]{
+  width:100%!important;min-width:0;max-width:none;
+  height:39px;min-height:39px;text-align:center;
+  padding:5px 4px;font-variant-numeric:tabular-nums;
+}
+.forge-v7-workroom .forge-v5-swatch{
+  width:39px!important;flex:0 0 39px;height:39px!important;min-width:39px;
+  padding:4px!important;border:1px solid #9cb59b;border-radius:9px;
+  background:#25362a;box-shadow:inset 0 0 0 1px #ffffff20;
+}
+.forge-v7-workroom .forge-v5-swatch input[type=color]{
+  width:100%;height:29px;border:0;border-radius:5px;cursor:pointer;
+}
+.forge-v7-workroom .forge-v5-swatch input[type=color]::-webkit-color-swatch{
+  border:2px solid #f1f7ed;border-radius:5px;
+}
+.forge-v7-workroom .forge-v5-group select{
+  appearance:none;-webkit-appearance:none;
+  background-color:#16251b!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23d1e6c9' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;background-position:right 8px center!important;
+  background-size:15px!important;padding-left:11px!important;padding-right:27px!important;
+  border-radius:9px!important;border-color:#6a896c!important;
+  color:#f1f8eb!important;
+}
+.forge-v7-workroom .forge-v5-group select:hover{border-color:#b0d2a2!important;background-color:#1e3224!important}
+.forge-v7-workroom .forge-v5-type-controls select:focus-visible,
+.forge-v7-workroom .forge-v5-group select:focus-visible{
+  outline:2px solid #d9fb79!important;outline-offset:2px!important;
+}
+.forge-v7-workroom .forge-v5-format select{min-width:81px}
+.forge-v7-workroom .forge-v5-type-controls input:focus-visible{outline:2px solid #d9fb79;outline-offset:2px}
+
+/* Tactile buttons: depth appears on interaction, never as a persistent glow.
+   Motion communicates selection, not decoration. */
+.forge-v7-workroom .forge-v5-action,
+.forge-v7-workroom .logo-card-footer button,
+.forge-v7-workroom .logo-detail-actions button,
+.forge-v7-workroom .logo-detail-buttons button,
+.forge-v7-workroom .forge-v5-preset-grid button{
+  transition:transform .13s cubic-bezier(.2,1,.25,1),background-color .16s ease,
+             border-color .16s ease,box-shadow .18s ease,color .16s ease!important;
+}
+.forge-v7-workroom .forge-v5-action:active:not(:disabled),
+.forge-v7-workroom .logo-card-footer button:active:not(:disabled),
+.forge-v7-workroom .logo-detail-actions button:active:not(:disabled),
+.forge-v7-workroom .forge-v5-preset-grid button:active:not(:disabled){
+  transform:scale(.968);box-shadow:inset 0 2px 8px #0003;
+}
+.forge-v7-workroom .forge-v5-action:focus-visible,
+.forge-v7-workroom .logo-detail-buttons button:focus-visible,
+.forge-v7-workroom .logo-card-footer button:focus-visible{
+  box-shadow:0 0 0 3px #d9fb7930!important;
+}
+.forge-v7-workroom .forge-v5-preset-grid button{
+  border-radius:9px;overflow:hidden;isolation:isolate;
+}
+.forge-v7-workroom .forge-v7-preset-selection{box-shadow:inset 0 1px 0 #ffffffa9,0 3px 12px #0003}
+.forge-v7-workroom .forge-v7-preset-copy{font-weight:700;letter-spacing:-.02em}
+
+@media(max-width:1480px) and (min-width:1161px){
+  .forge-v7-workroom .forge-v5-type-controls{max-width:280px}
+}
+@media(max-width:1160px) and (min-width:851px){
+  .forge-v7-workroom .forge-v5-type-controls{max-width:290px}
+}
+@media(max-width:850px){
+  .forge-v7-workroom .forge-v5-type-controls{max-width:290px}
+  .forge-v7-workroom .logo-body.forge-v7-body.forge-v7-has-focus{
+    grid-template-columns:minmax(0,1fr) 315px;
+  }
+}
+@media(max-width:700px){
+  .forge-v7-workroom .logo-body.forge-v7-body{display:block;position:relative}
+  .forge-v7-workroom .forge-v7-body .logo-detail.forge-v7-editor{
+    position:absolute!important;right:0!important;top:0!important;
+    width:min(370px,93%)!important;max-width:100%!important;box-shadow:-10px 0 45px #0009;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .forge-v7-workroom .logo-body.forge-v7-body{transition:none!important}
+  .forge-v7-workroom :is(.forge-v5-action,.logo-card-footer button,.logo-detail-actions button,
+  .logo-detail-buttons button,.forge-v5-preset-grid button){transition:none!important}
+}
