@@ -308,3 +308,35 @@
  .forge-v7-workroom *{scroll-behavior:auto!important}
  .forge-v7-workroom :is(button,input,select,textarea,.logo-card,.forge-v7-card-open,.forge-v7-card-art){transition:none!important;animation:none!important}
 }
+
+
+/* The established Forge identity stays intact; refine navigation mechanics. */
+.forge-v5-shell .sidebar{background:linear-gradient(180deg,#111a13,#0c140f 65%);border-right-color:#344b38}
+.forge-v5-shell .tool-link{
+  border-radius:12px;border-color:transparent;color:#abc0a9;
+  transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .21s cubic-bezier(.2,1,.25,1),box-shadow .2s ease;
+}
+.forge-v5-shell .tool-link:hover{background:#233629;border-color:#48664c;color:#f4fbee;transform:translateX(2px)}
+.forge-v5-shell .tool-link.is-active{
+  background:linear-gradient(145deg,#2b402d,#1c2d21);border:1px solid #709771;
+  color:#d9fb79;box-shadow:inset 0 1px #ffffff18,0 8px 17px #0003;
+}
+.forge-v5-shell .tool-link.is-active:before{
+  height:28px;top:11px;left:-9px;width:3px;border-radius:0 3px 3px 0;
+  background:#d9fb79;box-shadow:0 0 15px #d9fb7955;
+}
+.forge-v5-shell .tool-nav .tool-link:focus-visible{outline:2px solid #d9fb79;outline-offset:2px}
+.forge-v5-shell .topbar{background:#101711;border-bottom-color:#3b503f}
+.forge-v7-workroom .forge-v7-modal-kicker{display:block;color:#d9fb79;font:700 10px Consolas,monospace;letter-spacing:.12em}
+.forge-v7-workroom .logo-modal-actions .forge-v7-modal-danger{
+  background:#432926;border-color:#a16b60;color:#ffe2da;
+}
+.forge-v7-workroom .logo-modal-actions .forge-v7-modal-danger:hover:not(:disabled){
+  background:#61332d;border-color:#d78d7e;
+}
+.forge-v7-workroom .logo-link-title button{height:35px;width:35px;min-width:35px;padding:4px;border-radius:9px;background:#263b2b;border-color:#6b8a6c;color:#d4e5d1;font-size:20px}
+.forge-v7-workroom .logo-modal .logo-subtle{font-size:12px;color:#bcd7b4}
+.forge-v7-workroom .logo-link-warning button{border-radius:8px;background:#493823;border-color:#b08c54}
+@media(prefers-reduced-motion:reduce){
+ .forge-v5-shell .tool-link{transition:none!important;transform:none!important}
+}
