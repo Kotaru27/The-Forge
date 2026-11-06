@@ -42,14 +42,6 @@ jobs:
           FORGE_BASE_PATH: /The-Forge/
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-      - name: Upload sidebar and typography visual QA
-        if: always() && github.event_name == 'pull_request' && github.head_ref == 'design/logo-resizer-v7-sidebar-motion-polish'
-        uses: actions/upload-artifact@v4
-        with:
-          name: forge-logo-sidebar-motion-qa
-          path: test-results
-          if-no-files-found: error
-          retention-days: 7
 
       # Produce a downloadable candidate even before GitHub Pages is enabled.
       # This artifact is for staging/review; it does not publish the website.
