@@ -366,7 +366,7 @@ test('motion: final card exits without removing its animation parent', async ({ 
 });
 
 
-test('V7 visual QA: nine real logos, scrolled sixth card, independent preview canvases and immersive editor', async ({ page }, testInfo) => {
+test('V7 sidebar QA: nine logos, restored source canvas and focused right-side inspector', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1536, height: 950 });
   await page.screenshot({ path: testInfo.outputPath('v7-empty-1536.png'), fullPage: true });
   const assets = Array.from({ length: 9 }, (_, index) => {
@@ -418,8 +418,11 @@ test('V7 visual QA: nine real logos, scrolled sixth card, independent preview ca
     const gallery = document.querySelector('.logo-gallery')!;
     return { editorWidth: editor.width, rootWidth: root.width, artWidth: art.width, scrollbar: getComputedStyle(gallery).scrollbarColor, documentWidth: document.documentElement.scrollWidth, viewportWidth: innerWidth };
   });
-  expect(bounds.editorWidth).toBeGreaterThan(bounds.rootWidth * .95);
-  expect(bounds.artWidth).toBeGreaterThan(300);
+  expect(bounds.editorWidth).toBeGreaterThan(310);
+  expect(bounds.editorWidth).toBeLessThan(445);
+  expect(bounds.rootWidth - bounds.editorWidth).toBeGreaterThan(450);
+  expect(bounds.artWidth).toBeGreaterThan(190);
+  expect(bounds.artWidth).toBeLessThan(235);
   expect(bounds.documentWidth).toBeLessThanOrEqual(bounds.viewportWidth + 1);
   expect(bounds.scrollbar).not.toBe('auto');
   await page.waitForTimeout(460); // Capture the finished spring, not a translucent intermediate frame.
@@ -427,6 +430,13 @@ test('V7 visual QA: nine real logos, scrolled sixth card, independent preview ca
   for (const width of [1024, 1920]) {
     await page.setViewportSize({ width, height: 950 });
     await expect(editor.locator('.forge-v7-editor-content')).toBeVisible();
+    await page.waitForTimeout(420);
+    const dimensions = await page.evaluate(() => ({
+      sidebar: document.querySelector('.forge-v7-editor')!.getBoundingClientRect().width,
+      gallery: document.querySelector('.logo-gallery')!.getBoundingClientRect().width,
+    }));
+    expect(dimensions.sidebar).toBeLessThan(445);
+    expect(dimensions.gallery).toBeGreaterThan(340);
     const documentWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(documentWidth).toBeLessThanOrEqual(width + 1);
     await page.screenshot({ path: testInfo.outputPath(`v7-editor-${width}.png`), fullPage: true });
@@ -485,4 +495,67 @@ test('V7 toolbar controls never overlap between groups at real desktop breakpoin
     });
     expect(conflicts, `control overlap at ${width}px`).toEqual([]);
   }
+});
+
+
+test('V7.1 typography controls keep complete font names visible and never overlap', async ({ page }, testInfo) => {
+  for (const width of [1024, 1280, 1366, 1536, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    const control = page.locator('.forge-v5-typography');
+    const family = control.getByRole('combobox', { name: 'Font family' });
+    await family.selectOption('Times New Roman');
+    await expect(family).toHaveValue('Times New Roman');
+    const result = await control.evaluate(node => {
+      const family = node.querySelector('select')!;
+      const number = node.querySelector('input[type=number]')!;
+      const swatch = node.querySelector('.forge-v5-swatch')!;
+      const fb = family.getBoundingClientRect(), nb = number.getBoundingClientRect(), sb = swatch.getBoundingClientRect();
+      const styles = getComputedStyle(family);
+      const probe = document.createElement('canvas').getContext('2d')!;
+      probe.font = `${styles.fontSize} ${styles.fontFamily}`;
+      const readableWidth = fb.width - parseFloat(styles.paddingLeft) - parseFloat(styles.paddingRight);
+      const textWidth = probe.measureText('Times New Roman').width;
+      return {
+        readableWidth, textWidth, fontRight: fb.right, numberLeft: nb.left,
+        numberRight: nb.right, swatchLeft: sb.left, swatchRight: sb.right,
+        containerRight: node.getBoundingClientRect().right, selectBorderRadius: styles.borderRadius,
+      };
+    });
+    expect(result.readableWidth, `Font family clipped at ${width}px`).toBeGreaterThan(result.textWidth + 3);
+    expect(result.numberLeft).toBeGreaterThanOrEqual(result.fontRight);
+    expect(result.swatchLeft).toBeGreaterThanOrEqual(result.numberRight);
+    expect(result.swatchRight).toBeLessThanOrEqual(result.containerRight + 1);
+    expect(parseFloat(result.selectBorderRadius)).toBeGreaterThan(6);
+    if (width === 1024 || width === 1536) {
+      await page.screenshot({ path: testInfo.outputPath(`v71-controls-${width}.png`), fullPage: true });
+    }
+  }
+});
+
+test('V7.1 sidebar opens and closes without stealing the source canvas or blocking gallery', async ({ page }, testInfo) => {
+  await addFiles(page, [sample, { ...sample, name: 'SecondaryLogo.png' }]);
+  const gallery = page.locator('.logo-gallery');
+  const opener = page.getByRole('button', { name: /Open Focus Mode for/ }).first();
+  const source = page.locator('.logo-card canvas').first();
+  const pixels = await source.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL());
+  await opener.click();
+  const focus = page.getByLabel('Focus Mode', { exact: true });
+  await expect(focus).toBeVisible();
+  await page.waitForTimeout(440);
+  const details = await page.evaluate(() => {
+    const gallery = document.querySelector('.logo-gallery')!.getBoundingClientRect();
+    const editor = document.querySelector('.forge-v7-editor')!.getBoundingClientRect();
+    const art = document.querySelector('.forge-v7-editor .logo-preview-frame')!.getBoundingClientRect();
+    return { editorLeft: editor.left, galleryRight: gallery.right, editorWidth: editor.width, artWidth: art.width };
+  });
+  expect(Math.abs(details.editorLeft - details.galleryRight)).toBeLessThanOrEqual(2);
+  expect(details.editorWidth).toBeLessThan(445);
+  expect(details.artWidth).toBeLessThan(240);
+  await expect(gallery).not.toHaveAttribute('inert');
+  expect(await source.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL())).toBe(pixels);
+  await page.screenshot({ path: testInfo.outputPath('v71-focus-sidebar-1536.png'), fullPage: true });
+  await focus.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(focus).toHaveCount(0);
+  await expect(opener).toBeFocused();
+  expect(await source.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL())).toBe(pixels);
 });
