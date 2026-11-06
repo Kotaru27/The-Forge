@@ -363,7 +363,7 @@ export function LogoResizer() {
   const detail = cards.find(asset => asset.id === focused) ?? null;
   // Avoid expensive FLIP measurements and staggered animation on large logo batches.
   const animateGallery = !prefersReducedMotion && cards.length <= 18;
-  const layoutChange = `${cards.length}:${focused ?? ''}`;
+  const layoutChange = String(cards.length);
   const updateLabel = (asset: LogoAsset, value: string) => {
     patchCard(asset.id, {
       label: value,
@@ -511,9 +511,8 @@ export function LogoResizer() {
       </AnimatePresence>
       {error && <div className="logo-error" role="alert">{error}</div>}
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
-      <div className="logo-body forge-v7-body">
+      <div className={`logo-body forge-v7-body${detail ? ' forge-v7-has-focus' : ''}`}>
         <main className={`logo-gallery${dragActive ? ' forge-v6-drag-active' : ''}`}
-          inert={Boolean(detail)} aria-hidden={Boolean(detail)}
           onDragEnter={onGalleryDragEnter} onDragLeave={onGalleryDragLeave}
           onDragOver={event => { if (Array.from(event.dataTransfer.types).includes('Files')) event.preventDefault(); }}
           onDrop={onDrop}>
@@ -547,12 +546,14 @@ export function LogoResizer() {
                 <motion.article
                   key={asset.id}
                   className="logo-card"
-                  layout={animateGallery ? 'position' : false}
+                  layout={animateGallery && !focused ? 'position' : false}
                   layoutDependency={layoutChange}
-                  initial={animateGallery ? { opacity: 0, y: 12 } : false}
+                  initial={animateGallery ? { opacity: 0, y: 18, scale: .977 } : { opacity: 0 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={animateGallery ? { opacity: 0, scale: .97 } : { opacity: 0 }}
-                  transition={{ duration: animateGallery ? .24 : 0, ease: [.16, 1, .3, 1], layout: { duration: .28 } }}>
+                  exit={animateGallery ? { opacity: 0, y: -7, scale: .975 } : { opacity: 0 }}
+                  transition={{ opacity: { duration: prefersReducedMotion ? 0 : .19, delay: animateGallery ? Math.min(index, 6) * .035 : 0 },
+                    y: { type: 'spring', stiffness: 460, damping: 39, mass: .85, delay: animateGallery ? Math.min(index, 6) * .035 : 0 },
+                    scale: { duration: .26 }, layout: { type: 'spring', stiffness: 480, damping: 46, mass: .95 } }}>
                   <div className="logo-card-heading"><span className="forge-v5-card-index">{String(cards.length - index).padStart(2,"0")}</span>
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
                     <button type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</button>
@@ -581,10 +582,10 @@ export function LogoResizer() {
         <AnimatePresence initial={false}>
         {detail && <motion.aside ref={editorRef} tabIndex={-1} className="logo-detail forge-v7-editor" aria-label="Focus Mode"
           key="focus-panel"
-          initial={{ x: prefersReducedMotion ? 0 : 28 }}
-          animate={{ x: 0 }}
-          exit={{ x: prefersReducedMotion ? 0 : 22 }}
-          transition={{ type: 'spring', stiffness: 380, damping: 43, mass: .9 }}>
+          initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 14 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: prefersReducedMotion ? 0 : 12 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 48, mass: .9 }}>
           <div className="logo-detail-heading">
             <div className="forge-v7-editor-title">
               <span className="forge-v7-eyebrow">THE FORGE / IMAGE EDITOR</span>
