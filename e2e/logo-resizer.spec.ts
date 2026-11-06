@@ -266,8 +266,8 @@ test('audit polish: readable controls, contrast, real icons, and responsive work
 test('audit polish: preview adapts by canvas size, multiline labels and focus controls remain usable', async ({ page }) => {
   await addFiles(page, [sample]);
   const card = page.locator('.logo-card').first();
-  await card.locator('textarea').fill('First line\\nSecond line');
-  await expect(card.locator('textarea')).toHaveValue('First line\\nSecond line');
+  await card.locator('textarea').fill('First line\nSecond line');
+  await expect(card.locator('textarea')).toHaveValue('First line\nSecond line');
   const preview = card.locator('.logo-preview-button');
   await page.locator('.forge-v5-presets').getByRole('button', { name: '150 × 150' }).click();
   await expect(preview).toHaveCSS('min-height', '218px');
