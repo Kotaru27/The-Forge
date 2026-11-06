@@ -48,4 +48,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+          name: forge-pages-${{ github.run_id }}-${{ github.run_attempt }}
       - uses: actions/deploy-pages@v4
+        with:
+          artifact_name: forge-pages-${{ github.run_id }}-${{ github.run_attempt }}
