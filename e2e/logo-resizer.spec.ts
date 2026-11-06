@@ -364,3 +364,81 @@ test('motion: final card exits without removing its animation parent', async ({ 
   await expect(page.locator('.logo-empty')).toBeVisible();
   await expect(page.locator('.forge-v5-board-heading')).toContainText('Your workboard is empty');
 });
+
+
+test('V7 visual QA: nine real logos, scrolled sixth card, independent preview canvases and immersive editor', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1536, height: 950 });
+  const assets = Array.from({ length: 9 }, (_, index) => {
+    const label = `BRAND ${index + 1}`;
+    const art = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="220" viewBox="0 0 320 220">
+      <rect width="320" height="220" fill="#ffffff"/>
+      <rect x="54" y="34" width="212" height="152" rx="34" fill="#186844"/>
+      <circle cx="160" cy="94" r="34" fill="#e1fb88"/>
+      <text x="160" y="152" font-family="Arial" font-weight="700" text-anchor="middle" font-size="22" fill="#ffffff">${label}</text>
+    </svg>`;
+    return { name: `Brand-${index + 1}.svg`, mimeType: 'image/svg+xml', buffer: Buffer.from(art) };
+  });
+  await addFiles(page, assets);
+  await expect(page.locator('.logo-card')).toHaveCount(9);
+  await expect(page.locator('.logo-card canvas')).toHaveCount(9);
+  await page.screenshot({ path: testInfo.outputPath('v7-gallery-1536.png'), fullPage: true });
+
+  const sixth = page.locator('.logo-card').nth(5);
+  await sixth.scrollIntoViewIfNeeded();
+  const sixthCanvas = sixth.locator('canvas');
+  const before = await sixthCanvas.evaluate(node => {
+    const canvas = node as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d')!;
+    const point = ctx.getImageData(canvas.width / 2, canvas.height / 2, 1, 1).data;
+    return { pixels: canvas.toDataURL(), colored: [...point.slice(0,3)].some(channel => channel < 245) };
+  });
+  expect(before.colored).toBe(true);
+  await sixth.locator('.logo-preview-button').click();
+  const editor = page.getByLabel('Focus Mode', { exact: true });
+  await expect(editor).toBeVisible();
+  await expect(editor.locator('.forge-v7-editor-content')).toBeVisible();
+  await expect(editor.locator('.forge-v7-editor-inspector')).toBeVisible();
+  await expect(editor.locator('.logo-detail-preview canvas')).toHaveCount(1);
+  await expect(page.locator('.logo-card canvas')).toHaveCount(9);
+  await expect(sixthCanvas).toHaveJSProperty('width', 200);
+  expect(await sixthCanvas.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL())).toBe(before.pixels);
+  const bounds = await page.evaluate(() => {
+    const root = document.querySelector('.logo-body')!.getBoundingClientRect();
+    const editor = document.querySelector('.forge-v7-editor')!.getBoundingClientRect();
+    const art = document.querySelector('.forge-v7-editor .logo-preview-frame')!.getBoundingClientRect();
+    const gallery = document.querySelector('.logo-gallery')!;
+    return { editorWidth: editor.width, rootWidth: root.width, artWidth: art.width, scrollbar: getComputedStyle(gallery).scrollbarColor, documentWidth: document.documentElement.scrollWidth, viewportWidth: innerWidth };
+  });
+  expect(bounds.editorWidth).toBeGreaterThan(bounds.rootWidth * .95);
+  expect(bounds.artWidth).toBeGreaterThan(300);
+  expect(bounds.documentWidth).toBeLessThanOrEqual(bounds.viewportWidth + 1);
+  expect(bounds.scrollbar).not.toBe('auto');
+  await page.screenshot({ path: testInfo.outputPath('v7-editor-1536.png'), fullPage: true });
+  await editor.getByRole('button', { name: 'Next logo' }).click();
+  await expect(editor.getByLabel('Filename')).not.toHaveValue('Brand-6');
+  await editor.getByRole('button', { name: 'Previous logo' }).click();
+  await expect(editor.getByLabel('Filename')).toHaveValue('Brand-6');
+  await editor.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(editor).toHaveCount(0);
+  await expect(sixth.locator('.logo-preview-button')).toBeFocused();
+  expect(await sixthCanvas.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL())).toBe(before.pixels);
+  await page.screenshot({ path: testInfo.outputPath('v7-gallery-after-close-1536.png'), fullPage: true });
+});
+
+test('V7 dialogs: Escape and keyboard focus behave correctly', async ({ page }) => {
+  const trigger = page.getByRole('button', { name: 'Generate links' });
+  await trigger.click();
+  const dialog = page.getByRole('dialog', { name: 'Generate logo links' });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+
+  await addFiles(page, [sample]);
+  await page.getByRole('button', { name: 'Clear workroom' }).click();
+  const confirm = page.getByRole('dialog', { name: 'Clear logo workspace' });
+  await expect(confirm).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(confirm).toHaveCount(0);
+  await expect(page.locator('.logo-card')).toHaveCount(1);
+});
