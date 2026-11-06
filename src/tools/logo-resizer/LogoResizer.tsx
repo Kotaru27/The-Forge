@@ -419,8 +419,9 @@ export function LogoResizer() {
                   const selected = settings.width === preset.width && settings.height === preset.height;
                   return <button key={preset.label} type="button" className={selected ? 'selected' : ''}
                     aria-pressed={selected} onClick={() => setSize(preset.width, preset.height)}>
-                    {selected && <motion.span className="forge-v7-preset-selection" layoutId="forge-v7-preset"
-                      transition={{ type: 'spring', stiffness: 480, damping: 38, mass: .8 }} />}
+                    {selected && <motion.span className="forge-v7-preset-selection"
+                      layoutId={prefersReducedMotion ? undefined : 'forge-v7-preset'}
+                      transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 38, mass: .8 }} />}
                     <span className="forge-v7-preset-copy">{preset.label}</span>
                   </button>;
                 })}
