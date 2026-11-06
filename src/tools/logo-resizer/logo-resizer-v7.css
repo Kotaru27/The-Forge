@@ -121,7 +121,7 @@
 }
 .forge-v7-workroom .logo-card-heading button:hover{background:#442521;color:#ffe3d9}
 .forge-v7-workroom .logo-preview-button{
-  position:relative;min-height:0!important;height:clamp(228px,23vw,298px)!important;padding:17px 18px 18px;
+  position:relative;height:auto;padding:17px 18px 18px;transition:min-height .3s var(--v7-ease),background-color .18s ease;
   overflow:hidden;background:#1b2b20;border-radius:0;border:0;border-bottom:1px solid #3d5742;
   background-image:linear-gradient(#c4e0c20e 1px,transparent 1px),linear-gradient(90deg,#c4e0c20e 1px,transparent 1px);
   background-size:24px 24px;
