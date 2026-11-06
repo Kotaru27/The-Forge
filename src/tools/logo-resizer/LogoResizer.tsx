@@ -83,6 +83,8 @@ export function LogoResizer() {
   const [notice, setNotice] = useState('');
   const [workProgress, setWorkProgress] = useState<WorkProgress | null>(null);
   const focusOrigin = useRef<string | null>(null);
+  const editorRef = useRef<HTMLElement>(null);
+  const focusWasOpen = useRef(false);
   const prefersReducedMotion = Boolean(useReducedMotion());
 
   useEffect(() => {
@@ -324,6 +326,12 @@ export function LogoResizer() {
     // Focus navigation must follow the currently visible list.
   }, [focused, cards, pending, confirmClear, showLinks]);
 
+  useEffect(() => {
+    // Focus once on opening, not on every Previous/Next navigation or field edit.
+    if (focused && !focusWasOpen.current) editorRef.current?.focus({ preventScroll: true });
+    focusWasOpen.current = Boolean(focused);
+  }, [focused]);
+
   // Treat confirmation and link dialogs as real keyboard-contained surfaces.
   useEffect(() => {
     if (!pending && !confirmClear && !showLinks) return;
@@ -504,6 +512,7 @@ export function LogoResizer() {
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
       <div className="logo-body forge-v7-body">
         <main className={`logo-gallery${dragActive ? ' forge-v6-drag-active' : ''}`}
+          inert={Boolean(detail)} aria-hidden={Boolean(detail)}
           onDragEnter={onGalleryDragEnter} onDragLeave={onGalleryDragLeave}
           onDragOver={event => { if (Array.from(event.dataTransfer.types).includes('Files')) event.preventDefault(); }}
           onDrop={onDrop}>
@@ -568,7 +577,7 @@ export function LogoResizer() {
           </div>
         </main>
         <AnimatePresence initial={false}>
-        {detail && <motion.aside className="logo-detail forge-v7-editor" aria-label="Focus Mode"
+        {detail && <motion.aside ref={editorRef} tabIndex={-1} className="logo-detail forge-v7-editor" aria-label="Focus Mode"
           key="focus-panel"
           initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 12, scale: prefersReducedMotion ? 1 : .992 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
