@@ -24,6 +24,7 @@ mkdirSync(target, { recursive: true });
 cpSync(join(source, 'dist', 'js'), join(target, 'dist', 'js'), { recursive: true });
 cpSync(join(source, 'dist', 'css'), join(target, 'dist', 'css'), { recursive: true });
 cpSync(join(source, 'compressor'), join(target, 'compressor'), { recursive: true });
+for (const file of ['forge-logo-studio.css', 'forge-logo-studio.js']) cpSync(join(root, 'src', 'legacy', file), join(target, file));
 for (const path of ['favicon.svg', 'manifest.json']) cpSync(join(source, path), join(target, path));
 
 const minimalCss = [
@@ -83,8 +84,8 @@ html = html
   .replace(/<style id="forge-first-paint-css">[\s\S]*?<\/style>/, '')
   .replace(/<script id="forge-first-paint-js">[\s\S]*?<\/script>/, '');
 html = html.replace('<head>', "<head>\n<script>window.__forgeDisableSharedHandoff=true;try{sessionStorage.setItem('forge_intro_suppress','1');localStorage.setItem('forge_whatsnew_dismissed_2026_v3','1')}catch(e){}</script>");
-html = html.replace('</head>', '<style id="forge-amoled-bridge">' + minimalCss + '</style></head>');
-html = html.replace('</body>', bridge + '</body>');
+html = html.replace('</head>', '<style id="forge-amoled-bridge">' + minimalCss + '</style><link rel="stylesheet" href="./forge-logo-studio.css" /></head>');
+html = html.replace('</body>', bridge + '<script src="./forge-logo-studio.js"></script></body>');
 writeFileSync(join(target, 'index.html'), html);
 
 let compressorHtml = readFileSync(join(target, 'compressor', 'index.html'), 'utf8');
