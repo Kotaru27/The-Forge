@@ -310,7 +310,7 @@ export function LogoResizer() {
     setFocused(cards[(index + direction + cards.length) % cards.length].id);
   }
   useEffect(() => {
-    if (!focused) return;
+    if (!focused || pending || confirmClear || showLinks) return;
     const keydown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         if (event.key !== 'Escape') return;
@@ -322,7 +322,35 @@ export function LogoResizer() {
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
     // Focus navigation must follow the currently visible list.
-  }, [focused, cards]);
+  }, [focused, cards, pending, confirmClear, showLinks]);
+
+  // Treat confirmation and link dialogs as real keyboard-contained surfaces.
+  useEffect(() => {
+    if (!pending && !confirmClear && !showLinks) return;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const selectFocusable = () => [...document.querySelectorAll<HTMLElement>(
+      '.logo-modal[role="dialog"] button, .logo-modal[role="dialog"] input, .logo-modal[role="dialog"] select, .logo-modal[role="dialog"] textarea'
+    )].filter(element => !element.hasAttribute('disabled') && element.getClientRects().length > 0);
+    const frame = window.requestAnimationFrame(() => selectFocusable()[0]?.focus());
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (confirmNoLogos) setConfirmNoLogos(false);
+        else if (pending) setPending(null);
+        else if (confirmClear) setConfirmClear(false);
+        else setShowLinks(false);
+      } else if (event.key === 'Tab') {
+        const items = selectFocusable();
+        if (!items.length) return;
+        const first = items[0], last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        else if (!items.includes(document.activeElement as HTMLElement)) { event.preventDefault(); first.focus(); }
+      }
+    };
+    window.addEventListener('keydown', keydown);
+    return () => { window.cancelAnimationFrame(frame); window.removeEventListener('keydown', keydown); previous?.focus(); };
+  }, [Boolean(pending), confirmClear, showLinks, confirmNoLogos]);
 
   const detail = cards.find(asset => asset.id === focused) ?? null;
   // Avoid expensive FLIP measurements and staggered animation on large logo batches.
@@ -617,30 +645,82 @@ export function LogoResizer() {
         </motion.aside>}
         </AnimatePresence>
       </div>
-      {pending && <div className="logo-modal-backdrop" role="presentation">
-        <div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions">
-          <h2>Set logo dimensions</h2>
-          <p>Confirm the size before importing {pending.length} file(s).</p>
-          <div className="logo-presets">
-            {LOGO_PRESETS.map(preset => <button type="button" key={preset.label} className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''} onClick={() => setSize(preset.width, preset.height)}>{preset.label}</button>)}
-          </div>
-          <div className="logo-two-fields">
-            <label>Width (px)<input type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width', event.target.value)} /></label>
-            <label>Height (px)<input type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height', event.target.value)} /></label>
-          </div>
-          <div className="logo-modal-actions"><button type="button" onClick={() => setPending(null)}>Cancel</button><button className="logo-primary" type="button" onClick={() => void importPending()}>Apply &amp; process</button></div>
-        </div>
-      </div>}
-      {confirmClear && <div className="logo-modal-backdrop"><div className="logo-modal" role="dialog" aria-modal="true" aria-label="Clear logo workspace"><h2>Clear all logos?</h2><p>Remove all uploaded logos and reset settings? You can undo this with your edits intact.</p><div className="logo-modal-actions"><button type="button" onClick={() => setConfirmClear(false)}>Cancel</button><button type="button" onClick={clearAll}>Clear all</button></div></div></div>}
-      {showLinks && <div className="logo-modal-backdrop"><div className="logo-modal logo-link-dialog" role="dialog" aria-modal="true" aria-label="Generate logo links">
-        <div className="logo-link-title"><h2>Generate logo links</h2><button type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</button></div>
-        <div className="logo-two-fields"><label>Server<select value={server} onChange={event => setServer(event.target.value as LogoServer)}><option value="s3">S3 Media</option><option value="aldi">Aldi Media</option></select></label><label>Folder path<input value={folder} onChange={event => setFolder(event.target.value)} placeholder="logos/2026/summer" /></label></div>
-        <label>Brand names (one per line)<textarea rows={7} value={brands} onChange={event => setBrands(event.target.value)} placeholder="Brand A&#10;Brand B" /></label>
-        <label>Generated HTML<textarea rows={7} value={links} readOnly /></label>
-        <p className="logo-subtle" role="status">{linkMessage}</p>
-        <div className="logo-modal-actions"><button type="button" onClick={() => setShowLinks(false)}>Close</button><button type="button" onClick={() => makeLinks()}>Generate</button><button className="logo-primary" type="button" onClick={() => void copyLinks()}>Copy HTML</button></div>
-        {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded"><p>No logos are uploaded. Generate links using the brand names as filenames?</p><button type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</button><button type="button" onClick={() => makeLinks(true)}>Proceed anyway</button></div>}
-      </div></div>}
+      <AnimatePresence initial={false}>
+        {pending && <motion.div key="dimension-dialog" className="logo-modal-backdrop" role="presentation"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : .2 }}>
+          <motion.div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions"
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14, scale: prefersReducedMotion ? 1 : .97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: prefersReducedMotion ? 0 : 8, scale: prefersReducedMotion ? 1 : .99 }}
+            transition={{ duration: prefersReducedMotion ? 0 : .28, ease: [.2, 1, .25, 1] }}>
+            <span className="forge-v7-modal-kicker">IMPORT / ASSET PREPARATION</span>
+            <h2>Set logo dimensions</h2>
+            <p>Confirm the output canvas for {pending.length} {pending.length === 1 ? 'file' : 'files'} before importing.</p>
+            <div className="logo-presets" aria-label="Import size presets">
+              {LOGO_PRESETS.map(preset => <button type="button" key={preset.label}
+                className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''}
+                onClick={() => setSize(preset.width, preset.height)}>{preset.label}</button>)}
+            </div>
+            <div className="logo-two-fields">
+              <label>Width (px)<input type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width', event.target.value)} /></label>
+              <label>Height (px)<input type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height', event.target.value)} /></label>
+            </div>
+            <div className="logo-modal-actions">
+              <button type="button" onClick={() => setPending(null)}>Cancel</button>
+              <button className="logo-primary" type="button" onClick={() => void importPending()}>Apply &amp; process <span aria-hidden="true">↗</span></button>
+            </div>
+          </motion.div>
+        </motion.div>}
+        {confirmClear && <motion.div key="clear-dialog" className="logo-modal-backdrop"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : .2 }}>
+          <motion.div className="logo-modal" role="dialog" aria-modal="true" aria-label="Clear logo workspace"
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14, scale: prefersReducedMotion ? 1 : .97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : .26, ease: [.2, 1, .25, 1] }}>
+            <span className="forge-v7-modal-kicker">WORKROOM / RECOVERABLE ACTION</span>
+            <h2>Clear all logos?</h2>
+            <p>Remove the imported logos and reset the settings? You can restore the entire workspace with edits for 60 seconds.</p>
+            <div className="logo-modal-actions">
+              <button type="button" onClick={() => setConfirmClear(false)}>Cancel</button>
+              <button type="button" className="forge-v7-modal-danger" onClick={clearAll}>Clear all</button>
+            </div>
+          </motion.div>
+        </motion.div>}
+        {showLinks && <motion.div key="links-dialog" className="logo-modal-backdrop"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : .2 }}>
+          <motion.div className="logo-modal logo-link-dialog" role="dialog" aria-modal="true" aria-label="Generate logo links"
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14, scale: prefersReducedMotion ? 1 : .97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: prefersReducedMotion ? 0 : 8 }}
+            transition={{ duration: prefersReducedMotion ? 0 : .28, ease: [.2, 1, .25, 1] }}>
+            <span className="forge-v7-modal-kicker">EXPORT / HTML LINKS</span>
+            <div className="logo-link-title"><h2>Generate logo links</h2>
+              <button type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</button>
+            </div>
+            <div className="logo-two-fields">
+              <label>Server<select value={server} onChange={event => setServer(event.target.value as LogoServer)}>
+                <option value="s3">S3 Media</option><option value="aldi">Aldi Media</option></select></label>
+              <label>Folder path<input value={folder} onChange={event => setFolder(event.target.value)} placeholder="logos/2026/summer" /></label>
+            </div>
+            <label>Brand names (one per line)<textarea rows={7} value={brands} onChange={event => setBrands(event.target.value)} placeholder="Brand A&#10;Brand B" /></label>
+            <label>Generated HTML<textarea rows={7} value={links} readOnly /></label>
+            <p className="logo-subtle" role="status">{linkMessage}</p>
+            <div className="logo-modal-actions">
+              <button type="button" onClick={() => setShowLinks(false)}>Close</button>
+              <button type="button" onClick={() => makeLinks()}>Generate</button>
+              <button className="logo-primary" type="button" onClick={() => void copyLinks()}>Copy HTML</button>
+            </div>
+            {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded">
+              <p>No logos are uploaded. Generate links using the brand names as filenames?</p>
+              <button type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</button>
+              <button type="button" onClick={() => makeLinks(true)}>Proceed anyway</button>
+            </div>}
+          </motion.div>
+        </motion.div>}
+      </AnimatePresence>
     </section>
   );
 }
