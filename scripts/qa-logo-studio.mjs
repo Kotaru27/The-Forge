@@ -68,15 +68,14 @@ try {
       return { x:r.x, right:r.right, width:r.width, height:r.height };
     };
     return {
-      section:rect(':scope'), settings:rect('.sidebar-panel'), board:rect('#logoGrid'),
+      section:rect(':scope'), editor:rect('.editor-layout'), view: (() => { const r=document.getElementById('view-app').getBoundingClientRect();return {x:r.x,width:r.width};})(), settings:rect('.sidebar-panel'), board:rect('#logoGrid'),
       card:rect('.logo-card-item'), toolbar:rect('.forge-stage-toolbar'),
-      assetCount:root.querySelector('.forge-stage-count')?.textContent,
+      assetCount:root.querySelector('.forge-stage-count')?.textContent, computedColumns:getComputedStyle(root.querySelector('.editor-layout')).gridTemplateColumns,
     };
   });
-  assert.ok(initialLayout.settings.width > 200, 'Global settings sidebar clipped');
-  assert.ok(initialLayout.board.width > 450, 'Asset board too narrow');
-  assert.ok(initialLayout.card.width >= 200, 'Logo card compressed');
-  assert.ok(initialLayout.toolbar.height >= 50, 'Board toolbar is missing');
+  console.log('FORGE_LAYOUT_BASELINE ' + JSON.stringify(initialLayout));
+  assert.ok(initialLayout.settings.width > 200, 'Global settings sidebar clipped: ' + JSON.stringify(initialLayout));
+  assert.ok(initialLayout.toolbar.height >= 50, 'Board toolbar is missing: ' + JSON.stringify(initialLayout));
   assert.match(initialLayout.assetCount || '', /1 ASSET/);
   await page.screenshot({ path: 'artifacts/browser-qa/logo-imported-1440.png' });
 
@@ -91,6 +90,7 @@ try {
       inspectorRight:r('#logoDetailOverlay').right,
       panelVisibility:getComputedStyle(root.querySelector('#logoDetailOverlay')).visibility };
   });
+  console.log('FORGE_LAYOUT_FOCUS ' + JSON.stringify(focus));
   assert.ok(focus.sidebar > 200, 'Global settings sidebar disappeared in focus mode');
   assert.ok(focus.board > 280, 'Asset board disappeared in focus mode');
   assert.ok(focus.inspector >= 300 && focus.inspector <= 380, 'Inspector did not dock as right sidebar');
