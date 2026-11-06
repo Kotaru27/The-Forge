@@ -461,3 +461,28 @@ test('V7 dialogs: Escape and keyboard focus behave correctly', async ({ page }) 
   await expect(confirm).toHaveCount(0);
   await expect(page.locator('.logo-card')).toHaveCount(1);
 });
+
+
+test('V7 toolbar controls never overlap between groups at real desktop breakpoints', async ({ page }) => {
+  for (const width of [768, 1024, 1160, 1280, 1366, 1536, 1920]) {
+    await page.setViewportSize({ width, height: 950 });
+    const conflicts = await page.evaluate(() => {
+      const groups = [...document.querySelectorAll<HTMLElement>('.forge-v5-control-grid > .forge-v5-group')];
+      const rects = groups.map(group => [...group.querySelectorAll<HTMLElement>(
+        'button,select,input,.forge-v5-checkboxes label,.forge-v5-sliders label'
+      )].map(element => element.getBoundingClientRect()));
+      const conflicts: string[] = [];
+      for (let i = 0; i < rects.length; i++) {
+        for (let j = i + 1; j < rects.length; j++) {
+          for (const a of rects[i]) for (const b of rects[j]) {
+            const area = Math.max(0, Math.min(a.right,b.right) - Math.max(a.left,b.left)) *
+              Math.max(0, Math.min(a.bottom,b.bottom) - Math.max(a.top,b.top));
+            if (area > 20) conflicts.push(`${i}-${j}: ${Math.round(area)}px2`);
+          }
+        }
+      }
+      return conflicts;
+    });
+    expect(conflicts, `control overlap at ${width}px`).toEqual([]);
+  }
+});
