@@ -224,3 +224,60 @@ test('single centered header retains the exact existing SVG and title styling ac
     expect(geometry.pageWidth).toBeLessThanOrEqual(geometry.viewportWidth + 1);
   }
 });
+
+
+test('audit polish: readable controls, contrast, real icons, and responsive workroom', async ({ page }) => {
+  const railIcons = page.locator('.tool-nav .tool-link svg');
+  await expect(railIcons).toHaveCount(7);
+  await expect(page.locator('.tool-link.is-active svg.logo-tool-icon')).toHaveCount(1);
+  await expect(page.locator('.tool-link .forge-v5-nav-icon')).toHaveCount(6);
+  await expect(page.locator('.forge-v5-control-grid > .forge-v5-group')).toHaveCount(8);
+
+  for (const width of [768, 1024, 1280, 1366, 1536, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    const result = await page.evaluate(() => {
+      const title = document.querySelector('.forge-v5-group-title')!;
+      const btn = document.querySelector('.forge-v5-import .forge-v5-action')!;
+      const preset = document.querySelector('.forge-v5-preset-grid button')!;
+      const gallery = document.querySelector('.logo-gallery')!;
+      const controls = document.querySelector('.forge-v5-control-grid')!;
+      return {
+        groupFont: parseFloat(getComputedStyle(title).fontSize),
+        actionFont: parseFloat(getComputedStyle(btn).fontSize),
+        presetFont: parseFloat(getComputedStyle(preset).fontSize),
+        pageWidth: document.documentElement.scrollWidth,
+        viewportWidth: innerWidth,
+        controlsScroll: controls.scrollWidth,
+        controlsWidth: controls.clientWidth,
+        galleryWidth: gallery.getBoundingClientRect().width,
+        navNames: [...document.querySelectorAll('.tool-nav button')].every(element => !!element.getAttribute('aria-label')),
+      };
+    });
+    expect(result.groupFont).toBeGreaterThanOrEqual(11);
+    expect(result.actionFont).toBeGreaterThanOrEqual(12);
+    expect(result.presetFont).toBeGreaterThanOrEqual(12);
+    expect(result.pageWidth).toBeLessThanOrEqual(result.viewportWidth + 1);
+    expect(result.controlsScroll).toBeLessThanOrEqual(result.controlsWidth + 2);
+    expect(result.galleryWidth).toBeGreaterThan(200);
+    expect(result.navNames).toBe(true);
+  }
+});
+
+test('audit polish: preview adapts by canvas size, multiline labels and focus controls remain usable', async ({ page }) => {
+  await addFiles(page, [sample]);
+  const card = page.locator('.logo-card').first();
+  await card.locator('textarea').fill('First line\\nSecond line');
+  await expect(card.locator('textarea')).toHaveValue('First line\\nSecond line');
+  const preview = card.locator('.logo-preview-button');
+  await page.locator('.forge-v5-presets').getByRole('button', { name: '150 × 150' }).click();
+  await expect(preview).toHaveCSS('min-height', '218px');
+  await page.locator('.forge-v5-presets').getByRole('button', { name: '250 × 250' }).click();
+  await expect(preview).toHaveCSS('min-height', '314px');
+  await card.getByRole('button', {name: /Open Focus Mode for/}).click();
+  const focus = page.getByLabel('Focus Mode', { exact: true });
+  await expect(focus).toBeVisible();
+  await expect(focus.getByText('ASSET DETAILS')).toBeVisible();
+  await expect(focus.getByText('POSITIONING')).toBeVisible();
+  await expect(focus.locator('.forge-v5-focus-stage .logo-preview-frame')).toHaveCount(1);
+  await expect(focus.locator('label').first()).toHaveCSS('font-size', '13px');
+});
