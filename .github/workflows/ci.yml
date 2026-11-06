@@ -31,3 +31,48 @@ jobs:
         env:
           CTK_SOURCE_DIR: legacy-source
           FORGE_BASE_PATH: /The-Forge/
+
+  browser-qa:
+    name: Logo Resizer desktop browser check
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout The Forge
+        uses: actions/checkout@v4
+      - name: Checkout pinned CTK baseline (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: Kotaru27/CTK
+          ref: 617615c0b4370c795ddfd6dc4c300920cd595883
+          path: legacy-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Install browser testing runtime
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Build GitHub Pages preview
+        run: npm run build
+        env:
+          CTK_SOURCE_DIR: legacy-source
+          FORGE_BASE_PATH: /The-Forge/
+      - name: Run real desktop Logo Resizer smoke test
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/forge-preview.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4173/The-Forge/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/qa-logo-studio.mjs
+        env:
+          FORGE_BASE_PATH: /The-Forge/
+      - name: Upload browser snapshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: forge-browser-smoke
+          path: artifacts/browser-qa/
+          if-no-files-found: ignore
