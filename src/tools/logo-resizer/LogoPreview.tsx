@@ -8,7 +8,7 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
   // Animate the displayed frame, never the exported bitmap.
 
   const focused = className.split(' ').includes('logo-detail-preview');
-  const maxSide = focused ? 430 : 250;
+  const maxSide = focused ? 208 : 250;
   // Focus Mode can enlarge the display of a small output canvas; never alter export pixels.
   const scale = focused
     ? Math.min(4, maxSide / Math.max(settings.width, settings.height))
