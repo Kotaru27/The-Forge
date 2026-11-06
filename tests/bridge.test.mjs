@@ -26,3 +26,26 @@ test('generated compatibility page exists after setup', () => {
     assert.ok(existsSync(resolve('public/legacy/compressor/index.html')));
   }
 });
+
+test('logo studio assets are generated and never replace image processing', () => {
+  const css = readFileSync(resolve('src/legacy/forge-logo-studio.css'), 'utf8');
+  const interactions = readFileSync(resolve('src/legacy/forge-logo-studio.js'), 'utf8');
+  assert.match(legacy, /forge-logo-studio\.css/);
+  assert.match(legacy, /forge-logo-studio\.js/);
+  assert.match(css, /grid-template-columns.*important/);
+  assert.match(css, /prefers-reduced-motion/);
+  for (const size of ['150, 150', '200, 200', '200, 150', '250, 250']) {
+    assert.ok(interactions.includes(size));
+  }
+  assert.match(interactions, /Tools\.Logo\.handleFiles\(files\)/);
+  assert.doesNotMatch(interactions, /innerHTML\s*=\s*file\.name/);
+});
+test('generated logo studio assets exist after compatibility build', () => {
+  if (process.env.CTK_SOURCE_DIR || existsSync(resolve('legacy-source'))) {
+    assert.ok(existsSync(resolve('public/legacy/forge-logo-studio.css')));
+    assert.ok(existsSync(resolve('public/legacy/forge-logo-studio.js')));
+    const html = readFileSync(resolve('public/legacy/index.html'), 'utf8');
+    assert.match(html, /forge-logo-studio\.css/);
+    assert.match(html, /forge-logo-studio\.js/);
+  }
+});

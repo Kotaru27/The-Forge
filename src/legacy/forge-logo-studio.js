@@ -76,12 +76,15 @@
       if (animate && !reducedMotion() && typeof card.animate === 'function') {
         card.animate(
           [{ opacity: 0, transform: 'translate3d(0, 17px, 0) scale(.978)' }, { opacity: 1, transform: 'translate3d(0,0,0) scale(1)' }],
-          { duration: 560, delay: Math.min(index * 45, 250), easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' }
+          { duration: 560, delay: Math.min(index * 45, 250), easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }
         );
       }
     };
     const paint = () => {
       paintQueued = false;
+      // The CTK clear action replaces grid children. Restore non-processing UI after reset.
+      if (!grid.contains(heading)) grid.prepend(heading);
+      if (!grid.contains(drop)) grid.appendChild(drop);
       const cards = Array.from(grid.querySelectorAll(':scope > .logo-card-item'));
       cards.forEach((card, index) => prepareCard(card, index, false));
       if (cards.length !== previousCount) {
@@ -144,7 +147,7 @@
       dragDepth = 0;
       grid.classList.remove('is-dragging');
       const files = Array.from(e.dataTransfer?.files || []);
-      if (files.length && window.Tools?.Logo?.handleFiles) window.Tools.Logo.handleFiles(files);
+      if (files.length && typeof Tools !== 'undefined' && Tools.Logo && typeof Tools.Logo.handleFiles === 'function') Tools.Logo.handleFiles(files);
     });
     // Surface slider values visually without replacing their original event handlers.
     for (const id of ['globalPadding', 'globalImgPos']) {

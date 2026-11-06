@@ -378,3 +378,7 @@
   #section-logo #logoGrid>.logo-card-item,
   #section-logo .liquid-btn{transition:none!important;animation:none!important}
 }
+
+/* Empty-state visibility is controlled by the original engine via inline display. */
+#section-logo #logoEmpty[style*="display: none"],#section-logo #logoEmpty[hidden]{display:none!important}
+#section-logo #logoGrid:focus-within .forge-stage-toolbar{border-bottom-color:#3c5941}
