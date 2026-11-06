@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: forge-logo-sidebar-motion-qa
-          path: test-results/**/{v7-*,v71-*}.png
+          path: test-results/**/v*.png
           if-no-files-found: error
           retention-days: 7
 
