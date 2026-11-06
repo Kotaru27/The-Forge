@@ -415,7 +415,7 @@ export function LogoResizer() {
             </div>
           )}
         </main>
-        {detail && <><button type="button" className="forge-v5-focus-shade" aria-label="Close Focus Mode" onClick={() => setFocused(null)}/><aside className="logo-detail" aria-label="Focus Mode">
+        {detail && <aside className="logo-detail" aria-label="Focus Mode">
           <div className="logo-detail-heading">
             <strong>Focus Mode</strong>
             <div className="logo-detail-buttons">
@@ -437,7 +437,7 @@ export function LogoResizer() {
             <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</button>
             <button type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
           </div>
-        </aside></>}
+        </aside>}
       </div>
       {pending && <div className="logo-modal-backdrop" role="presentation">
         <div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions">
