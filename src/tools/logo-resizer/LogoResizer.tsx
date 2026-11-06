@@ -367,8 +367,6 @@ export function LogoResizer() {
           </div>
           <div className="forge-v5-deck-foot">
             <span className="forge-v5-live"><i aria-hidden="true"/> LIVE PREVIEW</span>
-            <span>ASPECT RATIO PRESERVED</span>
-            <span>ALL EDITS STAY IN YOUR BROWSER</span>
             <output className="forge-v5-current-size">{settings.width} × {settings.height} <small>PX</small></output>
           </div>
         </div>
@@ -378,7 +376,7 @@ export function LogoResizer() {
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
       <div className="logo-body">
         <main className="logo-gallery" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
-          <div className="forge-v5-board-heading"><div><span>01 — CANVAS / ASSET BOARD</span><h2>{cards.length ? cards.length + (cards.length === 1 ? " logo in your workboard" : " logos in your workboard") : "Your workboard is empty"}</h2></div><small>{String(cards.length).padStart(2,"0")} / ASSETS</small></div>
+          <div className="forge-v5-board-heading"><div><span>IMAGE WORKBOARD</span><h2>{cards.length ? "Your logos" : "Your workboard is empty"}</h2></div><small>{cards.length} {cards.length === 1 ? 'ASSET' : 'ASSETS'}</small></div>
           {!cards.length ? (
             <div className="logo-empty">
               <div className="forge-v5-drop-icon"><LogoResizerIcon /></div>
@@ -395,7 +393,7 @@ export function LogoResizer() {
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
                     <button type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</button>
                   </div>
-                  <button className="logo-preview-button" type="button" onClick={() => setFocused(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
+                  <button className="logo-preview-button" type="button" style={{minHeight: Math.min(318, Math.max(218, settings.height + 64))}} onClick={() => setFocused(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
                     <LogoPreview asset={asset} settings={settings} />
                     <span className="forge-v5-card-size">{settings.width} × {settings.height} PX</span>
                   </button>
@@ -421,10 +419,12 @@ export function LogoResizer() {
             </div>
           </div>
           <p className="logo-subtle">{cards.findIndex(asset => asset.id === detail.id) + 1} of {cards.length}</p>
-          <LogoPreview asset={detail} settings={settings} className="logo-detail-preview" />
+          <div className="forge-v5-focus-stage"><LogoPreview asset={detail} settings={settings} className="logo-detail-preview" /><small>{settings.width} × {settings.height} PX</small></div>
+          <div className="forge-v5-focus-section-label">ASSET DETAILS</div>
           <label>Filename<input value={detail.filename} onChange={event => patchCard(detail.id, { filename: sanitizeLogoFilename(event.target.value) })} /></label>
           <label>Overlay label<textarea rows={3} value={detail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
           <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={detail.fontSizeOverride ?? ''} onChange={event => patchCard(detail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
+          <div className="forge-v5-focus-section-label">POSITIONING</div>
           <label>Image padding {detail.paddingOverride ?? settings.padding}px <input type="range" min="0" max="150" value={detail.paddingOverride ?? settings.padding} onChange={event => patchCard(detail.id, { paddingOverride: Number(event.target.value) })} /></label>
           <button type="button" onClick={() => patchCard(detail.id, { paddingOverride: null })}>Reset padding to global</button>
           <label>Image Y offset {detail.imageOffset} <input type="range" min="-50" max="50" value={detail.imageOffset} onChange={event => patchCard(detail.id, { imageOffset: Number(event.target.value) })} /></label>
