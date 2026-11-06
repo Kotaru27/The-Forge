@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEv
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
+import { LogoResizerIcon } from './LogoResizerIcon';
 import { logoToBlob } from './renderer';
 import { extractOfficeImages } from './office';
 import { generateLogoLinks } from './links';
@@ -282,76 +283,125 @@ export function LogoResizer() {
   }
 
   return (
-    <section className="logo-workspace" aria-label="Logo Resizer">
+    <section className="logo-workspace forge-logo-v5" aria-label="Logo Resizer">
       <input ref={inputRef} type="file" accept="image/*,.pptx,.xlsx,.xlsm" multiple hidden onChange={onFileInput} />
-      <div className="logo-toolbar" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
-        <button className="logo-primary" type="button" onClick={() => inputRef.current?.click()} disabled={busy}>Upload logos</button>
-        <span className="logo-hint">Images · PPTX · XLSX / XLSM · Drop files here</span>
-        <div className="logo-toolbar-actions">
-          <button type="button" onClick={openLinkDialog}>Generate links</button>
-          <button type="button" onClick={() => setConfirmClear(true)} disabled={!cards.length || busy}>Clear all</button>
-          <button className="logo-primary" type="button" onClick={() => void exportZip()} disabled={!cards.length || busy}>Download ZIP</button>
+      <div className="forge-v5-head" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
+        <div className="forge-v5-intro">
+          <div className="forge-v5-eyebrow">WORKROOM 01 / IMAGE PROCESSING</div>
+          <div className="forge-v5-title"><LogoResizerIcon /><h1>Logo resizer<span>.</span></h1></div>
+        </div>
+        <div className="forge-v5-command-deck" aria-label="Global logo settings and actions">
+          <div className="forge-v5-control-grid">
+            <div className="forge-v5-group forge-v5-import">
+              <span className="forge-v5-group-title">IMPORT / LINKS</span>
+              <div className="forge-v5-button-stack">
+                <button type="button" className="forge-v5-action forge-v5-primary" onClick={() => inputRef.current?.click()} disabled={busy}>
+                  <span aria-hidden="true">＋</span> Add assets
+                </button>
+                <button type="button" className="forge-v5-action" onClick={openLinkDialog}>Generate links</button>
+              </div>
+            </div>
+            <div className="forge-v5-group forge-v5-presets">
+              <span className="forge-v5-group-title">CANVAS PRESETS</span>
+              <div className="forge-v5-preset-grid" aria-label="Size presets">
+                {LOGO_PRESETS.map(preset => <button
+                  key={preset.label} type="button"
+                  className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''}
+                  aria-pressed={settings.width === preset.width && settings.height === preset.height}
+                  onClick={() => setSize(preset.width, preset.height)}
+                >{preset.label}</button>)}
+              </div>
+            </div>
+            <div className="forge-v5-group forge-v5-custom">
+              <span className="forge-v5-group-title">CUSTOM <small>PX</small></span>
+              <div className="forge-v5-dimensions">
+                <label><span>W</span><input aria-label="Width in pixels" type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width',event.target.value)} /></label>
+                <label><span>H</span><input aria-label="Height in pixels" type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height',event.target.value)} /></label>
+              </div>
+            </div>
+            <div className="forge-v5-group forge-v5-format">
+              <span className="forge-v5-group-title">SAVE AS</span>
+              <select aria-label="Download format" value={settings.format} onChange={event => patchSettings({format:event.target.value as 'png' | 'jpeg'})}>
+                <option value="png">PNG</option><option value="jpeg">JPG</option>
+              </select>
+              <small className="forge-v5-subnote">WHITE CANVAS</small>
+            </div>
+            <div className="forge-v5-group forge-v5-typography">
+              <span className="forge-v5-group-title">LABEL TYPOGRAPHY</span>
+              <div className="forge-v5-type-controls">
+                <select aria-label="Font family" value={settings.fontFamily} onChange={event => patchSettings({fontFamily:event.target.value})}>
+                  {LOGO_FONTS.map(font => <option key={font} value={font}>{font}</option>)}
+                </select>
+                <input aria-label="Global label font size" type="number" min="8" max="200" placeholder="28" value={settings.fontSize} onChange={event=>patchSettings({fontSize:event.target.value})} />
+                <label className="forge-v5-swatch" title="Text color">
+                  <input aria-label="Text color" type="color" value={settings.fontColor} onChange={event=>patchSettings({fontColor:event.target.value})}/>
+                </label>
+              </div>
+              <small className="forge-v5-subnote">FONT · SIZE · COLOR</small>
+            </div>
+            <div className="forge-v5-group forge-v5-options">
+              <span className="forge-v5-group-title">LABEL OPTIONS</span>
+              <div className="forge-v5-checkboxes">
+                <label><input type="checkbox" checked={settings.bold} onChange={event=>patchSettings({bold:event.target.checked})}/> Bold</label>
+                <label><input type="checkbox" checked={settings.syncFilename} onChange={event=>patchSettings({syncFilename:event.target.checked})}/> Sync filename</label>
+              </div>
+            </div>
+            <div className="forge-v5-group forge-v5-position">
+              <span className="forge-v5-group-title">IMAGE POSITIONING</span>
+              <div className="forge-v5-sliders">
+                <label><span>PADDING</span>
+                  <input type="range" aria-label="Global image padding" min="0" max="150" value={settings.padding}
+                    onChange={event=>patchSettings({padding:Number(event.target.value)})}/>
+                  <output>{settings.padding} px</output>
+                </label>
+                <label><span>IMAGE Y</span>
+                  <input type="range" aria-label="Global vertical image offset" min="-50" max="50" value={settings.imageOffset}
+                    onChange={event=>patchSettings({imageOffset:Number(event.target.value)})}/>
+                  <output>{settings.imageOffset}</output>
+                </label>
+              </div>
+            </div>
+            <div className="forge-v5-group forge-v5-exports">
+              <span className="forge-v5-group-title">WORKROOM ACTIONS</span>
+              <div className="forge-v5-button-stack">
+                <button className="forge-v5-action forge-v5-ghost" type="button" onClick={()=>setConfirmClear(true)} disabled={!cards.length || busy}>Clear workroom</button>
+                <button className="forge-v5-action forge-v5-primary" type="button" onClick={()=>void exportZip()} disabled={!cards.length || busy}>Export batch ZIP <span aria-hidden="true">↗</span></button>
+              </div>
+            </div>
+          </div>
+          <div className="forge-v5-deck-foot">
+            <span className="forge-v5-live"><i aria-hidden="true"/> LIVE PREVIEW</span>
+            <span>ASPECT RATIO PRESERVED</span>
+            <span>ALL EDITS STAY IN YOUR BROWSER</span>
+            <output className="forge-v5-current-size">{settings.width} × {settings.height} <small>PX</small></output>
+          </div>
         </div>
       </div>
       {progress && <div className="logo-progress" role="status">{progress}</div>}
       {error && <div className="logo-error" role="alert">{error}</div>}
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
       <div className="logo-body">
-        <aside className="logo-settings" aria-label="Logo controls">
-          <h2>Output size</h2>
-          <div className="logo-presets" aria-label="Size presets">
-            {LOGO_PRESETS.map(preset => <button
-              key={preset.label} type="button"
-              className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''}
-              onClick={() => setSize(preset.width, preset.height)}
-            >{preset.label}</button>)}
-          </div>
-          <div className="logo-two-fields">
-            <label>Width (px)<input type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width', event.target.value)} /></label>
-            <label>Height (px)<input type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height', event.target.value)} /></label>
-          </div>
-          <label>Download format
-            <select value={settings.format} onChange={event => patchSettings({ format: event.target.value as 'png' | 'jpeg' })}>
-              <option value="png">PNG</option><option value="jpeg">JPG</option>
-            </select>
-          </label>
-          <p className="logo-subtle">Background: white</p>
-          <h2>Text settings</h2>
-          <label>Font
-            <select value={settings.fontFamily} onChange={event => patchSettings({ fontFamily: event.target.value })}>
-              {LOGO_FONTS.map(font => <option key={font} value={font}>{font}</option>)}
-            </select>
-          </label>
-          <div className="logo-two-fields">
-            <label>Font size (px)<input type="number" placeholder="Auto (28)" min="8" max="200" value={settings.fontSize} onChange={event => patchSettings({ fontSize: event.target.value })} /></label>
-            <label>Font color<input type="color" value={settings.fontColor} onChange={event => patchSettings({ fontColor: event.target.value })} /></label>
-          </div>
-          <label className="logo-check"><input type="checkbox" checked={settings.bold} onChange={event => patchSettings({ bold: event.target.checked })} /> Bold</label>
-          <label className="logo-check"><input type="checkbox" checked={settings.syncFilename} onChange={event => patchSettings({ syncFilename: event.target.checked })} /> Sync filename with label</label>
-          <h2>Image positioning</h2>
-          <label>Padding <span>{settings.padding}px</span>
-            <input type="range" min="0" max="150" value={settings.padding} onChange={event => patchSettings({ padding: Number(event.target.value) })} />
-          </label>
-          <label>Vertical offset <span>{settings.imageOffset}</span>
-            <input type="range" min="-50" max="50" value={settings.imageOffset} onChange={event => patchSettings({ imageOffset: Number(event.target.value) })} />
-          </label>
-        </aside>
         <main className="logo-gallery" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
+          <div className="forge-v5-board-heading"><div><span>01 — CANVAS / ASSET BOARD</span><h2>{cards.length ? cards.length + (cards.length === 1 ? " logo in your workboard" : " logos in your workboard") : "Your workboard is empty"}</h2></div><small>{String(cards.length).padStart(2,"0")} / ASSETS</small></div>
           {!cards.length ? (
             <div className="logo-empty">
-              <p>No logos uploaded</p>
-              <button type="button" onClick={() => inputRef.current?.click()}>Choose files</button>
+              <div className="forge-v5-drop-icon"><LogoResizerIcon /></div>
+              <h3>Make room for your logos.</h3>
+              <p>Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually.</p>
+              <button type="button" className="forge-v5-action forge-v5-primary" onClick={() => inputRef.current?.click()}>Choose files ↗</button>
+              <small>PNG · JPG · WEBP · SVG · PPTX · XLSX · XLSM</small>
             </div>
           ) : (
             <div className="logo-grid">
               {cards.map(asset => (
                 <article key={asset.id} className="logo-card">
-                  <div className="logo-card-heading">
+                  <div className="logo-card-heading"><span className="forge-v5-card-index">{String(cards.length - cards.indexOf(asset)).padStart(2,"0")}</span>
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
                     <button type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</button>
                   </div>
                   <button className="logo-preview-button" type="button" onClick={() => setFocused(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
                     <LogoPreview asset={asset} settings={settings} />
+                    <span className="forge-v5-card-size">{settings.width} × {settings.height} PX</span>
                   </button>
                   <div className="logo-card-controls">
                     <label>Overlay label<textarea rows={2} value={asset.label} placeholder="Optional label" onChange={event => updateLabel(asset, event.target.value)} /></label>
@@ -365,7 +415,7 @@ export function LogoResizer() {
             </div>
           )}
         </main>
-        {detail && <aside className="logo-detail" aria-label="Focus Mode">
+        {detail && <><button type="button" className="forge-v5-focus-shade" aria-label="Close Focus Mode" onClick={() => setFocused(null)}/><aside className="logo-detail" aria-label="Focus Mode">
           <div className="logo-detail-heading">
             <strong>Focus Mode</strong>
             <div className="logo-detail-buttons">
@@ -387,7 +437,7 @@ export function LogoResizer() {
             <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</button>
             <button type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
           </div>
-        </aside>}
+        </aside></>}
       </div>
       {pending && <div className="logo-modal-backdrop" role="presentation">
         <div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions">
