@@ -42,7 +42,7 @@
 .forge-v7-workroom input[type=checkbox]{accent-color:var(--v7-accent);width:15px;height:15px;cursor:pointer}
 .forge-v7-workroom .forge-v5-head{background:#101813;padding-top:11px;padding-bottom:10px;border-bottom:1px solid #334739}
 .forge-v7-workroom .forge-v5-command-deck{background:linear-gradient(135deg,#1b2a1cbb,#14201999);border:1px solid #405b44;border-radius:14px;padding:13px 16px 9px;box-shadow:inset 0 1px #ffffff09}
-.forge-v7-workroom .forge-v5-group-title{font-size:10px;min-height:14px;color:#b8ceb2;letter-spacing:.045em}
+.forge-v7-workroom .forge-v5-group-title{font-size:11px;min-height:15px;color:#b8ceb2;letter-spacing:.045em}
 .forge-v7-workroom .forge-v5-group{gap:8px}
 .forge-v7-workroom .forge-v5-control-grid{row-gap:15px;column-gap:clamp(8px,1vw,15px)}
 .forge-v7-workroom .forge-v5-group .forge-v5-action,
@@ -69,7 +69,7 @@
   font-size:12px;font-weight:600;
 }
 .forge-v7-workroom .forge-v5-preset-grid button.selected{background:#17231a;border-color:#d9fb79;color:#16231a}
-.forge-v7-preset-selection{position:absolute;inset:0;background:linear-gradient(130deg,#e1ff93,#d6f774);border-radius:7px;z-index:-1;box-shadow:inset 0 1px #ffffffaa}
+.forge-v7-preset-selection{position:absolute;inset:0;background:linear-gradient(130deg,#e1ff93,#d6f774);border-radius:7px;z-index:0;box-shadow:inset 0 1px #ffffffaa}
 .forge-v7-preset-copy{position:relative;z-index:1;display:inline-block;white-space:nowrap}
 .forge-v7-workroom .forge-v5-preset-grid button:hover:not(.selected){border-color:#a3c099;background:#26392a}
 .forge-v7-workroom .forge-v5-group :is(input:not([type=range]):not([type=checkbox]):not([type=color]),select){background:#132019;border-color:#58755e;border-radius:8px}
@@ -233,12 +233,12 @@
 }
 .forge-v7-workroom .forge-v7-inspector-fields .forge-v5-focus-section-label:first-child{margin-top:0}
 .forge-v7-workroom .forge-v7-inspector-fields label{
-  display:flex;flex-direction:column;gap:8px;color:#d1e0cd;font-size:12px;font-weight:620;line-height:1.4;
+  display:flex;flex-direction:column;gap:8px;color:#d1e0cd;font-size:13px;font-weight:620;line-height:1.4;
 }
 .forge-v7-workroom .forge-v7-inspector-fields :is(input:not([type=range]),textarea){width:100%;min-height:41px;background:#101a14;border-color:#57735c;border-radius:9px;color:#f4faef;font-size:13px}
 .forge-v7-workroom .forge-v7-inspector-fields textarea{min-height:93px;line-height:1.5}
 .forge-v7-workroom .forge-v7-range-control>span{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#d5e5cf}
-.forge-v7-range-control output{font:700 12px Consolas,monospace;color:#d9fb79}
+.forge-v7-range-control .forge-v7-value{font:700 12px Consolas,monospace;color:#d9fb79}
 .forge-v7-workroom .forge-v7-range-control input[type=range]{margin:10px 0 6px}
 .forge-v7-workroom .forge-v7-reset{
   min-height:33px;align-self:start;padding:6px 11px;border-radius:8px;
