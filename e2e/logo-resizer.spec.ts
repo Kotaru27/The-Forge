@@ -368,6 +368,7 @@ test('motion: final card exits without removing its animation parent', async ({ 
 
 test('V7 visual QA: nine real logos, scrolled sixth card, independent preview canvases and immersive editor', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1536, height: 950 });
+  await page.screenshot({ path: testInfo.outputPath('v7-empty-1536.png'), fullPage: true });
   const assets = Array.from({ length: 9 }, (_, index) => {
     const label = `BRAND ${index + 1}`;
     const art = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="220" viewBox="0 0 320 220">
@@ -414,6 +415,14 @@ test('V7 visual QA: nine real logos, scrolled sixth card, independent preview ca
   expect(bounds.documentWidth).toBeLessThanOrEqual(bounds.viewportWidth + 1);
   expect(bounds.scrollbar).not.toBe('auto');
   await page.screenshot({ path: testInfo.outputPath('v7-editor-1536.png'), fullPage: true });
+  for (const width of [1024, 1920]) {
+    await page.setViewportSize({ width, height: 950 });
+    await expect(editor.locator('.forge-v7-editor-content')).toBeVisible();
+    const documentWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(documentWidth).toBeLessThanOrEqual(width + 1);
+    await page.screenshot({ path: testInfo.outputPath(`v7-editor-${width}.png`), fullPage: true });
+  }
+  await page.setViewportSize({ width: 1536, height: 950 });
   const startingFilename = await editor.getByLabel('Filename').inputValue();
   await editor.getByRole('button', { name: 'Next logo' }).click();
   await expect(editor.getByLabel('Filename')).not.toHaveValue(startingFilename);
