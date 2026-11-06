@@ -1,0 +1,21 @@
+name: One-time approved Logo Resizer interaction publish
+on:
+  push:
+    branches: [release/pages-preview]
+
+# Dispatch the existing gated/manual Pages workflow only on the reviewed merge.
+# Remove immediately after the deployment has been confirmed.
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch-reviewed-pages:
+    if: contains(github.event.head_commit.message, '[publish-logo-motion]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch the existing gated Pages workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref release/pages-preview
