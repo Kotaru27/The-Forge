@@ -9,5 +9,13 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
     if (!ref.current) return;
     drawLogoPreview(ref.current, asset, settings);
   }, [asset, settings]);
-  return <canvas aria-label={`Preview of ${asset.filename || asset.source.name}`} className={`logo-preview ${className}`} ref={ref} />;
+  // Animate the displayed frame, never the actual canvas pixels used by CTK/Pica exports.
+  const focused = className.split(' ').includes('logo-detail-preview');
+  const maxSide = focused ? 280 : 250;
+  const scale = Math.min(1, maxSide / Math.max(settings.width, settings.height));
+  const width = Math.max(1, Math.round(settings.width * scale));
+  const height = Math.max(1, Math.round(settings.height * scale));
+  return <span className={`logo-preview-frame ${className}`} style={{ width, height }}>
+    <canvas aria-label={`Preview of ${asset.filename || asset.source.name}`} className="logo-preview" ref={ref}/>
+  </span>;
 });
