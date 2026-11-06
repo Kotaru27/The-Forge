@@ -434,7 +434,7 @@
 }
 .forge-v7-workroom .forge-v7-editor .forge-v7-stage-bottomline span:last-child{display:none}
 .forge-v7-workroom .forge-v7-editor .forge-v5-focus-stage{
-  margin:10px 0 0;flex:0 0 238px;height:238px;min-height:0;
+  margin:10px 0 0;flex:0 0 230px;height:230px;min-height:0;
   padding:10px;overflow:hidden;border-radius:12px;
   background-color:#1b2b20;
 }
