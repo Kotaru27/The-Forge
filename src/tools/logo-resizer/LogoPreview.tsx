@@ -12,7 +12,10 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
   // Animate the displayed frame, never the actual canvas pixels used by CTK/Pica exports.
   const focused = className.split(' ').includes('logo-detail-preview');
   const maxSide = focused ? 430 : 250;
-  const scale = Math.min(1, maxSide / Math.max(settings.width, settings.height));
+  // Focus Mode can enlarge the display of a small output canvas; never alter export pixels.
+  const scale = focused
+    ? Math.min(4, maxSide / Math.max(settings.width, settings.height))
+    : Math.min(1, maxSide / Math.max(settings.width, settings.height));
   const width = Math.max(1, Math.round(settings.width * scale));
   const height = Math.max(1, Math.round(settings.height * scale));
   return <span className={`logo-preview-frame ${className}`} style={{ width, height }}>
