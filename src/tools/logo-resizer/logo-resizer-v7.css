@@ -458,7 +458,7 @@
   overflow-x:hidden;overflow-y:auto;min-height:0;
   padding:14px 16px 21px;gap:12px;
 }
-.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields label{font-size:12px;gap:6px}
+.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields label{font-size:13px;gap:6px}
 .forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields textarea{min-height:76px;resize:vertical}
 .forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields .forge-v5-focus-section-label{
   margin-top:8px;padding-bottom:9px;
@@ -476,7 +476,7 @@
    Guarantee space for the family name, numeric size and color swatch. */
 @media(min-width:1481px){
   .forge-v7-workroom .forge-v5-control-grid{
-    grid-template-columns:130px 155px 80px 81px 243px 114px minmax(185px,1fr) 152px;
+    grid-template-columns:130px 155px 80px 81px 258px 114px minmax(185px,1fr) 152px;
   }
 }
 .forge-v7-workroom .forge-v5-typography{min-width:0}
