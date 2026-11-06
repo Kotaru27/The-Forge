@@ -41,7 +41,7 @@ test('four presets, white background, exact output dimensions and matching ZIP f
   const names = ['150 × 150', '200 × 200', '200 × 150', '250 × 250'];
   const shapes = [[150,150],[200,200],[200,150],[250,250]];
   for (let i = 0; i < names.length; i++) {
-    await page.locator('.logo-settings').getByRole('button', { name: names[i] }).click();
+    await page.locator('.forge-v5-presets').getByRole('button', { name: names[i] }).click();
     const result = await page.locator('.logo-preview').first().evaluate(canvas => {
       const element = canvas as HTMLCanvasElement;
       const corner = element.getContext('2d')!.getImageData(element.width - 1, element.height - 1, 1, 1).data;
@@ -53,7 +53,7 @@ test('four presets, white background, exact output dimensions and matching ZIP f
   await fields.nth(0).fill('Repeat');
   await fields.nth(1).fill('repeat');
   const event = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Download ZIP' }).click();
+  await page.getByRole('button', { name: /Export batch ZIP/ }).click();
   const download = await event;
   expect(download.suggestedFilename()).toBe('batch_logos.zip');
   const zip = await JSZip.loadAsync(await readFile(await download.path()));
@@ -74,7 +74,7 @@ test('individual edits, focus, save image, clear and undo retain edits', async (
   const event = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Save image' }).click();
   expect((await event).suggestedFilename()).toBe('Brand_ABC.png');
-  await page.getByRole('button', { name: 'Clear all' }).click();
+  await page.getByRole('button', { name: 'Clear workroom' }).click();
   await page.getByRole('dialog', { name: 'Clear logo workspace' }).getByRole('button', { name: 'Clear all' }).click();
   await expect(page.locator('.logo-card')).toHaveCount(0);
   await page.getByRole('button', { name: /Undo with all edits/ }).click();
@@ -103,7 +103,7 @@ test('SVGs can scale up, JPG download remains white and focus arrows work', asyn
   const vector = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12"><rect width="24" height="12" fill="#ff0000"/></svg>');
   await addFiles(page, [{ name: 'Vector.svg', mimeType: 'image/svg+xml', buffer: vector }, sample]);
   await expect(page.locator('.logo-card')).toHaveCount(2);
-  await page.locator('.logo-settings').getByRole('button', { name: '250 × 250' }).click();
+  await page.locator('.forge-v5-presets').getByRole('button', { name: '250 × 250' }).click();
   const svgPreview = page.locator('.logo-card').nth(1).locator('canvas');
   await expect(svgPreview).toHaveCount(1);
   const center = await svgPreview.evaluate(canvas => {
@@ -112,8 +112,8 @@ test('SVGs can scale up, JPG download remains white and focus arrows work', asyn
   });
   expect(center).toEqual([255,0,0]);
 
-  await page.locator('.logo-settings select').nth(1).selectOption('Georgia');
-  await page.locator('.logo-settings').getByLabel('Download format').selectOption('jpeg');
+  await page.locator('.forge-v5-typography select').selectOption('Georgia');
+  await page.locator('.forge-v5-format').getByLabel('Download format').selectOption('jpeg');
   await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
   const firstFilename = await page.getByLabel('Focus Mode', { exact: true }).getByLabel('Filename').inputValue();
   await page.keyboard.press('ArrowRight');
@@ -151,4 +151,41 @@ test('per-logo sliders, reset, matching and branded HTML links', async ({ page }
   await dialog.getByRole('button', { name: 'Generate', exact: true }).click();
   await expect(dialog.getByLabel('Generated HTML')).toHaveValue(/aldimediaeu\.blob\.core\.windows\.net/);
   await expect(dialog.getByLabel('Generated HTML')).toHaveValue(/SecondLogo\.png/);
+});
+
+
+test('approved V5 header groups appear in order with no horizontal overflow on desktop/laptop', async ({ page }) => {
+  for (const width of [768, 1024, 1280, 1366, 1536, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    const groups = page.locator('.forge-v5-control-grid > .forge-v5-group');
+    await expect(groups).toHaveCount(8);
+    const headings = await groups.locator('.forge-v5-group-title').allTextContents();
+    expect(headings.map(value => value.trim())).toEqual([
+      'IMPORT / LINKS', 'CANVAS PRESETS', 'CUSTOM PX', 'SAVE AS',
+      'LABEL TYPOGRAPHY', 'LABEL OPTIONS', 'IMAGE POSITIONING', 'WORKROOM ACTIONS',
+    ]);
+    const layout = await page.evaluate(() => ({
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: window.innerWidth,
+      galleryVisible: !!document.querySelector('.logo-gallery'),
+    }));
+    expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+    expect(layout.galleryVisible).toBe(true);
+  }
+});
+
+test('preview resizing animation is decorative and export canvas remains exact', async ({ page }) => {
+  await addFiles(page, [sample]);
+  const frames = page.locator('.logo-card .logo-preview-frame');
+  await expect(frames).toHaveCount(1);
+  await page.locator('.forge-v5-presets').getByRole('button', { name: '200 × 150' }).click();
+  await expect(frames.first()).toHaveCSS('height', '150px');
+  const details = await page.locator('.logo-card .logo-preview').first().evaluate(canvas => {
+    const c = canvas as HTMLCanvasElement;
+    const corner = c.getContext('2d')!.getImageData(199,149,1,1).data;
+    return [c.width,c.height,corner[0],corner[1],corner[2]];
+  });
+  expect(details).toEqual([200,150,255,255,255]);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(frames.first()).toHaveCSS('transition-duration','0s');
 });

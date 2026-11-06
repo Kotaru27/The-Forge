@@ -5,6 +5,7 @@ import type { StoryboardRef } from './tools/storyboard/engine';
 import type { TransferGroup, TransferResult } from './tools/video-stills/engine';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
+import { LogoResizerIcon } from './tools/logo-resizer/LogoResizerIcon';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
@@ -45,9 +46,9 @@ export default function App() {
   const current = tools.find(tool => tool.id === activeTool) ?? tools[0];
 
   return (
-    <div className="forge-app">
+    <div className={activeTool === 'logo-resizer' ? 'forge-app forge-v5-shell' : 'forge-app'}>
       <aside className="sidebar" aria-label="Tools">
-        <div className="brand">THE FORGE</div>
+        <div className="brand">{activeTool === 'logo-resizer' ? <span className="forge-v5-f">F</span> : 'THE FORGE'}</div>
         <nav className="tool-nav" aria-label="Select a tool">
           {tools.map(tool => (
             <button
@@ -55,13 +56,23 @@ export default function App() {
               type="button"
               key={tool.id}
               aria-current={activeTool === tool.id ? 'page' : undefined}
+              aria-label={tool.label}
+              title={tool.label}
               onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
-            >{tool.label}</button>
+            >{activeTool === 'logo-resizer' ? (
+              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <span>{tool.label.split(' ').map(word => word[0]).join('').substring(0,2)}</span>}</span>
+            ) : tool.label}</button>
           ))}
         </nav>
       </aside>
       <main className="main-area">
-        <header className="topbar"><h1>{current.label}</h1></header>
+        <header className="topbar">{activeTool === 'logo-resizer' ? (
+          <>
+            <strong className="forge-v5-wordmark">THE <span>F</span>ORGE</strong>
+            <span className="forge-v5-top-center">TOOL / LOGO RESIZER</span>
+            <span className="forge-v5-top-end"><i aria-hidden="true" /> ALL PROCESSING STAYS IN YOUR BROWSER</span>
+          </>
+        ) : <h1>{current.label}</h1>}</header>
         <div className="native-tool" hidden={activeTool !== 'link-generator'}><LinkGenerator /></div>
         <div className="native-tool" hidden={activeTool !== 'logo-resizer'}><LogoResizer /></div>
         <div className="native-tool" hidden={activeTool !== 'image-splitter'}><ImageSplitter /></div>
