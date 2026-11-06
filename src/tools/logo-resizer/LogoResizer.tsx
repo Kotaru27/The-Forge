@@ -228,14 +228,13 @@ export function LogoResizer() {
         zip.file(names[i], await logoToBlob(cards[i], settings));
         setWorkProgress({ phase: 'Rendering logos', done: i + 1, total: cards.length });
       }
-      setProgress('Creating ZIP archive');
+      setProgress('Compressing ZIP archive');
       setWorkProgress({ phase: 'Compressing ZIP', done: 0, total: 100 });
       let lastPercent = -1;
       const zipBlob = await zip.generateAsync({ type: 'blob' }, meta => {
         const percent = Math.round(meta.percent);
         if (percent !== lastPercent) {
           lastPercent = percent;
-          setProgress(`Compressing ZIP: ${percent}%`);
           setWorkProgress({ phase: 'Compressing ZIP', done: percent, total: 100 });
         }
       });
@@ -481,17 +480,23 @@ export function LogoResizer() {
             </motion.div>}
           </AnimatePresence>
           <div className="forge-v5-board-heading"><div><span>IMAGE WORKBOARD</span><h2>{cards.length ? "Your logos" : "Your workboard is empty"}</h2></div><small>{cards.length} {cards.length === 1 ? 'ASSET' : 'ASSETS'}</small></div>
-          {!cards.length ? (
-            <div className="logo-empty">
+          <AnimatePresence initial={false}>
+          {!cards.length && (
+            <motion.div className="logo-empty" key="empty-workroom"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : .17 }}>
               <div className="forge-v5-drop-icon"><LogoResizerIcon /></div>
               <h3>Make room for your logos.</h3>
               <p>Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually.</p>
               <button type="button" className="forge-v5-action forge-v5-primary" onClick={() => inputRef.current?.click()}>Choose files ↗</button>
               <small>PNG · JPG · WEBP · SVG · PPTX · XLSX · XLSM</small>
-            </div>
-          ) : (
-            <div className="logo-grid">
-              <AnimatePresence initial={false} mode={animateGallery ? 'popLayout' : 'sync'}>
+            </motion.div>
+          )}
+          </AnimatePresence>
+          <div className="logo-grid">
+            <AnimatePresence initial={false} mode={animateGallery ? 'popLayout' : 'sync'}>
               {cards.map((asset, index) => (
                 <motion.article
                   key={asset.id}
@@ -525,8 +530,7 @@ export function LogoResizer() {
                 </motion.article>
               ))}
               </AnimatePresence>
-            </div>
-          )}
+          </div>
         </main>
         <AnimatePresence initial={false}>
         {detail && <motion.aside className="logo-detail" aria-label="Focus Mode" key="focus-panel"
