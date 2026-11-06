@@ -189,3 +189,38 @@ test('preview resizing animation is decorative and export canvas remains exact',
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(frames.first()).toHaveCSS('transition-duration','0s');
 });
+
+
+test('single centered header retains the exact existing SVG and title styling across laptop widths', async ({ page }) => {
+  const header = page.locator('.forge-v5-shell header.topbar');
+  const title = header.locator('.forge-v5-title');
+  await expect(header.getByRole('heading', { name: /Logo resizer/i, level: 1 })).toHaveCount(1);
+  await expect(page.locator('.logo-workspace h1, .forge-v5-intro, .forge-v5-top-center, .forge-v5-top-end')).toHaveCount(0);
+  await expect(header.getByText('WORKROOM 01 / IMAGE PROCESSING')).toBeVisible();
+
+  const icon = title.locator('svg.logo-tool-icon');
+  const sidebarIcon = page.locator('.tool-link.is-active svg.logo-tool-icon');
+  await expect(icon).toHaveAttribute('viewBox', '0 0 72 72');
+  expect(await icon.evaluate(svg => svg.outerHTML)).toBe(await sidebarIcon.evaluate(svg => svg.outerHTML));
+
+  for (const width of [768, 1024, 1280, 1366, 1536, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    const geometry = await page.evaluate(() => {
+      const header = document.querySelector('.forge-v5-shell header.topbar')!.getBoundingClientRect();
+      const title = document.querySelector('.forge-v5-shell .topbar .forge-v5-title')!.getBoundingClientRect();
+      const controls = document.querySelector('.logo-workspace .forge-v5-head')!.getBoundingClientRect();
+      const heading = document.querySelector('.forge-v5-shell .topbar .forge-v5-title h1')!;
+      return {
+        centerDelta: Math.abs((title.left + title.width / 2) - (header.left + header.width / 2)),
+        controlsGap: controls.top - header.bottom,
+        headingFont: getComputedStyle(heading).fontFamily,
+        pageWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+      };
+    });
+    expect(geometry.centerDelta).toBeLessThanOrEqual(2);
+    expect(Math.abs(geometry.controlsGap)).toBeLessThanOrEqual(2);
+    expect(geometry.headingFont).toContain('Segoe UI');
+    expect(geometry.pageWidth).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+  }
+});

@@ -68,9 +68,15 @@ export default function App() {
       <main className="main-area">
         <header className="topbar">{activeTool === 'logo-resizer' ? (
           <>
-            <strong className="forge-v5-wordmark">THE <span>F</span>ORGE</strong>
-            <span className="forge-v5-top-center">TOOL / LOGO RESIZER</span>
-            <span className="forge-v5-top-end"><i aria-hidden="true" /> ALL PROCESSING STAYS IN YOUR BROWSER</span>
+            <div className="forge-v5-header-brand">
+              <strong className="forge-v5-wordmark">THE <span>F</span>ORGE</strong>
+              <small className="forge-v5-header-kicker">WORKROOM 01 / IMAGE PROCESSING</small>
+            </div>
+            <div className="forge-v5-title">
+              <LogoResizerIcon />
+              <h1>Logo resizer<span>.</span></h1>
+            </div>
+            <div aria-hidden="true" className="forge-v5-header-balance" />
           </>
         ) : <h1>{current.label}</h1>}</header>
         <div className="native-tool" hidden={activeTool !== 'link-generator'}><LinkGenerator /></div>
