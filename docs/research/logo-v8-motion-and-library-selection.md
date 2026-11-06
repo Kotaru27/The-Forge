@@ -31,7 +31,7 @@ Skill source instructions and reference files were copied verbatim, with source 
 |---|---|---|---|
 | Motion (already installed) | Gallery reflow, interruption, carefully bounded Focus Mode transitions | Current code has conflicting projection/layout ownership if reused carelessly | **Keep core** |
 | CSS transitions + Web Animations API | Press, hover, focus and simple visual feedback | Lowest overhead, must avoid `transition: all` | **Use** |
-| Animate UI | Accessible animated select/dialog/button and slider primitives | Integration with existing native forms and styles must be tested | **Prototype selected controls only** |
+| Animate UI | Accessible animated select/dialog/button and slider primitives | React >=19 + Motion >=12.23 compatible; CSS/Tailwind integration and MIT + Commons Clause redistribution terms require review | **Prototype selected controls only** |
 | Motion Primitives | Contextual morph patterns | Copy/paste components can clash with live canvas | **Reference, not global install** |
 | GSAP + Flip | Exact timeline/FLIP choreography | Another runtime and imperative cleanup | **Deferred unless measured need** |
 | React Spring | Physics-oriented alternative | Overlaps existing Motion | **Skip** |
@@ -59,3 +59,5 @@ Test manual and automated sequences:
 - Require full existing functional, Office-import, label, ZIP and links parity tests; user approves the interactive prototype **before** merging/deploying V8.
 
 **Current recommendation:** Retain Motion, prototype Animate UI's select and dialog patterns (not whole library replacement), develop an original Forge asset-arrival/precision motion language, and gate release on **actual video + visual QA** rather than passing unit tests alone.
+
+**Licensing and fit caution (2026-11-06):** Animate UI's [current license](https://github.com/imskyleen/animate-ui/blob/main/LICENSE.md) is *MIT + Commons Clause*, not unrestricted MIT. It permits using the components in apps, including commercially, but restricts selling or redistributing components in their original form. The Forge is a public repository, so review the precise redistribution terms before copying components. Current Forge does not use Tailwind/shadcn or Radix; Animate UI is an integration candidate, not a one-click upgrade. Its [troubleshooting guide](https://animate-ui.com/docs/troubleshooting) says React >=19 and Motion >=12.23; the current Forge versions satisfy those minima, but dependency integrations must still be tested.
