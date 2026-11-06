@@ -382,3 +382,30 @@
 /* Empty-state visibility is controlled by the original engine via inline display. */
 #section-logo #logoEmpty[style*="display: none"],#section-logo #logoEmpty[hidden]{display:none!important}
 #section-logo #logoGrid:focus-within .forge-stage-toolbar{border-bottom-color:#424653}
+
+/* Workbench layout contract: the legacy compact layout used a horizontal settings row.
+   Explicitly place all three regions in one row, including after focus closes. */
+#section-logo .editor-layout,
+#section-logo .editor-layout:has(#logoDetailOverlay.active) {
+  grid-template-rows:minmax(0,1fr)!important;
+}
+#section-logo .editor-layout:not(:has(#logoDetailOverlay.active)) > .sidebar-panel {
+  grid-area:1 / 1 / 2 / 2!important;
+  width:100%!important;max-width:none!important;height:100%!important;
+}
+#section-logo .editor-layout:not(:has(#logoDetailOverlay.active)) > #logoGrid {
+  grid-area:1 / 2 / 2 / 3!important;
+  width:100%!important;height:100%!important;
+}
+#section-logo .editor-layout:not(:has(#logoDetailOverlay.active)) > #logoDetailOverlay {
+  grid-area:1 / 3 / 2 / 4!important;
+}
+#section-logo .editor-layout:has(#logoDetailOverlay.active) > .sidebar-panel {
+  grid-area:1 / 1 / 2 / 2!important;
+}
+#section-logo .editor-layout:has(#logoDetailOverlay.active) > #logoGrid {
+  grid-area:1 / 2 / 2 / 3!important;
+}
+#section-logo .editor-layout:has(#logoDetailOverlay.active) > #logoDetailOverlay {
+  grid-area:1 / 3 / 2 / 4!important;
+}

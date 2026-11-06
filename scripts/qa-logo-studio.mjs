@@ -74,7 +74,9 @@ try {
     };
   });
   console.log('FORGE_LAYOUT_BASELINE ' + JSON.stringify(initialLayout));
-  assert.ok(initialLayout.settings.width > 200, 'Global settings sidebar clipped: ' + JSON.stringify(initialLayout));
+  assert.ok(initialLayout.settings.width >= 215 && initialLayout.settings.width <= 320, 'Settings must be a docked sidebar: ' + JSON.stringify(initialLayout));
+  assert.ok(initialLayout.board.width > 450, 'Asset board too narrow: ' + JSON.stringify(initialLayout));
+  assert.ok(Math.abs(initialLayout.settings.right - initialLayout.board.x) < 3, 'Board must be next to settings: ' + JSON.stringify(initialLayout));
   assert.ok(initialLayout.toolbar.height >= 50, 'Board toolbar is missing: ' + JSON.stringify(initialLayout));
   assert.match(initialLayout.assetCount || '', /1 ASSET/);
   await page.screenshot({ path: 'artifacts/browser-qa/logo-imported-1440.png' });
