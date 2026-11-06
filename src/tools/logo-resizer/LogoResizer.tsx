@@ -446,11 +446,40 @@ export function LogoResizer() {
           </div>
         </div>
       </div>
-      {progress && <div className="logo-progress" role="status">{progress}</div>}
+      {progress && <div className="logo-progress forge-v6-progress" role="status" aria-live="polite">
+        <div className="forge-v6-progress-meta">
+          <span className="forge-v6-processing-dot" aria-hidden="true" />
+          <span className="forge-v6-progress-message">{progress}</span>
+          {workProgress && <strong>{Math.round(workProgress.done / Math.max(1, workProgress.total) * 100)}%</strong>}
+        </div>
+        {workProgress && <progress aria-label={workProgress.phase} value={workProgress.done} max={workProgress.total} />}
+      </div>}
+      <AnimatePresence initial={false}>
+        {notice && <motion.div className="forge-v6-notice" role="status" aria-live="polite"
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : -7 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -5 }}
+          transition={{ duration: prefersReducedMotion ? 0 : .19 }}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+          <span>{notice}</span>
+          <button type="button" onClick={() => setNotice('')} aria-label="Dismiss notification">×</button>
+        </motion.div>}
+      </AnimatePresence>
       {error && <div className="logo-error" role="alert">{error}</div>}
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
       <div className="logo-body">
-        <main className="logo-gallery" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
+        <LayoutGroup id="forge-logo-workroom">
+        <main className={`logo-gallery${dragActive ? ' forge-v6-drag-active' : ''}`}
+          onDragEnter={onGalleryDragEnter} onDragLeave={onGalleryDragLeave}
+          onDragOver={event => { if (Array.from(event.dataTransfer.types).includes('Files')) event.preventDefault(); }}
+          onDrop={onDrop}>
+          <AnimatePresence initial={false}>
+            {dragActive && <motion.div className="forge-v6-drop-overlay" aria-hidden="true"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : .14 }}>
+              <span>DROP ASSETS TO IMPORT</span><small>Images · PowerPoint · Excel</small>
+            </motion.div>}
+          </AnimatePresence>
           <div className="forge-v5-board-heading"><div><span>IMAGE WORKBOARD</span><h2>{cards.length ? "Your logos" : "Your workboard is empty"}</h2></div><small>{cards.length} {cards.length === 1 ? 'ASSET' : 'ASSETS'}</small></div>
           {!cards.length ? (
             <div className="logo-empty">
@@ -462,14 +491,28 @@ export function LogoResizer() {
             </div>
           ) : (
             <div className="logo-grid">
-              {cards.map(asset => (
-                <article key={asset.id} className="logo-card">
-                  <div className="logo-card-heading"><span className="forge-v5-card-index">{String(cards.length - cards.indexOf(asset)).padStart(2,"0")}</span>
+              <AnimatePresence initial={false} mode={animateGallery ? 'popLayout' : 'sync'}>
+              {cards.map((asset, index) => (
+                <motion.article
+                  key={asset.id}
+                  className="logo-card"
+                  layout={animateGallery ? 'position' : false}
+                  layoutDependency={layoutChange}
+                  initial={animateGallery ? { opacity: 0, y: 12 } : false}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={animateGallery ? { opacity: 0, scale: .97 } : { opacity: 0 }}
+                  transition={{ duration: animateGallery ? .24 : 0, ease: [.16, 1, .3, 1], layout: { duration: .28 } }}>
+                  <div className="logo-card-heading"><span className="forge-v5-card-index">{String(cards.length - index).padStart(2,"0")}</span>
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
                     <button type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</button>
                   </div>
-                  <button className="logo-preview-button" type="button" style={{minHeight: Math.min(318, Math.max(218, settings.height + 64))}} onClick={() => setFocused(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
-                    <LogoPreview asset={asset} settings={settings} />
+                  <button className="logo-preview-button" type="button" data-preview-id={asset.id}
+                    style={{minHeight: Math.min(318, Math.max(218, settings.height + 64))}}
+                    onClick={() => openFocus(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
+                    <motion.span className="forge-v6-art" layoutId={animateGallery ? `logo-art-${asset.id}` : undefined}
+                      transition={{ layout: { duration: .32, ease: [.16, 1, .3, 1] } }}>
+                      <LogoPreview asset={asset} settings={settings} />
+                    </motion.span>
                     <span className="forge-v5-card-size">{settings.width} × {settings.height} PX</span>
                   </button>
                   <div className="logo-card-controls">
@@ -479,22 +522,35 @@ export function LogoResizer() {
                       <button type="button" onClick={() => void exportOne(asset)} disabled={busy}>Save</button>
                     </div>
                   </div>
-                </article>
+                </motion.article>
               ))}
+              </AnimatePresence>
             </div>
           )}
         </main>
-        {detail && <aside className="logo-detail" aria-label="Focus Mode">
+        <AnimatePresence initial={false}>
+        {detail && <motion.aside className="logo-detail" aria-label="Focus Mode" key="focus-panel"
+          initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 18 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: prefersReducedMotion ? 0 : 10 }}
+          transition={{ duration: prefersReducedMotion ? .08 : .29, ease: [.16, 1, .3, 1] }}>
           <div className="logo-detail-heading">
             <strong>Focus Mode</strong>
             <div className="logo-detail-buttons">
               <button type="button" aria-label="Previous logo" onClick={() => navigateFocus(-1)}>←</button>
               <button type="button" aria-label="Next logo" onClick={() => navigateFocus(1)}>→</button>
-              <button type="button" aria-label="Close Focus Mode" onClick={() => setFocused(null)}>×</button>
+              <button type="button" aria-label="Close Focus Mode" onClick={closeFocus}>×</button>
             </div>
           </div>
           <p className="logo-subtle">{cards.findIndex(asset => asset.id === detail.id) + 1} of {cards.length}</p>
-          <div className="forge-v5-focus-stage"><LogoPreview asset={detail} settings={settings} className="logo-detail-preview" /><small>{settings.width} × {settings.height} PX</small></div>
+          <div className="forge-v5-focus-stage">
+            <motion.span className="forge-v6-art forge-v6-focus-art"
+              layoutId={animateGallery ? `logo-art-${detail.id}` : undefined}
+              transition={{ layout: { duration: .32, ease: [.16, 1, .3, 1] } }}>
+              <LogoPreview asset={detail} settings={settings} className="logo-detail-preview" />
+            </motion.span>
+            <small>{settings.width} × {settings.height} PX</small>
+          </div>
           <div className="forge-v5-focus-section-label">ASSET DETAILS</div>
           <label>Filename<input value={detail.filename} onChange={event => patchCard(detail.id, { filename: sanitizeLogoFilename(event.target.value) })} /></label>
           <label>Overlay label<textarea rows={3} value={detail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
@@ -508,7 +564,9 @@ export function LogoResizer() {
             <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</button>
             <button type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
           </div>
-        </aside>}
+        </motion.aside>}
+        </AnimatePresence>
+        </LayoutGroup>
       </div>
       {pending && <div className="logo-modal-backdrop" role="presentation">
         <div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions">
