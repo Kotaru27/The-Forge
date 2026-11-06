@@ -521,6 +521,11 @@
 .forge-v7-workroom .forge-v5-format select{min-width:81px}
 .forge-v7-workroom .forge-v5-type-controls input:focus-visible{outline:2px solid #d9fb79;outline-offset:2px}
 
+.forge-v7-workroom .forge-v6-notice{
+  /* Never cover the sidebar's Save/Delete actions, even during a new import. */
+  left:calc(78px + 26px);right:auto;bottom:24px;
+  width:min(360px,calc(100vw - 120px));
+}
 /* Tactile buttons: depth appears on interaction, never as a persistent glow.
    Motion communicates selection, not decoration. */
 .forge-v7-workroom .forge-v5-action,
