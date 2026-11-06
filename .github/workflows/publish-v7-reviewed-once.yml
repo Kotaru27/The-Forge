@@ -1,0 +1,21 @@
+name: One-time reviewed Logo Resizer V7 Pages publish
+on:
+  push:
+    branches: [release/pages-preview]
+
+# Runs only for the reviewed V7 merge; dispatches the existing fully gated
+# manual workflow, which independently verifies build, browser tests and live site.
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch-reviewed-pages:
+    if: contains(github.event.head_commit.message, '[publish-reviewed-v7]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch existing gated Pages workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref release/pages-preview

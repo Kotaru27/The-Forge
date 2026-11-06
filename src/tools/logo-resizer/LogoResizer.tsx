@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent, type CSSProperties } from 'react';
 import JSZip from 'jszip';
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
 import { LogoResizerIcon } from './LogoResizerIcon';
@@ -13,6 +13,7 @@ import {
   validateLogoDimensions, type LogoAsset, type LogoServer, type LogoSettings,
 } from './types';
 import './logo-resizer.css';
+import './logo-resizer-v7.css';
 
 let nextLogoId = 0;
 const isOffice = (file: File) => /\.(pptx|xlsx|xlsm)$/i.test(file.name);
@@ -20,6 +21,10 @@ const isImage = (file: File) => file.type.startsWith('image/') || /\.(png|jpe?g|
 const dimensions = (w: number, h: number) => ({ width: String(w), height: String(h) });
 type Snapshot = { cards: LogoAsset[]; settings: LogoSettings };
 type WorkProgress = { phase: string; done: number; total: number };
+const rangeStyle = (value: number, min: number, max: number): CSSProperties => ({
+  '--v7-fill': `${Math.max(0, Math.min(100, (value - min) / (max - min) * 100))}%`,
+} as CSSProperties);
+
 
 async function loadAsset(file: File): Promise<LogoAsset> {
   const url = URL.createObjectURL(file);
@@ -78,6 +83,8 @@ export function LogoResizer() {
   const [notice, setNotice] = useState('');
   const [workProgress, setWorkProgress] = useState<WorkProgress | null>(null);
   const focusOrigin = useRef<string | null>(null);
+  const editorRef = useRef<HTMLElement>(null);
+  const focusWasOpen = useRef(false);
   const prefersReducedMotion = Boolean(useReducedMotion());
 
   useEffect(() => {
@@ -305,7 +312,7 @@ export function LogoResizer() {
     setFocused(cards[(index + direction + cards.length) % cards.length].id);
   }
   useEffect(() => {
-    if (!focused) return;
+    if (!focused || pending || confirmClear || showLinks) return;
     const keydown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         if (event.key !== 'Escape') return;
@@ -317,7 +324,41 @@ export function LogoResizer() {
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
     // Focus navigation must follow the currently visible list.
-  }, [focused, cards]);
+  }, [focused, cards, pending, confirmClear, showLinks]);
+
+  useEffect(() => {
+    // Focus once on opening, not on every Previous/Next navigation or field edit.
+    if (focused && !focusWasOpen.current) editorRef.current?.focus({ preventScroll: true });
+    focusWasOpen.current = Boolean(focused);
+  }, [focused]);
+
+  // Treat confirmation and link dialogs as real keyboard-contained surfaces.
+  useEffect(() => {
+    if (!pending && !confirmClear && !showLinks) return;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const selectFocusable = () => [...document.querySelectorAll<HTMLElement>(
+      '.logo-modal[role="dialog"] button, .logo-modal[role="dialog"] input, .logo-modal[role="dialog"] select, .logo-modal[role="dialog"] textarea'
+    )].filter(element => !element.hasAttribute('disabled') && element.getClientRects().length > 0);
+    const frame = window.requestAnimationFrame(() => selectFocusable()[0]?.focus());
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (confirmNoLogos) setConfirmNoLogos(false);
+        else if (pending) setPending(null);
+        else if (confirmClear) setConfirmClear(false);
+        else setShowLinks(false);
+      } else if (event.key === 'Tab') {
+        const items = selectFocusable();
+        if (!items.length) return;
+        const first = items[0], last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        else if (!items.includes(document.activeElement as HTMLElement)) { event.preventDefault(); first.focus(); }
+      }
+    };
+    window.addEventListener('keydown', keydown);
+    return () => { window.cancelAnimationFrame(frame); window.removeEventListener('keydown', keydown); previous?.focus(); };
+  }, [Boolean(pending), confirmClear, showLinks, confirmNoLogos]);
 
   const detail = cards.find(asset => asset.id === focused) ?? null;
   // Avoid expensive FLIP measurements and staggered animation on large logo batches.
@@ -357,7 +398,7 @@ export function LogoResizer() {
   }
 
   return (
-    <section className="logo-workspace forge-logo-v5" aria-label="Logo Resizer">
+    <section className="logo-workspace forge-logo-v5 forge-v7-workroom" aria-label="Logo Resizer">
       <input ref={inputRef} type="file" accept="image/*,.pptx,.xlsx,.xlsm" multiple hidden onChange={onFileInput} />
       <div className="forge-v5-head" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
         <div className="forge-v5-command-deck" aria-label="Global logo settings and actions">
@@ -374,12 +415,16 @@ export function LogoResizer() {
             <div className="forge-v5-group forge-v5-presets">
               <span className="forge-v5-group-title">CANVAS PRESETS</span>
               <div className="forge-v5-preset-grid" aria-label="Size presets">
-                {LOGO_PRESETS.map(preset => <button
-                  key={preset.label} type="button"
-                  className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''}
-                  aria-pressed={settings.width === preset.width && settings.height === preset.height}
-                  onClick={() => setSize(preset.width, preset.height)}
-                >{preset.label}</button>)}
+                {LOGO_PRESETS.map(preset => {
+                  const selected = settings.width === preset.width && settings.height === preset.height;
+                  return <button key={preset.label} type="button" className={selected ? 'selected' : ''}
+                    aria-pressed={selected} onClick={() => setSize(preset.width, preset.height)}>
+                    {selected && <motion.span className="forge-v7-preset-selection"
+                      layoutId={prefersReducedMotion ? undefined : 'forge-v7-preset'}
+                      transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 38, mass: .8 }} />}
+                    <span className="forge-v7-preset-copy">{preset.label}</span>
+                  </button>;
+                })}
               </div>
             </div>
             <div className="forge-v5-group forge-v5-custom">
@@ -420,12 +465,12 @@ export function LogoResizer() {
               <span className="forge-v5-group-title">IMAGE POSITIONING</span>
               <div className="forge-v5-sliders">
                 <label><span>PADDING</span>
-                  <input type="range" aria-label="Global image padding" min="0" max="150" value={settings.padding}
+                  <input type="range" aria-label="Global image padding" min="0" max="150" value={settings.padding} style={rangeStyle(settings.padding, 0, 150)}
                     onChange={event=>patchSettings({padding:Number(event.target.value)})}/>
                   <output>{settings.padding} px</output>
                 </label>
                 <label><span>IMAGE Y</span>
-                  <input type="range" aria-label="Global vertical image offset" min="-50" max="50" value={settings.imageOffset}
+                  <input type="range" aria-label="Global vertical image offset" min="-50" max="50" value={settings.imageOffset} style={rangeStyle(settings.imageOffset, -50, 50)}
                     onChange={event=>patchSettings({imageOffset:Number(event.target.value)})}/>
                   <output>{settings.imageOffset}</output>
                 </label>
@@ -466,9 +511,9 @@ export function LogoResizer() {
       </AnimatePresence>
       {error && <div className="logo-error" role="alert">{error}</div>}
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
-      <div className="logo-body">
-        <LayoutGroup id="forge-logo-workroom">
+      <div className="logo-body forge-v7-body">
         <main className={`logo-gallery${dragActive ? ' forge-v6-drag-active' : ''}`}
+          inert={Boolean(detail)} aria-hidden={Boolean(detail)}
           onDragEnter={onGalleryDragEnter} onDragLeave={onGalleryDragLeave}
           onDragOver={event => { if (Array.from(event.dataTransfer.types).includes('Files')) event.preventDefault(); }}
           onDrop={onDrop}>
@@ -486,7 +531,8 @@ export function LogoResizer() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: prefersReducedMotion ? 0 : .17 }}>
+              // Empty state must not occupy space after import; cards start at the board top.
+              transition={{ duration: 0 }}>
               <div className="forge-v5-drop-icon"><LogoResizerIcon /></div>
               <h3>Make room for your logos.</h3>
               <p>Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually.</p>
@@ -514,11 +560,10 @@ export function LogoResizer() {
                   <button className="logo-preview-button" type="button" data-preview-id={asset.id}
                     style={{minHeight: Math.min(318, Math.max(218, settings.height + 64))}}
                     onClick={() => openFocus(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
-                    <motion.span className="forge-v6-art" layoutId={animateGallery ? `logo-art-${asset.id}` : undefined}
-                      layoutDependency={focused}
-                      transition={{ layout: { duration: .32, ease: [.16, 1, .3, 1] } }}>
+                    <span className="forge-v6-art forge-v7-card-art">
                       <LogoPreview asset={asset} settings={settings} />
-                    </motion.span>
+                    </span>
+                    <span className="forge-v7-card-open" aria-hidden="true">OPEN EDITOR <span>↗</span></span>
                     <span className="forge-v5-card-size">{settings.width} × {settings.height} PX</span>
                   </button>
                   <div className="logo-card-controls">
@@ -534,70 +579,159 @@ export function LogoResizer() {
           </div>
         </main>
         <AnimatePresence initial={false}>
-        {detail && <motion.aside className="logo-detail" aria-label="Focus Mode" key="focus-panel"
-          initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 18 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: prefersReducedMotion ? 0 : 10 }}
-          transition={{ duration: prefersReducedMotion ? .08 : .29, ease: [.16, 1, .3, 1] }}>
+        {detail && <motion.aside ref={editorRef} tabIndex={-1} className="logo-detail forge-v7-editor" aria-label="Focus Mode"
+          key="focus-panel"
+          initial={{ x: prefersReducedMotion ? 0 : 28 }}
+          animate={{ x: 0 }}
+          exit={{ x: prefersReducedMotion ? 0 : 22 }}
+          transition={{ type: 'spring', stiffness: 380, damping: 43, mass: .9 }}>
           <div className="logo-detail-heading">
-            <strong>Focus Mode</strong>
+            <div className="forge-v7-editor-title">
+              <span className="forge-v7-eyebrow">THE FORGE / IMAGE EDITOR</span>
+              <strong>Focus Mode<span className="forge-v7-title-dot">.</span></strong>
+            </div>
+            <span className="forge-v7-editor-counter">{cards.findIndex(asset => asset.id === detail.id) + 1} <span>of</span> {cards.length}</span>
             <div className="logo-detail-buttons">
-              <button type="button" aria-label="Previous logo" onClick={() => navigateFocus(-1)}>←</button>
-              <button type="button" aria-label="Next logo" onClick={() => navigateFocus(1)}>→</button>
-              <button type="button" aria-label="Close Focus Mode" onClick={closeFocus}>×</button>
+              <button type="button" aria-label="Previous logo" title="Previous logo (←)" onClick={() => navigateFocus(-1)}>←</button>
+              <button type="button" aria-label="Next logo" title="Next logo (→)" onClick={() => navigateFocus(1)}>→</button>
+              <button type="button" aria-label="Close Focus Mode" title="Close Focus Mode (Esc)" onClick={closeFocus}>×</button>
             </div>
           </div>
-          <p className="logo-subtle">{cards.findIndex(asset => asset.id === detail.id) + 1} of {cards.length}</p>
-          <div className="forge-v5-focus-stage">
-            <motion.span className="forge-v6-art forge-v6-focus-art"
-              layoutId={animateGallery ? `logo-art-${detail.id}` : undefined}
-              layoutDependency={focused}
-              transition={{ layout: { duration: .32, ease: [.16, 1, .3, 1] } }}>
-              <LogoPreview asset={detail} settings={settings} className="logo-detail-preview" />
-            </motion.span>
-            <small>{settings.width} × {settings.height} PX</small>
-          </div>
-          <div className="forge-v5-focus-section-label">ASSET DETAILS</div>
-          <label>Filename<input value={detail.filename} onChange={event => patchCard(detail.id, { filename: sanitizeLogoFilename(event.target.value) })} /></label>
-          <label>Overlay label<textarea rows={3} value={detail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
-          <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={detail.fontSizeOverride ?? ''} onChange={event => patchCard(detail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
-          <div className="forge-v5-focus-section-label">POSITIONING</div>
-          <label>Image padding {detail.paddingOverride ?? settings.padding}px <input type="range" min="0" max="150" value={detail.paddingOverride ?? settings.padding} onChange={event => patchCard(detail.id, { paddingOverride: Number(event.target.value) })} /></label>
-          <button type="button" onClick={() => patchCard(detail.id, { paddingOverride: null })}>Reset padding to global</button>
-          <label>Image Y offset {detail.imageOffset} <input type="range" min="-50" max="50" value={detail.imageOffset} onChange={event => patchCard(detail.id, { imageOffset: Number(event.target.value) })} /></label>
-          <label>Text Y offset {detail.textOffset} <input type="range" min="0" max="100" value={detail.textOffset} onChange={event => patchCard(detail.id, { textOffset: Number(event.target.value) })} /></label>
-          <div className="logo-detail-actions">
-            <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</button>
-            <button type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
+          <div className="forge-v7-editor-content">
+            <div className="forge-v7-editor-stage">
+              <div className="forge-v7-stage-topline"><span>LIVE OUTPUT PREVIEW</span><span>{settings.width} × {settings.height} PX</span></div>
+              <div className="forge-v5-focus-stage">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div key={detail.id} className="forge-v6-art forge-v6-focus-art"
+                    initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : .975 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : .985 }}
+                    transition={{ duration: prefersReducedMotion ? .01 : .19, ease: [.2, 1, .3, 1] }}>
+                    <LogoPreview asset={detail} settings={settings} className="logo-detail-preview" />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+              <div className="forge-v7-stage-bottomline">
+                <span>{detail.filename || detail.source.name}</span>
+                <span>WHITE CANVAS · ORIGINAL OUTPUT DIMENSIONS</span>
+              </div>
+            </div>
+            <div className="forge-v7-editor-inspector">
+              <div className="forge-v7-inspector-heading">
+                <div><span className="forge-v7-eyebrow">PRECISION CONTROLS</span><h3>Asset settings</h3></div>
+                <span className="forge-v7-inspector-live"><i aria-hidden="true" /> LIVE</span>
+              </div>
+              <div className="forge-v7-inspector-fields">
+                <div className="forge-v5-focus-section-label">ASSET DETAILS</div>
+                <label>Filename<input value={detail.filename} onChange={event => patchCard(detail.id, { filename: sanitizeLogoFilename(event.target.value) })} /></label>
+                <label>Overlay label<textarea rows={3} value={detail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
+                <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={detail.fontSizeOverride ?? ''} onChange={event => patchCard(detail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
+                <div className="forge-v5-focus-section-label">POSITIONING</div>
+                <label className="forge-v7-range-control">
+                  <span>Image padding <span className="forge-v7-value">{detail.paddingOverride ?? settings.padding}px</span></span>
+                  <input aria-label="Focus image padding" type="range" min="0" max="150" value={detail.paddingOverride ?? settings.padding}
+                    style={rangeStyle(detail.paddingOverride ?? settings.padding, 0, 150)}
+                    onChange={event => patchCard(detail.id, { paddingOverride: Number(event.target.value) })} />
+                </label>
+                <button type="button" className="forge-v7-reset" onClick={() => patchCard(detail.id, { paddingOverride: null })}>↶ Reset padding to global</button>
+                <label className="forge-v7-range-control">
+                  <span>Image Y offset <span className="forge-v7-value">{detail.imageOffset}</span></span>
+                  <input aria-label="Focus image Y offset" type="range" min="-50" max="50" value={detail.imageOffset}
+                    style={rangeStyle(detail.imageOffset, -50, 50)}
+                    onChange={event => patchCard(detail.id, { imageOffset: Number(event.target.value) })} />
+                </label>
+                <label className="forge-v7-range-control">
+                  <span>Text Y offset <span className="forge-v7-value">{detail.textOffset}</span></span>
+                  <input aria-label="Focus text Y offset" type="range" min="0" max="100" value={detail.textOffset}
+                    style={rangeStyle(detail.textOffset, 0, 100)}
+                    onChange={event => patchCard(detail.id, { textOffset: Number(event.target.value) })} />
+                </label>
+              </div>
+              <div className="logo-detail-actions">
+                <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image <span aria-hidden="true">↗</span></button>
+                <button className="forge-v7-danger" type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
+              </div>
+            </div>
           </div>
         </motion.aside>}
         </AnimatePresence>
-        </LayoutGroup>
       </div>
-      {pending && <div className="logo-modal-backdrop" role="presentation">
-        <div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions">
-          <h2>Set logo dimensions</h2>
-          <p>Confirm the size before importing {pending.length} file(s).</p>
-          <div className="logo-presets">
-            {LOGO_PRESETS.map(preset => <button type="button" key={preset.label} className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''} onClick={() => setSize(preset.width, preset.height)}>{preset.label}</button>)}
-          </div>
-          <div className="logo-two-fields">
-            <label>Width (px)<input type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width', event.target.value)} /></label>
-            <label>Height (px)<input type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height', event.target.value)} /></label>
-          </div>
-          <div className="logo-modal-actions"><button type="button" onClick={() => setPending(null)}>Cancel</button><button className="logo-primary" type="button" onClick={() => void importPending()}>Apply &amp; process</button></div>
-        </div>
-      </div>}
-      {confirmClear && <div className="logo-modal-backdrop"><div className="logo-modal" role="dialog" aria-modal="true" aria-label="Clear logo workspace"><h2>Clear all logos?</h2><p>Remove all uploaded logos and reset settings? You can undo this with your edits intact.</p><div className="logo-modal-actions"><button type="button" onClick={() => setConfirmClear(false)}>Cancel</button><button type="button" onClick={clearAll}>Clear all</button></div></div></div>}
-      {showLinks && <div className="logo-modal-backdrop"><div className="logo-modal logo-link-dialog" role="dialog" aria-modal="true" aria-label="Generate logo links">
-        <div className="logo-link-title"><h2>Generate logo links</h2><button type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</button></div>
-        <div className="logo-two-fields"><label>Server<select value={server} onChange={event => setServer(event.target.value as LogoServer)}><option value="s3">S3 Media</option><option value="aldi">Aldi Media</option></select></label><label>Folder path<input value={folder} onChange={event => setFolder(event.target.value)} placeholder="logos/2026/summer" /></label></div>
-        <label>Brand names (one per line)<textarea rows={7} value={brands} onChange={event => setBrands(event.target.value)} placeholder="Brand A&#10;Brand B" /></label>
-        <label>Generated HTML<textarea rows={7} value={links} readOnly /></label>
-        <p className="logo-subtle" role="status">{linkMessage}</p>
-        <div className="logo-modal-actions"><button type="button" onClick={() => setShowLinks(false)}>Close</button><button type="button" onClick={() => makeLinks()}>Generate</button><button className="logo-primary" type="button" onClick={() => void copyLinks()}>Copy HTML</button></div>
-        {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded"><p>No logos are uploaded. Generate links using the brand names as filenames?</p><button type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</button><button type="button" onClick={() => makeLinks(true)}>Proceed anyway</button></div>}
-      </div></div>}
+      <AnimatePresence initial={false}>
+        {pending && <motion.div key="dimension-dialog" className="logo-modal-backdrop" role="presentation"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : .2 }}>
+          <motion.div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions"
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14, scale: prefersReducedMotion ? 1 : .97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: prefersReducedMotion ? 0 : 8, scale: prefersReducedMotion ? 1 : .99 }}
+            transition={{ duration: prefersReducedMotion ? 0 : .28, ease: [.2, 1, .25, 1] }}>
+            <span className="forge-v7-modal-kicker">IMPORT / ASSET PREPARATION</span>
+            <h2>Set logo dimensions</h2>
+            <p>Confirm the output canvas for {pending.length} {pending.length === 1 ? 'file' : 'files'} before importing.</p>
+            <div className="logo-presets" aria-label="Import size presets">
+              {LOGO_PRESETS.map(preset => <button type="button" key={preset.label}
+                className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''}
+                onClick={() => setSize(preset.width, preset.height)}>{preset.label}</button>)}
+            </div>
+            <div className="logo-two-fields">
+              <label>Width (px)<input type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width', event.target.value)} /></label>
+              <label>Height (px)<input type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height', event.target.value)} /></label>
+            </div>
+            <div className="logo-modal-actions">
+              <button type="button" onClick={() => setPending(null)}>Cancel</button>
+              <button className="logo-primary" type="button" onClick={() => void importPending()}>Apply &amp; process <span aria-hidden="true">↗</span></button>
+            </div>
+          </motion.div>
+        </motion.div>}
+        {confirmClear && <motion.div key="clear-dialog" className="logo-modal-backdrop"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : .2 }}>
+          <motion.div className="logo-modal" role="dialog" aria-modal="true" aria-label="Clear logo workspace"
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14, scale: prefersReducedMotion ? 1 : .97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : .26, ease: [.2, 1, .25, 1] }}>
+            <span className="forge-v7-modal-kicker">WORKROOM / RECOVERABLE ACTION</span>
+            <h2>Clear all logos?</h2>
+            <p>Remove the imported logos and reset the settings? You can restore the entire workspace with edits for 60 seconds.</p>
+            <div className="logo-modal-actions">
+              <button type="button" onClick={() => setConfirmClear(false)}>Cancel</button>
+              <button type="button" className="forge-v7-modal-danger" onClick={clearAll}>Clear all</button>
+            </div>
+          </motion.div>
+        </motion.div>}
+        {showLinks && <motion.div key="links-dialog" className="logo-modal-backdrop"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : .2 }}>
+          <motion.div className="logo-modal logo-link-dialog" role="dialog" aria-modal="true" aria-label="Generate logo links"
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14, scale: prefersReducedMotion ? 1 : .97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: prefersReducedMotion ? 0 : 8 }}
+            transition={{ duration: prefersReducedMotion ? 0 : .28, ease: [.2, 1, .25, 1] }}>
+            <span className="forge-v7-modal-kicker">EXPORT / HTML LINKS</span>
+            <div className="logo-link-title"><h2>Generate logo links</h2>
+              <button type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</button>
+            </div>
+            <div className="logo-two-fields">
+              <label>Server<select value={server} onChange={event => setServer(event.target.value as LogoServer)}>
+                <option value="s3">S3 Media</option><option value="aldi">Aldi Media</option></select></label>
+              <label>Folder path<input value={folder} onChange={event => setFolder(event.target.value)} placeholder="logos/2026/summer" /></label>
+            </div>
+            <label>Brand names (one per line)<textarea rows={7} value={brands} onChange={event => setBrands(event.target.value)} placeholder="Brand A&#10;Brand B" /></label>
+            <label>Generated HTML<textarea rows={7} value={links} readOnly /></label>
+            <p className="logo-subtle" role="status">{linkMessage}</p>
+            <div className="logo-modal-actions">
+              <button type="button" onClick={() => setShowLinks(false)}>Close</button>
+              <button type="button" onClick={() => makeLinks()}>Generate</button>
+              <button className="logo-primary" type="button" onClick={() => void copyLinks()}>Copy HTML</button>
+            </div>
+            {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded">
+              <p>No logos are uploaded. Generate links using the brand names as filenames?</p>
+              <button type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</button>
+              <button type="button" onClick={() => makeLinks(true)}>Proceed anyway</button>
+            </div>}
+          </motion.div>
+        </motion.div>}
+      </AnimatePresence>
     </section>
   );
 }
