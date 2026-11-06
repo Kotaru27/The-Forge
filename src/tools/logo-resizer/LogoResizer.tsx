@@ -515,6 +515,7 @@ export function LogoResizer() {
                     style={{minHeight: Math.min(318, Math.max(218, settings.height + 64))}}
                     onClick={() => openFocus(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
                     <motion.span className="forge-v6-art" layoutId={animateGallery ? `logo-art-${asset.id}` : undefined}
+                      layoutDependency={focused}
                       transition={{ layout: { duration: .32, ease: [.16, 1, .3, 1] } }}>
                       <LogoPreview asset={asset} settings={settings} />
                     </motion.span>
@@ -550,6 +551,7 @@ export function LogoResizer() {
           <div className="forge-v5-focus-stage">
             <motion.span className="forge-v6-art forge-v6-focus-art"
               layoutId={animateGallery ? `logo-art-${detail.id}` : undefined}
+              layoutDependency={focused}
               transition={{ layout: { duration: .32, ease: [.16, 1, .3, 1] } }}>
               <LogoPreview asset={detail} settings={settings} className="logo-detail-preview" />
             </motion.span>
