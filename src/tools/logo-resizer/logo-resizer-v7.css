@@ -279,11 +279,48 @@
   .forge-v7-workroom .forge-v5-command-deck{padding-inline:13px}
   .forge-v7-workroom .forge-v5-control-grid{row-gap:13px}
 }
+@media(min-width:1481px){
+  .forge-v7-workroom .forge-v5-sliders{max-width:500px}
+}
 @media(max-width:1160px){
+  /* Dedicated laptop rhythm: keep all eight control groups in order without collisions. */
+  .forge-v7-workroom .forge-v5-control-grid{
+    grid-template-columns:minmax(132px,1fr) minmax(155px,1.1fr) minmax(190px,1.35fr) minmax(140px,1fr);
+    grid-template-areas:
+      "import presets custom format"
+      "typography typography options export"
+      "position position position position";
+    column-gap:12px;row-gap:15px;
+  }
+  .forge-v7-workroom .forge-v5-position .forge-v5-sliders{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    max-width:none;gap:17px;
+  }
+  .forge-v7-workroom .forge-v5-position .forge-v5-sliders label{
+    width:100%;height:39px;min-height:39px;max-width:none;flex:none;
+  }
+  .forge-v7-workroom .forge-v5-exports{max-width:none}
   .forge-v7-workroom .logo-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
   .forge-v7-editor-content{grid-template-columns:minmax(0,1fr) 330px}
   .forge-v7-editor-stage{padding:18px 21px}
   .forge-v7-workroom .forge-v7-inspector-fields{padding:15px 19px 20px}
+}
+@media(max-width:850px){
+  .forge-v7-workroom .forge-v5-control-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-areas:
+      "import presets"
+      "custom format"
+      "typography typography"
+      "options options"
+      "position position"
+      "export export";
+    gap:13px;
+  }
+  .forge-v7-workroom .forge-v5-import,.forge-v7-workroom .forge-v5-exports{max-width:none}
+  .forge-v7-workroom .forge-v5-position .forge-v5-sliders{grid-template-columns:1fr;gap:6px}
+  .forge-v7-workroom .forge-v5-options .forge-v5-checkboxes{display:flex;flex-direction:row;flex-wrap:wrap}
+  .forge-v7-workroom .forge-v5-options .forge-v5-checkboxes label{min-width:142px}
 }
 @media(max-width:900px){
   .forge-v7-editor-content{grid-template-columns:minmax(0,1fr) 315px}
