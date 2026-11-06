@@ -43,11 +43,11 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - name: Upload sidebar and typography visual QA
-        if: github.event_name == 'pull_request' && github.head_ref == 'design/logo-resizer-v7-sidebar-motion-polish'
+        if: always() && github.event_name == 'pull_request' && github.head_ref == 'design/logo-resizer-v7-sidebar-motion-polish'
         uses: actions/upload-artifact@v4
         with:
           name: forge-logo-sidebar-motion-qa
-          path: test-results/**/v*.png
+          path: test-results
           if-no-files-found: error
           retention-days: 7
 
