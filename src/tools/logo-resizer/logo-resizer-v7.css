@@ -577,3 +577,52 @@
   .forge-v7-workroom :is(.forge-v5-action,.logo-card-footer button,.logo-detail-actions button,
   .logo-detail-buttons button,.forge-v5-preset-grid button){transition:none!important}
 }
+
+
+/* V7.1 final inspector correction: a naturally scrolling sidebar, not stacked
+   fixed-height panes. At 720px-high desktops the old two-row grid squeezed
+   controls underneath the preview and intercepted Save/Reset pointer events. */
+.forge-v7-workroom .forge-v7-body .logo-detail.forge-v7-editor{
+  display:block!important;overflow-y:auto!important;overflow-x:hidden!important;
+  scrollbar-color:#607b62 #162119;scrollbar-width:thin;
+  scroll-padding-top:76px;overscroll-behavior:contain;
+}
+.forge-v7-workroom .forge-v7-body .logo-detail.forge-v7-editor::-webkit-scrollbar{width:8px}
+.forge-v7-workroom .forge-v7-body .logo-detail.forge-v7-editor::-webkit-scrollbar-track{background:#162119}
+.forge-v7-workroom .forge-v7-body .logo-detail.forge-v7-editor::-webkit-scrollbar-thumb{
+  border-radius:10px;border:2px solid #162119;background:#607b62;
+}
+.forge-v7-workroom .forge-v7-editor .logo-detail-heading{
+  position:sticky;top:0;z-index:12;
+  background:#16231a;box-shadow:0 4px 18px #0003;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-editor-content{
+  display:flex!important;flex-direction:column!important;
+  grid-template-columns:none!important;grid-template-rows:none!important;
+  flex:none!important;height:auto!important;min-height:0!important;
+  overflow:visible!important;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-editor-stage{
+  flex:none!important;min-height:0!important;height:auto!important;
+  overflow:hidden!important;position:relative;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-editor-inspector{
+  display:block!important;flex:none!important;height:auto!important;
+  min-height:0!important;overflow:visible!important;
+}
+.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-heading{position:relative}
+.forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields{
+  display:flex!important;flex-direction:column!important;
+  max-height:none!important;height:auto!important;
+  overflow:visible!important;
+}
+.forge-v7-workroom .forge-v7-editor .logo-detail-actions{
+  position:sticky;bottom:0;z-index:10;
+  background:#18251b;border-top-color:#567356;
+  box-shadow:0 -10px 25px #0006;
+}
+@media(max-height:790px){
+  .forge-v7-workroom .forge-v7-editor .forge-v5-focus-stage{height:210px;flex-basis:210px}
+  .forge-v7-workroom .forge-v7-editor .forge-v7-editor-stage{padding-top:9px;padding-bottom:9px}
+  .forge-v7-workroom .forge-v7-editor .forge-v7-inspector-fields{gap:11px}
+}
