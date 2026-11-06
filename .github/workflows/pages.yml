@@ -6,6 +6,11 @@ on:
     types: [completed]
     branches: [main]
 
+# Serialize Pages deployments so rapid UI commits never collide.
+concurrency:
+  group: forge-pages-preview
+  cancel-in-progress: false
+
 permissions:
   contents: read
   pages: write

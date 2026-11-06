@@ -1,40 +1,41 @@
-# The Forge — React + TypeScript migration
+# The Forge — Creative Toolkit
 
-Phase 1 is the compatibility foundation. React and TypeScript own the application shell while existing CTK engines continue to run in an isolated workspace. All eight tool routes remain available. The UI is deliberately basic: AMOLED black, one sidebar, one title, no decorative CTK homepage, intro, or extra widgets.
+A local-first, desktop-oriented creative workspace built with React 19, TypeScript and Vite. The Forge has its own graphite-and-brass visual system, distinct from the CTK source application.
 
-This is not yet a full TypeScript rewrite of processing engines, a Windows executable, or a Tauri updater.
+## Current architecture
+
+React owns the navigation, title bar, and native Link Generator. The other tool engines still execute in an isolated compatibility iframe, generated from a pinned public CTK baseline; processing behavior is preserved until it is migrated and independently verified. The current routes are Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard, Link Generator, Ad Downloader and Video Compressor.
+
+### Logo Studio (visual upgrade)
+
+The Logo Resizer's original processing engine remains unchanged. A scoped layer in `src/legacy/forge-logo-studio.css` and `src/legacy/forge-logo-studio.js` adds:
+- Graphite/brass interface, refined controls and typography, animated action feedback
+- Animated side-by-side, right-hand asset inspector (focus mode)
+- Real export-aspect-ratio preview cards, output stage, file counts and import drop affordance
+- Quick output presets: 150×150, 200×200, 200×150, 250×250
+- Reduced-motion alternative, keyboard activation of asset previews
+
+Image and Office-media import, high-quality resizing, per-card edits, per-card download, ZIP export and original file handlers stay in the pinned CTK engine. No CTK code is modified or republished.
 
 ## Local development
 
-Requirements: Node.js 22.12+, Git and npm.
+Requires Node.js 22.12+ and Git. Run:
 
-Install dependencies with `npm install`, then run `npm run dev`. The first setup fetches a pinned, public CTK baseline, or set the CTK_SOURCE_DIR environment variable to a local copy of the uploaded CTK source.
+```bash
+npm install
+npm run dev
+npm test
+npm run build
+```
 
-Commands:
-- `npm run prepare:legacy` generates a local compatibility workspace.
-- `npm test` runs bridge checks and original CTK regression tests.
-- `npm run build` produces a Vite application build.
+`npm run prepare:legacy` clones and verifies the pinned CTK commit, creates `public/legacy`, copies approved unchanged CTK runtime assets and applies the isolated Forge visual skin. You can set `CTK_SOURCE_DIR` to a local CTK checkout instead. Generated content in `public/legacy` is ignored by Git.
 
-The generator copies the original tested engine into ignored public/legacy and hides the legacy homepage and navigation while preserving tool controls. React navigates through a typed, origin-checked message bridge. The compatibility source remains pinned to commit 617615c0b4370c795ddfd6dc4c300920cd595883 of Kotaru27/CTK until each engine is migrated.
+## Verification and deployment
 
-This is a static client-side app. Do not treat the public site as access-controlled or upload confidential files there.
+Pushes and pull requests run `.github/workflows/ci.yml`, which runs the original CTK compatibility tests, React bridge tests, TypeScript typecheck and production build. On successful main-branch CI, the Pages workflow builds and publishes the `/The-Forge/` static site. Deployments are serialized to avoid collisions when multiple UI commits land close together. GitHub Pages also supports a manual dispatch.
 
-## Migration order
+**Automated checks do not establish visual/browser parity.** Before declaring the UI production-ready, test image and PPTX/XLSX imports, size prompts, overrides, focus open/close, keyboard navigation, delete/clear/undo, PNG/JPEG export and ZIP contents on a real desktop browser with representative files.
 
-1. Record baseline outputs and browser workflows for every tool.
-2. Move the shared shell and navigational state into React (started).
-3. Migrate Link Generator and Logo Resizer into typed services and components.
-4. Migrate Image Splitter, PDF to Image, Video Stills and Ad Downloader.
-5. Migrate Storyboard and Video Compressor after output comparison.
-6. Remove the compatibility bridge when all workflows pass regression tests.
-7. Only then integrate Tauri 2, Windows packaging and GitHub-based updates.
+## Future migration
 
-## GitHub Pages
-
-The preview workflow is manually triggered to prevent publishing an unverified migration. Configure Settings → Pages → GitHub Actions and run the Publish web preview workflow after verification. Vite uses FORGE_BASE_PATH=/The-Forge/.
-
-Automated bridge checks do not establish full functional parity. Browser-based workflows and generated file outputs must still be tested.
-
-## Tool migration status
-
-Link Generator is now a native React component backed by a TypeScript processing service, with compatibility output tests. Seven other tools and the original Video Compressor still use the preserved CTK runtime. Browser E2E tests remain outstanding.
+Replace each iframe engine with React + TypeScript only after input/output and workflow parity are demonstrated. The last compatibility bridge should be removed only when all migrated tools have regression coverage. The site is static and does not provide access control; do not upload confidential material.
