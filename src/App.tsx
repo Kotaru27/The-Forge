@@ -1,16 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { VideoStills } from './tools/video-stills/VideoStills';
-import { Storyboard } from './tools/storyboard/Storyboard';
-import type { StoryboardRef } from './tools/storyboard/engine';
-import type { TransferGroup, TransferResult } from './tools/video-stills/engine';
+import { useCallback, useEffect, useState } from 'react';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
+import { ArrowUpRight, Download, FileImage, Film, Image, LayoutGrid, Link2, Scissors, Video, type LucideIcon } from 'lucide-react';
+import { LegacyWorkspace } from './components/LegacyWorkspace';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
-import { LogoResizer } from './tools/logo-resizer/LogoResizer';
-import { LogoResizerIcon } from './tools/logo-resizer/LogoResizerIcon';
-import { ForgeNavIcon } from './components/ForgeNavIcon';
-import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
-import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
-import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { defaultTool, isToolId, tools, type ToolId } from './tools';
+
+const toolIcons: Record<ToolId, LucideIcon> = {
+  'logo-resizer': Image,
+  'pdf-to-image': FileImage,
+  'image-splitter': Scissors,
+  'video-stills': Film,
+  storyboard: LayoutGrid,
+  'link-generator': Link2,
+  'ad-downloader': Download,
+  'video-compressor': Video,
+};
+const ease = [0.22, 1, 0.36, 1] as const;
 
 function initialTool(): ToolId {
   const saved = window.location.hash.replace(/^#\/?/, '');
@@ -19,75 +24,81 @@ function initialTool(): ToolId {
 
 export default function App() {
   const [activeTool, setActiveTool] = useState<ToolId>(initialTool);
-  const storyboardRef = useRef<StoryboardRef>(null);
 
   const openTool = useCallback((tool: ToolId) => {
-    if (!isToolId(tool)) return;
     setActiveTool(tool);
-    if (window.location.hash !== `#/${tool}`) history.replaceState(null, '', `#/${tool}`);
+    if (window.location.hash !== '#/' + tool) history.replaceState(null, '', '#/' + tool);
   }, []);
 
   useEffect(() => {
-    // Normalize invalid/deferred deep links to a supported tool on first load.
-    openTool(initialTool());
     function onHashChange() { openTool(initialTool()); }
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, [openTool]);
 
-  const handleStillsTransfer = useCallback(async (groups: TransferGroup[]): Promise<TransferResult> => {
-    if (!storyboardRef.current) throw Error('Storyboard is not ready.');
-    const result = await storyboardRef.current.importStills(groups);
-    if (result.imported) {
-      openTool('storyboard');
-    }
-    return result;
-  }, [openTool]);
-
   const current = tools.find(tool => tool.id === activeTool) ?? tools[0];
+  const currentIndex = tools.findIndex(tool => tool.id === activeTool) + 1;
 
   return (
-    <div className={activeTool === 'logo-resizer' ? 'forge-app forge-v5-shell' : 'forge-app'}>
-      <aside className="sidebar" aria-label="Tools">
-        <div className="brand">{activeTool === 'logo-resizer' ? <span className="forge-v5-f">F</span> : 'THE FORGE'}</div>
-        <nav className="tool-nav" aria-label="Select a tool">
-          {tools.map(tool => (
-            <button
-              className={`tool-link${activeTool === tool.id ? ' is-active' : ''}`}
-              type="button"
-              key={tool.id}
-              aria-current={activeTool === tool.id ? 'page' : undefined}
-              aria-label={tool.label}
-              title={tool.label}
-              onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
-            >{activeTool === 'logo-resizer' ? (
-              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <ForgeNavIcon tool={tool.id} />}</span>
-            ) : tool.label}</button>
-          ))}
-        </nav>
-      </aside>
-      <main className="main-area">
-        <header className="topbar">{activeTool === 'logo-resizer' ? (
-          <>
-            <div className="forge-v5-header-brand">
-              <strong className="forge-v5-wordmark">THE <span>F</span>ORGE</strong>
-              <small className="forge-v5-header-kicker">WORKROOM 01 / IMAGE PROCESSING</small>
+    <MotionConfig reducedMotion="user" transition={{ duration: 0.42, ease }}>
+      <div className="forge-app">
+        <aside className="sidebar" aria-label="Tools">
+          <div className="brand">
+            <span className="brand-glyph" aria-hidden="true">F<span className="brand-glyph-dot">.</span></span>
+            <div className="brand-wordmark"><strong>THE FORGE</strong><span>CREATIVE WORKSPACE</span></div>
+          </div>
+          <div className="nav-eyebrow"><span>YOUR TOOLS</span><span>08</span></div>
+          <nav className="tool-nav" aria-label="Select a tool">
+            {tools.map((tool, index) => {
+              const Icon = toolIcons[tool.id];
+              const selected = activeTool === tool.id;
+              return (
+                <motion.button
+                  type="button"
+                  key={tool.id}
+                  className={'tool-link' + (selected ? ' is-active' : '')}
+                  aria-current={selected ? 'page' : undefined}
+                  onClick={() => openTool(tool.id)}
+                  whileHover={{ x: 2 }}
+                  whileTap={{ scale: 0.985 }}
+                  transition={{ duration: 0.2, ease }}
+                >
+                  {selected && <motion.span layoutId="forge-nav-selection" className="tool-link-selection" transition={{ type: 'spring', stiffness: 420, damping: 36 }} />}
+                  <Icon size={17} strokeWidth={selected ? 1.9 : 1.55} aria-hidden="true" className="tool-link-icon" />
+                  <span className="tool-link-label">{tool.label}</span>
+                  <span className="tool-link-number">{String(index + 1).padStart(2, '0')}</span>
+                </motion.button>
+              );
+            })}
+          </nav>
+          <div className="sidebar-footer">
+            <div className="sidebar-footer-label"><span className="status-dot" /> WORKSPACE ACTIVE</div>
+            <div className="sidebar-footer-note">Local-first creative utilities. Built for precision.</div>
+            <span className="sidebar-footer-version">THE FORGE <span>©</span> 2026</span>
+          </div>
+        </aside>
+
+        <main className="main-area">
+          <header className="topbar">
+            <div className="topbar-left"><span className="topbar-crumb">THE FORGE</span><span className="crumb-separator">/</span><span>STUDIO</span></div>
+            <div className="topbar-center">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div key={activeTool} className="topbar-title" initial={{ opacity: 0, y: 9, filter: 'blur(3px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -7, filter: 'blur(3px)' }} transition={{ duration: 0.23, ease }}>
+                  <h1>{current.label}</h1>
+                </motion.div>
+              </AnimatePresence>
             </div>
-            <div className="forge-v5-title">
-              <LogoResizerIcon />
-              <h1>Logo resizer<span>.</span></h1>
-            </div>
-            <div aria-hidden="true" className="forge-v5-header-balance" />
-          </>
-        ) : <h1>{current.label}</h1>}</header>
-        <div className="native-tool" hidden={activeTool !== 'link-generator'}><LinkGenerator /></div>
-        <div className="native-tool" hidden={activeTool !== 'logo-resizer'}><LogoResizer /></div>
-        <div className="native-tool" hidden={activeTool !== 'image-splitter'}><ImageSplitter /></div>
-        <div className="native-tool" hidden={activeTool !== 'pdf-to-image'}><PdfToImage /></div>
-        <div className="native-tool" hidden={activeTool !== 'video-stills'}><VideoStills onTransfer={handleStillsTransfer} /></div>
-        <div className="native-tool" hidden={activeTool !== 'storyboard'}><Storyboard ref={storyboardRef} /></div>
-        <div className="native-tool" hidden={activeTool !== 'ad-downloader'}><AdDownloader /></div>
-      </main>
-    </div>
+            <div className="topbar-right"><span className="topbar-location">TOOL {String(currentIndex).padStart(2, '0')} / 08</span><span className="topbar-corner" aria-hidden="true"><ArrowUpRight size={15} /></span></div>
+          </header>
+          {activeTool === 'link-generator' && <LinkGenerator />}
+          <div className="legacy-container" hidden={activeTool === 'link-generator'}>
+            <LegacyWorkspace
+              toolId={activeTool === 'link-generator' ? 'logo-resizer' : activeTool}
+              onToolChange={tool => { if (activeTool !== 'link-generator') openTool(tool); }}
+            />
+          </div>
+        </main>
+      </div>
+    </MotionConfig>
   );
 }

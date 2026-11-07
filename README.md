@@ -1,60 +1,40 @@
-# The Forge — native React web release candidate
+# The Forge — React + TypeScript migration
 
-The Forge is a desktop-first, AMOLED-black **React + TypeScript + Vite** toolkit. The initial GitHub Pages web release contains **seven tools**: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (Grid Board / Fit to Platform), Link Generator and Ad Downloader.
+Phase 1 is the compatibility foundation. React and TypeScript own the application shell while existing CTK engines continue to run in an isolated workspace. All eight tool routes remain available. The UI is deliberately basic: AMOLED black, one sidebar, one title, no decorative CTK homepage, intro, or extra widgets.
 
-**Video Compressor is postponed** and will be rebuilt from scratch after the website is stable. Its old CTK iframe, compression worker and bundled legacy CSS/JS are not part of this web build.
+This is not yet a full TypeScript rewrite of processing engines, a Windows executable, or a Tauri updater.
 
-## Develop locally
+## Local development
 
-Prerequisite: Node.js >= 22.12.0. For building or developing the seven native tools, no CTK checkout is needed.
+Requirements: Node.js 22.12+, Git and npm.
 
-```bash
-npm install
-npm run dev
-npm run build
-npm run preview
-```
+Install dependencies with `npm install`, then run `npm run dev`. The first setup fetches a pinned, public CTK baseline, or set the CTK_SOURCE_DIR environment variable to a local copy of the uploaded CTK source.
 
-The `predev` / `prebuild` commands remove any previously **generated, ignored** `public/legacy` directory before Vite runs, so old CTK assets cannot accidentally re-enter the build. The post-build check verifies the bundled entrypoint and blocks legacy/compressor payloads.
+Commands:
+- `npm run prepare:legacy` generates a local compatibility workspace.
+- `npm test` runs bridge checks and original CTK regression tests.
+- `npm run build` produces a Vite application build.
 
-## Automated verification
+The generator copies the original tested engine into ignored public/legacy and hides the legacy homepage and navigation while preserving tool controls. React navigates through a typed, origin-checked message bridge. The compatibility source remains pinned to commit 617615c0b4370c795ddfd6dc4c300920cd595883 of Kotaru27/CTK until each engine is migrated.
 
-```bash
-npm run test:unit
-npm run test:e2e
-```
+This is a static client-side app. Do not treat the public site as access-controlled or upload confidential files there.
 
-`npm test` runs **both** the React/TypeScript unit tests and the original CTK baseline regression tests. For the latter, check out `Kotaru27/CTK` at pinned commit `617615c0b4370c795ddfd6dc4c300920cd595883` into `legacy-source/`, or set `CTK_SOURCE_DIR` to an equivalent local checkout. GitHub Actions does this automatically. **CTK remains a test oracle, not an app/runtime dependency.**
+## Migration order
 
-## GitHub Pages release candidate
-
-The seven-tool React site is prepared for a **manual, gated** GitHub Pages preview from `release/pages-preview`. The source branch runs build and browser checks without automatically publishing. After enabling GitHub Pages (Settings → Pages → GitHub Actions), use the Actions workflow's branch dropdown to deploy only the reviewed release branch, then inspect the live URL.
-
-See [GitHub Pages release procedure](docs/GITHUB_PAGES_RELEASE.md) for the one-time setting, deployment instructions, live Chromium smoke checks, rollback, and remaining real-file acceptance checks.
+1. Record baseline outputs and browser workflows for every tool.
+2. Move the shared shell and navigational state into React (started).
+3. Migrate Link Generator and Logo Resizer into typed services and components.
+4. Migrate Image Splitter, PDF to Image, Video Stills and Ad Downloader.
+5. Migrate Storyboard and Video Compressor after output comparison.
+6. Remove the compatibility bridge when all workflows pass regression tests.
+7. Only then integrate Tauri 2, Windows packaging and GitHub-based updates.
 
 ## GitHub Pages
 
-The project site URL base is `/The-Forge/`. On Linux/macOS:
+The preview workflow is manually triggered to prevent publishing an unverified migration. Configure Settings → Pages → GitHub Actions and run the Publish web preview workflow after verification. Vite uses FORGE_BASE_PATH=/The-Forge/.
 
-```bash
-FORGE_BASE_PATH=/The-Forge/ npm run build
-```
+Automated bridge checks do not establish full functional parity. Browser-based workflows and generated file outputs must still be tested.
 
-On Windows PowerShell:
+## Tool migration status
 
-```powershell
-$env:FORGE_BASE_PATH = '/The-Forge/'
-npm run build
-```
-
-The build fails if the produced script does not use that base path, or if `dist/` includes any `legacy/` or `compressor/` folder. The Playwright suite runs against the same production-style path.
-
-`.github/workflows/pages.yml` supports **manual deployment only**. Publishing is not part of the migration PRs and requires approval and Pages configuration (Settings → Pages → GitHub Actions).
-
-## Feature parity status
-
-The React implementations have automated tests for uploads, transforms, ZIP/image exports, cancel/undo, keyboard controls and Video Stills → Grid Board transfers. Additional tests compare exact Link Generator output against pinned CTK and validate OOXML and rotated PDF edge cases.
-
-**Real-work-file parity is still a release gate.** See [feature parity gate](docs/FEATURE_PARITY_GATE.md), [native runtime cleanup](docs/NATIVE_WEB_CLEANUP.md) and individual migration notes under `docs/`. Authentic SharePoint permissions, real Excel/PPTX files and MP4/MOV compatibility must be verified before calling the website production-ready.
-
-No native Windows executable is included.
+Link Generator is now a native React component backed by a TypeScript processing service, with compatibility output tests. Seven other tools and the original Video Compressor still use the preserved CTK runtime. Browser E2E tests remain outstanding.
