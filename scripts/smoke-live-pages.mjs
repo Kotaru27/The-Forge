@@ -41,7 +41,7 @@ try {
   for (let attempt = 1; attempt <= 5; attempt++) {
     try {
       await page.goto(new URL('#/logo-resizer', site).href, { waitUntil: 'domcontentloaded', timeout: 25_000 });
-      await expect(page.getByRole('navigation', { name: 'Select a tool' }).getByRole('button')).toHaveCount(7, { timeout: 10_000 });
+      await expect(page.getByRole('navigation', { name: 'Select a tool' }).getByRole('button')).toHaveCount(8, { timeout: 10_000 });
       ready = true;
       break;
     } catch (error) {
@@ -73,6 +73,10 @@ try {
     await expect(page.locator('iframe')).toHaveCount(0);
   }
 
+  await nav.getByRole('button', { name: 'Home', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
+  await expect(page.locator('.forge-home-card')).toHaveCount(7);
+
   await nav.getByRole('button', { name: 'Link Generator', exact: true }).click();
   await page.getByLabel('Folder / Path').fill('Pages Release');
   await page.getByLabel('Filenames').fill('smoke.png');
@@ -102,10 +106,11 @@ try {
   assert.ok((await download.path()), 'Browser did not receive a ZIP export');
 
   await page.evaluate(() => { window.location.hash = '#/video-compressor'; });
-  await expect(page).toHaveURL(/#\/logo-resizer$/);
+  await expect(page).toHaveURL(/#\/home$/);
+  await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
   assert.deepEqual(missingAssets, [], 'Published site has missing assets');
   assert.deepEqual(jsErrors, [], 'Published site has JavaScript exceptions');
-  console.log('LIVE PAGES SMOKE PASSED: ' + site.href + ' — 7 routes, assets, image ZIP, no legacy iframe');
+  console.log('LIVE PAGES SMOKE PASSED: ' + site.href + ' — Home + 7 tools, assets, image ZIP, no legacy iframe');
 } finally {
   await browser.close();
 }

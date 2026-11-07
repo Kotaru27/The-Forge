@@ -42,6 +42,14 @@ jobs:
           FORGE_BASE_PATH: /The-Forge/
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - name: Archive desktop workroom screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-workroom-qa-${{ github.run_id }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
 
       # Produce a downloadable candidate even before GitHub Pages is enabled.
       # This artifact is for staging/review; it does not publish the website.
