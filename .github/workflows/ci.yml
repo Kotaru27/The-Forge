@@ -26,6 +26,14 @@ jobs:
         env:
           CTK_SOURCE_DIR: legacy-source
           FORGE_BASE_PATH: /The-Forge/
+      - name: Archive PR-only production preview for visual QA
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-quiet-instrument-production-preview
+          path: dist
+          if-no-files-found: error
+          retention-days: 3
 
   browser:
     if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/heads/migration/') || github.ref == 'refs/heads/release/pages-preview'
