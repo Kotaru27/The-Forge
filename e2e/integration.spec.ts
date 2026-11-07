@@ -14,7 +14,7 @@ function nav(page: Page) {
   return page.getByRole('navigation', { name: 'Select a tool' });
 }
 
-test('seven React tools navigate together without loading the legacy compressor iframe', async ({ page }) => {
+test('seven native tools and Home navigate without loading the legacy compressor iframe', async ({ page }) => {
   const errors: string[] = [];
   const legacyRequests: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -22,7 +22,7 @@ test('seven React tools navigate together without loading the legacy compressor 
     if (/\/(?:legacy|compressor)\//.test(new URL(request.url()).pathname)) legacyRequests.push(request.url());
   });
   await page.goto('#/logo-resizer');
-  await expect(nav(page).getByRole('button')).toHaveCount(7);
+  await expect(nav(page).getByRole('button')).toHaveCount(8);
   await expect(nav(page).getByRole('button', { name: 'Video Compressor' })).toHaveCount(0);
 
   for (const [id, label] of released) {
@@ -35,17 +35,17 @@ test('seven React tools navigate together without loading the legacy compressor 
   expect(legacyRequests).toEqual([]);
 });
 
-test('direct Storyboard links work and compressor/invalid links fall back safely', async ({ page }) => {
+test('direct Storyboard links work and compressor/invalid links open Home', async ({ page }) => {
   await page.goto('#/storyboard');
   await expect(page.getByRole('heading', { name: 'Storyboard', level: 1 })).toBeVisible();
   await expect(nav(page).getByRole('button', { name: 'Storyboard' })).toHaveAttribute('aria-current', 'page');
   await page.evaluate(() => { window.location.hash = '#/video-compressor'; });
-  await expect(page).toHaveURL(/#\/logo-resizer$/);
-  await expect(page.getByRole('heading', { name: 'Logo Resizer', level: 1 })).toBeVisible();
+  await expect(page).toHaveURL(/#\/home$/);
+  await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
   await page.evaluate(() => { window.location.hash = '#/not-a-tool'; });
-  await expect(page).toHaveURL(/#\/logo-resizer$/);
+  await expect(page).toHaveURL(/#\/home$/);
   await page.reload();
-  await expect(nav(page).getByRole('button')).toHaveCount(7);
+  await expect(nav(page).getByRole('button')).toHaveCount(8);
   await expect(page.locator('iframe')).toHaveCount(0);
 });
 
