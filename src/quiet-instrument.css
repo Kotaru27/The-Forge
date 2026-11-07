@@ -631,7 +631,7 @@
   .forge-app :is(button,input,select,textarea),
   .forge-app .tool-link,.forge-app .forge-home-card,
   .forge-app .logo-preview-frame,.forge-app .forge-home-open{
-    transition-duration:0.01ms!important;animation:none!important;
+    transition:none!important;animation:none!important;
   }
 }
 
@@ -677,4 +677,76 @@
 }
 @media(prefers-reduced-motion:reduce){
   .forge-app .forge-logo-v5 .logo-body{transition:none!important;}
+}
+
+/* Home workbench index — six distinct horizontal entries, not a generic card grid.
+   All existing labels, descriptions, detail lines, icons and seven launch buttons stay. */
+@media(min-width:1121px){
+  .forge-app .forge-home-inner{padding-top:29px;}
+  .forge-app .forge-home-intro{min-height:204px;padding-bottom:22px;}
+  .forge-app .forge-home-intro h1{font-size:clamp(44px,4vw,62px);}
+  .forge-app .forge-home-intro-mark{width:154px;height:154px;}
+  .forge-app .forge-home-intro-mark>span{font-size:98px;}
+  .forge-app .forge-home-intro-mark small{bottom:12px;}
+  .forge-app .forge-home-section-title{padding:20px 0 15px;}
+  .forge-app .forge-home-grid{
+    display:grid;grid-template-columns:minmax(310px,.85fr) minmax(0,1.15fr);
+    grid-template-rows:repeat(6,minmax(88px,auto));
+    column-gap:24px;row-gap:0;
+  }
+  .forge-app.forge-collection-shell .forge-home-card-feature{
+    grid-column:1;grid-row:1 / span 6;min-height:0;height:100%;
+    border-radius:9px;padding:27px 28px;
+  }
+  .forge-app.forge-collection-shell .forge-home-card-small{
+    display:grid;grid-column:2;grid-row:auto;
+    grid-template-columns:48px minmax(0,1fr) minmax(140px,166px);
+    grid-template-rows:1fr 1fr;
+    grid-template-areas:"icon main meta" "icon main foot";
+    column-gap:17px;align-items:center;
+    min-width:0;min-height:88px;padding:9px 8px 10px 10px;
+    border:0;border-bottom:1px solid var(--qi-line);
+    border-radius:0;background:transparent;
+  }
+  .forge-app.forge-collection-shell .forge-home-card-small:hover{
+    background:#1c261e;border-color:#738675;
+  }
+  .forge-app .forge-home-card-small .forge-home-small-icon{
+    grid-area:icon;width:43px;height:43px;margin:0;
+  }
+  .forge-app .forge-home-card-small .forge-home-small-content{
+    grid-area:main;align-self:center;gap:4px;margin:0;min-width:0;
+  }
+  .forge-app .forge-home-card-small .forge-home-small-content strong{
+    font-size:18px;line-height:1.15;
+  }
+  .forge-app .forge-home-card-small .forge-home-small-content>span{
+    font-size:11px;line-height:1.45;max-width:none;text-wrap:pretty;
+  }
+  .forge-app .forge-home-card-small .forge-home-card-top{
+    grid-area:meta;align-self:end;justify-content:flex-end;
+    gap:11px;min-width:0;width:100%;
+  }
+  .forge-app .forge-home-card-small .forge-home-card-top .forge-home-open{
+    flex:0 0 auto;font-size:18px;
+  }
+  .forge-app .forge-home-card-small .forge-home-category{
+    font-size:9px;text-align:right;white-space:normal;
+  }
+  .forge-app .forge-home-card-small .forge-home-card-foot{
+    grid-area:foot;align-self:start;margin:5px 0 0;padding:0;
+    border:0;gap:8px;min-width:0;width:100%;
+    font-size:9px;line-height:1.3;
+  }
+  .forge-app .forge-home-card-small .forge-home-card-foot>span{
+    flex:1;min-width:0;text-align:right;overflow-wrap:break-word;
+  }
+  .forge-app .forge-home-card-small .forge-home-card-foot strong{flex-shrink:0;}
+}
+/* Neutralize the original bright-lime logo glyph without changing SVG geometry. */
+.forge-app .logo-tool-icon rect[x="25"]{fill:var(--qi-accent);}
+/* Disable every decorative timing under reduce-motion, not only the transport. */
+@media(prefers-reduced-motion:reduce){
+  .forge-app .forge-home-open,.forge-app .forge-home-art-tile,
+  .forge-app .forge-v5-preset-grid .qi-preset-plate{transition:none!important;animation:none!important;}
 }
