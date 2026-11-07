@@ -6,7 +6,6 @@ import type { TransferGroup, TransferResult } from './tools/video-stills/engine'
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { LogoResizerIcon } from './tools/logo-resizer/LogoResizerIcon';
-import { ForgeNavIcon } from './components/ForgeNavIcon';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
@@ -61,7 +60,7 @@ export default function App() {
               title={tool.label}
               onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
             >{activeTool === 'logo-resizer' ? (
-              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <ForgeNavIcon tool={tool.id} />}</span>
+              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <span>{tool.label.split(' ').map(word => word[0]).join('').substring(0,2)}</span>}</span>
             ) : tool.label}</button>
           ))}
         </nav>
@@ -69,15 +68,9 @@ export default function App() {
       <main className="main-area">
         <header className="topbar">{activeTool === 'logo-resizer' ? (
           <>
-            <div className="forge-v5-header-brand">
-              <strong className="forge-v5-wordmark">THE <span>F</span>ORGE</strong>
-              <small className="forge-v5-header-kicker">WORKROOM 01 / IMAGE PROCESSING</small>
-            </div>
-            <div className="forge-v5-title">
-              <LogoResizerIcon />
-              <h1>Logo resizer<span>.</span></h1>
-            </div>
-            <div aria-hidden="true" className="forge-v5-header-balance" />
+            <strong className="forge-v5-wordmark">THE <span>F</span>ORGE</strong>
+            <span className="forge-v5-top-center">TOOL / LOGO RESIZER</span>
+            <span className="forge-v5-top-end"><i aria-hidden="true" /> ALL PROCESSING STAYS IN YOUR BROWSER</span>
           </>
         ) : <h1>{current.label}</h1>}</header>
         <div className="native-tool" hidden={activeTool !== 'link-generator'}><LinkGenerator /></div>

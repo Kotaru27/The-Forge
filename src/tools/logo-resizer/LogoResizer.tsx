@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
 import { LogoResizerIcon } from './LogoResizerIcon';
@@ -13,18 +12,12 @@ import {
   validateLogoDimensions, type LogoAsset, type LogoServer, type LogoSettings,
 } from './types';
 import './logo-resizer.css';
-import './logo-resizer-v7.css';
 
 let nextLogoId = 0;
 const isOffice = (file: File) => /\.(pptx|xlsx|xlsm)$/i.test(file.name);
 const isImage = (file: File) => file.type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp|svg|avif)$/i.test(file.name);
 const dimensions = (w: number, h: number) => ({ width: String(w), height: String(h) });
 type Snapshot = { cards: LogoAsset[]; settings: LogoSettings };
-type WorkProgress = { phase: string; done: number; total: number };
-const rangeStyle = (value: number, min: number, max: number): CSSProperties => ({
-  '--v7-fill': `${Math.max(0, Math.min(100, (value - min) / (max - min) * 100))}%`,
-} as CSSProperties);
-
 
 async function loadAsset(file: File): Promise<LogoAsset> {
   const url = URL.createObjectURL(file);
@@ -78,36 +71,12 @@ export function LogoResizer() {
   const [linkMessage, setLinkMessage] = useState('');
   const [confirmNoLogos, setConfirmNoLogos] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  const dragDepth = useRef(0);
-  const [notice, setNotice] = useState('');
-  const [workProgress, setWorkProgress] = useState<WorkProgress | null>(null);
-  const focusOrigin = useRef<string | null>(null);
-  const editorRef = useRef<HTMLElement>(null);
-  const focusWasOpen = useRef(false);
-  const prefersReducedMotion = Boolean(useReducedMotion());
 
   useEffect(() => {
     return () => {
       cardsRef.current.forEach(asset => URL.revokeObjectURL(asset.url));
       snapshotRef.current?.cards.forEach(asset => URL.revokeObjectURL(asset.url));
       if (snapshotTimer.current) window.clearTimeout(snapshotTimer.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!notice) return;
-    const timeout = window.setTimeout(() => setNotice(''), 6000);
-    return () => window.clearTimeout(timeout);
-  }, [notice]);
-
-  useEffect(() => {
-    const resetDrag = () => { dragDepth.current = 0; setDragActive(false); };
-    window.addEventListener('dragend', resetDrag);
-    window.addEventListener('drop', resetDrag);
-    return () => {
-      window.removeEventListener('dragend', resetDrag);
-      window.removeEventListener('drop', resetDrag);
     };
   }, []);
 
@@ -141,20 +110,7 @@ export function LogoResizer() {
   }
   function onDrop(event: DragEvent<HTMLElement>) {
     event.preventDefault();
-    dragDepth.current = 0;
-    setDragActive(false);
     if (event.dataTransfer.files.length) askToUpload(event.dataTransfer.files);
-  }
-  function onGalleryDragEnter(event: DragEvent<HTMLElement>) {
-    if (!Array.from(event.dataTransfer.types).includes('Files')) return;
-    event.preventDefault();
-    dragDepth.current += 1;
-    setDragActive(true);
-  }
-  function onGalleryDragLeave(event: DragEvent<HTMLElement>) {
-    event.preventDefault();
-    dragDepth.current = Math.max(0, dragDepth.current - 1);
-    if (dragDepth.current === 0) setDragActive(false);
   }
   async function importPending() {
     if (!pending) return;
@@ -168,15 +124,12 @@ export function LogoResizer() {
     setPending(null);
     setBusy(true);
     setError('');
-    setNotice('');
-    setWorkProgress({ phase: 'Importing assets', done: 0, total: uploads.length });
     const loaded: LogoAsset[] = [];
     const failures: string[] = [];
     try {
       for (let index = 0; index < uploads.length; index++) {
         const file = uploads[index];
         setProgress(`Importing ${index + 1} of ${uploads.length}: ${file.name}`);
-        setWorkProgress({ phase: 'Importing assets', done: index, total: uploads.length });
         try {
           const sources = isOffice(file)
             ? await extractOfficeImages(file, message => setProgress(`${file.name}: ${message}`))
@@ -191,14 +144,10 @@ export function LogoResizer() {
           failures.push(`${file.name}: ${cause instanceof Error ? cause.message : String(cause)}`);
         }
       }
-      if (loaded.length) {
-        setCards(previous => [...loaded.reverse(), ...previous]);
-        setNotice(`Added ${loaded.length} ${loaded.length === 1 ? 'logo' : 'logos'} to your workboard.`);
-      }
+      if (loaded.length) setCards(previous => [...loaded.reverse(), ...previous]);
       if (failures.length) setError(failures.join('\n'));
     } finally {
       setProgress('');
-      setWorkProgress(null);
       setBusy(false);
     }
   }
@@ -207,52 +156,37 @@ export function LogoResizer() {
     setBusy(true);
     setError('');
     setProgress(`Exporting ${asset.filename || asset.source.name}`);
-    setNotice('');
-    setWorkProgress(null);
     try {
       const blob = await logoToBlob(asset, settings);
       downloadBlob(blob, `${sanitizeLogoFilename(asset.filename || 'logo') || 'logo'}.${outputExtension(settings.format)}`);
-      setNotice('Image download started.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
       setBusy(false);
       setProgress('');
-      setWorkProgress(null);
     }
   }
   async function exportZip() {
     if (!cards.length || busy) return;
     setBusy(true);
     setError('');
-    setNotice('');
-    setWorkProgress({ phase: 'Rendering logos', done: 0, total: cards.length });
     try {
       const zip = new JSZip();
       const names = uniqueExportNames(cards, outputExtension(settings.format));
       for (let i = 0; i < cards.length; i++) {
         setProgress(`Rendering ${i + 1} / ${cards.length} logos`);
         zip.file(names[i], await logoToBlob(cards[i], settings));
-        setWorkProgress({ phase: 'Rendering logos', done: i + 1, total: cards.length });
       }
-      setProgress('Compressing ZIP archive');
-      setWorkProgress({ phase: 'Compressing ZIP', done: 0, total: 100 });
-      let lastPercent = -1;
+      setProgress('Creating ZIP archive');
       const zipBlob = await zip.generateAsync({ type: 'blob' }, meta => {
-        const percent = Math.round(meta.percent);
-        if (percent !== lastPercent) {
-          lastPercent = percent;
-          setWorkProgress({ phase: 'Compressing ZIP', done: percent, total: 100 });
-        }
+        setProgress(`Compressing ZIP: ${Math.round(meta.percent)}%`);
       });
       downloadBlob(zipBlob, 'batch_logos.zip');
-      setNotice(`ZIP download started — ${cards.length} ${cards.length === 1 ? 'logo' : 'logos'}.`);
     } catch (cause) {
       setError(`Export failed: ${cause instanceof Error ? cause.message : String(cause)}`);
     } finally {
       setBusy(false);
       setProgress('');
-      setWorkProgress(null);
     }
   }
   function removeAsset(asset: LogoAsset) {
@@ -294,76 +228,27 @@ export function LogoResizer() {
     setSettings(saved.settings);
     setDraft(dimensions(saved.settings.width, saved.settings.height));
   }
-  function openFocus(id: string) {
-    focusOrigin.current = id;
-    setFocused(id);
-  }
-  function closeFocus() {
-    const restoreId = focusOrigin.current;
-    setFocused(null);
-    window.requestAnimationFrame(() => {
-      const origin = [...document.querySelectorAll<HTMLButtonElement>('.logo-preview-button')].find(button => button.dataset.previewId === restoreId);
-      (origin ?? document.querySelector<HTMLButtonElement>('.forge-v5-import .forge-v5-action'))?.focus();
-    });
-  }
   function navigateFocus(direction: number) {
     if (!focused || !cards.length) return;
     const index = cards.findIndex(asset => asset.id === focused);
     setFocused(cards[(index + direction + cards.length) % cards.length].id);
   }
   useEffect(() => {
-    if (!focused || pending || confirmClear || showLinks) return;
+    if (!focused) return;
     const keydown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         if (event.key !== 'Escape') return;
       }
-      if (event.key === 'Escape') closeFocus();
+      if (event.key === 'Escape') setFocused(null);
       if (event.key === 'ArrowLeft') { event.preventDefault(); navigateFocus(-1); }
       if (event.key === 'ArrowRight') { event.preventDefault(); navigateFocus(1); }
     };
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
     // Focus navigation must follow the currently visible list.
-  }, [focused, cards, pending, confirmClear, showLinks]);
-
-  useEffect(() => {
-    // Focus once on opening, not on every Previous/Next navigation or field edit.
-    if (focused && !focusWasOpen.current) editorRef.current?.focus({ preventScroll: true });
-    focusWasOpen.current = Boolean(focused);
-  }, [focused]);
-
-  // Treat confirmation and link dialogs as real keyboard-contained surfaces.
-  useEffect(() => {
-    if (!pending && !confirmClear && !showLinks) return;
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const selectFocusable = () => [...document.querySelectorAll<HTMLElement>(
-      '.logo-modal[role="dialog"] button, .logo-modal[role="dialog"] input, .logo-modal[role="dialog"] select, .logo-modal[role="dialog"] textarea'
-    )].filter(element => !element.hasAttribute('disabled') && element.getClientRects().length > 0);
-    const frame = window.requestAnimationFrame(() => selectFocusable()[0]?.focus());
-    const keydown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        if (confirmNoLogos) setConfirmNoLogos(false);
-        else if (pending) setPending(null);
-        else if (confirmClear) setConfirmClear(false);
-        else setShowLinks(false);
-      } else if (event.key === 'Tab') {
-        const items = selectFocusable();
-        if (!items.length) return;
-        const first = items[0], last = items[items.length - 1];
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-        else if (!items.includes(document.activeElement as HTMLElement)) { event.preventDefault(); first.focus(); }
-      }
-    };
-    window.addEventListener('keydown', keydown);
-    return () => { window.cancelAnimationFrame(frame); window.removeEventListener('keydown', keydown); previous?.focus(); };
-  }, [Boolean(pending), confirmClear, showLinks, confirmNoLogos]);
+  }, [focused, cards]);
 
   const detail = cards.find(asset => asset.id === focused) ?? null;
-  // Avoid expensive FLIP measurements and staggered animation on large logo batches.
-  const animateGallery = !prefersReducedMotion && cards.length <= 18;
-  const layoutChange = String(cards.length);
   const updateLabel = (asset: LogoAsset, value: string) => {
     patchCard(asset.id, {
       label: value,
@@ -398,9 +283,13 @@ export function LogoResizer() {
   }
 
   return (
-    <section className="logo-workspace forge-logo-v5 forge-v7-workroom" aria-label="Logo Resizer">
+    <section className="logo-workspace forge-logo-v5" aria-label="Logo Resizer">
       <input ref={inputRef} type="file" accept="image/*,.pptx,.xlsx,.xlsm" multiple hidden onChange={onFileInput} />
       <div className="forge-v5-head" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
+        <div className="forge-v5-intro">
+          <div className="forge-v5-eyebrow">WORKROOM 01 / IMAGE PROCESSING</div>
+          <div className="forge-v5-title"><LogoResizerIcon /><h1>Logo resizer<span>.</span></h1></div>
+        </div>
         <div className="forge-v5-command-deck" aria-label="Global logo settings and actions">
           <div className="forge-v5-control-grid">
             <div className="forge-v5-group forge-v5-import">
@@ -415,16 +304,12 @@ export function LogoResizer() {
             <div className="forge-v5-group forge-v5-presets">
               <span className="forge-v5-group-title">CANVAS PRESETS</span>
               <div className="forge-v5-preset-grid" aria-label="Size presets">
-                {LOGO_PRESETS.map(preset => {
-                  const selected = settings.width === preset.width && settings.height === preset.height;
-                  return <button key={preset.label} type="button" className={selected ? 'selected' : ''}
-                    aria-pressed={selected} onClick={() => setSize(preset.width, preset.height)}>
-                    {selected && <motion.span className="forge-v7-preset-selection"
-                      layoutId={prefersReducedMotion ? undefined : 'forge-v7-preset'}
-                      transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 38, mass: .8 }} />}
-                    <span className="forge-v7-preset-copy">{preset.label}</span>
-                  </button>;
-                })}
+                {LOGO_PRESETS.map(preset => <button
+                  key={preset.label} type="button"
+                  className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''}
+                  aria-pressed={settings.width === preset.width && settings.height === preset.height}
+                  onClick={() => setSize(preset.width, preset.height)}
+                >{preset.label}</button>)}
               </div>
             </div>
             <div className="forge-v5-group forge-v5-custom">
@@ -465,12 +350,12 @@ export function LogoResizer() {
               <span className="forge-v5-group-title">IMAGE POSITIONING</span>
               <div className="forge-v5-sliders">
                 <label><span>PADDING</span>
-                  <input type="range" aria-label="Global image padding" min="0" max="150" value={settings.padding} style={rangeStyle(settings.padding, 0, 150)}
+                  <input type="range" aria-label="Global image padding" min="0" max="150" value={settings.padding}
                     onChange={event=>patchSettings({padding:Number(event.target.value)})}/>
                   <output>{settings.padding} px</output>
                 </label>
                 <label><span>IMAGE Y</span>
-                  <input type="range" aria-label="Global vertical image offset" min="-50" max="50" value={settings.imageOffset} style={rangeStyle(settings.imageOffset, -50, 50)}
+                  <input type="range" aria-label="Global vertical image offset" min="-50" max="50" value={settings.imageOffset}
                     onChange={event=>patchSettings({imageOffset:Number(event.target.value)})}/>
                   <output>{settings.imageOffset}</output>
                 </label>
@@ -486,85 +371,36 @@ export function LogoResizer() {
           </div>
           <div className="forge-v5-deck-foot">
             <span className="forge-v5-live"><i aria-hidden="true"/> LIVE PREVIEW</span>
+            <span>ASPECT RATIO PRESERVED</span>
+            <span>ALL EDITS STAY IN YOUR BROWSER</span>
             <output className="forge-v5-current-size">{settings.width} × {settings.height} <small>PX</small></output>
           </div>
         </div>
       </div>
-      {progress && <div className="logo-progress forge-v6-progress" role="status" aria-live="polite">
-        <div className="forge-v6-progress-meta">
-          <span className="forge-v6-processing-dot" aria-hidden="true" />
-          <span className="forge-v6-progress-message">{progress}</span>
-          {workProgress && <strong>{Math.round(workProgress.done / Math.max(1, workProgress.total) * 100)}%</strong>}
-        </div>
-        {workProgress && <progress aria-label={workProgress.phase} value={workProgress.done} max={workProgress.total} />}
-      </div>}
-      <AnimatePresence initial={false}>
-        {notice && <motion.div className="forge-v6-notice" role="status" aria-live="polite"
-          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : -7 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -5 }}
-          transition={{ duration: prefersReducedMotion ? 0 : .19 }}>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
-          <span>{notice}</span>
-          <button type="button" onClick={() => setNotice('')} aria-label="Dismiss notification">×</button>
-        </motion.div>}
-      </AnimatePresence>
+      {progress && <div className="logo-progress" role="status">{progress}</div>}
       {error && <div className="logo-error" role="alert">{error}</div>}
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
-      <div className={`logo-body forge-v7-body${detail ? ' forge-v7-has-focus' : ''}`}>
-        <main className={`logo-gallery${dragActive ? ' forge-v6-drag-active' : ''}`}
-          onDragEnter={onGalleryDragEnter} onDragLeave={onGalleryDragLeave}
-          onDragOver={event => { if (Array.from(event.dataTransfer.types).includes('Files')) event.preventDefault(); }}
-          onDrop={onDrop}>
-          <AnimatePresence initial={false}>
-            {dragActive && <motion.div className="forge-v6-drop-overlay" aria-hidden="true"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: prefersReducedMotion ? 0 : .14 }}>
-              <span>DROP ASSETS TO IMPORT</span><small>Images · PowerPoint · Excel</small>
-            </motion.div>}
-          </AnimatePresence>
-          <div className="forge-v5-board-heading"><div><span>IMAGE WORKBOARD</span><h2>{cards.length ? "Your logos" : "Your workboard is empty"}</h2></div><small>{cards.length} {cards.length === 1 ? 'ASSET' : 'ASSETS'}</small></div>
-          <AnimatePresence initial={false}>
-          {!cards.length && (
-            <motion.div className="logo-empty" key="empty-workroom"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              // Empty state must not occupy space after import; cards start at the board top.
-              transition={{ duration: 0 }}>
+      <div className="logo-body">
+        <main className="logo-gallery" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
+          <div className="forge-v5-board-heading"><div><span>01 — CANVAS / ASSET BOARD</span><h2>{cards.length ? cards.length + (cards.length === 1 ? " logo in your workboard" : " logos in your workboard") : "Your workboard is empty"}</h2></div><small>{String(cards.length).padStart(2,"0")} / ASSETS</small></div>
+          {!cards.length ? (
+            <div className="logo-empty">
               <div className="forge-v5-drop-icon"><LogoResizerIcon /></div>
               <h3>Make room for your logos.</h3>
               <p>Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually.</p>
               <button type="button" className="forge-v5-action forge-v5-primary" onClick={() => inputRef.current?.click()}>Choose files ↗</button>
               <small>PNG · JPG · WEBP · SVG · PPTX · XLSX · XLSM</small>
-            </motion.div>
-          )}
-          </AnimatePresence>
-          <div className="logo-grid">
-            <AnimatePresence initial={false} mode={animateGallery ? 'popLayout' : 'sync'}>
-              {cards.map((asset, index) => (
-                <motion.article
-                  key={asset.id}
-                  className="logo-card"
-                  layout={animateGallery && !focused ? 'position' : false}
-                  layoutDependency={layoutChange}
-                  initial={animateGallery ? { opacity: 0, y: 18, scale: .977 } : { opacity: 0 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={animateGallery ? { opacity: 0, y: -7, scale: .975 } : { opacity: 0 }}
-                  transition={{ opacity: { duration: prefersReducedMotion ? 0 : .19, delay: animateGallery ? Math.min(index, 6) * .035 : 0 },
-                    y: { type: 'spring', stiffness: 460, damping: 39, mass: .85, delay: animateGallery ? Math.min(index, 6) * .035 : 0 },
-                    scale: { duration: .26 }, layout: { type: 'spring', stiffness: 480, damping: 46, mass: .95 } }}>
-                  <div className="logo-card-heading"><span className="forge-v5-card-index">{String(cards.length - index).padStart(2,"0")}</span>
+            </div>
+          ) : (
+            <div className="logo-grid">
+              {cards.map(asset => (
+                <article key={asset.id} className="logo-card">
+                  <div className="logo-card-heading"><span className="forge-v5-card-index">{String(cards.length - cards.indexOf(asset)).padStart(2,"0")}</span>
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
                     <button type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</button>
                   </div>
-                  <button className="logo-preview-button" type="button" data-preview-id={asset.id}
-                    style={{minHeight: Math.min(318, Math.max(218, settings.height + 64))}}
-                    onClick={() => openFocus(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
-                    <span className="forge-v6-art forge-v7-card-art">
-                      <LogoPreview asset={asset} settings={settings} />
-                    </span>
-                    <span className="forge-v7-card-open" aria-hidden="true">OPEN EDITOR <span>↗</span></span>
+                  <button className="logo-preview-button" type="button" onClick={() => setFocused(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
+                    <LogoPreview asset={asset} settings={settings} />
                     <span className="forge-v5-card-size">{settings.width} × {settings.height} PX</span>
                   </button>
                   <div className="logo-card-controls">
@@ -574,165 +410,59 @@ export function LogoResizer() {
                       <button type="button" onClick={() => void exportOne(asset)} disabled={busy}>Save</button>
                     </div>
                   </div>
-                </motion.article>
+                </article>
               ))}
-              </AnimatePresence>
-          </div>
+            </div>
+          )}
         </main>
-        <AnimatePresence initial={false}>
-        {detail && <motion.aside ref={editorRef} tabIndex={-1} className="logo-detail forge-v7-editor" aria-label="Focus Mode"
-          key="focus-panel"
-          initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 14 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: prefersReducedMotion ? 0 : 12 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 48, mass: .9 }}>
+        {detail && <aside className="logo-detail" aria-label="Focus Mode">
           <div className="logo-detail-heading">
-            <div className="forge-v7-editor-title">
-              <span className="forge-v7-eyebrow">THE FORGE / IMAGE EDITOR</span>
-              <strong>Focus Mode<span className="forge-v7-title-dot">.</span></strong>
-            </div>
-            <span className="forge-v7-editor-counter">{cards.findIndex(asset => asset.id === detail.id) + 1} <span>of</span> {cards.length}</span>
+            <strong>Focus Mode</strong>
             <div className="logo-detail-buttons">
-              <button type="button" aria-label="Previous logo" title="Previous logo (←)" onClick={() => navigateFocus(-1)}>←</button>
-              <button type="button" aria-label="Next logo" title="Next logo (→)" onClick={() => navigateFocus(1)}>→</button>
-              <button type="button" aria-label="Close Focus Mode" title="Close Focus Mode (Esc)" onClick={closeFocus}>×</button>
+              <button type="button" aria-label="Previous logo" onClick={() => navigateFocus(-1)}>←</button>
+              <button type="button" aria-label="Next logo" onClick={() => navigateFocus(1)}>→</button>
+              <button type="button" aria-label="Close Focus Mode" onClick={() => setFocused(null)}>×</button>
             </div>
           </div>
-          <div className="forge-v7-editor-content">
-            <div className="forge-v7-editor-stage">
-              <div className="forge-v7-stage-topline"><span>LIVE OUTPUT PREVIEW</span><span>{settings.width} × {settings.height} PX</span></div>
-              <div className="forge-v5-focus-stage">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div key={detail.id} className="forge-v6-art forge-v6-focus-art"
-                    initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : .975 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : .985 }}
-                    transition={{ duration: prefersReducedMotion ? .01 : .19, ease: [.2, 1, .3, 1] }}>
-                    <LogoPreview asset={detail} settings={settings} className="logo-detail-preview" />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-              <div className="forge-v7-stage-bottomline">
-                <span>{detail.filename || detail.source.name}</span>
-                <span>WHITE CANVAS · ORIGINAL OUTPUT DIMENSIONS</span>
-              </div>
-            </div>
-            <div className="forge-v7-editor-inspector">
-              <div className="forge-v7-inspector-heading">
-                <div><span className="forge-v7-eyebrow">PRECISION CONTROLS</span><h3>Asset settings</h3></div>
-                <span className="forge-v7-inspector-live"><i aria-hidden="true" /> LIVE</span>
-              </div>
-              <div className="forge-v7-inspector-fields">
-                <div className="forge-v5-focus-section-label">ASSET DETAILS</div>
-                <label>Filename<input value={detail.filename} onChange={event => patchCard(detail.id, { filename: sanitizeLogoFilename(event.target.value) })} /></label>
-                <label>Overlay label<textarea rows={3} value={detail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
-                <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={detail.fontSizeOverride ?? ''} onChange={event => patchCard(detail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
-                <div className="forge-v5-focus-section-label">POSITIONING</div>
-                <label className="forge-v7-range-control">
-                  <span>Image padding <span className="forge-v7-value">{detail.paddingOverride ?? settings.padding}px</span></span>
-                  <input aria-label="Focus image padding" type="range" min="0" max="150" value={detail.paddingOverride ?? settings.padding}
-                    style={rangeStyle(detail.paddingOverride ?? settings.padding, 0, 150)}
-                    onChange={event => patchCard(detail.id, { paddingOverride: Number(event.target.value) })} />
-                </label>
-                <button type="button" className="forge-v7-reset" onClick={() => patchCard(detail.id, { paddingOverride: null })}>↶ Reset padding to global</button>
-                <label className="forge-v7-range-control">
-                  <span>Image Y offset <span className="forge-v7-value">{detail.imageOffset}</span></span>
-                  <input aria-label="Focus image Y offset" type="range" min="-50" max="50" value={detail.imageOffset}
-                    style={rangeStyle(detail.imageOffset, -50, 50)}
-                    onChange={event => patchCard(detail.id, { imageOffset: Number(event.target.value) })} />
-                </label>
-                <label className="forge-v7-range-control">
-                  <span>Text Y offset <span className="forge-v7-value">{detail.textOffset}</span></span>
-                  <input aria-label="Focus text Y offset" type="range" min="0" max="100" value={detail.textOffset}
-                    style={rangeStyle(detail.textOffset, 0, 100)}
-                    onChange={event => patchCard(detail.id, { textOffset: Number(event.target.value) })} />
-                </label>
-              </div>
-              <div className="logo-detail-actions">
-                <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image <span aria-hidden="true">↗</span></button>
-                <button className="forge-v7-danger" type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
-              </div>
-            </div>
+          <p className="logo-subtle">{cards.findIndex(asset => asset.id === detail.id) + 1} of {cards.length}</p>
+          <LogoPreview asset={detail} settings={settings} className="logo-detail-preview" />
+          <label>Filename<input value={detail.filename} onChange={event => patchCard(detail.id, { filename: sanitizeLogoFilename(event.target.value) })} /></label>
+          <label>Overlay label<textarea rows={3} value={detail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
+          <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={detail.fontSizeOverride ?? ''} onChange={event => patchCard(detail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
+          <label>Image padding {detail.paddingOverride ?? settings.padding}px <input type="range" min="0" max="150" value={detail.paddingOverride ?? settings.padding} onChange={event => patchCard(detail.id, { paddingOverride: Number(event.target.value) })} /></label>
+          <button type="button" onClick={() => patchCard(detail.id, { paddingOverride: null })}>Reset padding to global</button>
+          <label>Image Y offset {detail.imageOffset} <input type="range" min="-50" max="50" value={detail.imageOffset} onChange={event => patchCard(detail.id, { imageOffset: Number(event.target.value) })} /></label>
+          <label>Text Y offset {detail.textOffset} <input type="range" min="0" max="100" value={detail.textOffset} onChange={event => patchCard(detail.id, { textOffset: Number(event.target.value) })} /></label>
+          <div className="logo-detail-actions">
+            <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</button>
+            <button type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
           </div>
-        </motion.aside>}
-        </AnimatePresence>
+        </aside>}
       </div>
-      <AnimatePresence initial={false}>
-        {pending && <motion.div key="dimension-dialog" className="logo-modal-backdrop" role="presentation"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          transition={{ duration: prefersReducedMotion ? 0 : .2 }}>
-          <motion.div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions"
-            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14, scale: prefersReducedMotion ? 1 : .97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: prefersReducedMotion ? 0 : 8, scale: prefersReducedMotion ? 1 : .99 }}
-            transition={{ duration: prefersReducedMotion ? 0 : .28, ease: [.2, 1, .25, 1] }}>
-            <span className="forge-v7-modal-kicker">IMPORT / ASSET PREPARATION</span>
-            <h2>Set logo dimensions</h2>
-            <p>Confirm the output canvas for {pending.length} {pending.length === 1 ? 'file' : 'files'} before importing.</p>
-            <div className="logo-presets" aria-label="Import size presets">
-              {LOGO_PRESETS.map(preset => <button type="button" key={preset.label}
-                className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''}
-                onClick={() => setSize(preset.width, preset.height)}>{preset.label}</button>)}
-            </div>
-            <div className="logo-two-fields">
-              <label>Width (px)<input type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width', event.target.value)} /></label>
-              <label>Height (px)<input type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height', event.target.value)} /></label>
-            </div>
-            <div className="logo-modal-actions">
-              <button type="button" onClick={() => setPending(null)}>Cancel</button>
-              <button className="logo-primary" type="button" onClick={() => void importPending()}>Apply &amp; process <span aria-hidden="true">↗</span></button>
-            </div>
-          </motion.div>
-        </motion.div>}
-        {confirmClear && <motion.div key="clear-dialog" className="logo-modal-backdrop"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          transition={{ duration: prefersReducedMotion ? 0 : .2 }}>
-          <motion.div className="logo-modal" role="dialog" aria-modal="true" aria-label="Clear logo workspace"
-            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14, scale: prefersReducedMotion ? 1 : .97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: prefersReducedMotion ? 0 : .26, ease: [.2, 1, .25, 1] }}>
-            <span className="forge-v7-modal-kicker">WORKROOM / RECOVERABLE ACTION</span>
-            <h2>Clear all logos?</h2>
-            <p>Remove the imported logos and reset the settings? You can restore the entire workspace with edits for 60 seconds.</p>
-            <div className="logo-modal-actions">
-              <button type="button" onClick={() => setConfirmClear(false)}>Cancel</button>
-              <button type="button" className="forge-v7-modal-danger" onClick={clearAll}>Clear all</button>
-            </div>
-          </motion.div>
-        </motion.div>}
-        {showLinks && <motion.div key="links-dialog" className="logo-modal-backdrop"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          transition={{ duration: prefersReducedMotion ? 0 : .2 }}>
-          <motion.div className="logo-modal logo-link-dialog" role="dialog" aria-modal="true" aria-label="Generate logo links"
-            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14, scale: prefersReducedMotion ? 1 : .97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: prefersReducedMotion ? 0 : 8 }}
-            transition={{ duration: prefersReducedMotion ? 0 : .28, ease: [.2, 1, .25, 1] }}>
-            <span className="forge-v7-modal-kicker">EXPORT / HTML LINKS</span>
-            <div className="logo-link-title"><h2>Generate logo links</h2>
-              <button type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</button>
-            </div>
-            <div className="logo-two-fields">
-              <label>Server<select value={server} onChange={event => setServer(event.target.value as LogoServer)}>
-                <option value="s3">S3 Media</option><option value="aldi">Aldi Media</option></select></label>
-              <label>Folder path<input value={folder} onChange={event => setFolder(event.target.value)} placeholder="logos/2026/summer" /></label>
-            </div>
-            <label>Brand names (one per line)<textarea rows={7} value={brands} onChange={event => setBrands(event.target.value)} placeholder="Brand A&#10;Brand B" /></label>
-            <label>Generated HTML<textarea rows={7} value={links} readOnly /></label>
-            <p className="logo-subtle" role="status">{linkMessage}</p>
-            <div className="logo-modal-actions">
-              <button type="button" onClick={() => setShowLinks(false)}>Close</button>
-              <button type="button" onClick={() => makeLinks()}>Generate</button>
-              <button className="logo-primary" type="button" onClick={() => void copyLinks()}>Copy HTML</button>
-            </div>
-            {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded">
-              <p>No logos are uploaded. Generate links using the brand names as filenames?</p>
-              <button type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</button>
-              <button type="button" onClick={() => makeLinks(true)}>Proceed anyway</button>
-            </div>}
-          </motion.div>
-        </motion.div>}
-      </AnimatePresence>
+      {pending && <div className="logo-modal-backdrop" role="presentation">
+        <div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions">
+          <h2>Set logo dimensions</h2>
+          <p>Confirm the size before importing {pending.length} file(s).</p>
+          <div className="logo-presets">
+            {LOGO_PRESETS.map(preset => <button type="button" key={preset.label} className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''} onClick={() => setSize(preset.width, preset.height)}>{preset.label}</button>)}
+          </div>
+          <div className="logo-two-fields">
+            <label>Width (px)<input type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width', event.target.value)} /></label>
+            <label>Height (px)<input type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height', event.target.value)} /></label>
+          </div>
+          <div className="logo-modal-actions"><button type="button" onClick={() => setPending(null)}>Cancel</button><button className="logo-primary" type="button" onClick={() => void importPending()}>Apply &amp; process</button></div>
+        </div>
+      </div>}
+      {confirmClear && <div className="logo-modal-backdrop"><div className="logo-modal" role="dialog" aria-modal="true" aria-label="Clear logo workspace"><h2>Clear all logos?</h2><p>Remove all uploaded logos and reset settings? You can undo this with your edits intact.</p><div className="logo-modal-actions"><button type="button" onClick={() => setConfirmClear(false)}>Cancel</button><button type="button" onClick={clearAll}>Clear all</button></div></div></div>}
+      {showLinks && <div className="logo-modal-backdrop"><div className="logo-modal logo-link-dialog" role="dialog" aria-modal="true" aria-label="Generate logo links">
+        <div className="logo-link-title"><h2>Generate logo links</h2><button type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</button></div>
+        <div className="logo-two-fields"><label>Server<select value={server} onChange={event => setServer(event.target.value as LogoServer)}><option value="s3">S3 Media</option><option value="aldi">Aldi Media</option></select></label><label>Folder path<input value={folder} onChange={event => setFolder(event.target.value)} placeholder="logos/2026/summer" /></label></div>
+        <label>Brand names (one per line)<textarea rows={7} value={brands} onChange={event => setBrands(event.target.value)} placeholder="Brand A&#10;Brand B" /></label>
+        <label>Generated HTML<textarea rows={7} value={links} readOnly /></label>
+        <p className="logo-subtle" role="status">{linkMessage}</p>
+        <div className="logo-modal-actions"><button type="button" onClick={() => setShowLinks(false)}>Close</button><button type="button" onClick={() => makeLinks()}>Generate</button><button className="logo-primary" type="button" onClick={() => void copyLinks()}>Copy HTML</button></div>
+        {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded"><p>No logos are uploaded. Generate links using the brand names as filenames?</p><button type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</button><button type="button" onClick={() => makeLinks(true)}>Proceed anyway</button></div>}
+      </div></div>}
     </section>
   );
 }

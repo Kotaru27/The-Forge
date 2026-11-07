@@ -48,14 +48,11 @@ function paintWhite(context: CanvasRenderingContext2D, settings: LogoSettings) {
 }
 
 /** Same placement, background, text, and no-raster-upscaling rules as CTK. */
-export function drawLogoPreview(canvas: HTMLCanvasElement, asset: LogoAsset, settings: LogoSettings, displayScale = 1): void {
-  // Presentation-only supersampling: exports still use the exact requested dimensions.
-  const scale = Number.isFinite(displayScale) && displayScale > 0 ? displayScale : 1;
-  canvas.width = Math.max(1, Math.round(settings.width * scale));
-  canvas.height = Math.max(1, Math.round(settings.height * scale));
+export function drawLogoPreview(canvas: HTMLCanvasElement, asset: LogoAsset, settings: LogoSettings): void {
+  canvas.width = settings.width;
+  canvas.height = settings.height;
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Canvas is unavailable');
-  context.setTransform(scale, 0, 0, scale, 0, 0);
   paintWhite(context, settings);
   const g = logoGeometry(asset, settings);
   let imageSource: CanvasImageSource = asset.image;

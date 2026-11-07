@@ -24,8 +24,7 @@
     "jszip": "^3.10.1",
     "pica": "^9.0.1",
     "pdfjs-dist": "6.5.438",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "motion": "14.9.1"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
