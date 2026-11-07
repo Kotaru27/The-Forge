@@ -71,3 +71,18 @@ test('all eight Logo control groups fit at common desktop widths', async ({ page
     expect(layout.gallery).toBeGreaterThan(100);
   }
 });
+
+test('document and video review overlays remain viewport-fixed after route transitions', async ({ page }) => {
+  for (const route of ['pdf-to-image', 'video-stills']) {
+    await page.goto('#/' + route);
+    await page.waitForTimeout(250);
+    const anchor = await page.evaluate(() => {
+      const root = document.querySelector('.native-tool:not([hidden])');
+      if (!root) throw Error('Active native tool missing');
+      const style = getComputedStyle(root);
+      return { transform: style.transform, containment: style.contain };
+    });
+    expect(anchor.transform).toBe('none');
+  }
+});
+
