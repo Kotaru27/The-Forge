@@ -325,3 +325,24 @@
  .forge-collection-shell button,.forge-collection-shell input,.forge-collection-shell select,
  .forge-collection-shell textarea{transition:none!important;animation:none!important}
 }
+
+/* Storyboard list-mode fix: do not let scrollable board rows shrink behind
+   the following settings controls when the inspector column fills vertically. */
+.forge-collection-shell .sb-controls > :is(.sb-section-head,.sb-view-choice,.sb-project-switch,.sb-project-list,.sb-fields,.sb-asset-list,label,details) {
+  flex-shrink:0;
+}
+.forge-collection-shell .sb-project-list {
+  flex:0 0 auto;
+  min-height:44px;
+  max-height:180px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  position:relative;
+  z-index:1;
+}
+.forge-collection-shell .sb-project-row {
+  flex:0 0 auto;
+  min-height:40px;
+  position:relative;
+}
+.forge-collection-shell .sb-project-row button {min-height:37px;}
