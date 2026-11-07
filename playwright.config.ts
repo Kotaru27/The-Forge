@@ -3,6 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   timeout: 50_000,
+  // Canvas/video suites can saturate shared GitHub runners. Keep CI deterministic.
+  workers: process.env.CI ? 1 : undefined,
   expect: { timeout: 10_000 },
   use: { baseURL: 'http://127.0.0.1:4173/The-Forge/', ...devices['Desktop Chrome'] },
   webServer: {

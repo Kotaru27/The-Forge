@@ -1,6 +1,6 @@
-# The Forge — native React web release candidate
+# The Forge — native React creative workroom
 
-The Forge is a desktop-first, AMOLED-black **React + TypeScript + Vite** toolkit. The initial GitHub Pages web release contains **seven tools**: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (Grid Board / Fit to Platform), Link Generator and Ad Downloader.
+The Forge is a desktop-first, dark-green **React + TypeScript + Vite** creative workroom with a Home screen and seven purpose-built tool workspaces. The initial GitHub Pages web release contains **seven tools**: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (Grid Board / Fit to Platform), Link Generator and Ad Downloader.
 
 **Video Compressor is postponed** and will be rebuilt from scratch after the website is stable. Its old CTK iframe, compression worker and bundled legacy CSS/JS are not part of this web build.
 
@@ -58,3 +58,9 @@ The React implementations have automated tests for uploads, transforms, ZIP/imag
 **Real-work-file parity is still a release gate.** See [feature parity gate](docs/FEATURE_PARITY_GATE.md), [native runtime cleanup](docs/NATIVE_WEB_CLEANUP.md) and individual migration notes under `docs/`. Authentic SharePoint permissions, real Excel/PPTX files and MP4/MOV compatibility must be verified before calling the website production-ready.
 
 No native Windows executable is included.
+
+## Workroom design pass — before motion polish
+
+The Home route (`#/home`) is now the default. It opens seven native React tools from a purpose-built workbench grid. The six non-logo tools use a consistent green production shell with updated controls, panels, import surfaces, galleries and review tables. Video Stills has a dedicated ingest dock and Storyboard retains two creation modes.
+
+The approved **Logo Resizer V5** React interface is retained (with only a Home navigation entry). All processing and export engines remain unchanged. The Playwright suite now covers Home, all seven workspaces and the existing export/integration workflows. This is a **layout/design coverage pass**; detailed animations and visual polish are separate, later work.
