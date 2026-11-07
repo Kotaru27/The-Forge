@@ -1,0 +1,56 @@
+name: Restore previous Forge site
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["React migration checks"]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: forge-pages-preview
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    outputs:
+      artifact_name: ${{ steps.artifact.outputs.name }}
+    steps:
+      - name: Checkout restored native React Forge
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - name: Build restored native React site
+        run: npm run build
+        env:
+          FORGE_BASE_PATH: /The-Forge/
+      - uses: actions/configure-pages@v5
+      - id: artifact
+        run: echo "name=forge-pages-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+          name: ${{ steps.artifact.outputs.name }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Allow artifact metadata to propagate
+        run: sleep 20
+      - id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.build.outputs.artifact_name }}
