@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { LayoutGroup, motion } from 'motion/react';
 import { VideoStills } from './tools/video-stills/VideoStills';
 import { Storyboard } from './tools/storyboard/Storyboard';
 import type { StoryboardRef } from './tools/storyboard/engine';
@@ -12,6 +13,7 @@ import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { ForgeHome, ToolGlyph, toolDetails } from './home/ForgeHome';
 import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
+import './quiet-instrument.css';
 
 type Route = ToolId | 'home';
 
@@ -56,10 +58,11 @@ export default function App() {
             ? <span className="forge-v5-f">F</span>
             : <button type="button" className="forge-collection-brand" onClick={() => openTool('home')} aria-label="The Forge home">F<span>.</span></button>}
         </div>
-        <nav className="tool-nav" aria-label="Select a tool">
+        <LayoutGroup id="forge-rail"><nav className="tool-nav" aria-label="Select a tool">
           <button className={'tool-link forge-home-nav' + (isHome ? ' is-active' : '')}
             type="button" aria-current={isHome ? 'page' : undefined}
             aria-label="Home" title="Home" onClick={() => openTool('home')}>
+            {isHome && <motion.span layoutId="qi-rail-selection" className="qi-rail-plate" aria-hidden="true" transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }} />}
             <span className={isLogo ? 'forge-v5-rail-glyph' : 'forge-collection-rail-icon'}><ToolGlyph tool="home" /></span>
           </button>
           {tools.map(tool => (
@@ -71,11 +74,13 @@ export default function App() {
               aria-label={tool.label}
               title={tool.label}
               onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
-            >{isLogo ? (
+            >
+              {activeTool === tool.id && <motion.span layoutId="qi-rail-selection" className="qi-rail-plate" aria-hidden="true" transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }} />}
+              {isLogo ? (
               <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <span>{tool.label.split(' ').map(word => word[0]).join('').substring(0,2)}</span>}</span>
             ) : <span className="forge-collection-rail-icon"><ToolGlyph tool={tool.id} /></span>}</button>
           ))}
-        </nav>
+        </nav></LayoutGroup>
       </aside>
       <main className="main-area">
         <header className="topbar">{isLogo ? (
