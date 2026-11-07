@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
 
@@ -44,7 +45,7 @@ const toolNotes: Record<ToolId, { description: string; category: string; detail:
 export const toolDetails = toolNotes;
 
 export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: number }) {
-  const paths: Record<Destination, React.ReactNode> = {
+  const paths: Record<Destination, ReactNode> = {
     home: <><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></>,
     'logo-resizer': <><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8v8H8zM3 9h3m12 6h3M9 3v3m6 12v3"/></>,
     'pdf-to-image': <><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 12h6m-6 4h6"/></>,

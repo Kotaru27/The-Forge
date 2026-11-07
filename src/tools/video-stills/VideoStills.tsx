@@ -216,6 +216,7 @@ export function VideoStills({ onTransfer }: Props) {
 
   return (
     <section className="video-stills" aria-label="Video Stills">
+      <div className="vs-workbench-side">
       <div className="vs-toolbar">
         <div className="vs-drop" onDragOver={event => { event.preventDefault(); setDragged(true); }}
           onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragged(false); }}
@@ -239,6 +240,7 @@ export function VideoStills({ onTransfer }: Props) {
       {zipProgress !== null && <div className="vs-status" role="status">Creating ZIP: {zipProgress}%</div>}
       {error && <p className="vs-error" role="alert">{error}</p>}
       {notice && <p className="vs-notice" role="status">{notice}</p>}
+      </div>
       <div className="vs-content">
         <div className="vs-list-heading"><h2>Video collections</h2><span>{collections.length} videos</span></div>
         {!collections.length && <div className="vs-empty">Upload videos to extract still frames. Processing stays on this device.</div>}
