@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutGroup, motion } from 'motion/react';
+import { LayoutGroup, motion, MotionConfig } from 'motion/react';
 import { VideoStills } from './tools/video-stills/VideoStills';
 import { Storyboard } from './tools/storyboard/Storyboard';
 import type { StoryboardRef } from './tools/storyboard/engine';
@@ -51,6 +51,7 @@ export default function App() {
   const isHome = activeTool === 'home';
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className={isLogo ? 'forge-app forge-v5-shell' : 'forge-app forge-collection-shell'}>
       <aside className="sidebar" aria-label="Tools">
         <div className="brand">
@@ -115,5 +116,6 @@ export default function App() {
         <div className="native-tool" hidden={activeTool !== 'ad-downloader'}><AdDownloader /></div>
       </main>
     </div>
+    </MotionConfig>
   );
 }
