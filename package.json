@@ -3,27 +3,37 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "engines": { "node": ">=22.12.0" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
-    "prepare:legacy": "node scripts/materialize-legacy.mjs",
-    "dev": "npm run prepare:legacy && vite --host 0.0.0.0",
-    "build": "npm run prepare:legacy && tsc --noEmit && vite build",
+    "clean:generated-legacy": "node scripts/clean-generated-legacy.mjs",
+    "predev": "npm run clean:generated-legacy",
+    "dev": "vite --host 0.0.0.0",
+    "prebuild": "npm run clean:generated-legacy",
+    "build": "tsc --noEmit && vite build && node scripts/verify-native-dist.mjs",
     "preview": "vite preview --host 0.0.0.0",
-    "test:bridge": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test:unit": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:legacy": "node scripts/test-legacy.mjs",
-    "test": "npm run test:bridge && npm run test:legacy"
+    "test": "npm run test:unit && npm run test:legacy",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "motion": "^14.9.0",
-    "lucide-react": "^0.468.0"
+    "jszip": "^3.10.1",
+    "pica": "^9.0.1",
+    "pdfjs-dist": "6.5.438",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "motion": "14.9.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@types/pica": "^9.0.1",
     "@vitejs/plugin-react": "^5.1.0",
     "typescript": "^5.9.0",
-    "vite": "^7.3.0"
+    "vite": "^7.3.0",
+    "@playwright/test": "^1.59.1"
   }
 }

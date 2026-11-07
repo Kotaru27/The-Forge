@@ -1,41 +1,60 @@
-# The Forge — Creative Toolkit
+# The Forge — native React web release candidate
 
-A local-first, desktop-oriented creative workspace built with React 19, TypeScript and Vite. The Forge has its own graphite-and-brass visual system, distinct from the CTK source application.
+The Forge is a desktop-first, AMOLED-black **React + TypeScript + Vite** toolkit. The initial GitHub Pages web release contains **seven tools**: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (Grid Board / Fit to Platform), Link Generator and Ad Downloader.
 
-## Current architecture
+**Video Compressor is postponed** and will be rebuilt from scratch after the website is stable. Its old CTK iframe, compression worker and bundled legacy CSS/JS are not part of this web build.
 
-React owns the navigation, title bar, and native Link Generator. The other tool engines still execute in an isolated compatibility iframe, generated from a pinned public CTK baseline; processing behavior is preserved until it is migrated and independently verified. The current routes are Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard, Link Generator, Ad Downloader and Video Compressor.
+## Develop locally
 
-### Logo Studio (visual upgrade)
-
-The Logo Resizer's original processing engine remains unchanged. A scoped layer in `src/legacy/forge-logo-studio.css` and `src/legacy/forge-logo-studio.js` adds:
-- Graphite/brass interface, refined controls and typography, animated action feedback
-- Animated side-by-side, right-hand asset inspector (focus mode)
-- Real export-aspect-ratio preview cards, output stage, file counts and import drop affordance
-- Quick output presets: 150×150, 200×200, 200×150, 250×250
-- Reduced-motion alternative, keyboard activation of asset previews
-
-Image and Office-media import, high-quality resizing, per-card edits, per-card download, ZIP export and original file handlers stay in the pinned CTK engine. No CTK code is modified or republished.
-
-## Local development
-
-Requires Node.js 22.12+ and Git. Run:
+Prerequisite: Node.js >= 22.12.0. For building or developing the seven native tools, no CTK checkout is needed.
 
 ```bash
 npm install
 npm run dev
-npm test
+npm run build
+npm run preview
+```
+
+The `predev` / `prebuild` commands remove any previously **generated, ignored** `public/legacy` directory before Vite runs, so old CTK assets cannot accidentally re-enter the build. The post-build check verifies the bundled entrypoint and blocks legacy/compressor payloads.
+
+## Automated verification
+
+```bash
+npm run test:unit
+npm run test:e2e
+```
+
+`npm test` runs **both** the React/TypeScript unit tests and the original CTK baseline regression tests. For the latter, check out `Kotaru27/CTK` at pinned commit `617615c0b4370c795ddfd6dc4c300920cd595883` into `legacy-source/`, or set `CTK_SOURCE_DIR` to an equivalent local checkout. GitHub Actions does this automatically. **CTK remains a test oracle, not an app/runtime dependency.**
+
+## GitHub Pages release candidate
+
+The seven-tool React site is prepared for a **manual, gated** GitHub Pages preview from `release/pages-preview`. The source branch runs build and browser checks without automatically publishing. After enabling GitHub Pages (Settings → Pages → GitHub Actions), use the Actions workflow's branch dropdown to deploy only the reviewed release branch, then inspect the live URL.
+
+See [GitHub Pages release procedure](docs/GITHUB_PAGES_RELEASE.md) for the one-time setting, deployment instructions, live Chromium smoke checks, rollback, and remaining real-file acceptance checks.
+
+## GitHub Pages
+
+The project site URL base is `/The-Forge/`. On Linux/macOS:
+
+```bash
+FORGE_BASE_PATH=/The-Forge/ npm run build
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:FORGE_BASE_PATH = '/The-Forge/'
 npm run build
 ```
 
-`npm run prepare:legacy` clones and verifies the pinned CTK commit, creates `public/legacy`, copies approved unchanged CTK runtime assets and applies the isolated Forge visual skin. You can set `CTK_SOURCE_DIR` to a local CTK checkout instead. Generated content in `public/legacy` is ignored by Git.
+The build fails if the produced script does not use that base path, or if `dist/` includes any `legacy/` or `compressor/` folder. The Playwright suite runs against the same production-style path.
 
-## Verification and deployment
+`.github/workflows/pages.yml` supports **manual deployment only**. Publishing is not part of the migration PRs and requires approval and Pages configuration (Settings → Pages → GitHub Actions).
 
-Pushes and pull requests run `.github/workflows/ci.yml`, which runs the original CTK compatibility tests, React bridge tests, TypeScript typecheck and production build. On successful main-branch CI, the Pages workflow builds and publishes the `/The-Forge/` static site. Deployments are serialized to avoid collisions when multiple UI commits land close together. GitHub Pages also supports a manual dispatch.
+## Feature parity status
 
-**Automated checks do not establish visual/browser parity.** Before declaring the UI production-ready, test image and PPTX/XLSX imports, size prompts, overrides, focus open/close, keyboard navigation, delete/clear/undo, PNG/JPEG export and ZIP contents on a real desktop browser with representative files.
+The React implementations have automated tests for uploads, transforms, ZIP/image exports, cancel/undo, keyboard controls and Video Stills → Grid Board transfers. Additional tests compare exact Link Generator output against pinned CTK and validate OOXML and rotated PDF edge cases.
 
-## Future migration
+**Real-work-file parity is still a release gate.** See [feature parity gate](docs/FEATURE_PARITY_GATE.md), [native runtime cleanup](docs/NATIVE_WEB_CLEANUP.md) and individual migration notes under `docs/`. Authentic SharePoint permissions, real Excel/PPTX files and MP4/MOV compatibility must be verified before calling the website production-ready.
 
-Replace each iframe engine with React + TypeScript only after input/output and workflow parity are demonstrated. The last compatibility bridge should be removed only when all migrated tools have regression coverage. The site is static and does not provide access control; do not upload confidential material.
+No native Windows executable is included.
