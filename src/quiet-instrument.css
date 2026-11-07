@@ -634,3 +634,47 @@
     transition-duration:0.01ms!important;animation:none!important;
   }
 }
+
+/* Shared-layout preset plate: exact four original choices and values. */
+.forge-app .forge-logo-v5 .forge-v5-preset-grid button{
+  position:relative;isolation:isolate;overflow:hidden;
+}
+.forge-app .forge-logo-v5 .forge-v5-preset-grid button.selected{
+  color:var(--qi-accent-ink);border-color:#879a86;background:var(--qi-panel);
+}
+.forge-app .forge-v5-preset-grid .qi-preset-plate{
+  position:absolute;z-index:0;inset:0;border-radius:4px;
+  background:var(--qi-accent);pointer-events:none;
+}
+.forge-app .forge-v5-preset-grid .qi-preset-text{
+  position:relative;z-index:1;pointer-events:none;
+}
+/* Collapse and expand the actual workboard track in sync with Focus exit.
+   The rendering canvas is never animated or recreated by this mechanism. */
+.forge-app .forge-logo-v5 .logo-body{
+  display:grid;grid-template-columns:minmax(0,1fr) 0px;
+  transition:grid-template-columns 290ms cubic-bezier(.16,1,.3,1);
+}
+.forge-app .forge-logo-v5 .logo-body.qi-focus-open{
+  grid-template-columns:minmax(0,1fr) min(365px,30vw);
+}
+.forge-app .forge-logo-v5 .logo-gallery{
+  grid-column:1;grid-row:1;min-width:0;
+}
+.forge-app .forge-logo-v5 .logo-detail{
+  grid-column:2;grid-row:1;min-width:0;width:100%;height:100%;
+  flex:none;position:relative;overflow-x:hidden;animation:none;
+}
+@media(max-width:960px){
+  .forge-app .forge-logo-v5 .logo-body,
+  .forge-app .forge-logo-v5 .logo-body.qi-focus-open{
+    display:flex;position:relative;grid-template-columns:none;transition:none;
+  }
+  .forge-app .forge-logo-v5 .logo-detail{
+    position:absolute;top:0;right:0;bottom:0;
+    width:min(365px,90%);height:100%;box-shadow:-12px 0 30px #05090565;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .forge-app .forge-logo-v5 .logo-body{transition:none!important;}
+}
