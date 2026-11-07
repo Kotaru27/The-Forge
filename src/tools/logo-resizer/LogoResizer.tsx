@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
@@ -309,7 +310,10 @@ export function LogoResizer() {
                   className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''}
                   aria-pressed={settings.width === preset.width && settings.height === preset.height}
                   onClick={() => setSize(preset.width, preset.height)}
-                >{preset.label}</button>)}
+                >
+                  {settings.width === preset.width && settings.height === preset.height && <motion.span layoutId="qi-logo-active-preset" className="qi-preset-plate" aria-hidden="true" transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }} />}
+                  <span className="qi-preset-text">{preset.label}</span>
+                </button>)}
               </div>
             </div>
             <div className="forge-v5-group forge-v5-custom">
@@ -380,7 +384,7 @@ export function LogoResizer() {
       {progress && <div className="logo-progress" role="status">{progress}</div>}
       {error && <div className="logo-error" role="alert">{error}</div>}
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
-      <div className="logo-body">
+      <div className={"logo-body" + (detail ? " qi-focus-open" : "")}>
         <main className="logo-gallery" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
           <div className="forge-v5-board-heading"><div><span>01 — CANVAS / ASSET BOARD</span><h2>{cards.length ? cards.length + (cards.length === 1 ? " logo in your workboard" : " logos in your workboard") : "Your workboard is empty"}</h2></div><small>{String(cards.length).padStart(2,"0")} / ASSETS</small></div>
           {!cards.length ? (
@@ -415,7 +419,10 @@ export function LogoResizer() {
             </div>
           )}
         </main>
-        {detail && <aside className="logo-detail" aria-label="Focus Mode">
+        <AnimatePresence initial={false}>
+        {detail && <motion.aside key="logo-focus" className="logo-detail" aria-label="Focus Mode"
+          initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}>
           <div className="logo-detail-heading">
             <strong>Focus Mode</strong>
             <div className="logo-detail-buttons">
@@ -437,7 +444,8 @@ export function LogoResizer() {
             <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</button>
             <button type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
           </div>
-        </aside>}
+        </motion.aside>}
+        </AnimatePresence>
       </div>
       {pending && <div className="logo-modal-backdrop" role="presentation">
         <div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions">
