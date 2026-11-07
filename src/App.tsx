@@ -6,7 +6,6 @@ import type { StoryboardRef } from './tools/storyboard/engine';
 import type { TransferGroup, TransferResult } from './tools/video-stills/engine';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
-import { LogoResizerIcon } from './tools/logo-resizer/LogoResizerIcon';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
@@ -77,9 +76,8 @@ export default function App() {
               onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
             >
               {activeTool === tool.id && <motion.span layoutId="qi-rail-selection" className="qi-rail-plate" aria-hidden="true" transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }} />}
-              {isLogo ? (
-              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <span>{tool.label.split(' ').map(word => word[0]).join('').substring(0,2)}</span>}</span>
-            ) : <span className="forge-collection-rail-icon"><ToolGlyph tool={tool.id} /></span>}</button>
+              <span className={isLogo ? 'forge-v5-rail-glyph' : 'forge-collection-rail-icon'}><ToolGlyph tool={tool.id} /></span>
+            </button>
           ))}
         </nav></LayoutGroup>
       </aside>
