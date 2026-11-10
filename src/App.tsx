@@ -13,6 +13,7 @@ import { ForgeHome, ToolGlyph, toolDetails } from './home/ForgeHome';
 import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
 import './studio-motion.css';
+import './studio-workrooms.css';
 
 type Route = ToolId | 'home';
 
