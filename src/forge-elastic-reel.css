@@ -345,30 +345,31 @@
 .forge-domino-letter{
   display:inline-block;
   flex:none;
-  transform-origin:9% 92%;
+  transform-style:preserve-3d;
+  transform-origin:50% 96%;
   backface-visibility:hidden;
   will-change:transform;
 }
 .forge-domino-space{display:inline-block;flex:none;width:.22em}
 .forge-app.forge-studio-shell .native-tool:not([hidden]) .forge-domino-letter{
   animation-name:forge-domino-fall,forge-domino-rise;
-  animation-duration:.62s,.73s;
+  animation-duration:.50s,.63s;
   animation-timing-function:cubic-bezier(.35,.06,.66,.96),cubic-bezier(.19,1,.27,1);
   animation-fill-mode:forwards,forwards;
   animation-iteration-count:1,1;
 }
 @keyframes forge-domino-fall{
-  0%{transform:rotate(0deg) translateY(0)}
-  18%{transform:rotate(0deg) translateY(0)}
-  45%{transform:rotate(21deg) translateY(2px)}
-  83%{transform:rotate(76deg) translateY(5px)}
-  100%{transform:rotate(78deg) translateY(5px)}
+  0%{transform:rotateX(0deg)}
+  16%{transform:rotateX(0deg)}
+  48%{transform:rotateX(-33deg)}
+  87%{transform:rotateX(-77deg)}
+  100%{transform:rotateX(-76deg)}
 }
 @keyframes forge-domino-rise{
-  0%{transform:rotate(78deg) translateY(5px)}
-  54%{transform:rotate(-8deg) translateY(-1px)}
-  78%{transform:rotate(3deg) translateY(0)}
-  100%{transform:rotate(0deg) translateY(0)}
+  0%{transform:rotateX(-76deg)}
+  57%{transform:rotateX(9deg)}
+  79%{transform:rotateX(-3deg)}
+  100%{transform:rotateX(0deg)}
 }
 /* All seven cards have the same matte material. Small accent shifts mark
    tool identity instead of seven unrelated colored backgrounds. */
