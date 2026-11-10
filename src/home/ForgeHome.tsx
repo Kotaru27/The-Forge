@@ -98,7 +98,7 @@ export function ForgeHome({ onOpenTool, transitionTarget }: Props) {
                     key={index}
                     className="forge-domino-letter"
                     style={{
-                      animationDelay: `${(0.23 + index * 0.09).toFixed(3)}s, ${(1.47 + (8 - index) * 0.068).toFixed(3)}s`
+                      animationDelay: `${(0.18 + index * 0.075).toFixed(3)}s, ${(1.27 + (8 - index) * 0.055).toFixed(3)}s`
                     }}
                   >{character}</span>
                 )}
