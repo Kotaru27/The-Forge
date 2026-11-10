@@ -169,10 +169,13 @@
 .forge-app.forge-studio-shell .pdf-page-card{border-radius:7px;border-color:#4a3b32;background:#171310}
 .forge-app.forge-studio-shell .pdf-page-preview{background:#25201b}
 .forge-app.forge-studio-shell .pdf-page-foot{background:#1b1612}
-.forge-app.forge-studio-shell .pdf-workspace button:not(.pdf-primary):not(.pdf-doc-card):not(:disabled){
- background:#25201c;color:#e6d8cd;border-color:#605045;border-radius:5px
+.forge-app.forge-studio-shell :is(.pdf-detail,.pdf-confirm) button:not(.pdf-primary),
+.forge-app.forge-studio-shell .pdf-page-foot button,
+.forge-app.forge-studio-shell .pdf-setup>button.pdf-secondary{
+ background:#25201c;color:#e6d8cd;border:1px solid #605045;border-radius:5px
 }
-.forge-app.forge-studio-shell .pdf-workspace button:not(.pdf-primary):not(.pdf-doc-card):not(:disabled):hover{background:#302820}
+.forge-app.forge-studio-shell :is(.pdf-detail,.pdf-confirm) button:not(.pdf-primary):hover:not(:disabled),
+.forge-app.forge-studio-shell .pdf-page-foot button:hover:not(:disabled){background:#302820}
 .forge-app.forge-studio-shell .pdf-error{background:#321d1c;border-color:#8f5147;color:#ffc6bf}
 .forge-app.forge-studio-shell .pdf-detail-backdrop,
 .forge-app.forge-studio-shell .pdf-confirm-backdrop{background:rgba(0,0,0,.85);animation:suite-fade .22s ease both}
