@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { motion } from 'motion/react';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
 
@@ -84,7 +85,10 @@ export function ForgeHome({ onOpenTool, transitionTarget }: Props) {
             const note = toolNotes[tool.id];
             const shared = transitionTarget === tool.id;
             return (
-              <button type="button" className="forge-home-card forge-studio-index-entry"
+              <motion.button type="button" className="forge-home-card forge-studio-index-entry"
+                initial={{ opacity: 0, y: 11 }} animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -1 }} whileTap={{ scale: 0.995 }}
+                transition={{ duration: 0.38, delay: Math.min(0.58, 0.28 + index * 0.055), ease: [0.22, 1, 0.36, 1] }}
                 key={tool.id} onClick={() => onOpenTool(tool.id)}
                 aria-label={`Open ${tool.label}`}>
                 <span className="forge-studio-index-number">{String(index + 1).padStart(2, '0')}</span>
@@ -96,7 +100,7 @@ export function ForgeHome({ onOpenTool, transitionTarget }: Props) {
                   <span>{note.description}</span>
                 </span>
                 <span className="forge-studio-index-arrow" aria-hidden="true">↗</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
