@@ -22,6 +22,11 @@ test('studio home keeps seven tools reachable at every target desktop width', as
     await expect(page.getByRole('heading', { name: 'THE FORGE' })).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath(`studio-home-${width}.png`) });
   }
+  // A transformed workspace would trap position:fixed dialogs behind the tool header.
+  await page.goto('#/pdf-to-image');
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('transform', 'none');
+  await page.goto('#/video-stills');
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('transform', 'none');
   expect(pageErrors).toEqual([]);
 });
 
