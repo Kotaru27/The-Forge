@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
@@ -69,6 +69,15 @@ export function ForgeHome({ onOpenTool, transitionTarget }: Props) {
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const activeIndex = focusedIndex ?? hoveredIndex;
 
+  // Clear any previously hovered panel after the route transition captures it.
+  // This preserves the expanding card's title/icon for the shared-element snapshot.
+  useEffect(() => {
+    if (transitionTarget !== null && transitionTarget !== undefined) {
+      setHoveredIndex(null);
+      setFocusedIndex(null);
+    }
+  }, [transitionTarget]);
+
   return (
     <section className="forge-home forge-studio-home forge-elastic-home" aria-label="The Forge home">
       <div className="forge-studio-home-inner">
@@ -111,11 +120,7 @@ export function ForgeHome({ onOpenTool, transitionTarget }: Props) {
                   onPointerEnter={() => setHoveredIndex(index)}
                   onFocus={() => setFocusedIndex(index)}
                   onBlur={() => setFocusedIndex(null)}
-                  onClick={() => {
-                    setHoveredIndex(null);
-                    setFocusedIndex(null);
-                    onOpenTool(tool.id);
-                  }}
+                  onClick={() => onOpenTool(tool.id)}
                   initial={{ opacity: 0 }}
                   animate={{
                     opacity: 1,
