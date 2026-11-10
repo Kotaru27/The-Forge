@@ -164,7 +164,7 @@
 .forge-app.forge-studio-shell .forge-v5-eyebrow:before{background:var(--studio-accent)}
 .forge-app.forge-studio-shell .forge-v5-title{gap:8px}
 .forge-app.forge-studio-shell .forge-v5-title svg{width:30px;height:30px;flex:0 0 30px}
-.forge-app.forge-studio-shell .forge-v5-title h1{font:700 clamp(25px,2.5vw,37px)/1 inherit;letter-spacing:-.06em;color:var(--studio-text)}
+.forge-app.forge-studio-shell .forge-v5-title h1{font-size:clamp(25px,2.5vw,37px);font-weight:700;line-height:1;font-family:inherit;letter-spacing:-.06em;color:var(--studio-text)}
 .forge-app.forge-studio-shell .forge-v5-title h1 span{color:var(--studio-accent-hi)}
 .forge-app.forge-studio-shell .forge-v5-command-deck{border-top:1px solid var(--studio-border);padding-top:10px}
 .forge-app.forge-studio-shell .forge-v5-control-grid{grid-template-columns:130px 155px 80px 81px 205px 114px minmax(188px,1fr) 152px;
