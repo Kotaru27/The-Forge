@@ -321,3 +321,220 @@
     animation-duration:0s!important;
   }
 }
+
+
+/* November editorial refinement — a quieter, more legible instrument deck.
+   Original composition and animation; not paid React Bits Pro source. */
+.forge-elastic-home .forge-studio-hero-content h1.forge-domino-title{
+  position:relative;
+  overflow:visible;
+  perspective:920px;
+  isolation:isolate;
+  white-space:nowrap;
+  line-height:1.05;
+  padding-block:.07em .12em;
+  margin-block:-.07em -.12em;
+}
+.forge-domino-letters{
+  display:inline-flex;
+  align-items:baseline;
+  white-space:nowrap;
+  letter-spacing:-.07em;
+  color:#f4f0eb;
+}
+.forge-domino-letter{
+  display:inline-block;
+  flex:none;
+  transform-origin:9% 92%;
+  backface-visibility:hidden;
+  will-change:transform;
+}
+.forge-domino-space{display:inline-block;flex:none;width:.22em}
+.forge-app.forge-studio-shell .native-tool:not([hidden]) .forge-domino-letter{
+  animation-name:forge-domino-fall,forge-domino-rise;
+  animation-duration:.62s,.73s;
+  animation-timing-function:cubic-bezier(.35,.06,.66,.96),cubic-bezier(.19,1,.27,1);
+  animation-fill-mode:forwards,forwards;
+  animation-iteration-count:1,1;
+}
+@keyframes forge-domino-fall{
+  0%{transform:rotate(0deg) translateY(0)}
+  18%{transform:rotate(0deg) translateY(0)}
+  45%{transform:rotate(21deg) translateY(2px)}
+  83%{transform:rotate(76deg) translateY(5px)}
+  100%{transform:rotate(78deg) translateY(5px)}
+}
+@keyframes forge-domino-rise{
+  0%{transform:rotate(78deg) translateY(5px)}
+  54%{transform:rotate(-8deg) translateY(-1px)}
+  78%{transform:rotate(3deg) translateY(0)}
+  100%{transform:rotate(0deg) translateY(0)}
+}
+/* All seven cards have the same matte material. Small accent shifts mark
+   tool identity instead of seven unrelated colored backgrounds. */
+.forge-app.forge-studio-shell .forge-home-card.forge-elastic-card{
+  --reel-top:#25201c;
+  --reel-bottom:#11100f;
+  background:linear-gradient(164deg,var(--reel-top) 0%,#181615 51%,var(--reel-bottom) 100%);
+  border:1px solid #51463d;
+  border-radius:8px;
+  box-shadow:inset 0 1px 0 #ffffff0b,0 14px 32px #0008;
+  transition:border-color .28s ease,box-shadow .32s cubic-bezier(.22,1,.36,1);
+}
+.forge-app.forge-studio-shell .forge-elastic-card[data-tool=logo-resizer]{
+  --reel-top:#2c221c;--reel-bottom:#14100e;--reel-accent:#dbab87;
+}
+.forge-app.forge-studio-shell .forge-elastic-card[data-tool=pdf-to-image]{
+  --reel-top:#222321;--reel-bottom:#101210;--reel-accent:#c2c1b5;
+}
+.forge-app.forge-studio-shell .forge-elastic-card[data-tool=image-splitter]{
+  --reel-top:#29221d;--reel-bottom:#14110e;--reel-accent:#d1ac8f;
+}
+.forge-app.forge-studio-shell .forge-elastic-card[data-tool=video-stills]{
+  --reel-top:#1e2727;--reel-bottom:#101516;--reel-accent:#a7c2c1;
+}
+.forge-app.forge-studio-shell .forge-elastic-card[data-tool=storyboard]{
+  --reel-top:#27231e;--reel-bottom:#14110f;--reel-accent:#cfad8d;
+}
+.forge-app.forge-studio-shell .forge-elastic-card[data-tool=link-generator]{
+  --reel-top:#23232a;--reel-bottom:#111217;--reel-accent:#bab9cb;
+}
+.forge-app.forge-studio-shell .forge-elastic-card[data-tool=ad-downloader]{
+  --reel-top:#28231f;--reel-bottom:#15110e;--reel-accent:#d1b496;
+}
+.forge-app.forge-studio-shell .forge-home-card.forge-elastic-card::before{
+  background:linear-gradient(180deg,#ffffff08 0%,transparent 28%,transparent 62%,#0005 100%);
+}
+.forge-app.forge-studio-shell .forge-home-card.forge-elastic-card::after{
+  border-radius:7px;
+}
+.forge-app.forge-studio-shell .forge-home-card.forge-elastic-card[data-expanded=true]{
+  border-color:#c29a77;
+  box-shadow:inset 0 1px 0 #ffffff13,0 24px 42px #0009;
+}
+.forge-elastic-art{
+  background:linear-gradient(180deg,transparent 0%,#ffffff03 40%,transparent 72%);
+}
+.forge-elastic-art::before{
+  top:24%;left:50%;width:130px;height:130px;
+  border:1px solid #e2c0a326;
+  border-radius:13px;
+  background:linear-gradient(156deg,#ffffff0d 0%,#ffffff02 38%,#0000001a 100%);
+  opacity:1;
+  transform:translateX(-50%) rotate(-6deg);
+  transition:transform .5s cubic-bezier(.22,1,.36,1),border-color .35s;
+}
+.forge-elastic-card[data-expanded=true] .forge-elastic-art::before{
+  transform:translateX(-50%) rotate(-1deg) scale(1.05);
+  border-color:#d5ad8b44;
+}
+.forge-elastic-art-rules{
+  inset:17px 14px 17px;
+  border-top:1px solid #ffffff14;border-bottom:1px solid #ffffff12;
+  opacity:.9;
+}
+.forge-elastic-art-rules::before{
+  width:26px;background:var(--reel-accent);opacity:.85
+}
+.forge-elastic-art-rules::after{
+  right:0;top:20%;height:60%;opacity:.09;
+}
+.forge-elastic-art-glyph{
+  top:25%;left:50%;width:132px;height:132px;
+  color:var(--reel-accent);
+  opacity:.74;
+  transform:translateX(-50%) rotate(-3deg);
+  transition:opacity .3s ease,top .45s cubic-bezier(.22,1,.36,1),transform .52s cubic-bezier(.22,1,.36,1);
+}
+.forge-elastic-art-glyph svg{
+  width:110px;height:110px;stroke-width:1.1;
+}
+.forge-elastic-card[data-expanded=true] .forge-elastic-art-glyph{
+  opacity:.32;top:17%;transform:translateX(-50%) rotate(0deg) scale(1.04);
+}
+.forge-elastic-card-no{
+  top:23px;left:17px;
+  color:#f0e5d9;font-size:11px;letter-spacing:.03em;
+}
+.forge-elastic-card-no i{color:var(--reel-accent);opacity:.67}
+.forge-elastic-card-icon{
+  top:16px;right:15px;left:auto;bottom:auto;
+  width:36px;height:36px;
+  border-radius:5px;
+  background:#07070755;
+  border-color:#e8d2bf32;
+  color:var(--reel-accent);
+}
+.forge-elastic-card-icon svg{width:22px;height:22px;stroke-width:1.55}
+.forge-elastic-card[data-expanded=true] .forge-elastic-card-icon{
+  background:#090807ad;border-color:#d2a7857a;color:#e0b896;
+}
+.forge-elastic-slice-label{
+  left:17px;right:13px;bottom:24px;
+  display:flex;flex-direction:column;gap:8px;
+  white-space:normal;
+  overflow:visible;
+  color:#f2ebe3;
+  line-height:1.2;
+  transition:opacity .2s ease,transform .32s cubic-bezier(.22,1,.36,1);
+}
+.forge-elastic-slice-category{
+  color:var(--reel-accent);
+  font-size:10px;letter-spacing:.025em;
+  font-weight:565;
+  opacity:.92;
+}
+.forge-elastic-slice-title{
+  display:block;
+  font-size:clamp(15px,1.22vw,20px);
+  letter-spacing:-.045em;font-weight:690;
+  text-wrap:balance;line-height:1.09;
+}
+.forge-elastic-card[data-expanded=true] .forge-elastic-slice-label{
+  opacity:0;transform:translateY(8px);
+}
+.forge-elastic-card-info{
+  left:25px;bottom:85px;
+  width:min(370px,calc(100% - 50px));
+}
+.forge-elastic-card-info strong{
+  font-size:clamp(31px,2.75vw,44px);
+  font-weight:695;
+}
+.forge-elastic-card-description{font-size:12.5px;line-height:1.57;color:#d6c8b9}
+.forge-elastic-card-meta{font-size:10.5px;color:#d3b396}
+.forge-elastic-card-open{right:20px;bottom:23px;color:#e2b28e}
+@media(min-width:721px) and (max-width:1239px){
+  .forge-elastic-card-no{left:12px}
+  .forge-elastic-slice-label{left:12px;right:9px}
+  .forge-elastic-card-icon{right:11px}
+  .forge-elastic-slice-category{font-size:9px}
+  .forge-elastic-slice-title{font-size:clamp(14px,1.3vw,18px)}
+  .forge-elastic-card-info{left:20px;width:calc(100% - 40px)}
+}
+@media(max-width:900px){
+  .forge-elastic-slice-label{display:flex}
+  .forge-elastic-slice-title{font-size:14px}
+  .forge-elastic-card-icon{top:15px;right:11px}
+  .forge-elastic-art::before{width:96px;height:96px;top:26%}
+  .forge-elastic-art-glyph{width:108px;height:108px;top:26%}
+  .forge-elastic-art-glyph svg{width:84px;height:84px}
+}
+@media(max-width:720px){
+  .forge-app.forge-studio-shell .forge-home-card.forge-elastic-card{border-color:#625244}
+  .forge-elastic-slice-label{display:none}
+  .forge-elastic-card-info{left:15px;width:calc(100% - 30px);bottom:62px}
+  .forge-elastic-card-info strong{font-size:22px}
+  .forge-elastic-card-icon{top:12px;right:12px;left:auto;bottom:auto}
+  .forge-elastic-art-glyph{top:16%;opacity:.35}
+  .forge-elastic-art::before{top:17%}
+  .forge-elastic-card-no{top:18px;left:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  .forge-app.forge-studio-shell .native-tool:not([hidden]) .forge-domino-letter{
+    animation:none!important;
+    transform:none!important;
+    will-change:auto;
+  }
+  .forge-elastic-art::before{transition:none!important}
+}
