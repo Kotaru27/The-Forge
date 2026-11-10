@@ -115,10 +115,6 @@
 .forge-studio-index-arrow{color:var(--studio-accent);opacity:.65;align-self:flex-start;
  margin-top:6px;font-size:17px;transition:opacity .2s,transform .32s var(--studio-ease)}
 .forge-studio-index-entry:hover .forge-studio-index-arrow{opacity:1;transform:translate(2px,-2px)}
-.forge-studio-index-entry{animation:forge-entry .4s var(--studio-ease) both}
-.forge-studio-index-entry:nth-child(1),.forge-studio-index-entry:nth-child(2){animation-delay:.38s}
-.forge-studio-index-entry:nth-child(3),.forge-studio-index-entry:nth-child(4){animation-delay:.45s}
-.forge-studio-index-entry:nth-child(n+5){animation-delay:.52s}
 .forge-studio-home-foot{display:flex;justify-content:space-between;gap:15px;color:#706b65;
  font-size:10px;letter-spacing:.055em;border-top:1px solid var(--studio-border);
  padding-top:17px;margin-top:18px}
@@ -202,8 +198,8 @@
 .forge-app.forge-studio-shell .logo-grid{grid-template-columns:repeat(auto-fill,minmax(226px,270px));gap:17px;align-items:start}
 .forge-app.forge-studio-shell .logo-card{background:#151311;border-color:#3b3430;border-radius:7px;
  transition:border-color .25s,box-shadow .25s,transform .26s var(--studio-ease);
- animation:forge-card-enter .35s var(--studio-ease) both}
-.forge-app.forge-studio-shell .logo-card:hover{border-color:#786251;transform:translateY(-2px);
+ }
+.forge-app.forge-studio-shell .logo-card:hover{border-color:#786251;transform:none;
  box-shadow:0 12px 32px #0007}
 .forge-app.forge-studio-shell .logo-card-heading{background:#171513;border-bottom-color:#3d352f}
 .forge-app.forge-studio-shell .logo-preview-button{background:#1c1916;border-bottom-color:#3d342e}
@@ -217,9 +213,7 @@
  box-shadow:0 10px 27px #0007,0 0 0 1px #aaa19a;background:#fff
 }
 .forge-app.forge-studio-shell .logo-detail{background:#171513;border-left:1px solid #5e4c3e;
- box-shadow:-12px 0 30px #0004;animation:forge-focus-enter .34s var(--studio-ease) both}
-.forge-app.forge-studio-shell .logo-detail.is-closing{
- pointer-events:none;animation:forge-focus-exit .22s cubic-bezier(.55,0,.85,.35) both}
+ box-shadow:-12px 0 30px #0004}
 .forge-app.forge-studio-shell .logo-detail-heading{border-color:#494036}
 .forge-app.forge-studio-shell .logo-detail-heading strong{color:var(--studio-text)}
 .forge-app.forge-studio-shell .logo-detail-preview{margin:12px auto 18px}
