@@ -121,7 +121,8 @@
 .forge-studio-home-foot span:first-child{color:#b9aba0}
 
 /* Workspaces retain their entire mounted state and all existing controls. */
-.forge-app.forge-studio-shell .native-tool:not([hidden]){animation:forge-tool-enter .35s var(--studio-ease) both}
+/* Never transform .native-tool: fixed dialogs must remain viewport-anchored. */
+.forge-app.forge-studio-shell .forge-suite-context{animation:forge-tool-enter .3s var(--studio-ease) both}
 .forge-app.forge-studio-shell .forge-suite-context{
  background:#11100f;border-bottom:1px solid var(--studio-border);padding:15px clamp(22px,3vw,54px);
  min-height:82px;gap:16px}
