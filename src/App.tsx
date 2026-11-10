@@ -6,7 +6,6 @@ import type { StoryboardRef } from './tools/storyboard/engine';
 import type { TransferGroup, TransferResult } from './tools/video-stills/engine';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
-import { LogoResizerIcon } from './tools/logo-resizer/LogoResizerIcon';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
