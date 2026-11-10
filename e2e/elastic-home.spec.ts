@@ -42,6 +42,9 @@ test('seven elastic Home cards are accessible and behave as one continuous reel'
       );
       return sizes[3] / Math.max(sizes[0], sizes[6]);
     }).toBeGreaterThan(2.2);
+    const expandedInfo = selected.locator('.forge-elastic-card-info');
+    await expect(expandedInfo).toHaveCSS('opacity', '1');
+    await expect(expandedInfo.locator('strong')).toHaveText('Video Stills');
     await page.screenshot({ path: testInfo.outputPath('elastic-seven-' + width + '.png') });
 
     await page.mouse.move(2, 2);
