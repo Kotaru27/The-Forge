@@ -55,6 +55,8 @@ export function LogoResizer() {
   const cardsRef = useRef(cards);
   cardsRef.current = cards;
   const [focused, setFocused] = useState<string | null>(null);
+  const [renderedFocus, setRenderedFocus] = useState<string | null>(null);
+  const [focusExiting, setFocusExiting] = useState(false);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
   const [pending, setPending] = useState<File[] | null>(null);
@@ -248,7 +250,22 @@ export function LogoResizer() {
     // Focus navigation must follow the currently visible list.
   }, [focused, cards]);
 
-  const detail = cards.find(asset => asset.id === focused) ?? null;
+  // Keep the inspector mounted briefly on close, so its exit can animate.
+  useEffect(() => {
+    if (focused) {
+      setRenderedFocus(focused);
+      setFocusExiting(false);
+      return;
+    }
+    if (!renderedFocus) return;
+    setFocusExiting(true);
+    const timer = window.setTimeout(() => {
+      setRenderedFocus(null);
+      setFocusExiting(false);
+    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220);
+    return () => window.clearTimeout(timer);
+  }, [focused, renderedFocus]);
+  const detail = cards.find(asset => asset.id === (focused ?? renderedFocus)) ?? null;
   const updateLabel = (asset: LogoAsset, value: string) => {
     patchCard(asset.id, {
       label: value,
@@ -415,7 +432,7 @@ export function LogoResizer() {
             </div>
           )}
         </main>
-        {detail && <aside className="logo-detail" aria-label="Focus Mode">
+        {detail && <aside className={focusExiting ? "logo-detail is-closing" : "logo-detail"} aria-label="Focus Mode" aria-hidden={focusExiting || undefined}>
           <div className="logo-detail-heading">
             <strong>Focus Mode</strong>
             <div className="logo-detail-buttons">
