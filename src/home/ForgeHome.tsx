@@ -90,7 +90,20 @@ export function ForgeHome({ onOpenTool, transitionTarget }: Props) {
           </div>
           <div className="forge-studio-hero-content">
             <div className="forge-studio-eyebrow">DESKTOP CREATIVE WORKSPACE</div>
-            <h1><span className="forge-studio-word-reveal">THE FORGE</span></h1>
+            <h1 className="forge-domino-title" aria-label="THE FORGE">
+              <span className="forge-domino-letters" aria-hidden="true">
+                {Array.from('THE FORGE', (character, index) =>
+                  character === ' ' ? <span key="space" className="forge-domino-space">&nbsp;</span> :
+                  <span
+                    key={index}
+                    className="forge-domino-letter"
+                    style={{
+                      animationDelay: `${(0.34 + index * 0.105).toFixed(3)}s, ${(1.91 + (8 - index) * 0.082).toFixed(3)}s`
+                    }}
+                  >{character}</span>
+                )}
+              </span>
+            </h1>
             <p>Seven dedicated tools. One continuous creative workspace.</p>
           </div>
           <span className="forge-studio-hero-number" aria-hidden="true">F / 07</span>
@@ -146,7 +159,10 @@ export function ForgeHome({ onOpenTool, transitionTarget }: Props) {
                     style={shared ? { viewTransitionName: 'forge-selected-icon' } : undefined}>
                     <ToolGlyph tool={tool.id} size={27} />
                   </span>
-                  <span className="forge-elastic-slice-label" aria-hidden="true">{tool.label}</span>
+                  <span className="forge-elastic-slice-label" aria-hidden="true">
+                    <span className="forge-elastic-slice-category">{note.category}</span>
+                    <span className="forge-elastic-slice-title">{tool.label}</span>
+                  </span>
                   <span className="forge-elastic-card-info">
                     <span className="forge-elastic-card-category">{note.category}</span>
                     <strong style={shared ? { viewTransitionName: 'forge-selected-title' } : undefined}>{tool.label}</strong>
