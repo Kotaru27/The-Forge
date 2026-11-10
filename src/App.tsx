@@ -14,6 +14,7 @@ import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
 import './studio-motion.css';
 import './studio-workrooms.css';
+import './forge-elastic-reel.css';
 
 type Route = ToolId | 'home';
 
