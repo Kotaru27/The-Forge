@@ -15,12 +15,25 @@ test('Domino lettering preserves readable THE FORGE heading while animating and 
   expect(animation).toContain('forge-domino-rise');
   const before = await title.boundingBox();
   await page.screenshot({ path: testInfo.outputPath('domino-before.png') });
-  await page.waitForTimeout(3400);
+  const tagline = page.getByText('Seven dedicated tools. One continuous creative workspace.');
+  for (const delay of [620, 540, 480]) {
+    await page.waitForTimeout(delay);
+    const letteringBottom = await letters.evaluateAll(nodes =>
+      Math.max(...nodes.map(node => node.getBoundingClientRect().bottom))
+    );
+    const subtitleTop = (await tagline.boundingBox())?.y ?? 0;
+    expect(letteringBottom).toBeLessThan(subtitleTop + 2);
+  }
+  await page.screenshot({ path: testInfo.outputPath('domino-mid-animation.png') });
+  await page.waitForTimeout(1350);
   const after = await title.boundingBox();
   expect(after).not.toBeNull();
   expect(before).not.toBeNull();
   expect(Math.abs(after!.width - before!.width)).toBeLessThanOrEqual(1);
-  await expect.poll(async () => letters.first().evaluate(el => getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
+  await expect.poll(async () => letters.first().evaluate(el => {
+    const transform = getComputedStyle(el).transform;
+    return transform === 'none' || new DOMMatrixReadOnly(transform).isIdentity;
+  })).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('domino-settled.png') });
   expect(exceptions).toEqual([]);
 });
@@ -54,6 +67,7 @@ test('all seven cards have readable permanent titles on the resting reel at desk
     }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     expect(overflow).toBeLessThanOrEqual(1);
+    await expect.poll(async () => Number(await cards.last().evaluate(el => getComputedStyle(el).opacity))).toBe(1);
     await page.screenshot({ path: testInfo.outputPath('refined-reel-' + width + '.png') });
   }
 });
