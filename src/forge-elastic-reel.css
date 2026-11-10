@@ -353,7 +353,7 @@
 .forge-domino-space{display:inline-block;flex:none;width:.22em}
 .forge-app.forge-studio-shell .native-tool:not([hidden]) .forge-domino-letter{
   animation-name:forge-domino-fall,forge-domino-rise;
-  animation-duration:.50s,.63s;
+  animation-duration:.46s,.56s;
   animation-timing-function:cubic-bezier(.35,.06,.66,.96),cubic-bezier(.19,1,.27,1);
   animation-fill-mode:forwards,forwards;
   animation-iteration-count:1,1;
@@ -361,12 +361,12 @@
 @keyframes forge-domino-fall{
   0%{transform:rotateX(0deg)}
   16%{transform:rotateX(0deg)}
-  48%{transform:rotateX(-33deg)}
-  87%{transform:rotateX(-77deg)}
-  100%{transform:rotateX(-76deg)}
+  48%{transform:rotateX(-29deg)}
+  87%{transform:rotateX(-67deg)}
+  100%{transform:rotateX(-66deg)}
 }
 @keyframes forge-domino-rise{
-  0%{transform:rotateX(-76deg)}
+  0%{transform:rotateX(-66deg)}
   57%{transform:rotateX(9deg)}
   79%{transform:rotateX(-3deg)}
   100%{transform:rotateX(0deg)}
