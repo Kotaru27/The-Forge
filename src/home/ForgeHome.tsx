@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
@@ -63,48 +63,104 @@ export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: numbe
 type Props = { onOpenTool: (tool: ToolId) => void; transitionTarget?: ToolId | null };
 
 export function ForgeHome({ onOpenTool, transitionTarget }: Props) {
+  // Deliberately independent of the licensed React Bits Pro implementation.
+  // Seven mounted destinations share one elastic layout; existing routes stay intact.
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const activeIndex = focusedIndex ?? hoveredIndex;
+
   return (
-    <section className="forge-home forge-studio-home" aria-label="The Forge home">
+    <section className="forge-home forge-studio-home forge-elastic-home" aria-label="The Forge home">
       <div className="forge-studio-home-inner">
         <div className="forge-studio-hero">
           <div className="forge-studio-hero-mark" aria-hidden="true">
             <svg viewBox="0 0 120 152" fill="none">
-              <path className="forge-studio-f-stroke" d="M25 132V20H104M25 73H86" stroke="currentColor" strokeWidth="14" strokeLinejoin="miter" strokeLinecap="square"/>
+              <path className="forge-studio-f-stroke" d="M25 132V20H104M25 73H86" stroke="currentColor"
+                strokeWidth="14" strokeLinejoin="miter" strokeLinecap="square" />
             </svg>
           </div>
           <div className="forge-studio-hero-content">
             <div className="forge-studio-eyebrow">DESKTOP CREATIVE WORKSPACE</div>
             <h1><span className="forge-studio-word-reveal">THE FORGE</span></h1>
-            <p>Seven precise tools for preparing, composing and delivering your work. Everything stays in your browser.</p>
+            <p>Seven dedicated tools. One continuous creative workspace.</p>
           </div>
           <span className="forge-studio-hero-number" aria-hidden="true">F / 07</span>
         </div>
-        <div className="forge-studio-index-heading"><h2>Choose a workspace</h2><span>07 TOOLS</span></div>
-        <div className="forge-studio-index">
-          {tools.map((tool, index) => {
-            const note = toolNotes[tool.id];
-            const shared = transitionTarget === tool.id;
-            return (
-              <motion.button type="button" className="forge-home-card forge-studio-index-entry"
-                initial={{ opacity: 0, y: 11 }} animate={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -1 }} whileTap={{ scale: 0.995 }}
-                transition={{ duration: 0.38, delay: Math.min(0.58, 0.28 + index * 0.055), ease: [0.22, 1, 0.36, 1] }}
-                key={tool.id} onClick={() => onOpenTool(tool.id)}
-                aria-label={`Open ${tool.label}`}>
-                <span className="forge-studio-index-number">{String(index + 1).padStart(2, '0')}</span>
-                <span className="forge-studio-index-icon" style={shared ? { viewTransitionName: 'forge-selected-icon' } : undefined}>
-                  <ToolGlyph tool={tool.id} size={26}/>
-                </span>
-                <span className="forge-studio-index-copy">
-                  <strong style={shared ? { viewTransitionName: 'forge-selected-title' } : undefined}>{tool.label}</strong>
-                  <span>{note.description}</span>
-                </span>
-                <span className="forge-studio-index-arrow" aria-hidden="true">↗</span>
-              </motion.button>
-            );
-          })}
+
+        <div className="forge-studio-index-heading forge-elastic-heading">
+          <h2>Choose a workspace</h2>
+          <span>07 / 07</span>
         </div>
-        <footer className="forge-studio-home-foot"><span>THE FORGE</span><span>Made for the work between ideas and delivery.</span><span>LOCAL FIRST</span></footer>
+
+        <div className="forge-elastic-reel-frame">
+          <div className="forge-elastic-reel" aria-label="Seven workspaces"
+            onPointerLeave={() => setHoveredIndex(null)}>
+            {tools.map((tool, index) => {
+              const note = toolNotes[tool.id];
+              const expanded = activeIndex === index;
+              const near = activeIndex !== null && Math.abs(activeIndex - index) === 1;
+              const shared = transitionTarget === tool.id;
+              return (
+                <motion.button
+                  key={tool.id}
+                  type="button"
+                  className="forge-home-card forge-elastic-card"
+                  data-tool={tool.id}
+                  data-expanded={expanded ? 'true' : 'false'}
+                  aria-label={`Open ${tool.label}`}
+                  onPointerEnter={() => setHoveredIndex(index)}
+                  onFocus={() => setFocusedIndex(index)}
+                  onBlur={() => setFocusedIndex(null)}
+                  onClick={() => {
+                    setHoveredIndex(null);
+                    setFocusedIndex(null);
+                    onOpenTool(tool.id);
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: 1,
+                    flexGrow: expanded ? 4.35 : near ? 1.04 : activeIndex === null ? 1 : 0.94,
+                    y: expanded ? -7 : 0,
+                  }}
+                  transition={{
+                    opacity: { duration: 0.46, delay: 0.24 + index * 0.052 },
+                    flexGrow: { type: 'spring', stiffness: 265, damping: 34, mass: 0.78 },
+                    y: { type: 'spring', stiffness: 305, damping: 31, mass: 0.65 },
+                  }}
+                  whileTap={{ scale: 0.995 }}
+                >
+                  <span className="forge-elastic-art" aria-hidden="true">
+                    <span className="forge-elastic-art-rules" />
+                    <span className="forge-elastic-art-glyph"><ToolGlyph tool={tool.id} size={156} /></span>
+                    <span className="forge-elastic-art-caption">{note.category}</span>
+                  </span>
+                  <span className="forge-elastic-card-no" aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}<i>/</i>07
+                  </span>
+                  <span className="forge-elastic-card-icon"
+                    style={shared ? { viewTransitionName: 'forge-selected-icon' } : undefined}>
+                    <ToolGlyph tool={tool.id} size={27} />
+                  </span>
+                  <span className="forge-elastic-slice-label" aria-hidden="true">{tool.label}</span>
+                  <span className="forge-elastic-card-info">
+                    <span className="forge-elastic-card-category">{note.category}</span>
+                    <strong style={shared ? { viewTransitionName: 'forge-selected-title' } : undefined}>{tool.label}</strong>
+                    <span className="forge-elastic-card-description">{note.description}</span>
+                    <span className="forge-elastic-card-meta">{note.detail}</span>
+                  </span>
+                  <span className="forge-elastic-card-open" aria-hidden="true">↗</span>
+                </motion.button>
+              );
+            })}
+          </div>
+          <p className="forge-elastic-hint">Point to a tool to open the reel. Select it to begin.</p>
+        </div>
+
+        <footer className="forge-studio-home-foot forge-elastic-footer">
+          <span>THE FORGE</span>
+          <span>Seven tools. Your work stays here.</span>
+          <span>LOCAL FIRST</span>
+        </footer>
       </div>
     </section>
   );
