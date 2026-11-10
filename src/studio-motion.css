@@ -230,6 +230,37 @@
 .forge-app.forge-studio-shell .logo-undo{background:#251f19;border-color:#5b493c}
 .forge-app.forge-studio-shell .logo-error{background:#3a1d1b;color:#ffc3bb}
 
+
+/* One consistent visual response across the other six existing workspaces. */
+.forge-app.forge-studio-shell.forge-collection-shell{
+ --f-bg:#0c0b0b;--f-base:#141210;--f-rail:#0b0b0b;--f-panel:#191715;
+ --f-panel-2:#221e1a;--f-border:#443a33;--f-border-soft:#332c27;
+ --f-text:#f2eee9;--f-muted:#aaa098;--f-faint:#857b71;
+ --f-bright:#bd906e;--f-bright-ink:#1c120b;--f-grid:transparent;
+}
+.forge-app.forge-studio-shell .logo-tool-icon rect[fill="#d8fb72"]{fill:#bd906e}
+.forge-app.forge-studio-shell .logo-tool-icon rect[fill="#1d2520"]{fill:#25201d;stroke:#7e6a5c}
+.forge-app.forge-studio-shell .logo-tool-icon path[stroke="#122015"]{stroke:#26190f}
+.forge-app.forge-studio-shell .logo-tool-icon path[stroke="#dce8dd"]{stroke:#ede0d4}
+.forge-app.forge-studio-shell .forge-logo-v5 .logo-detail-actions .logo-primary{
+ background:var(--studio-accent);color:#1e140d;border-color:var(--studio-accent)
+}
+.forge-app.forge-studio-shell .forge-logo-v5 .logo-detail-actions .logo-primary:hover{
+ background:var(--studio-accent-hi)
+}
+.forge-app.forge-studio-shell :is(.split-card,.pdf-doc-card,.pdf-page-card,.vs-stack,.sb-project-row,.sb-frame){
+ transition:border-color .22s ease,background-color .22s ease,box-shadow .26s var(--studio-ease);
+}
+.forge-app.forge-studio-shell :is(.split-card,.pdf-doc-card,.pdf-page-card,.vs-stack,.sb-project-row,.sb-frame):hover{
+ border-color:#84705f;box-shadow:0 8px 24px rgba(0,0,0,.24);
+}
+.forge-app.forge-studio-shell :is(.split-dialog-backdrop,.pdf-detail-backdrop,.pdf-confirm-backdrop,.vs-overlay,.sb-overlay){
+ animation:forge-backdrop-in .18s ease-out both
+}
+.forge-app.forge-studio-shell :is(.split-dialog,.pdf-detail,.pdf-confirm,.vs-modal,.sb-dialog){
+ animation:forge-dialog-in .3s var(--studio-ease) both
+}
+
 /* Use the browser's shared-element snapshots without a full-page fade. */
 ::view-transition-old(root),::view-transition-new(root){animation:none!important}
 ::view-transition-group(forge-selected-icon),::view-transition-group(forge-selected-title){
