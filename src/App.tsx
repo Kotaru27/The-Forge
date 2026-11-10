@@ -46,13 +46,15 @@ export default function App() {
     // Mark only the originating Home row, so title/icon can travel to the header.
     flushSync(() => setTransitionTool(selected));
     const doc = document as Document & {
-      startViewTransition?: (callback: () => void) => { finished: Promise<void> };
+      startViewTransition?: (callback: () => void) => { ready: Promise<void>; finished: Promise<void> };
     };
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reduced && doc.startViewTransition) {
-      void doc.startViewTransition(() => commit()).finished.catch(() => {
-        // Unsupported snapshot combinations must never block navigation.
-      });
+      const transition = doc.startViewTransition(() => commit());
+      // Interrupting a transition can reject ready even if finished resolves.
+      // Both promises must be observed to avoid noisy unhandled rejections.
+      void transition.ready.catch(() => {});
+      void transition.finished.catch(() => {});
     } else {
       commit();
     }
