@@ -1,3 +1,5 @@
+> **Historical migration-era parity matrix.** The Studio preview has since deployed separately from `main`; synthetic tests still do not establish real-work-file production parity. The old draft-branch approval cautions below reflect their original migration stage.
+
 # Feature parity release gate — seven React tools
 
 **Purpose:** Measure whether the React migration preserves the working CTK behavior. Do **not** treat a successful build, navigation, or synthetic browser fixture as proof that real work files always behave identically.
