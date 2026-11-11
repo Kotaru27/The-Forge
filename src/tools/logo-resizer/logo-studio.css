@@ -501,3 +501,62 @@
    transform:translateX(calc(100% + 20px));opacity:0;
  }
 }
+
+
+/* Screenshot QA refinements: readable numeric steppers, proportionate controls,
+   and no competing annotations beneath the small format/typography groups. */
+.forge-v5-shell .forge-logo-v5 .forge-v5-control-grid{
+  grid-template-columns:
+    minmax(118px,.9fr) minmax(160px,1.2fr)
+    minmax(115px,.8fr) minmax(75px,.65fr)
+    minmax(190px,1.5fr) minmax(120px,.95fr)
+    minmax(195px,1.7fr) minmax(140px,1.05fr);
+  min-width:1175px;
+}
+.forge-v5-shell .forge-logo-v5 .forge-v5-dimensions label{
+  grid-template-columns:13px minmax(0,1fr);gap:6px;
+}
+.forge-v5-shell .forge-logo-v5 .forge-v5-dimensions input{
+  min-width:0;width:100%;padding:0 4px;
+  font-size:12px;font-variant-numeric:tabular-nums;
+}
+.forge-v5-shell .forge-logo-v5 .forge-v5-format .forge-v5-subnote,
+.forge-v5-shell .forge-logo-v5 .forge-v5-typography .forge-v5-subnote{
+  display:none;
+}
+/* A small batch takes up useful workboard space instead of occupying only
+   two narrow tracks at the left edge of a large desktop canvas. */
+.forge-v5-shell .forge-logo-v5 .logo-grid:has(> .logo-card:only-child){
+  grid-template-columns:minmax(0,min(480px,100%));
+}
+.forge-v5-shell .forge-logo-v5 .logo-grid:has(> .logo-card:nth-child(2):last-child){
+  grid-template-columns:repeat(2,minmax(0,min(475px,calc((100% - 26px)/2))));
+}
+.forge-v5-shell .forge-logo-v5 .logo-grid:has(> .logo-card:nth-child(3):last-child){
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.forge-v5-shell .forge-logo-v5 .logo-preview-button{
+  max-height:282px;min-height:210px;
+}
+/* Keep task controls visible on laptop heights; let the workboard own the
+   remaining space rather than burying the upload action below the dock. */
+@media (max-height:800px){
+ .forge-v5-shell .forge-logo-v5 .logo-empty{gap:7px;padding-top:14px;padding-bottom:14px}
+ .forge-v5-shell .forge-logo-v5 .forge-v5-drop-icon svg{width:57px;height:57px}
+ .forge-v5-shell .forge-logo-v5 .logo-empty h3{font-size:clamp(23px,2.45vw,31px)}
+ .forge-v5-shell .forge-logo-v5 .logo-empty p{font-size:11px;line-height:1.45}
+ .forge-v5-shell .forge-logo-v5 .logo-empty .forge-v5-action{
+   min-height:36px;height:36px;margin-top:0;
+ }
+ .forge-v5-shell .forge-logo-v5 .logo-empty small{margin-top:4px}
+}
+@media(max-width:850px){
+ .forge-v5-shell .forge-logo-v5 .logo-grid:has(> .logo-card:nth-child(3):last-child){
+   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+ }
+}
+@media(max-width:610px){
+ .forge-v5-shell .forge-logo-v5 .logo-grid:has(> .logo-card:nth-child(2):last-child){
+   grid-template-columns:1fr;
+ }
+}
