@@ -585,3 +585,14 @@
 .forge-v5-shell .forge-logo-v5 .logo-detail .logo-detail-preview{
   margin:2px auto 9px;
 }
+
+
+/* At extra-wide desktop widths a tiny batch reads as a centered composition,
+   not an unfinished left-aligned spreadsheet. With Focus Mode open the two
+   cards still fit completely to the left of the 410px inspector. */
+@media(min-width:1650px){
+ .forge-v5-shell .forge-logo-v5 .logo-grid:has(> .logo-card:only-child),
+ .forge-v5-shell .forge-logo-v5 .logo-grid:has(> .logo-card:nth-child(2):last-child){
+   justify-content:center;
+ }
+}
