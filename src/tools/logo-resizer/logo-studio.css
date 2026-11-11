@@ -494,3 +494,10 @@
    transform:none!important;transition:opacity 120ms ease!important;
  }
 }
+
+/* A newly-mounted drawer animates from the same edge as a reopening drawer. */
+@starting-style {
+ .forge-v5-shell .forge-logo-v5 .logo-detail.is-open{
+   transform:translateX(calc(100% + 20px));opacity:0;
+ }
+}
