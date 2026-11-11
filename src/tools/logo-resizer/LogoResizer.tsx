@@ -445,7 +445,7 @@ export function LogoResizer() {
           <p className="logo-subtle">{cards.findIndex(asset => asset.id === focusDisplayDetail.id) + 1} of {cards.length}</p>
           <LogoPreview asset={focusDisplayDetail} settings={settings} className="logo-detail-preview" />
           <label>Filename<input value={focusDisplayDetail.filename} onChange={event => patchCard(focusDisplayDetail.id, { filename: sanitizeLogoFilename(event.target.value) })} /></label>
-          <label>Overlay label<textarea rows={3} value={focusDisplayDetail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
+          <label>Overlay label<textarea rows={3} value={focusDisplayDetail.label} onChange={event => updateLabel(focusDisplayDetail, event.target.value)} /></label>
           <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={focusDisplayDetail.fontSizeOverride ?? ''} onChange={event => patchCard(focusDisplayDetail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
           <label>Image padding {focusDisplayDetail.paddingOverride ?? settings.padding}px <input type="range" min="0" max="150" value={focusDisplayDetail.paddingOverride ?? settings.padding} onChange={event => patchCard(focusDisplayDetail.id, { paddingOverride: Number(event.target.value) })} /></label>
           <button type="button" onClick={() => patchCard(focusDisplayDetail.id, { paddingOverride: null })}>Reset padding to global</button>
