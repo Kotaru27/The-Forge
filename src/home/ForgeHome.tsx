@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
 
@@ -61,57 +61,76 @@ export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: numbe
 
 type Props = { onOpenTool: (tool: ToolId) => void };
 
+
 export function ForgeHome({ onOpenTool }: Props) {
-  const featured = toolNotes['logo-resizer'];
-  const otherTools = tools.filter(tool => tool.id !== 'logo-resizer');
-  return <section className="forge-home" aria-label="The Forge home">
-    <div className="forge-home-inner">
-      <header className="forge-home-intro">
-        <div className="forge-home-intro-copy">
-          <p className="forge-home-overline"><span className="forge-home-live" /> YOUR CREATIVE WORKROOM</p>
-          <h1>Make the work.<br /><span>Keep the control.</span></h1>
-          <p className="forge-home-subtitle">Seven focused tools for preparing, reviewing and delivering media. No account, no upload to a server; processing stays in your browser.</p>
+  const [inspected, setInspected] = useState<ToolId>('logo-resizer');
+  const current = tools.find(tool => tool.id === inspected) ?? tools[0];
+  const currentIndex = tools.findIndex(tool => tool.id === current.id);
+  const detail = toolNotes[current.id];
+
+  return <section className="forge-home forge-home-atelier" aria-label="The Forge home">
+    <div className="atelier-frame">
+      <header className="atelier-intro">
+        <div className="atelier-intro-top">
+          <span className="atelier-kicker">A creative workstation, precisely made.</span>
+          <span className="atelier-series">Seven tools. One place to make the work.</span>
         </div>
-        <div className="forge-home-intro-mark" aria-hidden="true"><span>F</span><small>THE FORGE</small></div>
+        <div className="atelier-intro-main">
+          <h1 aria-label="The Forge" className="atelier-wordmark">
+            {Array.from('THE FORGE').map((letter, index) =>
+              <span key={index} className={letter === ' ' ? 'is-space' : ''} style={{ animationDelay: `${index * 32}ms` }} aria-hidden="true">
+                {letter === ' ' ? '\u00a0' : letter}
+              </span>
+            )}
+          </h1>
+          <p>Seven independent instruments for image, document, video and delivery work. Choose what you need; keep your work in your browser.</p>
+        </div>
       </header>
 
-      <div className="forge-home-section-title">
-        <div><h2>Choose your workbench</h2><p>Open a tool to start. Each workspace keeps its own controls and results.</p></div>
-        <span className="forge-home-count">07 / WORKBENCHES</span>
-      </div>
-
-      <div className="forge-home-grid">
-        <button type="button" className="forge-home-card forge-home-card-feature"
-          onClick={() => onOpenTool('logo-resizer')} aria-label="Open Logo Resizer">
-          <div className="forge-home-card-top"><span className="forge-home-category">{featured.category}</span><span className="forge-home-open">↗</span></div>
-          <div className="forge-home-feature-copy">
-            <div className="forge-home-feature-icon"><ToolGlyph tool="logo-resizer" size={24}/></div>
-            <h3>Logo Resizer</h3>
-            <p>{featured.description}</p>
+      <div className="atelier-body">
+        <div className="atelier-preview" aria-live="off">
+          <div className="atelier-preview-bar"><span>Selected instrument</span><span>{String(currentIndex + 1).padStart(2, '0')} / 07</span></div>
+          <div className="atelier-object-well" key={inspected}>
+            {inspected === 'logo-resizer' && <div className="atelier-logo-object"><span>F</span><i aria-hidden="true" /></div>}
+            {inspected === 'pdf-to-image' && <div className="atelier-pages-object"><i /><i /><i /><span>PDF</span></div>}
+            {inspected === 'image-splitter' && <div className="atelier-split-object">{Array.from({ length: 6 }, (_, i) => <i key={i} />)}</div>}
+            {inspected === 'video-stills' && <div className="atelier-film-object">{Array.from({ length: 4 }, (_, i) => <i key={i} />)}</div>}
+            {inspected === 'storyboard' && <div className="atelier-board-object">{Array.from({ length: 4 }, (_, i) => <i key={i} />)}</div>}
+            {inspected === 'link-generator' && <div className="atelier-link-object"><ToolGlyph tool="link-generator" size={132} /><span>media / output</span></div>}
+            {inspected === 'ad-downloader' && <div className="atelier-download-object"><ToolGlyph tool="ad-downloader" size={132} /><span>assets / archive</span></div>}
           </div>
-          <div className="forge-home-feature-art" aria-hidden="true">
-            <div className="forge-home-art-grid" />
-            <div className="forge-home-art-tile"><span className="forge-home-art-f">F<span>.</span></span></div>
-            <div className="forge-home-art-tag">200 × 200 <span>PNG</span></div>
+          <div className="atelier-preview-caption">
+            <div><small>{detail.category}</small><strong>{current.label}</strong><p>{detail.description}</p></div>
+            <span className="atelier-preview-mark" aria-hidden="true"><ToolGlyph tool={current.id} size={31} /></span>
           </div>
-          <span className="forge-home-card-foot"><span>{featured.detail}</span><strong>Open tool <span aria-hidden="true">→</span></strong></span>
-        </button>
-        {otherTools.map((tool, index) => {
-          const note = toolNotes[tool.id];
-          return <button type="button" className="forge-home-card forge-home-card-small"
-            data-workbench={tool.id} onClick={() => onOpenTool(tool.id)} key={tool.id}
-            aria-label={`Open ${tool.label}`}>
-            <span className="forge-home-card-top"><span className="forge-home-category">{note.category}</span><span className="forge-home-open">↗</span></span>
-            <span className="forge-home-small-icon"><ToolGlyph tool={tool.id} size={25}/></span>
-            <span className="forge-home-small-content">
-              <strong>{tool.label}</strong>
-              <span>{note.description}</span>
-            </span>
-            <span className="forge-home-card-foot"><span>{note.detail}</span><strong>{String(index + 2).padStart(2, '0')}</strong></span>
-          </button>;
-        })}
+          <div className="atelier-preview-footer"><span>{detail.detail}</span><span>Available locally</span></div>
+        </div>
+        <div className="atelier-collection">
+          <div className="atelier-collection-header">
+            <div><h2>Choose an instrument</h2><p>One click opens the original workroom.</p></div>
+            <span>01 — 07</span>
+          </div>
+          <div className="atelier-tool-index" aria-label="Tools">
+            {tools.map((tool, index) => {
+              const note = toolNotes[tool.id];
+              const isSelected = inspected === tool.id;
+              return <button type="button" key={tool.id}
+                className={'forge-home-card atelier-tool-row' + (isSelected ? ' is-inspected' : '')}
+                data-workbench={tool.id}
+                aria-label={`Open ${tool.label}`}
+                onMouseEnter={() => setInspected(tool.id)}
+                onFocus={() => setInspected(tool.id)}
+                onClick={() => onOpenTool(tool.id)}>
+                <span className="atelier-tool-count">{String(index + 1).padStart(2, '0')}</span>
+                <span className="atelier-tool-symbol"><ToolGlyph tool={tool.id} size={24} /></span>
+                <span className="atelier-tool-name">{tool.label}<small>{note.category}</small></span>
+                <span className="atelier-tool-arrow" aria-hidden="true">↗</span>
+              </button>;
+            })}
+          </div>
+          <div className="atelier-collection-footer"><span>Designed for focused work, not distractions.</span><span>THE FORGE / 2026</span></div>
+        </div>
       </div>
-      <footer className="forge-home-footer"><span>THE FORGE</span><span>Made for the work between ideas and delivery.</span><span>LOCAL-FIRST / 2026</span></footer>
     </div>
   </section>;
 }
