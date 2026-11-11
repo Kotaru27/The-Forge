@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { motion } from 'motion/react';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
 
@@ -59,59 +60,52 @@ export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: numbe
     strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[tool]}</svg>;
 }
 
-type Props = { onOpenTool: (tool: ToolId) => void };
+type Props = { onOpenTool: (tool: ToolId) => void; transitionTarget?: ToolId | null };
 
-export function ForgeHome({ onOpenTool }: Props) {
-  const featured = toolNotes['logo-resizer'];
-  const otherTools = tools.filter(tool => tool.id !== 'logo-resizer');
-  return <section className="forge-home" aria-label="The Forge home">
-    <div className="forge-home-inner">
-      <header className="forge-home-intro">
-        <div className="forge-home-intro-copy">
-          <p className="forge-home-overline"><span className="forge-home-live" /> YOUR CREATIVE WORKROOM</p>
-          <h1>Make the work.<br /><span>Keep the control.</span></h1>
-          <p className="forge-home-subtitle">Seven focused tools for preparing, reviewing and delivering media. No account, no upload to a server; processing stays in your browser.</p>
+export function ForgeHome({ onOpenTool, transitionTarget }: Props) {
+  return (
+    <section className="forge-home forge-studio-home" aria-label="The Forge home">
+      <div className="forge-studio-home-inner">
+        <div className="forge-studio-hero">
+          <div className="forge-studio-hero-mark" aria-hidden="true">
+            <svg viewBox="0 0 120 152" fill="none">
+              <path className="forge-studio-f-stroke" d="M25 132V20H104M25 73H86" stroke="currentColor" strokeWidth="14" strokeLinejoin="miter" strokeLinecap="square"/>
+            </svg>
+          </div>
+          <div className="forge-studio-hero-content">
+            <div className="forge-studio-eyebrow">DESKTOP CREATIVE WORKSPACE</div>
+            <h1><span className="forge-studio-word-reveal">THE FORGE</span></h1>
+            <p>Seven precise tools for preparing, composing and delivering your work. Everything stays in your browser.</p>
+          </div>
+          <span className="forge-studio-hero-number" aria-hidden="true">F / 07</span>
         </div>
-        <div className="forge-home-intro-mark" aria-hidden="true"><span>F</span><small>THE FORGE</small></div>
-      </header>
-
-      <div className="forge-home-section-title">
-        <div><h2>Choose your workbench</h2><p>Open a tool to start. Each workspace keeps its own controls and results.</p></div>
-        <span className="forge-home-count">07 / WORKBENCHES</span>
+        <div className="forge-studio-index-heading"><h2>Choose a workspace</h2><span>07 TOOLS</span></div>
+        <div className="forge-studio-index">
+          {tools.map((tool, index) => {
+            const note = toolNotes[tool.id];
+            const shared = transitionTarget === tool.id;
+            return (
+              <motion.button type="button" className="forge-home-card forge-studio-index-entry"
+                initial={{ opacity: 0, y: 11 }} animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -1 }} whileTap={{ scale: 0.995 }}
+                transition={{ duration: 0.38, delay: Math.min(0.58, 0.28 + index * 0.055), ease: [0.22, 1, 0.36, 1] }}
+                key={tool.id} onClick={() => onOpenTool(tool.id)}
+                aria-label={`Open ${tool.label}`}>
+                <span className="forge-studio-index-number">{String(index + 1).padStart(2, '0')}</span>
+                <span className="forge-studio-index-icon" style={shared ? { viewTransitionName: 'forge-selected-icon' } : undefined}>
+                  <ToolGlyph tool={tool.id} size={26}/>
+                </span>
+                <span className="forge-studio-index-copy">
+                  <strong style={shared ? { viewTransitionName: 'forge-selected-title' } : undefined}>{tool.label}</strong>
+                  <span>{note.description}</span>
+                </span>
+                <span className="forge-studio-index-arrow" aria-hidden="true">↗</span>
+              </motion.button>
+            );
+          })}
+        </div>
+        <footer className="forge-studio-home-foot"><span>THE FORGE</span><span>Made for the work between ideas and delivery.</span><span>LOCAL FIRST</span></footer>
       </div>
-
-      <div className="forge-home-grid">
-        <button type="button" className="forge-home-card forge-home-card-feature"
-          onClick={() => onOpenTool('logo-resizer')} aria-label="Open Logo Resizer">
-          <div className="forge-home-card-top"><span className="forge-home-category">{featured.category}</span><span className="forge-home-open">↗</span></div>
-          <div className="forge-home-feature-copy">
-            <div className="forge-home-feature-icon"><ToolGlyph tool="logo-resizer" size={24}/></div>
-            <h3>Logo Resizer</h3>
-            <p>{featured.description}</p>
-          </div>
-          <div className="forge-home-feature-art" aria-hidden="true">
-            <div className="forge-home-art-grid" />
-            <div className="forge-home-art-tile"><span className="forge-home-art-f">F<span>.</span></span></div>
-            <div className="forge-home-art-tag">200 × 200 <span>PNG</span></div>
-          </div>
-          <span className="forge-home-card-foot"><span>{featured.detail}</span><strong>Open tool <span aria-hidden="true">→</span></strong></span>
-        </button>
-        {otherTools.map((tool, index) => {
-          const note = toolNotes[tool.id];
-          return <button type="button" className="forge-home-card forge-home-card-small"
-            data-workbench={tool.id} onClick={() => onOpenTool(tool.id)} key={tool.id}
-            aria-label={`Open ${tool.label}`}>
-            <span className="forge-home-card-top"><span className="forge-home-category">{note.category}</span><span className="forge-home-open">↗</span></span>
-            <span className="forge-home-small-icon"><ToolGlyph tool={tool.id} size={25}/></span>
-            <span className="forge-home-small-content">
-              <strong>{tool.label}</strong>
-              <span>{note.description}</span>
-            </span>
-            <span className="forge-home-card-foot"><span>{note.detail}</span><strong>{String(index + 2).padStart(2, '0')}</strong></span>
-          </button>;
-        })}
-      </div>
-      <footer className="forge-home-footer"><span>THE FORGE</span><span>Made for the work between ideas and delivery.</span><span>LOCAL-FIRST / 2026</span></footer>
-    </div>
-  </section>;
+    </section>
+  );
 }

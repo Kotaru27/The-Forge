@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
+import { AnimatePresence, motion } from 'motion/react';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
 import { LogoResizerIcon } from './LogoResizerIcon';
@@ -393,8 +394,14 @@ export function LogoResizer() {
             </div>
           ) : (
             <div className="logo-grid">
+              <AnimatePresence initial={false} mode="popLayout">
               {cards.map(asset => (
-                <article key={asset.id} className="logo-card">
+                <motion.article key={asset.id} className="logo-card"
+                  layout="position"
+                  initial={{ opacity: 0, y: 13 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -9 }}
+                  transition={{ opacity: { duration: .19 }, y: { duration: .28, ease: [0.22, 1, 0.36, 1] }, layout: { duration: .3 } }}>
                   <div className="logo-card-heading"><span className="forge-v5-card-index">{String(cards.length - cards.indexOf(asset)).padStart(2,"0")}</span>
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
                     <button type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</button>
@@ -410,12 +417,17 @@ export function LogoResizer() {
                       <button type="button" onClick={() => void exportOne(asset)} disabled={busy}>Save</button>
                     </div>
                   </div>
-                </article>
+                </motion.article>
               ))}
+              </AnimatePresence>
             </div>
           )}
         </main>
-        {detail && <aside className="logo-detail" aria-label="Focus Mode">
+        <AnimatePresence initial={false}>
+        {detail && <motion.aside className="logo-detail" aria-label="Focus Mode"
+          initial={{ opacity: 0, x: 27 }} animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 27 }}
+          transition={{ duration: .32, ease: [0.22, 1, 0.36, 1] }}>
           <div className="logo-detail-heading">
             <strong>Focus Mode</strong>
             <div className="logo-detail-buttons">
@@ -437,7 +449,8 @@ export function LogoResizer() {
             <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</button>
             <button type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
           </div>
-        </aside>}
+        </motion.aside>}
+        </AnimatePresence>
       </div>
       {pending && <div className="logo-modal-backdrop" role="presentation">
         <div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions">

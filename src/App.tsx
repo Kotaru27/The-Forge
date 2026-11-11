@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { VideoStills } from './tools/video-stills/VideoStills';
 import { Storyboard } from './tools/storyboard/Storyboard';
 import type { StoryboardRef } from './tools/storyboard/engine';
 import type { TransferGroup, TransferResult } from './tools/video-stills/engine';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
-import { LogoResizerIcon } from './tools/logo-resizer/LogoResizerIcon';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { ForgeHome, ToolGlyph, toolDetails } from './home/ForgeHome';
 import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
+import './studio-motion.css';
 
 type Route = ToolId | 'home';
 
@@ -23,11 +24,37 @@ function initialTool(): Route {
 export default function App() {
   const [activeTool, setActiveTool] = useState<Route>(initialTool);
   const storyboardRef = useRef<StoryboardRef>(null);
+  const activeRouteRef = useRef<Route>(activeTool);
+  const [transitionTool, setTransitionTool] = useState<ToolId | null>(null);
 
+  // A native, progressive-enhancement shared transition; no processing state is unmounted.
   const openTool = useCallback((tool: Route) => {
     if (tool !== 'home' && !isToolId(tool)) return;
-    setActiveTool(tool);
-    if (window.location.hash !== '#/' + tool) history.replaceState(null, '', '#/' + tool);
+    const previous = activeRouteRef.current;
+    const commit = () => {
+      flushSync(() => setActiveTool(tool));
+      activeRouteRef.current = tool;
+      if (window.location.hash !== '#/' + tool) history.replaceState(null, '', '#/' + tool);
+    };
+    if (previous === tool) {
+      if (window.location.hash !== '#/' + tool) history.replaceState(null, '', '#/' + tool);
+      return;
+    }
+
+    const selected = tool === 'home' ? (previous === 'home' ? null : previous) : tool;
+    // Mark only the originating Home row, so title/icon can travel to the header.
+    flushSync(() => setTransitionTool(selected));
+    const doc = document as Document & {
+      startViewTransition?: (callback: () => void) => { finished: Promise<void> };
+    };
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced && doc.startViewTransition) {
+      void doc.startViewTransition(() => commit()).finished.catch(() => {
+        // Unsupported snapshot combinations must never block navigation.
+      });
+    } else {
+      commit();
+    }
   }, []);
 
   useEffect(() => {
@@ -49,46 +76,39 @@ export default function App() {
   const isHome = activeTool === 'home';
 
   return (
-    <div className={isLogo ? 'forge-app forge-v5-shell' : 'forge-app forge-collection-shell'}>
-      <aside className="sidebar" aria-label="Tools">
-        <div className="brand">
-          {isLogo
-            ? <span className="forge-v5-f">F</span>
-            : <button type="button" className="forge-collection-brand" onClick={() => openTool('home')} aria-label="The Forge home">F<span>.</span></button>}
-        </div>
-        <nav className="tool-nav" aria-label="Select a tool">
-          <button className={'tool-link forge-home-nav' + (isHome ? ' is-active' : '')}
-            type="button" aria-current={isHome ? 'page' : undefined}
-            aria-label="Home" title="Home" onClick={() => openTool('home')}>
-            <span className={isLogo ? 'forge-v5-rail-glyph' : 'forge-collection-rail-icon'}><ToolGlyph tool="home" /></span>
-          </button>
-          {tools.map(tool => (
-            <button
-              className={'tool-link' + (activeTool === tool.id ? ' is-active' : '')}
-              type="button"
-              key={tool.id}
-              aria-current={activeTool === tool.id ? 'page' : undefined}
-              aria-label={tool.label}
-              title={tool.label}
-              onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
-            >{isLogo ? (
-              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <span>{tool.label.split(' ').map(word => word[0]).join('').substring(0,2)}</span>}</span>
-            ) : <span className="forge-collection-rail-icon"><ToolGlyph tool={tool.id} /></span>}</button>
-          ))}
-        </nav>
-      </aside>
+    <div className={isLogo ? 'forge-app forge-v5-shell forge-studio-shell' : 'forge-app forge-collection-shell forge-studio-shell'}>
       <main className="main-area">
-        <header className="topbar">{isLogo ? (
-          <>
-            <strong className="forge-v5-wordmark">THE <span>F</span>ORGE</strong>
-            <span className="forge-v5-top-center">TOOL / LOGO RESIZER</span>
-            <span className="forge-v5-top-end"><i aria-hidden="true" /> ALL PROCESSING STAYS IN YOUR BROWSER</span>
-          </>
-        ) : <>
-          <strong className="forge-collection-wordmark">THE <span>F</span>ORGE</strong>
-          <span className="forge-collection-top-path">{isHome ? 'WORKROOM / OVERVIEW' : 'TOOL / ' + (current?.label.toUpperCase() ?? '')}</span>
-          <span className="forge-collection-top-status"><i aria-hidden="true" /> LOCAL PROCESSING</span>
-        </>}</header>
+        <header className="topbar forge-studio-topbar">
+          <button className="forge-studio-brand" type="button" onClick={() => openTool('home')} aria-label="The Forge home">
+            <span className="forge-studio-brand-f" aria-hidden="true">F</span><span>THE FORGE</span>
+          </button>
+          <span className="forge-studio-separator" aria-hidden="true" />
+          <div className="forge-studio-current" aria-live="polite">
+            {current ? <>
+              <span className="forge-studio-current-glyph" style={{ viewTransitionName: 'forge-selected-icon' }}>
+                <ToolGlyph tool={current.id} size={21} />
+              </span>
+              <strong style={{ viewTransitionName: 'forge-selected-title' }}>{current.label}</strong>
+            </> : <strong className="forge-studio-index-label">Workspaces</strong>}
+          </div>
+          <nav className="tool-nav forge-studio-tool-switcher" aria-label="Select a tool">
+            <button className={'tool-link forge-home-nav' + (isHome ? ' is-active' : '')}
+              type="button" aria-current={isHome ? 'page' : undefined}
+              aria-label="Home" title="Home" onClick={() => openTool('home')}>
+              <ToolGlyph tool="home" size={21} />
+            </button>
+            {tools.map(tool => (
+              <button className={'tool-link' + (activeTool === tool.id ? ' is-active' : '')}
+                type="button" key={tool.id}
+                aria-current={activeTool === tool.id ? 'page' : undefined}
+                aria-label={tool.label} title={tool.label}
+                onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}>
+                <ToolGlyph tool={tool.id} size={21} />
+              </button>
+            ))}
+          </nav>
+          <span className="forge-studio-local-status"><span aria-hidden="true" />LOCAL PROCESSING</span>
+        </header>
 
         {!isHome && !isLogo && current && <div className="forge-suite-context">
           <span className="forge-suite-glyph"><ToolGlyph tool={current.id} size={28}/></span>
@@ -100,7 +120,7 @@ export default function App() {
           <span className="forge-suite-detail">{toolDetails[current.id].detail}</span>
         </div>}
 
-        <div className="native-tool" hidden={!isHome}><ForgeHome onOpenTool={openTool}/></div>
+        <div className="native-tool" hidden={!isHome}><ForgeHome onOpenTool={openTool} transitionTarget={transitionTool}/></div>
         <div className="native-tool" hidden={activeTool !== 'link-generator'}><LinkGenerator /></div>
         <div className="native-tool" hidden={!isLogo}><LogoResizer /></div>
         <div className="native-tool" hidden={activeTool !== 'image-splitter'}><ImageSplitter /></div>
