@@ -121,10 +121,10 @@
   font:780 clamp(72px,8.6vw,158px)/.82 'Bahnschrift','Arial Narrow','Segoe UI Variable',sans-serif;
   letter-spacing:-.095em;color:#eeeee8;
 }
-.atelier-wordmark span{display:inline-block;transform-origin:30% 100%;animation:atelier-letter .6s var(--studio-ease) both}
+.atelier-wordmark span{display:inline-block;transform-origin:30% 100%;animation:atelier-letter .42s var(--studio-ease) both}
 .atelier-wordmark span.is-space{width:.21em;letter-spacing:0}
 @keyframes atelier-letter{
-  from{opacity:0;transform:translateY(.14em) rotate(-9deg)}
+  from{opacity:.85;transform:translateY(.045em) rotate(-2deg)}
   to{opacity:1;transform:translateY(0) rotate(0)}
 }
 .atelier-intro-main p{max-width:255px;font-size:13px;line-height:1.6;margin:0;color:#979f98;letter-spacing:0}
