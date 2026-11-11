@@ -2,7 +2,9 @@
 
 # Ad Downloader — migration parity checklist
 
-Uses the pinned official SheetJS 0.20.3 package to avoid the older npm 0.18.5 parser. Keep .xls and .xlsx compatibility tests as a release gate.\n\nThe original CTK tool lives in `CTK/src/js/tools/ad-downloader.js`, with SharePoint handling in `core/sharepoint-graph.js` and folder-based renaming in `core/download-rename.js`. This migration is a standalone React/TypeScript workspace; it does not use the old iframe.
+Uses the pinned official SheetJS 0.20.3 package to avoid the older npm 0.18.5 parser. Keep .xls and .xlsx compatibility tests as a release gate.
+
+The original CTK tool lives in `CTK/src/js/tools/ad-downloader.js`, with SharePoint handling in `core/sharepoint-graph.js` and folder-based renaming in `core/download-rename.js`. This migration is a standalone React/TypeScript workspace; it does not use the old iframe.
 
 ## Features retained
 - Excel `.xlsx` and `.xls`, first-sheet ad data, clickable hyperlinks and auto-detected columns (fallback: A=number, B=link, C=type).
