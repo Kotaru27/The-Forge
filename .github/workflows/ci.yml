@@ -40,8 +40,23 @@ jobs:
       - run: npm run build
         env:
           FORGE_BASE_PATH: /The-Forge/
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - name: Select pre-installed Chrome when available
+        id: browser-channel
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            google-chrome --version
+            echo "channel=chrome" >> "$GITHUB_OUTPUT"
+          else
+            echo "channel=chromium" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install Chromium if system Chrome is unavailable
+        if: steps.browser-channel.outputs.channel != 'chrome'
+        timeout-minutes: 5
+        run: npx playwright install --with-deps chromium
+      - name: Run browser regression tests
+        run: npm run test:e2e
+        env:
+          FORGE_BROWSER_CHANNEL: ${{ steps.browser-channel.outputs.channel }}
       - name: Archive desktop workroom screenshots
         if: always()
         uses: actions/upload-artifact@v4
