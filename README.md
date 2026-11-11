@@ -1,12 +1,36 @@
-# The Forge — native React creative workroom
+# The Forge
 
-The Forge is a desktop-first, dark-green **React + TypeScript + Vite** creative workroom with a Home screen and seven purpose-built tool workspaces. The initial GitHub Pages web release contains **seven tools**: Logo Resizer, PDF to Image, Image Splitter, Video Stills, Storyboard (Grid Board / Fit to Platform), Link Generator and Ad Downloader.
+**The Forge** is a desktop-first creative workroom built with React, TypeScript and Vite. It brings seven existing production-oriented workflows into a single browser interface.
 
-**Video Compressor is postponed** and will be rebuilt from scratch after the website is stable. Its old CTK iframe, compression worker and bundled legacy CSS/JS are not part of this web build.
+**[Open the GitHub Pages preview](https://kotaru27.github.io/The-Forge/)** · [Browse the preview branch](https://github.com/Kotaru27/The-Forge/tree/release/pages-preview)
+
+> **Project status:** Active public preview, not a production-certified release. Automated checks have passed on the preview branch, but real-work-file acceptance and authenticated SharePoint checks remain outstanding. No Windows executable is provided.
+
+## What is included
+
+| Workspace | Purpose |
+| --- | --- |
+| Logo Resizer | Prepare and batch-export logos using size presets and labels |
+| PDF to Image | Convert selected PDF pages to PNG/JPG outputs |
+| Image Splitter | Split images into pieces with ZIP export |
+| Video Stills | Extract, review, select and export video frames |
+| Storyboard | Arrange assets in Grid Board or Fit to Platform layouts |
+| Link Generator | Generate media links and associated code |
+| Ad Downloader | Review advertising assets and prepare supported downloads |
+
+Video Compressor and Filmstrip are **not** part of this seven-tool build. The browser-local workflows and their exports are subject to browser and file-format limitations; external asset and SharePoint requests depend on the user's existing permissions and network policies.
+
+## Current branches and preview
+
+- `main` is the intentionally preserved development baseline, **not necessarily the version shown on the live Pages preview**.
+- `release/pages-preview` contains the current Studio preview and its visual changes. Its `.github/workflows/studio-pages.yml` workflow publishes that preview on pushes to the release branch **after** tests and build checks succeed.
+- `.github/workflows/pages.yml` is a **separate manual** preview deployment workflow. Do not assume all publishing is manual.
+
+See [the release and rollback procedure](docs/GITHUB_PAGES_RELEASE.md) and [feature parity acceptance gate](docs/FEATURE_PARITY_GATE.md). Neither a passing automated workflow nor a working preview establishes parity for every real campaign file.
 
 ## Develop locally
 
-Prerequisite: Node.js >= 22.12.0. For building or developing the seven native tools, no CTK checkout is needed.
+Requires Node.js **22.12.0 or later**.
 
 ```bash
 npm install
@@ -15,52 +39,30 @@ npm run build
 npm run preview
 ```
 
-The `predev` / `prebuild` commands remove any previously **generated, ignored** `public/legacy` directory before Vite runs, so old CTK assets cannot accidentally re-enter the build. The post-build check verifies the bundled entrypoint and blocks legacy/compressor payloads.
+The `predev` and `prebuild` commands remove previously generated, ignored `public/legacy` content. The production build checks that legacy CTK runtime and Video Compressor payloads are not bundled.
 
-## Automated verification
+## Verification
 
 ```bash
 npm run test:unit
+npm run build
 npm run test:e2e
 ```
 
-`npm test` runs **both** the React/TypeScript unit tests and the original CTK baseline regression tests. For the latter, check out `Kotaru27/CTK` at pinned commit `617615c0b4370c795ddfd6dc4c300920cd595883` into `legacy-source/`, or set `CTK_SOURCE_DIR` to an equivalent local checkout. GitHub Actions does this automatically. **CTK remains a test oracle, not an app/runtime dependency.**
+`npm test` additionally runs the original CTK regression suite. For it, check out [Kotaru27/CTK](https://github.com/Kotaru27/CTK) at commit `617615c0b4370c795ddfd6dc4c300920cd595883` into `legacy-source/`, or set `CTK_SOURCE_DIR` to that checkout. CI prepares the test-only baseline automatically. CTK is **not** shipped as a runtime dependency.
 
-## GitHub Pages release candidate
+The browser suite uses Playwright; install Chromium if it is not available locally with `npx playwright install chromium`. The current project does not commit an npm lockfile; dependency resolution is not yet pinned end to end.
 
-The seven-tool React site is prepared for a **manual, gated** GitHub Pages preview from `release/pages-preview`. The source branch runs build and browser checks without automatically publishing. After enabling GitHub Pages (Settings → Pages → GitHub Actions), use the Actions workflow's branch dropdown to deploy only the reviewed release branch, then inspect the live URL.
+## Known verification limits
 
-See [GitHub Pages release procedure](docs/GITHUB_PAGES_RELEASE.md) for the one-time setting, deployment instructions, live Chromium smoke checks, rollback, and remaining real-file acceptance checks.
+Automated tests cover fixture-based imports, transforms, exports, interaction flows and selected legacy-output comparisons. Separate manual acceptance is still required for real multi-slide Office files, scanned/encrypted PDFs, MP4/MOV combinations, large asset batches, and authenticated SharePoint/file-system permissions. See [feature parity](docs/FEATURE_PARITY_GATE.md) and [release code audit](docs/RELEASE_CODE_AUDIT.md).
 
-## GitHub Pages
+## Contributing and security
 
-The project site URL base is `/The-Forge/`. On Linux/macOS:
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for scoped contribution and testing guidance. For vulnerabilities, read [SECURITY.md](SECURITY.md); do not publish exploit details in issues.
 
-```bash
-FORGE_BASE_PATH=/The-Forge/ npm run build
-```
+## Licensing and third-party sources
 
-On Windows PowerShell:
+**The Forge's original source code and project documentation are available under the [MIT License](LICENSE)** (Copyright © 2026 Kotaru27). MIT permits use, modification and redistribution, including commercial use, subject to retaining the copyright and permission notice.
 
-```powershell
-$env:FORGE_BASE_PATH = '/The-Forge/'
-npm run build
-```
-
-The build fails if the produced script does not use that base path, or if `dist/` includes any `legacy/` or `compressor/` folder. The Playwright suite runs against the same production-style path.
-
-`.github/workflows/pages.yml` supports **manual deployment only**. Publishing is not part of the migration PRs and requires approval and Pages configuration (Settings → Pages → GitHub Actions).
-
-## Feature parity status
-
-The React implementations have automated tests for uploads, transforms, ZIP/image exports, cancel/undo, keyboard controls and Video Stills → Grid Board transfers. Additional tests compare exact Link Generator output against pinned CTK and validate OOXML and rotated PDF edge cases.
-
-**Real-work-file parity is still a release gate.** See [feature parity gate](docs/FEATURE_PARITY_GATE.md), [native runtime cleanup](docs/NATIVE_WEB_CLEANUP.md) and individual migration notes under `docs/`. Authentic SharePoint permissions, real Excel/PPTX files and MP4/MOV compatibility must be verified before calling the website production-ready.
-
-No native Windows executable is included.
-
-## Workroom design pass — before motion polish
-
-The Home route (`#/home`) is now the default. It opens seven native React tools from a purpose-built workbench grid. The six non-logo tools use a consistent green production shell with updated controls, panels, import surfaces, galleries and review tables. Video Stills has a dedicated ingest dock and Storyboard retains two creation modes.
-
-The approved **Logo Resizer V5** React interface is retained (with only a Home navigation entry). All processing and export engines remain unchanged. The Playwright suite now covers Home, all seven workspaces and the existing export/integration workflows. This is a **layout/design coverage pass**; detailed animations and visual polish are separate, later work.
+Bundled third-party agent skills, libraries, test fixtures and other materials retain their **own applicable license terms**; the Forge MIT license does not relicense third-party works or grant rights to proprietary data, external services or trademarks. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution, sources and outstanding provenance checks.
