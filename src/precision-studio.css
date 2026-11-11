@@ -396,3 +396,134 @@
   .atelier-wordmark span,.atelier-object-well{animation:none}
   .forge-app :is(button,.logo-card,.atelier-tool-arrow){transition:none!important;transform:none!important}
 }
+
+
+/* Desktop compactness: keep the seventh instrument visible at 1280×720. */
+@media(min-width:851px) and (max-height:800px){
+ .atelier-frame{padding-top:14px;padding-bottom:10px}
+ .atelier-intro{padding-bottom:12px}
+ .atelier-intro-main{padding-top:12px;gap:26px}
+ .atelier-wordmark{font-size:clamp(67px,7.1vw,110px)}
+ .atelier-intro-main p{font-size:12px;line-height:1.45}
+ .atelier-body{min-height:0}
+ .atelier-preview{min-height:0}
+ .atelier-tool-index{grid-template-rows:repeat(7,minmax(44px,1fr))}
+ .forge-collection-shell .forge-home-atelier button.forge-home-card.atelier-tool-row{min-height:44px;padding-block:5px}
+ .atelier-collection-header{padding-bottom:11px}
+ .atelier-collection-footer{padding-top:9px}
+ .atelier-preview-caption{padding-top:9px}
+ .atelier-preview-caption strong{font-size:26px}
+ .atelier-preview-caption p{margin-top:4px;font-size:11px}
+ .atelier-preview-footer{padding-top:8px}
+}
+/* Calibrate the earlier per-workroom overrides: remove inherited fluorescent
+   accents and green-tinted slabs without relocating any functional controls. */
+.forge-collection-shell .pdf-workspace,
+.forge-collection-shell .split-workspace,
+.forge-collection-shell .video-stills,
+.forge-collection-shell .storyboard-tool,
+.forge-collection-shell .adw-workspace,
+.forge-collection-shell .link-generator{background:#040605}
+.forge-collection-shell .pdf-setup,
+.forge-collection-shell .split-settings,
+.forge-collection-shell .vs-workbench-side,
+.forge-collection-shell .sb-controls{background:#101411;border-color:#353d35}
+.forge-collection-shell .pdf-results,
+.forge-collection-shell .split-results,
+.forge-collection-shell .vs-content{background:#030503}
+.forge-collection-shell .pdf-drop,
+.forge-collection-shell .split-drop,
+.forge-collection-shell .vs-drop{
+  background:#141914;background-image:none;border-color:#59665b;border-radius:9px;
+}
+.forge-collection-shell .pdf-workspace .pdf-drop button,
+.forge-collection-shell .split-drop button,
+.forge-collection-shell .video-stills .vs-drop button,
+.forge-collection-shell .vs-toolbar>button:nth-of-type(1),
+.forge-collection-shell .split-settings>button.split-primary,
+.forge-collection-shell .pdf-workspace button.pdf-primary{
+ background:#e6e3dc;border-color:#e6e3dc;color:#181d18;
+}
+.forge-collection-shell .pdf-drop button:hover:not(:disabled),
+.forge-collection-shell .split-drop button:hover:not(:disabled),
+.forge-collection-shell .video-stills .vs-drop button:hover:not(:disabled),
+.forge-collection-shell .pdf-workspace button.pdf-primary:hover:not(:disabled){background:#f9f8f4;color:#151715;border-color:#f9f8f4}
+.forge-collection-shell .pdf-workspace button.pdf-secondary,
+.forge-collection-shell .split-settings>button,
+.forge-collection-shell .vs-toolbar>button{background:#1a211b;color:#e4e7dc;border-color:#4b554b}
+.forge-collection-shell .pdf-results-head,
+.forge-collection-shell .split-results-head,
+.forge-collection-shell .vs-list-heading{background:#0b100c;border-color:#353d34}
+.forge-collection-shell .pdf-empty,
+.forge-collection-shell .split-empty{background:#0b0e0c;border-color:#4c574c;color:#aeb8ac}
+.forge-collection-shell .pdf-empty::before,
+.forge-collection-shell .split-empty::before{color:#bdb8a9;border-color:#747b70;box-shadow:none}
+.forge-collection-shell .pdf-doc-card,
+.forge-collection-shell .split-card,
+.forge-collection-shell .video-stills .vs-stack{background:#121813;border-color:#414c40;border-radius:8px}
+.forge-collection-shell .pdf-workspace button.pdf-doc-card:hover,
+.forge-collection-shell .video-stills .vs-stack:hover{background:#1a231a;border-color:#909b89}
+.forge-collection-shell .split-image-stage{background:#1b201b;background-image:none;border-color:#4a544a}
+.forge-collection-shell .split-grid-overlay span{border-color:#c5bbab}
+.forge-collection-shell .vs-options{border-color:#3a433a;color:#a8b3a7}
+.forge-collection-shell .vs-options select{background:#151a15;border-color:#525d52;color:#e6e8e1}
+.forge-collection-shell .vs-status,
+.forge-collection-shell .pdf-progress{background:#172019;border-color:#475548;color:#dce4d7}
+.forge-collection-shell .vs-stack-thumb{background:#101610;border-color:#485447}
+.forge-collection-shell .vs-stack-meta span{color:#a5b4a7}
+.forge-collection-shell .sb-topline{background:#0d100e;border-color:#3a4139}
+.forge-collection-shell .sb-modes{background:#121713;border-color:#464e44;border-radius:9px}
+.forge-collection-shell .sb-modes button{color:#a9b5a9;border-radius:6px}
+.forge-collection-shell .sb-modes button.active{background:#e7e4db;color:#141814;border-color:#e7e4db}
+.forge-collection-shell .sb-toolbar button{background:#1c251e;color:#e4e7db;border-color:#485348;border-radius:7px}
+.forge-collection-shell .sb-toolbar button:hover:not(:disabled){background:#29322a;border-color:#b0aa9b}
+.forge-collection-shell .sb-toolbar button:nth-last-child(2):not(.danger){background:#c9c1b1;color:#191e19;border-color:#c9c1b1}
+.forge-collection-shell .sb-controls label{color:#c2c9bc}
+.forge-collection-shell .sb-section-head button{background:#222c23;color:#e6e3d9;border-color:#566050}
+.forge-collection-shell .sb-view-choice{background:#141914;border-color:#474f44;border-radius:8px}
+.forge-collection-shell .sb-view-choice button[aria-pressed="true"]{background:#323b32;border-color:#858d80;color:#f0eee9}
+.forge-collection-shell .sb-project-row button[aria-current="page"]{background:#222c22;border-color:#838b7d}
+.forge-collection-shell .sb-controls details{border-color:#404c40}
+.forge-collection-shell .sb-stage{background:#030504;background-image:none;color:#a4afa2}
+.forge-collection-shell .sb-stage p{color:#aeb8ac}
+.forge-collection-shell .sb-canvas canvas{border-color:#586154}
+.forge-collection-shell .sb-dimensions{background:#202721;color:#e7e5d9;border-color:#59665a;border-radius:6px}
+.forge-collection-shell .sb-frame{background:#182018;border-color:#434e42}
+.forge-collection-shell .sb-dialog{background:#151a15;border-color:#586258;border-radius:12px}
+.forge-collection-shell .adw-workspace{background:#060806}
+.forge-collection-shell .adw-header{background:#101511;border-color:#3a453a;border-radius:10px}
+.forge-collection-shell .adw-header h2{color:#eeeae1}
+.forge-collection-shell .adw-header p{color:#a2afa3}
+.forge-collection-shell .adw-controls button,
+.forge-collection-shell .adw-upload{background:#1b221c;border-color:#4b584b;color:#e4e7db;border-radius:7px}
+.forge-collection-shell .adw-controls .adw-primary{background:#e8e4dc;color:#191b17;border-color:#e8e4dc}
+.forge-collection-shell .adw-controls .adw-primary:hover:not(:disabled){background:#fff;color:#151715}
+.forge-collection-shell .adw-status,
+.forge-collection-shell .adw-summary{background:#151b16;color:#c3cec0;border-color:#414d40}
+.forge-collection-shell .adw-empty{background:#0a0f0b;border-color:#4a584a;color:#d3dcd0}
+.forge-collection-shell .adw-summary span:first-child{color:#d1c8b7}
+.forge-collection-shell .adw-table tbody tr:hover{background:#1c241e}
+.forge-collection-shell .adw-stage{color:#c4cbbc}
+.forge-collection-shell .adw-row-actions button,
+.forge-collection-shell .adw-row-actions summary,
+.forge-collection-shell .adw-more{background:#1d271e;border-color:#4c594b;color:#e4e5dc}
+.forge-collection-shell .link-generator{background:#050705}
+.forge-collection-shell .link-panel{background:#121713;border-color:#424d42;border-radius:9px;box-shadow:none}
+.forge-collection-shell .link-panel h2{color:#efede5}
+.forge-collection-shell .link-panel label{color:#b5c0b2}
+.forge-collection-shell .link-panel :is(input:not([type="checkbox"]),select,textarea){
+ background:#0d120e;color:#eff0e9;border-color:#465147;border-radius:7px;
+}
+.forge-collection-shell .link-panel .checkline{background:#1a211b;color:#d1dacf;border-color:#4c5549;border-radius:7px}
+.forge-collection-shell .link-panel button{background:#202a21;color:#f0f0e9;border-color:#525e51;border-radius:7px}
+.forge-collection-shell .link-panel button.primary{background:#e8e4dc;color:#151915;border-color:#e8e4dc}
+.forge-collection-shell .link-panel button.primary:hover:not(:disabled){background:#fff;color:#151515}
+.forge-collection-shell .link-outputs{background:#0d120e}
+.forge-collection-shell .link-outputs>textarea{background:#080c09;border-color:#424e42;color:#d6ded1}
+.forge-collection-shell .output-heading button{color:#d8ccba}
+.forge-v5-shell .forge-logo-v5 .forge-v5-type-controls input[type="number"]{
+ flex:0 0 68px;width:68px;max-width:68px;
+}
+.forge-v5-shell .forge-logo-v5 .forge-v5-typography select{flex:0 0 116px}
+.forge-v5-shell .forge-logo-v5 .forge-v5-swatch{flex:0 0 34px}
+.forge-v5-shell .forge-logo-v5 .forge-v5-action.forge-v5-ghost{background:#141914;color:#c3c6ba;border-color:#454e43}
