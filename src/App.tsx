@@ -12,6 +12,7 @@ import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { ForgeHome, ToolGlyph, toolDetails } from './home/ForgeHome';
 import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
+import './precision-studio.css';
 
 type Route = ToolId | 'home';
 
@@ -50,33 +51,7 @@ export default function App() {
 
   return (
     <div className={isLogo ? 'forge-app forge-v5-shell' : 'forge-app forge-collection-shell'}>
-      <aside className="sidebar" aria-label="Tools">
-        <div className="brand">
-          {isLogo
-            ? <span className="forge-v5-f">F</span>
-            : <button type="button" className="forge-collection-brand" onClick={() => openTool('home')} aria-label="The Forge home">F<span>.</span></button>}
-        </div>
-        <nav className="tool-nav" aria-label="Select a tool">
-          <button className={'tool-link forge-home-nav' + (isHome ? ' is-active' : '')}
-            type="button" aria-current={isHome ? 'page' : undefined}
-            aria-label="Home" title="Home" onClick={() => openTool('home')}>
-            <span className={isLogo ? 'forge-v5-rail-glyph' : 'forge-collection-rail-icon'}><ToolGlyph tool="home" /></span>
-          </button>
-          {tools.map(tool => (
-            <button
-              className={'tool-link' + (activeTool === tool.id ? ' is-active' : '')}
-              type="button"
-              key={tool.id}
-              aria-current={activeTool === tool.id ? 'page' : undefined}
-              aria-label={tool.label}
-              title={tool.label}
-              onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
-            >{isLogo ? (
-              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <span>{tool.label.split(' ').map(word => word[0]).join('').substring(0,2)}</span>}</span>
-            ) : <span className="forge-collection-rail-icon"><ToolGlyph tool={tool.id} /></span>}</button>
-          ))}
-        </nav>
-      </aside>
+
       <main className="main-area">
         <header className="topbar">{isLogo ? (
           <>
@@ -109,6 +84,33 @@ export default function App() {
         <div className="native-tool" hidden={activeTool !== 'storyboard'}><Storyboard ref={storyboardRef} /></div>
         <div className="native-tool" hidden={activeTool !== 'ad-downloader'}><AdDownloader /></div>
       </main>
+      <aside className="sidebar" aria-label="Tools">
+        <div className="brand">
+          {isLogo
+            ? <span className="forge-v5-f">F</span>
+            : <button type="button" className="forge-collection-brand" onClick={() => openTool('home')} aria-label="The Forge home">F<span>.</span></button>}
+        </div>
+        <nav className="tool-nav" aria-label="Select a tool">
+          <button className={'tool-link forge-home-nav' + (isHome ? ' is-active' : '')}
+            type="button" aria-current={isHome ? 'page' : undefined}
+            aria-label="Home" title="Home" onClick={() => openTool('home')}>
+            <span className={isLogo ? 'forge-v5-rail-glyph' : 'forge-collection-rail-icon'}><ToolGlyph tool="home" /></span>
+          </button>
+          {tools.map(tool => (
+            <button
+              className={'tool-link' + (activeTool === tool.id ? ' is-active' : '')}
+              type="button"
+              key={tool.id}
+              aria-current={activeTool === tool.id ? 'page' : undefined}
+              aria-label={tool.label}
+              title={tool.label}
+              onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
+            >{isLogo ? (
+              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <span>{tool.label.split(' ').map(word => word[0]).join('').substring(0,2)}</span>}</span>
+            ) : <span className="forge-collection-rail-icon"><ToolGlyph tool={tool.id} /></span>}</button>
+          ))}
+        </nav>
+      </aside>
     </div>
   );
 }
