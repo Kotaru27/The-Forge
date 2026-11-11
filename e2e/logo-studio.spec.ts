@@ -64,3 +64,29 @@ test('focus drawer respects reduced motion preference', async ({ page }) => {
   await expect(page.getByLabel('Focus Mode', { exact: true })).toBeVisible();
   await expect(page.locator('.logo-detail')).toHaveCSS('transition-duration', '0s');
 });
+
+
+test('visual QA captures empty canvas, imported cards and focus at desktop sizes', async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto('#/logo-resizer');
+  await page.screenshot({ path: testInfo.outputPath('logo-studio-empty-1366x768.png') });
+
+  const vector = {
+    name: 'CreativeStudio.svg', mimeType: 'image/svg+xml',
+    buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240"><rect width="400" height="240" fill="white"/><path d="M58 173V70h103v30H92v73z" fill="#1c2921"/><path d="M191 173l54-103h37l55 103h-39l-12-24h-49l-12 24z" fill="#1c2921"/><path d="M250 124h24l-12-27z" fill="white"/></svg>'),
+  };
+  await page.locator('.logo-workspace input[type=file]').setInputFiles([vector, sample]);
+  await page.getByRole('dialog', { name: 'Set logo dimensions' })
+    .getByRole('button', { name: 'Apply & process' }).click();
+  await expect(page.locator('.logo-card')).toHaveCount(2);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.screenshot({ path: testInfo.outputPath('logo-studio-two-assets-1440x900.png') });
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
+  await expect(page.getByLabel('Focus Mode', { exact: true })).toBeVisible();
+  await expect(page.locator('.logo-detail.is-open')).toHaveCount(1);
+  await page.waitForTimeout(260);
+  await page.screenshot({ path: testInfo.outputPath('logo-studio-focus-1440x900.png') });
+  expect(errors).toEqual([]);
+});
