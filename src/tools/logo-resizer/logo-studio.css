@@ -560,3 +560,28 @@
    grid-template-columns:1fr;
  }
 }
+
+
+/* Uploaded-content QA: make the full edit row visible in common 900px
+   workrooms without altering the exported canvas resolution. */
+.forge-v5-shell .forge-logo-v5 .logo-preview-button{
+  min-height:216px;max-height:259px;padding:15px;
+}
+.forge-v5-shell .forge-logo-v5 .logo-card .logo-preview-frame{
+  max-height:220px;max-width:220px;
+}
+.forge-v5-shell .forge-logo-v5 .logo-card-controls{
+  padding:12px 14px;gap:8px;
+}
+.forge-v5-shell .forge-logo-v5 .logo-card-controls label{gap:5px}
+.forge-v5-shell .forge-logo-v5 .logo-card-controls textarea{
+  min-height:51px;padding:8px 10px;
+}
+.forge-v5-shell .forge-logo-v5 .logo-card-footer button,
+.forge-v5-shell .forge-logo-v5 .logo-card-footer input{
+  height:33px;min-height:33px;
+}
+.forge-v5-shell .forge-logo-v5 .logo-detail{gap:10px}
+.forge-v5-shell .forge-logo-v5 .logo-detail .logo-detail-preview{
+  margin:2px auto 9px;
+}
