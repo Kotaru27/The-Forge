@@ -82,7 +82,13 @@ test('visual QA captures empty canvas, imported cards and focus at desktop sizes
     .getByRole('button', { name: 'Apply & process' }).click();
   await expect(page.locator('.logo-card')).toHaveCount(2);
   await page.setViewportSize({ width: 1440, height: 900 });
+  // Capture settled artwork, not a partially completed resizing/hover transition.
+  await page.mouse.move(1410, 105);
+  await page.waitForTimeout(320);
   await page.screenshot({ path: testInfo.outputPath('logo-studio-two-assets-1440x900.png') });
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.screenshot({ path: testInfo.outputPath('logo-studio-two-assets-1920x1080.png') });
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
   await expect(page.getByLabel('Focus Mode', { exact: true })).toBeVisible();
   await expect(page.locator('.logo-detail.is-open')).toHaveCount(1);
