@@ -90,3 +90,22 @@ test('visual QA captures empty canvas, imported cards and focus at desktop sizes
   await page.screenshot({ path: testInfo.outputPath('logo-studio-focus-1440x900.png') });
   expect(errors).toEqual([]);
 });
+
+
+test('two desktop asset cards use available width and expose editing actions', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('#/logo-resizer');
+  const second = { ...sample, name: 'SecondVisual.png' };
+  await page.locator('.logo-workspace input[type=file]').setInputFiles([sample, second]);
+  await page.getByRole('dialog', { name: 'Set logo dimensions' })
+    .getByRole('button', { name: 'Apply & process' }).click();
+  await expect(page.locator('.logo-card')).toHaveCount(2);
+  const boxes = await page.evaluate(() => {
+    const gallery = document.querySelector('.logo-gallery')!.getBoundingClientRect();
+    const cards = [...document.querySelectorAll('.logo-card')].map(x => x.getBoundingClientRect());
+    const saves = [...document.querySelectorAll('.logo-card-footer button')].map(x => x.getBoundingClientRect());
+    return { widths: cards.map(x => x.width), saveBottoms: saves.map(x => x.bottom), galleryBottom: gallery.bottom };
+  });
+  expect(Math.min(...boxes.widths)).toBeGreaterThan(400);
+  expect(Math.max(...boxes.saveBottoms)).toBeLessThanOrEqual(boxes.galleryBottom + 2);
+});
