@@ -12,6 +12,7 @@ import { ForgeHome, ToolGlyph, toolDetails } from './home/ForgeHome';
 import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
 import './precision-studio.css';
+import './tools/logo-resizer/logo-studio.css';
 
 type Route = ToolId | 'home';
 
