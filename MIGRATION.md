@@ -1,3 +1,5 @@
+> **Historical decision log, not a description of the current deployed preview.** For the active seven-tool scope and release status see [README](README.md), [feature parity](docs/FEATURE_PARITY_GATE.md) and [release procedure](docs/GITHUB_PAGES_RELEASE.md).
+
 # Migration decisions
 
 - New target repository: Kotaru27/The-Forge.

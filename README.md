@@ -1,36 +1,39 @@
 # The Forge
 
-**The Forge** is a desktop-first creative workroom built with React, TypeScript and Vite. It brings seven existing production-oriented workflows into a single browser interface.
+**Seven creative-production tools. One desktop-first workspace.** The Forge is a React + TypeScript + Vite toolkit for image, PDF, video, storyboard and media-asset workflows.
 
-**[Open the GitHub Pages preview](https://kotaru27.github.io/The-Forge/)** · [Browse the preview branch](https://github.com/Kotaru27/The-Forge/tree/release/pages-preview)
+**[Open the live preview](https://kotaru27.github.io/The-Forge/)** · [How to use it](docs/USER_GUIDE.md) · [View source](https://github.com/Kotaru27/The-Forge)
 
-> **Project status:** Active public preview, not a production-certified release. Automated checks have passed on the preview branch, but real-work-file acceptance and authenticated SharePoint checks remain outstanding. No Windows executable is provided.
+[![CI](https://github.com/Kotaru27/The-Forge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Kotaru27/The-Forge/actions/workflows/ci.yml) · [MIT License](LICENSE)
 
-## What is included
+> **Public preview, not a certified production release.** The published Studio UI comes from `release/pages-preview`; `main` remains a distinct development baseline. Manual tests with real Office files, unusual PDFs, video codecs and authenticated SharePoint workflows remain outstanding.
+
+## The seven workspaces
 
 | Workspace | Purpose |
 | --- | --- |
-| Logo Resizer | Prepare and batch-export logos using size presets and labels |
-| PDF to Image | Convert selected PDF pages to PNG/JPG outputs |
-| Image Splitter | Split images into pieces with ZIP export |
-| Video Stills | Extract, review, select and export video frames |
-| Storyboard | Arrange assets in Grid Board or Fit to Platform layouts |
-| Link Generator | Generate media links and associated code |
-| Ad Downloader | Review advertising assets and prepare supported downloads |
+| **Logo Resizer** | Batch resize and label images; export PNG/JPG/ZIP |
+| **PDF to Image** | Convert PDF pages to PNG/JPG, select pages and export |
+| **Image Splitter** | Split images into vertical columns and download ZIPs |
+| **Video Stills** | Extract/select video frames and send selected frames to Grid Board |
+| **Storyboard** | Assemble Grid Boards or Fit to Platform compositions |
+| **Link Generator** | Generate supported media links and output code |
+| **Ad Downloader** | Review workbook-listed assets and prepare supported downloads |
 
-Video Compressor and Filmstrip are **not** part of this seven-tool build. The browser-local workflows and their exports are subject to browser and file-format limitations; external asset and SharePoint requests depend on the user's existing permissions and network policies.
+The old Filmstrip workflow is retired; Video Compressor and a Windows installer are not included in this release.
 
-## Current branches and preview
+## Start using the preview
 
-- `main` is the intentionally preserved development baseline, **not necessarily the version shown on the live Pages preview**.
-- `release/pages-preview` contains the current Studio preview and its visual changes. Its `.github/workflows/studio-pages.yml` workflow publishes that preview on pushes to the release branch **after** tests and build checks succeed.
-- `.github/workflows/pages.yml` is a **separate manual** preview deployment workflow. Do not assume all publishing is manual.
+1. Visit [The Forge](https://kotaru27.github.io/The-Forge/) in a desktop browser.
+2. Select a workspace from Home and try a non-confidential sample file.
+3. Check the preview, selections and export settings; inspect the downloaded results.
+4. Report reproducible problems through the [issue templates](https://github.com/Kotaru27/The-Forge/issues/new/choose).
 
-See [the release and rollback procedure](docs/GITHUB_PAGES_RELEASE.md) and [feature parity acceptance gate](docs/FEATURE_PARITY_GATE.md). Neither a passing automated workflow nor a working preview establishes parity for every real campaign file.
+For format guidance and privacy cautions, see the [user guide](docs/USER_GUIDE.md). Browser-local image/document/video transforms do not imply that external media or SharePoint links are private or accessible without permission.
 
 ## Develop locally
 
-Requires Node.js **22.12.0 or later**.
+Requires **Node.js 22.12.0+**.
 
 ```bash
 npm install
@@ -39,30 +42,27 @@ npm run build
 npm run preview
 ```
 
-The `predev` and `prebuild` commands remove previously generated, ignored `public/legacy` content. The production build checks that legacy CTK runtime and Video Compressor payloads are not bundled.
-
-## Verification
+For automated checks:
 
 ```bash
 npm run test:unit
-npm run build
 npm run test:e2e
 ```
 
-`npm test` additionally runs the original CTK regression suite. For it, check out [Kotaru27/CTK](https://github.com/Kotaru27/CTK) at commit `617615c0b4370c795ddfd6dc4c300920cd595883` into `legacy-source/`, or set `CTK_SOURCE_DIR` to that checkout. CI prepares the test-only baseline automatically. CTK is **not** shipped as a runtime dependency.
+`npm test` also runs CTK regression tests against the pinned [CTK](https://github.com/Kotaru27/CTK) commit `617615c0b4370c795ddfd6dc4c300920cd595883` in `legacy-source/` (or `CTK_SOURCE_DIR`). CI prepares this test-only oracle; it is not deployed. Use `npx playwright install chromium` locally if Chromium is missing. Prebuild/predev remove generated ignored legacy files; no npm lockfile is presently committed.
 
-The browser suite uses Playwright; install Chromium if it is not available locally with `npx playwright install chromium`. The current project does not commit an npm lockfile; dependency resolution is not yet pinned end to end.
+## Engineering evidence and release state
 
-## Known verification limits
+- [CI](https://github.com/Kotaru27/The-Forge/actions/workflows/ci.yml): source tests, original CTK baseline checks and production build; Playwright covers appropriate branches/PRs.
+- [Studio preview publisher](https://github.com/Kotaru27/The-Forge/blob/release/pages-preview/.github/workflows/studio-pages.yml): releases the tested preview on **push** to `release/pages-preview`. The [separate manual publisher](.github/workflows/pages.yml) uses explicit dispatch.
+- [Release acceptance checklist](docs/RELEASE_READINESS.md): what must happen before a tagged or production release.
+- [Public evidence register](docs/OSS_EVIDENCE.md): verified facts and currently unproven adoption.
+- [Feature parity matrix](docs/FEATURE_PARITY_GATE.md) and [release code audit](docs/RELEASE_CODE_AUDIT.md): known limits and remaining real-world tests.
 
-Automated tests cover fixture-based imports, transforms, exports, interaction flows and selected legacy-output comparisons. Separate manual acceptance is still required for real multi-slide Office files, scanned/encrypted PDFs, MP4/MOV combinations, large asset batches, and authenticated SharePoint/file-system permissions. See [feature parity](docs/FEATURE_PARITY_GATE.md) and [release code audit](docs/RELEASE_CODE_AUDIT.md).
+The application must **not** be represented as universally compatible with real workbooks, encrypted/scanned PDFs, long MP4/MOV files or authenticated SharePoint folders on the basis of synthetic tests alone.
 
-## Contributing and security
+## Participate and reuse
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) for scoped contribution and testing guidance. For vulnerabilities, read [SECURITY.md](SECURITY.md); do not publish exploit details in issues.
+[Contribution guide](CONTRIBUTING.md) · [Security policy](SECURITY.md) · [Changelog](CHANGELOG.md) · [Third-party notices](THIRD_PARTY_NOTICES.md) · [Repository configuration checklist](docs/REPOSITORY_SETTINGS.md)
 
-## Licensing and third-party sources
-
-**The Forge's original source code and project documentation are available under the [MIT License](LICENSE)** (Copyright © 2026 Kotaru27). MIT permits use, modification and redistribution, including commercial use, subject to retaining the copyright and permission notice.
-
-Bundled third-party agent skills, libraries, test fixtures and other materials retain their **own applicable license terms**; the Forge MIT license does not relicense third-party works or grant rights to proprietary data, external services or trademarks. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution, sources and outstanding provenance checks.
+Original Forge code and documentation are MIT-licensed, © 2026 Kotaru27. Third-party libraries, bundled skills, external sources and fixtures retain their independent terms. The project does not claim unverified active-user, download, dependency or external-contributor counts.
