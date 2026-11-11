@@ -114,4 +114,12 @@ test('two desktop asset cards use available width and expose editing actions', a
   });
   expect(Math.min(...boxes.widths)).toBeGreaterThan(400);
   expect(Math.max(...boxes.saveBottoms)).toBeLessThanOrEqual(boxes.galleryBottom + 2);
+
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  const centerOffset = await page.evaluate(() => {
+    const gallery = document.querySelector('.logo-gallery')!.getBoundingClientRect();
+    const cards = Array.from(document.querySelectorAll('.logo-card')).map(el => el.getBoundingClientRect());
+    return Math.abs((cards[0].left + cards[1].right) / 2 - (gallery.left + gallery.right) / 2);
+  });
+  expect(centerOffset).toBeLessThan(8);
 });
