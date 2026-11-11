@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent, type CSSProperties } from 'react';
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
@@ -63,6 +63,8 @@ export function LogoResizer() {
   const snapshotRef = useRef<Snapshot | null>(null);
   const snapshotTimer = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastFocusAsset = useRef<LogoAsset | null>(null);
+  const [keepFocusForExit, setKeepFocusForExit] = useState(false);
   const [showLinks, setShowLinks] = useState(false);
   const [brands, setBrands] = useState('');
   const [server, setServer] = useState<LogoServer>('s3');
@@ -249,6 +251,22 @@ export function LogoResizer() {
   }, [focused, cards]);
 
   const detail = cards.find(asset => asset.id === focused) ?? null;
+  // Presentation only: retain the last focused card for the sidebar's
+  // exit transform. The underlying focused state changes immediately.
+  useEffect(() => {
+    if (detail) {
+      lastFocusAsset.current = detail;
+      setKeepFocusForExit(true);
+      return;
+    }
+    if (!lastFocusAsset.current) return;
+    const timeout = window.setTimeout(() => {
+      lastFocusAsset.current = null;
+      setKeepFocusForExit(false);
+    }, 240);
+    return () => window.clearTimeout(timeout);
+  }, [detail]);
+  const focusDisplayDetail = detail ?? (keepFocusForExit ? lastFocusAsset.current : null);
   const updateLabel = (asset: LogoAsset, value: string) => {
     patchCard(asset.id, {
       label: value,
@@ -394,7 +412,7 @@ export function LogoResizer() {
           ) : (
             <div className="logo-grid">
               {cards.map(asset => (
-                <article key={asset.id} className="logo-card">
+                <article key={asset.id} className="logo-card" style={{ '--logo-preview-ratio': `${settings.width} / ${settings.height}` } as CSSProperties}>
                   <div className="logo-card-heading"><span className="forge-v5-card-index">{String(cards.length - cards.indexOf(asset)).padStart(2,"0")}</span>
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
                     <button type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</button>
@@ -415,7 +433,7 @@ export function LogoResizer() {
             </div>
           )}
         </main>
-        {detail && <aside className="logo-detail" aria-label="Focus Mode">
+        {focusDisplayDetail && <aside className={'logo-detail' + (detail ? ' is-open' : '')} aria-label="Focus Mode" aria-hidden={!detail} inert={!detail}>
           <div className="logo-detail-heading">
             <strong>Focus Mode</strong>
             <div className="logo-detail-buttons">
@@ -424,18 +442,18 @@ export function LogoResizer() {
               <button type="button" aria-label="Close Focus Mode" onClick={() => setFocused(null)}>×</button>
             </div>
           </div>
-          <p className="logo-subtle">{cards.findIndex(asset => asset.id === detail.id) + 1} of {cards.length}</p>
-          <LogoPreview asset={detail} settings={settings} className="logo-detail-preview" />
-          <label>Filename<input value={detail.filename} onChange={event => patchCard(detail.id, { filename: sanitizeLogoFilename(event.target.value) })} /></label>
-          <label>Overlay label<textarea rows={3} value={detail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
-          <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={detail.fontSizeOverride ?? ''} onChange={event => patchCard(detail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
-          <label>Image padding {detail.paddingOverride ?? settings.padding}px <input type="range" min="0" max="150" value={detail.paddingOverride ?? settings.padding} onChange={event => patchCard(detail.id, { paddingOverride: Number(event.target.value) })} /></label>
-          <button type="button" onClick={() => patchCard(detail.id, { paddingOverride: null })}>Reset padding to global</button>
-          <label>Image Y offset {detail.imageOffset} <input type="range" min="-50" max="50" value={detail.imageOffset} onChange={event => patchCard(detail.id, { imageOffset: Number(event.target.value) })} /></label>
-          <label>Text Y offset {detail.textOffset} <input type="range" min="0" max="100" value={detail.textOffset} onChange={event => patchCard(detail.id, { textOffset: Number(event.target.value) })} /></label>
+          <p className="logo-subtle">{cards.findIndex(asset => asset.id === focusDisplayDetail.id) + 1} of {cards.length}</p>
+          <LogoPreview asset={focusDisplayDetail} settings={settings} className="logo-detail-preview" />
+          <label>Filename<input value={focusDisplayDetail.filename} onChange={event => patchCard(focusDisplayDetail.id, { filename: sanitizeLogoFilename(event.target.value) })} /></label>
+          <label>Overlay label<textarea rows={3} value={focusDisplayDetail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
+          <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={focusDisplayDetail.fontSizeOverride ?? ''} onChange={event => patchCard(focusDisplayDetail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
+          <label>Image padding {focusDisplayDetail.paddingOverride ?? settings.padding}px <input type="range" min="0" max="150" value={focusDisplayDetail.paddingOverride ?? settings.padding} onChange={event => patchCard(focusDisplayDetail.id, { paddingOverride: Number(event.target.value) })} /></label>
+          <button type="button" onClick={() => patchCard(focusDisplayDetail.id, { paddingOverride: null })}>Reset padding to global</button>
+          <label>Image Y offset {focusDisplayDetail.imageOffset} <input type="range" min="-50" max="50" value={focusDisplayDetail.imageOffset} onChange={event => patchCard(focusDisplayDetail.id, { imageOffset: Number(event.target.value) })} /></label>
+          <label>Text Y offset {focusDisplayDetail.textOffset} <input type="range" min="0" max="100" value={focusDisplayDetail.textOffset} onChange={event => patchCard(focusDisplayDetail.id, { textOffset: Number(event.target.value) })} /></label>
           <div className="logo-detail-actions">
-            <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</button>
-            <button type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
+            <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(focusDisplayDetail)}>Save image</button>
+            <button type="button" disabled={busy} onClick={() => removeAsset(focusDisplayDetail)}>Delete</button>
           </div>
         </aside>}
       </div>
