@@ -1,6 +1,6 @@
 # Contributing to The Forge
 
-Thank you for considering helping with The Forge. This repository is actively maintained, but its project-wide open-source license is **not yet finalized**. Please open an issue to discuss code contributions before submitting a PR; do not assume publicly available source can be copied or relicensed.
+Thank you for considering helping with The Forge. The project's original source code and documentation are available under the [MIT License](LICENSE); third-party materials retain their own licenses, as noted in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Please open an issue to discuss code contributions before submitting a PR. Only submit work you have the right to license and distribute under the project's MIT terms.
 
 ## Scope and existing behavior
 
@@ -20,6 +20,6 @@ See [README.md](README.md) for setup and [docs/FEATURE_PARITY_GATE.md](docs/FEAT
 
 ## Review and licensing
 
-A maintainer must review scope, provenance and test evidence before merging. Contributions may be deferred until project-level licensing and intellectual-property questions are resolved. Do not include third-party assets, generated source from proprietary products, or employer-owned code without permission. There is no guarantee that an issue or PR will be accepted.
+A maintainer must review scope, provenance, license compatibility and test evidence before merging. Contributions that incorporate outside code or assets may be deferred until their rights and attribution are verified. Do not include third-party assets, source copied from proprietary products, or employer-owned code without permission. There is no guarantee that an issue or PR will be accepted.
 
 Report security concerns privately following [SECURITY.md](SECURITY.md), not in public issues.

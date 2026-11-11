@@ -63,6 +63,6 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for scoped contribution and testing guid
 
 ## Licensing and third-party sources
 
-**Project-wide open-source licensing is pending an ownership and redistribution-rights review.** Public availability of this source is not, by itself, permission to copy or redistribute it under an assumed license. Do not treat the license files bundled with individual agent skills as a license for The Forge itself.
+**The Forge's original source code and project documentation are available under the [MIT License](LICENSE)** (Copyright © 2026 Kotaru27). MIT permits use, modification and redistribution, including commercial use, subject to retaining the copyright and permission notice.
 
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the dependency inventory, bundled skill provenance and outstanding ownership checks. A project-level LICENSE will be added only after the applicable rights are confirmed.
+Bundled third-party agent skills, libraries, test fixtures and other materials retain their **own applicable license terms**; the Forge MIT license does not relicense third-party works or grant rights to proprietary data, external services or trademarks. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution, sources and outstanding provenance checks.

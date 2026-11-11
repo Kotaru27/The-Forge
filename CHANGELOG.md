@@ -2,11 +2,12 @@
 
 Changes to The Forge are tracked in Git commits and pull requests. This file distinguishes a **public preview** from a formal versioned production release.
 
-## Unreleased — repository readiness documentation (proposed)
+## Unreleased — repository OSS readiness (draft PR)
 
+- Add the OSI-approved MIT License for original Forge source code and documentation, with third-party license exceptions clearly documented.
 - Explain the current preview branch, deployment paths and outstanding acceptance gates.
 - Introduce contribution, security, provenance and issue/PR reporting documentation.
-- No intended changes to user workflows, processing engines, tool appearance, runtime dependencies, or CI/deployment logic.
+- No changes to user workflows, processing engines, tool appearance, runtime dependencies, or CI/deployment logic.
 
 ## 2026-11-10 — Studio GitHub Pages preview
 
