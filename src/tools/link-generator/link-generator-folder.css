@@ -1,0 +1,68 @@
+/* Scoped to the Link Generator. Other workrooms are unchanged. */
+.forge-collection-shell .link-generator.link-generator-folder{--link-ink:#eef0eb;--link-muted:#9da59e;--link-line:#343b36;--link-lime:#dce8d2;--link-surface:#141715;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);gap:16px;padding:22px 28px 32px;overflow:auto;align-items:start;background:#0c0f0d}
+.forge-collection-shell .link-generator-folder .link-panel{display:block;min-width:0;min-height:0;overflow:hidden;padding:0;background:var(--link-surface);border:1px solid var(--link-line);border-radius:14px;box-shadow:0 20px 70px #0000001a;animation:link-panel-rise .46s cubic-bezier(.17,.85,.2,1) both}
+.forge-collection-shell .link-generator-folder .link-review-panel{animation-delay:.075s}
+.forge-collection-shell .link-generator-folder .link-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 25px 20px;border-bottom:1px solid var(--link-line)}
+.forge-collection-shell .link-generator-folder .link-panel-heading>div>span,.forge-collection-shell .link-generator-folder .link-panel-heading>small{display:block;color:#829288;font-size:10px;letter-spacing:.09em;font-family:Consolas,monospace}
+.forge-collection-shell .link-generator-folder .link-panel-heading h2{font-size:19px;font-weight:640;line-height:1.22;letter-spacing:-.045em;color:var(--link-ink);margin:7px 0 0}
+.forge-collection-shell .link-generator-folder .link-panel-body{display:flex;flex-direction:column;gap:0;padding:22px 25px 26px}
+.forge-collection-shell .link-generator-folder .link-source-fields{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:13px}
+.forge-collection-shell .link-generator-folder .link-panel label{color:#c5cec5;font-size:12px;gap:8px;font-weight:580}
+.forge-collection-shell .link-generator-folder .link-panel :is(input:not([type='checkbox']),select,textarea){border:1px solid #3b443c;color:#eaf0e7;border-radius:8px;background:#1b201c;outline:none;transition:border-color .18s ease,background .18s ease}
+.forge-collection-shell .link-generator-folder .link-panel :is(input:not([type='checkbox']),select,textarea):focus-visible{border-color:#b9cbb6;outline:2px solid #aebfa87a;outline-offset:1px}
+.forge-collection-shell .link-generator-folder .link-panel :is(input:not([type='checkbox']),select):hover{border-color:#6b7d6b}
+.forge-collection-shell .link-generator-folder .link-path-help{color:var(--link-muted);font-size:11px;line-height:1.5;margin:10px 0 17px}
+.forge-collection-shell .link-generator-folder .link-mp4-row{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:15px;border:1px solid #343e35;border-radius:8px;background:#1c251e;padding:12px 15px;cursor:pointer}
+.forge-collection-shell .link-generator-folder .link-mp4-row>span{display:flex;flex-direction:column;gap:4px}
+.forge-collection-shell .link-generator-folder .link-mp4-row strong{font-size:12px;font-weight:620;color:#e6efe3}
+.forge-collection-shell .link-generator-folder .link-mp4-row small{font-size:11px;font-weight:400;color:#9fb29e}
+.forge-collection-shell .link-generator-folder .link-mp4-row input{height:16px;width:16px;accent-color:var(--link-lime);flex-shrink:0}
+.forge-collection-shell .link-generator-folder .link-subheading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 12px}
+.forge-collection-shell .link-generator-folder .link-subheading h3,.forge-collection-shell .link-generator-folder .link-outputs-header h3{font-size:12px;font-weight:660;color:#eaf0e7;margin:0}
+.forge-collection-shell .link-generator-folder .link-subheading>span,.forge-collection-shell .link-generator-folder .link-outputs-header>span{color:#8a9b8c;font:10px Consolas,monospace;letter-spacing:.045em}
+.forge-collection-shell .link-generator-folder .link-import-box{display:flex;align-items:center;gap:14px;padding:17px;min-height:105px;border-radius:9px;border:1px dashed #59665a;background:linear-gradient(145deg,#1c241e,#181e1a);transition:border-color .21s ease,background .21s ease}
+.forge-collection-shell .link-generator-folder .link-import-box:hover,.forge-collection-shell .link-generator-folder .link-import-box.is-loaded{border-color:#b8cbb2}
+.forge-collection-shell .link-generator-folder .link-folder-icon{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border:1px solid #455547;border-radius:9px;color:#d5e1d0;background:#253027}
+.forge-collection-shell .link-generator-folder .link-import-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.forge-collection-shell .link-generator-folder .link-import-text strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#eaf0e7}
+.forge-collection-shell .link-generator-folder .link-import-text span{font-size:11px;color:#a4b3a3;line-height:1.4}
+.forge-collection-shell .link-generator-folder .link-panel button.link-browse-button{flex-shrink:0;border-radius:8px;padding:11px 13px;min-height:40px;border:1px solid #637363;color:#e9f3e3;background:#29382c;font-size:11px;font-weight:650}
+.forge-collection-shell .link-generator-folder .link-panel button.link-browse-button:hover{background:#3a4c3d;transform:translateY(-1px)}
+.forge-collection-shell .link-generator-folder .link-import-note{margin:10px 0 0;min-height:17px;color:var(--link-muted);font-size:11px;line-height:1.55}
+.forge-collection-shell .link-generator-folder .link-import-note.is-loaded{color:#b9d1b5}
+.forge-collection-shell .link-generator-folder .link-filenames-heading{margin-top:20px}
+.forge-collection-shell .link-generator-folder .link-filenames-heading h3 span{font-size:11px;font-weight:400;color:var(--link-muted)}
+.forge-collection-shell .link-generator-folder .link-filenames-heading>div{display:flex;align-items:center;gap:10px;color:#6e7c70}
+.forge-collection-shell .link-generator-folder .link-panel button.link-text-button{border:0;background:none;color:#b5c9af;padding:5px 0;min-height:0;font-size:11px;font-weight:600}
+.forge-collection-shell .link-generator-folder .link-panel button.link-text-button:hover{color:#eff9e9;background:transparent}
+.forge-collection-shell .link-generator-folder #link-filenames{margin-top:8px;min-height:184px;max-height:450px;font:12px/1.85 Consolas,monospace;background:#0f1411;border-radius:8px;resize:vertical;padding:12px 15px}
+.forge-collection-shell .link-generator-folder #link-filenames::placeholder{color:#748075}
+.forge-collection-shell .link-generator-folder .link-filenames-foot{display:flex;justify-content:space-between;gap:10px;margin:9px 0 0;color:#89988b;font:10px/1.5 Consolas,monospace}
+.forge-collection-shell .link-generator-folder .link-action-row{display:flex;align-items:stretch;gap:9px;margin-top:19px}
+.forge-collection-shell .link-generator-folder .link-panel button.primary{flex:1;min-height:46px;border:1px solid #dce8d2;border-radius:8px;color:#172217;background:#dce8d2;font-size:12px;font-weight:730;display:flex;align-items:center;justify-content:center;gap:10px}
+.forge-collection-shell .link-generator-folder .link-panel button.primary:hover{background:#eff8e7;border-color:#eff8e7;transform:translateY(-1px)}
+.forge-collection-shell .link-generator-folder .link-panel button.link-reset-button{border-radius:8px;background:transparent;color:#b7c5b7;border:1px solid #425043;min-width:76px}
+.forge-collection-shell .link-generator-folder .link-panel button.link-reset-button:hover{background:#283129}
+.forge-collection-shell .link-generator-folder .link-error{margin:13px 0 0;color:#edb1a6;font-size:12px;line-height:1.5}
+.forge-collection-shell .link-generator-folder .link-review-panel .link-subheading{margin-top:0}
+.forge-collection-shell .link-generator-folder .link-filename-preview{min-height:145px;max-height:205px;overflow-y:auto;background:#0e1410;border:1px solid #303b32;border-radius:9px;scrollbar-color:#566254 transparent}
+.forge-collection-shell .link-generator-folder .link-preview-empty{min-height:143px;margin:0;display:grid;place-items:center;text-align:center;padding:15px;color:#8a988b;font-size:11px}
+.forge-collection-shell .link-generator-folder .link-filename-preview ol{padding:0;margin:0;list-style:none}
+.forge-collection-shell .link-generator-folder .link-filename-preview li{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #253027;min-width:0;animation:link-list-in .22s ease both}
+.forge-collection-shell .link-generator-folder .link-filename-preview li:last-child{border-bottom:0}
+.forge-collection-shell .link-generator-folder .link-preview-index{font:10px Consolas,monospace;color:#7b8a7d}
+.forge-collection-shell .link-generator-folder .link-preview-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d9e6d5;font:12px Consolas,monospace}
+.forge-collection-shell .link-generator-folder .link-preview-ext{font:9px Consolas,monospace;border:1px solid #425444;background:#243027;color:#bbccb9;padding:4px 7px;border-radius:4px}
+.forge-collection-shell .link-generator-folder .link-filename-preview li.link-preview-more{font-size:11px;color:#98ae98}
+.forge-collection-shell .link-generator-folder .link-outputs-header{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #354039;margin-top:20px;padding-top:21px;margin-bottom:12px}
+.forge-collection-shell .link-generator-folder .link-output-block + .link-output-block{margin-top:17px}
+.forge-collection-shell .link-generator-folder .output-heading{margin:0 0 8px;display:flex;align-items:center;justify-content:space-between}
+.forge-collection-shell .link-generator-folder .output-heading label{font-size:12px;color:#e6eee1}
+.forge-collection-shell .link-generator-folder .output-heading button{border:1px solid #485e4a;color:#c4dbbd;border-radius:7px;background:#213023;padding:8px 14px;min-height:34px}
+.forge-collection-shell .link-generator-folder .output-heading button:hover:not(:disabled){background:#324436}
+.forge-collection-shell .link-generator-folder .link-output-block textarea{display:block;width:100%;height:175px;min-height:135px;max-height:400px;background:#0c110e;border:1px solid #344236;border-radius:8px;color:#d0dfca;line-height:1.7;font:11px/1.7 Consolas,monospace;resize:vertical}
+@keyframes link-panel-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes link-list-in{from{opacity:0;transform:translateX(4px)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:1200px){.forge-collection-shell .link-generator.link-generator-folder{grid-template-columns:1fr}}
+@media(max-width:780px){.forge-collection-shell .link-generator.link-generator-folder{padding:16px;gap:12px}.forge-collection-shell .link-generator-folder .link-panel-body{padding:18px}.forge-collection-shell .link-generator-folder .link-panel-heading{padding:18px}.forge-collection-shell .link-generator-folder .link-source-fields{grid-template-columns:1fr}.forge-collection-shell .link-generator-folder .link-import-box{flex-wrap:wrap}.forge-collection-shell .link-generator-folder .link-browse-button{width:100%}}
+@media(prefers-reduced-motion:reduce){.forge-collection-shell .link-generator-folder .link-panel,.forge-collection-shell .link-generator-folder .link-filename-preview li{animation:none}}
