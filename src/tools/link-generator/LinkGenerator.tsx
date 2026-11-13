@@ -93,7 +93,7 @@ export function LinkGenerator() {
 
   return (
     <section className="link-generator link-generator-folder" aria-label="Link Generator">
-      <section className="link-panel link-source-panel" aria-label="Source and filenames">
+      <section className="link-panel link-source-panel" aria-label="Link source inputs">
         <header className="link-panel-heading"><div><span>01 / INPUT</span><h2>Source &amp; filenames</h2></div><small>SELECT · REVIEW · GENERATE</small></header>
         <div className="link-panel-body">
           <div className="link-source-fields">
