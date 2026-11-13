@@ -29,11 +29,11 @@ test('local ad folder imports in ascending order and feeds unchanged link output
     const exposure = await page.locator('#link-exposure').inputValue();
     expect(exposure).toContain('Remote/Ads/Ad_1.png');
     expect(exposure.indexOf('Ad_2.jpg')).toBeLessThan(exposure.indexOf('Ad_10.mp4'));
-    await expect(page.locator('#link-storyboard')).toContainText('Ad_10.jpg');
+    await expect(page.locator('#link-storyboard')).toHaveValue(/Ad_10\.jpg/);
 
     await names.fill('Manual_9.mp3\nManual_1.jpg');
     await page.getByRole('button', { name: 'Generate', exact: true }).click();
-    await expect(page.locator('#link-exposure')).toContainText('Manual_9.mp3');
+    await expect(page.locator('#link-exposure')).toHaveValue(/Manual_9\.mp3/);
     await page.getByRole('button', { name: 'Reset' }).click();
     await expect(names).toHaveValue('');
     await expect(page.locator('#link-exposure')).toHaveValue('');
