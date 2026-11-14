@@ -279,10 +279,17 @@
   align-items: center;
   gap: 6px !important;
   padding: 15px 10px !important;
+  /* Vertical wheel/touch/keyboard scrolling only. Overflow-x:visible
+     with overflow-y:auto used to create the horizontal scrollbar in Chromium. */
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  overflow-x: visible;
-  scrollbar-width: thin;
-  scrollbar-color: #536b59 transparent;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  overscroll-behavior-y: contain;
+}
+.forge-ctk-ui .tool-nav::-webkit-scrollbar {
+  display: none;
 }
 .forge-ctk-ui .tool-link {
   position: relative;
@@ -314,24 +321,19 @@
 .forge-ctk-ui .tool-link.is-active::before {
   content: '';
   position: absolute;
-  left: -13px !important;
+  left: -8px !important;
   top: 13px !important;
   width: 3px !important;
   height: 23px !important;
   border-radius: 3px;
   background: #c9f6a4 !important;
 }
+/* Buttons retain their native title tooltip. A CSS pseudo-tooltip inside a
+   vertically scrollable rail increases scrollWidth and causes horizontal scroll. */
 .forge-ctk-ui .tool-link::after {
-  left: 60px;
-  z-index: 50;
-  padding: 9px 12px;
-  border: 1px solid #3e5948 !important;
-  border-radius: 6px !important;
-  background: #182b26 !important;
-  color: #fff !important;
-  font: 600 12px/1.2 'Plus Jakarta Sans', sans-serif !important;
-  box-shadow: 0 7px 24px rgba(4,27,14,.2);
+  display: none !important;
 }
+
 .forge-ctk-ui .forge-ctk-rail-icon {
   display: grid;
   place-items: center;
@@ -1090,7 +1092,9 @@
   }
   .forge-ctk-ui .ctk-home-card-copy { left: 15px; right: 11px; bottom: 14px; }
   .forge-ctk-ui .ctk-home-card-copy strong { font-size: 17px; }
-  .forge-ctk-ui .sidebar { width: 57px !important; min-width: 57px !important; flex: 0 0 57px !important; }\n  .forge-ctk-ui .tool-nav { padding: 12px 3px !important; }\n  .forge-ctk-ui .tool-link { width: 46px !important; min-width: 46px !important; }
+  .forge-ctk-ui .sidebar { width: 57px !important; min-width: 57px !important; flex: 0 0 57px !important; }
+  .forge-ctk-ui .tool-nav { padding: 12px 3px !important; }
+  .forge-ctk-ui .tool-link { width: 46px !important; min-width: 46px !important; }
   .forge-ctk-ui .topbar { padding: 0 12px !important; }
   .forge-ctk-ui .forge-ctk-top-home { font-size: 18px !important; }\n  .forge-ctk-ui .forge-ctk-header-icon { width: 31px; height: 31px; flex-basis: 31px; }\n  .forge-ctk-ui .forge-ctk-top-leading { gap: 7px; }
   .forge-ctk-ui .forge-ctk-tool-name { font-size: 15px; max-width: 42%; }

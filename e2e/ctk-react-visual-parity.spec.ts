@@ -96,3 +96,35 @@ test('CTK Image Splitter upload zone uses light background and contrasting CTA',
   await expect(page.getByRole('button',{name:'Add Images'})).toHaveCSS('background-color','rgb(40, 94, 67)');
   await expect(page.getByRole('button',{name:'Add Images'})).toHaveCSS('color','rgb(255, 255, 255)');
 });
+
+test('CTK sidebar never scrolls sideways, while all eight icons remain reachable vertically', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('#/logo-resizer');
+  const nav = page.getByRole('navigation', { name: 'Select a tool' });
+  await expect(nav.getByRole('button')).toHaveCount(8);
+  await expect(nav).toHaveCSS('overflow-x', 'hidden');
+  await expect(nav).toHaveCSS('overflow-y', 'auto');
+  const measure = () => nav.evaluate(el => ({
+    clientWidth: el.clientWidth,
+    scrollWidth: el.scrollWidth,
+    clientHeight: el.clientHeight,
+    scrollHeight: el.scrollHeight,
+    scrollTop: el.scrollTop,
+  }));
+  const desktop = await measure();
+  expect(desktop.scrollWidth).toBeLessThanOrEqual(desktop.clientWidth);
+  await page.screenshot({ path: testInfo.outputPath('ctk-sidebar-no-horizontal-scroll.png') });
+
+  await page.setViewportSize({ width: 1280, height: 500 });
+  const compact = await measure();
+  expect(compact.scrollWidth).toBeLessThanOrEqual(compact.clientWidth);
+  expect(compact.scrollHeight).toBeGreaterThan(compact.clientHeight);
+  await nav.hover();
+  await page.mouse.wheel(0, 420);
+  await expect.poll(async () => (await measure()).scrollTop).toBeGreaterThan(0);
+  await nav.getByRole('button', { name: 'Ad Downloader' }).click();
+  await expect(page).toHaveURL(/#\/ad-downloader$/);
+  await expect(nav.getByRole('button', { name: 'Ad Downloader' })).toHaveAttribute('aria-current', 'page');
+  const after = await measure();
+  expect(after.scrollWidth).toBeLessThanOrEqual(after.clientWidth);
+});
