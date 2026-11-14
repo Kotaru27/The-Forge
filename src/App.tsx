@@ -93,7 +93,7 @@ export default function App() {
             </div>
             <SketchDividerLine compact />
 
-            <nav className="tool-nav sketch-nav" aria-label="Primary navigation">
+            <nav className="tool-nav sketch-nav" aria-label="Select a tool">
               <button
                 type="button"
                 className="sketch-nav-link"
