@@ -26,7 +26,7 @@ test('Ink & Paper Home artwork, seven cards and tool finder remain interactive',
   const finder = page.getByRole('searchbox', { name: 'Find a Forge tool' });
   await finder.fill('PDF');
   await expect(page.getByRole('button', { name: 'Open PDF to Image' })).toBeEnabled();
-  await expect(page.getByRole('button', { name: 'Open Storyboard' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Open Storyboard' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Show all tools' }).click();
   await expect(finder).toHaveValue('');
   await expect(page.getByRole('button', { name: 'Open Storyboard' })).toBeEnabled();
