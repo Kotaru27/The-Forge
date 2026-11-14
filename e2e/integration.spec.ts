@@ -48,8 +48,8 @@ test('direct Storyboard links work and compressor/invalid links open Home', asyn
   // CTK's full-width Home intentionally replaces the tool rail with seven
   // actionable workbench cards. Verify the rail returns upon opening a tool.
   await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
-  await expect(page.locator('.ctk-home-card')).toHaveCount(7);
-  await expect(page.getByRole('button', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('.forge-home-card.sketch-tool-card')).toHaveCount(7);
+  await expect(page.locator('.sidebar')).toHaveCount(0);
   await page.getByRole('button', { name: 'Open Storyboard' }).click();
   await expect(nav(page).getByRole('button')).toHaveCount(8);
   await expect(page.getByRole('heading', { name: 'Storyboard', level: 1 })).toBeVisible();
