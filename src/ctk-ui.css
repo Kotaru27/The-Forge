@@ -818,6 +818,220 @@
   .forge-ctk-ui .sb-layout { grid-template-columns: 1fr; }
 }
 
+/* Targeted CTK review: Logo Resizer, Image Splitter and Ad Downloader.
+ * Prior dark workspace declarations have stronger specificity than the generic
+ * light adapter; override at the exact component/state to prevent dark bleed. */
+
+/* Logo Resizer: native light option rows, clear type and a single tool pictogram. */
+.forge-ctk-ui .logo-workspace .forge-v5-checkboxes label {
+  background: #f4f8f2 !important;
+  border: 1px solid #c5d6c6 !important;
+  border-radius: 5px !important;
+  color: #244933 !important;
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+.forge-ctk-ui .logo-workspace .forge-v5-checkboxes input {
+  accent-color: #285e43 !important;
+  color-scheme: light;
+}
+.forge-ctk-ui .logo-workspace .forge-v5-swatch {
+  background: #f4f8f2 !important;
+  border: 1px solid #c5d6c6 !important;
+  border-radius: 5px !important;
+}
+.forge-ctk-ui .logo-workspace .forge-v5-swatch input[type='color'] {
+  background: transparent !important;
+}
+.forge-ctk-ui .logo-workspace .forge-v5-sliders label span,
+.forge-ctk-ui .logo-workspace .forge-v5-dimensions label span,
+.forge-ctk-ui .logo-workspace .forge-v5-sliders output,
+.forge-ctk-ui .logo-workspace .forge-v5-deck-foot,
+.forge-ctk-ui .logo-workspace .forge-v5-current-size,
+.forge-ctk-ui .logo-workspace .forge-v5-current-size small {
+  color: #31543e !important;
+}
+.forge-ctk-ui .logo-workspace .forge-v5-deck-foot {
+  background: #fff !important;
+  border-top: 1px solid #e1e9df !important;
+  padding-top: 8px;
+}
+.forge-ctk-ui .logo-workspace .forge-v5-board-heading > div > span {
+  color: #58735e !important;
+}
+.forge-ctk-ui .logo-workspace .forge-v5-drop-icon {
+  display: grid;
+  place-items: center;
+  width: 94px;
+  height: 94px;
+  border: 1px solid #cbded0 !important;
+  border-radius: 12px !important;
+  background: #e8f1e7 !important;
+  color: #275b3b !important;
+}
+.forge-ctk-ui .logo-workspace .forge-v5-drop-icon svg {
+  width: 58px !important;
+  height: 58px !important;
+  stroke: currentColor;
+}
+.forge-ctk-ui .logo-workspace .logo-empty {
+  gap: 12px !important;
+}
+.forge-ctk-ui .logo-workspace .logo-empty h3 {
+  color: #173b2a !important;
+}
+.forge-ctk-ui .logo-workspace .logo-empty p,
+.forge-ctk-ui .logo-workspace .logo-empty small {
+  color: #526958 !important;
+}
+.forge-ctk-ui .logo-workspace .logo-empty p { margin-bottom: 6px !important; }
+.forge-ctk-ui .logo-workspace .logo-empty small { margin-top: 3px !important; }
+.forge-ctk-ui .logo-workspace .forge-v5-button-stack .forge-v5-action:disabled {
+  background: #f3f6f1 !important;
+  border-color: #d5e1d5 !important;
+  color: #778e7b !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+
+/* Image Splitter: pale drop surface with correctly contrasting copy and CTA. */
+.forge-ctk-ui .split-workspace .split-drop,
+.forge-ctk-ui .split-workspace .split-drop.is-dragging {
+  background: #e8f2e4 !important;
+  background-image: none !important;
+  border: 1px dashed #9fba9e !important;
+  color: #285e43 !important;
+}
+.forge-ctk-ui .split-workspace .split-drop.is-dragging {
+  background: #dcebd9 !important;
+  border-color: #285e43 !important;
+}
+.forge-ctk-ui .split-workspace .split-drop span {
+  color: #526958 !important;
+}
+.forge-ctk-ui .split-workspace .split-drop button:not(:disabled) {
+  background: #285e43 !important;
+  border: 1px solid #285e43 !important;
+  color: #fff !important;
+}
+.forge-ctk-ui .split-workspace .split-drop button:hover:not(:disabled) {
+  background: #194c33 !important;
+  border-color: #194c33 !important;
+  color: #fff !important;
+}
+.forge-ctk-ui .split-workspace :is(.split-settings h2,.split-results h2,.split-field,.split-filename) {
+  color: #173b29 !important;
+}
+.forge-ctk-ui .split-workspace :is(.split-muted,.split-status,.split-progress,.split-selection,.split-undo) {
+  color: #526958 !important;
+}
+.forge-ctk-ui .split-workspace :is(.split-card-meta,.split-undo) {
+  background: #fff !important;
+  border-color: #d6e0d6 !important;
+}
+.forge-ctk-ui .split-workspace .split-image-stage {
+  background: #f5f8f2 !important;
+  background-image: none !important;
+}
+.forge-ctk-ui .split-workspace .split-grid-overlay span {
+  border-color: #285e43 !important;
+  box-shadow: none !important;
+}
+
+/* Ad Downloader: CTK ready/requested/prepared queues stay legible on paper.
+ * An already-requested item stays available for repeat downloads. */
+.forge-ctk-ui .adw-workspace :is(.adw-header,.adw-status,.adw-selection-tools,.adw-table-wrap) {
+  color: #173b29 !important;
+  border-color: #d6e0d6 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-header h2 { color: #173b29 !important; }
+.forge-ctk-ui .adw-workspace .adw-header p { color: #526958 !important; }
+.forge-ctk-ui .adw-workspace .adw-status {
+  background: #f4f8f2 !important;
+  color: #31543e !important;
+  border: 1px solid #d6e0d6 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-status[data-error='true'] {
+  background: #fff1f0 !important;
+  border-color: #e4b3ab !important;
+  color: #a12e30 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-selection-tools {
+  justify-content: flex-end;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-selection-tools button {
+  background: #f4f8f2 !important;
+  color: #285e43 !important;
+  border: 1px solid #c5d6c6 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-selection-tools button:hover:not(:disabled) {
+  background: #e5f0e2 !important;
+  color: #173b29 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table-wrap {
+  background: #fff !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table {
+  background: #fff !important;
+  color: #173b29 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table th {
+  background: #e8f1e7 !important;
+  color: #244331 !important;
+  border-bottom-color: #d6e0d6 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table td,
+.forge-ctk-ui .adw-workspace .adw-table .adw-name,
+.forge-ctk-ui .adw-workspace .adw-table .adw-stage {
+  color: #244331 !important;
+  border-bottom-color: #e0e8df !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table tbody tr[data-stage='ready'] {
+  background: #fff !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table tbody tr[data-stage='requested'] {
+  background: #fff8e9 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table tbody tr[data-stage='prepared'] {
+  background: #edf4eb !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table tbody tr[data-stage]:hover {
+  background: #e3eee1 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table tr.adw-queue-divider td {
+  padding: 12px 14px !important;
+  background: #e0ebde !important;
+  color: #234b33 !important;
+  font: 700 12px/1.3 'Plus Jakarta Sans','Segoe UI',sans-serif !important;
+  border-top: 1px solid #b6cbb8 !important;
+  border-bottom: 1px solid #bed2c0 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-row-actions button,
+.forge-ctk-ui .adw-workspace .adw-row-actions summary {
+  background: #f4f8f2 !important;
+  color: #285e43 !important;
+  border: 1px solid #bdd1be !important;
+}
+.forge-ctk-ui .adw-workspace .adw-row-actions button:hover:not(:disabled),
+.forge-ctk-ui .adw-workspace .adw-row-actions summary:hover {
+  background: #e4efe1 !important;
+  color: #173b29 !important;
+}
+.forge-ctk-ui .adw-workspace .adw-more {
+  background: #fff !important;
+  color: #173b29 !important;
+  border: 1px solid #bdd1be !important;
+  box-shadow: 0 8px 22px rgba(22,55,32,.12) !important;
+}
+.forge-ctk-ui .adw-workspace .adw-table input[type='checkbox'] {
+  accent-color: #285e43 !important;
+  color-scheme: light;
+}
+
 /* Standard light dialogs and errors. Preserve modal semantics and handlers. */
 .forge-ctk-ui :is(.logo-modal,.pdf-detail,.pdf-confirm,.split-dialog,.vs-modal,.sb-dialog) {
   background: #fff !important; color: var(--ctk-ink) !important;

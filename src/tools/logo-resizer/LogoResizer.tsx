@@ -3,6 +3,7 @@ import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
 import { LogoResizerIcon } from './LogoResizerIcon';
+import { ToolGlyph } from '../../home/ForgeHome';
 import { logoToBlob } from './renderer';
 import { extractOfficeImages } from './office';
 import { generateLogoLinks } from './links';
@@ -370,7 +371,6 @@ export function LogoResizer() {
             </div>
           </div>
           <div className="forge-v5-deck-foot">
-            <span className="forge-v5-live"><i aria-hidden="true"/> LIVE PREVIEW</span>
             <span>ASPECT RATIO PRESERVED</span>
             <span>ALL EDITS STAY IN YOUR BROWSER</span>
             <output className="forge-v5-current-size">{settings.width} × {settings.height} <small>PX</small></output>
@@ -382,13 +382,12 @@ export function LogoResizer() {
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
       <div className="logo-body">
         <main className="logo-gallery" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
-          <div className="forge-v5-board-heading"><div><span>01 — CANVAS / ASSET BOARD</span><h2>{cards.length ? cards.length + (cards.length === 1 ? " logo in your workboard" : " logos in your workboard") : "Your workboard is empty"}</h2></div><small>{String(cards.length).padStart(2,"0")} / ASSETS</small></div>
+          <div className="forge-v5-board-heading"><div><span>01 — CANVAS / ASSET BOARD</span><h2>{cards.length ? cards.length + (cards.length === 1 ? " logo in your workboard" : " logos in your workboard") : "Your workboard is empty"}</h2></div></div>
           {!cards.length ? (
             <div className="logo-empty">
-              <div className="forge-v5-drop-icon"><LogoResizerIcon /></div>
+              <div className="forge-v5-drop-icon"><ToolGlyph tool="logo-resizer" size={76} /></div>
               <h3>Make room for your logos.</h3>
               <p>Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually.</p>
-              <button type="button" className="forge-v5-action forge-v5-primary" onClick={() => inputRef.current?.click()}>Choose files ↗</button>
               <small>PNG · JPG · WEBP · SVG · PPTX · XLSX · XLSM</small>
             </div>
           ) : (

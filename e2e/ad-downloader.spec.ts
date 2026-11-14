@@ -43,7 +43,9 @@ test('Excel cannot be uploaded before selecting an approved folder',async({page}
 test('Excel import parses names and exposes all copy/bucket controls',async({page})=>{
   await app(page).getByRole('button',{name:'Choose Auto-name folder'}).click();
   await app(page).getByLabel('Upload Excel workbook').setInputFiles({name:'ads.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:fixture()});
-  await expect(app(page).getByText('2 valid ads')).toBeVisible();
+  await expect(app(page).locator('.adw-table tbody tr[data-stage="ready"]')).toHaveCount(2);
+  await expect(app(page).locator('.adw-summary')).toHaveCount(0);
+  await expect(app(page).getByRole('group',{name:'Filter assets'})).toHaveCount(0);
   await expect(app(page).getByText('AD1_Photo')).toBeVisible();
   await expect(app(page).getByRole('button',{name:'Copy Script'})).toBeEnabled();
   await expect(app(page).getByRole('button',{name:'Copy Bucket Table'})).toBeEnabled();
@@ -95,4 +97,31 @@ test('SharePoint remains a native request and cannot enter browser ZIP',async({p
   await nativeRow.locator('details summary').click();
   await expect(nativeRow.getByRole('button',{name:'Fix downloaded name'})).toBeVisible();
   await expect(nativeRow.getByRole('button',{name:'Save named copy'})).toBeVisible();
+});
+
+test('CTK queue places completed downloads after ready rows with readable light colors',async({page})=>{
+  await page.route('**/asset-photo',route=>route.fulfill({
+    status:200,body:Buffer.from([255,216,255,224,1,2,3]),
+    headers:{'content-type':'image/jpeg','access-control-allow-origin':'*'}
+  }));
+  await app(page).getByRole('button',{name:'Choose Auto-name folder'}).click();
+  await app(page).getByLabel('Upload Excel workbook').setInputFiles({
+    name:'ads.xlsx',
+    mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    buffer:fixture()
+  });
+  const ready=app(page).getByRole('row',{name:/AD1_Photo/});
+  await expect(ready).toHaveCSS('background-color','rgb(255, 255, 255)');
+  const pending=page.waitForEvent('download');
+  await ready.getByRole('button',{name:'Download',exact:true}).click();
+  await pending;
+  const prepared=app(page).locator('.adw-table tbody tr[data-stage="prepared"]');
+  await expect(prepared).toHaveCount(1);
+  await expect(prepared).toHaveCSS('background-color','rgb(237, 244, 235)');
+  await expect(prepared.locator('.adw-name')).toHaveCSS('color','rgb(36, 67, 49)');
+  const order=await app(page).locator('.adw-table tbody tr').allTextContents();
+  expect(order[0]).toContain('AD2_Broken');
+  expect(order[1]).toContain('Prepared or verified downloads');
+  expect(order[2]).toContain('AD1_Photo');
+  await expect(prepared.getByRole('button',{name:'Download again'})).toBeVisible();
 });
