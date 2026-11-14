@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, Fragment, type ChangeEvent, type DragEvent } from 'react';
 import { downloadBlob } from '../../utils/download';
 import { AutoNamer } from './auto-name';
 import { fetchZip, getAsset } from './assets';
@@ -35,11 +35,8 @@ function nativeSharePointDownload(url: string) {
 export function AdDownloader() {
   const [folderName,setFolderName]=useState('');
   const [folderApproved,setFolderApproved]=useState(false);
-  const [fileName,setFileName]=useState('');
   const [entries,setEntries]=useState<AdEntry[]>([]);
   const [buckets,setBuckets]=useState<Bucket[]>([]);
-  const [skipped,setSkipped]=useState(0);
-  const [inferred,setInferred]=useState(0);
   const [busy,setBusy]=useState(false);
   const [importing,setImporting]=useState(false);
   const [status,setStatus]=useState<{message:string;error:boolean}>({message:'Choose the Auto-name folder to enable Excel import.',error:false});
@@ -48,7 +45,6 @@ export function AdDownloader() {
   const mounted=useRef(true);
   const entriesRef=useRef(entries);
   const busyRef=useRef(false);
-  const [filter,setFilter]=useState<'all' | Stage>('all');
   useEffect(()=>{entriesRef.current=entries;},[entries]);
   useEffect(()=>()=>{mounted.current=false;renamer.current.dispose();},[]);
   const report=useCallback((message:string,error=false)=>setStatus({message,error}),[]);
@@ -56,12 +52,10 @@ export function AdDownloader() {
     setEntries(current=>current.map(e=>e.id===id?{...e,...changes}:e));
   },[]);
   const chosen=useMemo(()=>entries.filter(e=>e.selected && !e.downloaded && !e.requested),[entries]);
-  const counts=useMemo(()=>({
-    ready:entries.filter(e=>stage(e)==='ready').length,
-    requested:entries.filter(e=>stage(e)==='requested').length,
-    prepared:entries.filter(e=>stage(e)==='prepared').length,
-  }),[entries]);
-  const filtered=useMemo(()=>filter==='all'?entries:entries.filter(e=>stage(e)===filter),[entries,filter]);
+  // Match CTK's visual queue: new ads first, requested next, prepared/verified last.
+  // Sorting a copy preserves original spreadsheet order within each queue.
+  const queued=useMemo(()=>[...entries].sort((a,b)=>
+    ({ready:0,requested:1,prepared:2})[stage(a)] - ({ready:0,requested:1,prepared:2})[stage(b)]),[entries]);
   async function chooseFolder() {
     try {
       const folder=await renamer.current.chooseFolder();
@@ -83,7 +77,6 @@ export function AdDownloader() {
     try {
       const book=parseWorkbook(await file.arrayBuffer());
       setEntries(book.entries);setBuckets(book.buckets);
-      setFileName(file.name);setSkipped(book.skipped);setInferred(book.inferred);setFilter('all');
       report(`${book.entries.length} ready · ${book.skipped} invalid rows skipped · ${book.inferred} extensions inferred.`+
         (book.entries.some(entry=>isSharePoint(entry.url))?' SharePoint uses native downloads with folder-based naming.':''));
     } catch(error) {report('Spreadsheet could not be parsed: '+showError(error),true);}
@@ -209,21 +202,18 @@ export function AdDownloader() {
       <div className="adw-empty" onDragOver={e=>e.preventDefault()} onDrop={onDrop} aria-label="Excel drop zone">
         <strong>Waiting for a workbook</strong><span>{folderApproved?'Drop an .xlsx or .xls file here, or select Upload Excel.':'Choose a writable Auto-name folder to unlock Excel import.'}</span>
       </div> : <>
-      <div className="adw-summary">
-        <span>{fileName}</span><span>{entries.length} valid ads</span>
-        <span>{skipped} invalid skipped</span><span>{inferred} inferred formats</span>
-        <span>{counts.requested} requested</span><span>{counts.prepared} prepared</span>
-      </div>
-      <div className="adw-filters" role="group" aria-label="Filter assets">
-        {(['all','ready','requested','prepared'] as const).map(f=><button type="button" key={f} aria-pressed={filter===f} onClick={()=>setFilter(f)}>
-          {f==='all'?'All':f==='ready'?'Ready':f==='requested'?'Requested':'Prepared / Verified'} {f==='all'?entries.length:counts[f]}
-        </button>)}
+      <div className="adw-filters adw-selection-tools" role="group" aria-label="Ready asset selection">
         <button type="button" onClick={()=>setSelected(true)}>Select ready</button>
         <button type="button" onClick={()=>setSelected(false)}>Deselect ready</button>
       </div>
       <div className="adw-table-wrap" onDragOver={e=>e.preventDefault()} onDrop={onDrop}>
         <table className="adw-table"><thead><tr><th>Ad No</th><th>Generated Name</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody>{filtered.map(entry=><tr key={entry.id} data-stage={stage(entry)}>
+          <tbody>{queued.map((entry,index)=><Fragment key={entry.id}>
+            {stage(entry)!=='ready' && (index===0||stage(queued[index-1])!==stage(entry)) &&
+              <tr className="adw-queue-divider"><td colSpan={4}>{stage(entry)==='requested'
+                ? 'Download requested · check browser downloads'
+                : 'Prepared or verified downloads'}</td></tr>}
+            <tr data-stage={stage(entry)}>
             <td><label><input type="checkbox" aria-label={'Include '+entry.displayName+' in ZIP'} checked={entry.selected} onChange={e=>changeEntry(entry.id,{selected:e.target.checked})}/>{entry.no}</label></td>
             <td className="adw-name" title={entry.confidence==='inferred'?'Extension inferred from media category':entry.confidence==='unknown'?'File extension detected from response':entry.url}>{entry.displayName}{entry.ext||''}</td>
             <td><span className="adw-stage">{entry.downloadVerified?'Verified in folder':entry.downloaded?'Prepared / requested':entry.requested?'Download requested':'Ready'}</span></td>
@@ -235,7 +225,7 @@ export function AdDownloader() {
                 {entry.requested||entry.downloaded?<button type="button" onClick={()=>saveNamedCopy(entry)}>Save named copy</button>:null}
               </div></details>}
             </div></td>
-          </tr>)}</tbody>
+          </tr></Fragment>)}</tbody>
         </table>
       </div>
     </>}
