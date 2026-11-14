@@ -75,3 +75,24 @@ test('Every React workroom uses the same CTK pictogram rail and centered tool he
     await page.screenshot({ path: testInfo.outputPath('ctk-unified-' + tool + '.png') });
   }
 });
+
+test('CTK screenshot corrections: logo pictogram, no duplicate action, readable controls', async ({ page }) => {
+  await page.goto('#/logo-resizer');
+  await expect(page.locator('.logo-empty .forge-v5-drop-icon svg')).toHaveCount(1);
+  await expect(page.locator('.logo-empty .forge-v5-drop-icon svg')).toHaveCSS('color','rgb(39, 91, 59)');
+  await expect(page.getByRole('button', { name: /Choose files/ })).toHaveCount(0);
+  await expect(page.locator('.forge-v5-board-heading > small')).toHaveCount(0);
+  await expect(page.getByText('LIVE PREVIEW', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Add assets/ })).toBeVisible();
+  await expect(page.locator('.forge-v5-checkboxes label').first()).toHaveCSS('background-color','rgb(244, 248, 242)');
+  await expect(page.locator('.forge-v5-checkboxes label').first()).toHaveCSS('color','rgb(36, 73, 51)');
+  await expect(page.locator('.forge-v5-swatch')).toHaveCSS('background-color','rgb(244, 248, 242)');
+});
+
+test('CTK Image Splitter upload zone uses light background and contrasting CTA', async ({ page }) => {
+  await page.goto('#/image-splitter');
+  await expect(page.locator('.split-drop')).toHaveCSS('background-color','rgb(232, 242, 228)');
+  await expect(page.locator('.split-drop span')).toHaveCSS('color','rgb(82, 105, 88)');
+  await expect(page.getByRole('button',{name:'Add Images'})).toHaveCSS('background-color','rgb(40, 94, 67)');
+  await expect(page.getByRole('button',{name:'Add Images'})).toHaveCSS('color','rgb(255, 255, 255)');
+});
