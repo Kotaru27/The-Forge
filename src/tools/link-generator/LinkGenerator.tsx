@@ -136,7 +136,7 @@ export function LinkGenerator() {
       </section>
 
       <section className="link-panel link-review-panel link-outputs" aria-label="Filename sequence and generated links">
-        <header className="link-panel-heading"><div><span>02 / OUTPUT</span><h2>Review &amp; generate</h2></div><small>LINK PREVIEW</small></header>
+        {/* Output controls remain visible; redundant “Review & generate” heading removed. */}
         <div className="link-panel-body">
           <div className="link-subheading link-preview-heading"><h3>Filename order</h3><span>{listMode === 'manual' ? 'CURRENT LIST ORDER' : 'NATURAL A–Z'}</span></div>
           <div className="link-filename-preview" aria-label="Current filename sequence">

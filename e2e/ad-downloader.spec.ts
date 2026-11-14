@@ -99,7 +99,7 @@ test('SharePoint remains a native request and cannot enter browser ZIP',async({p
   await expect(nativeRow.getByRole('button',{name:'Save named copy'})).toBeVisible();
 });
 
-test('CTK queue places completed downloads after ready rows with readable light colors',async({page})=>{
+test('Ink & Paper queue places completed downloads after ready rows with readable ink text',async({page})=>{
   await page.route('**/asset-photo',route=>route.fulfill({
     status:200,body:Buffer.from([255,216,255,224,1,2,3]),
     headers:{'content-type':'image/jpeg','access-control-allow-origin':'*'}
@@ -118,7 +118,7 @@ test('CTK queue places completed downloads after ready rows with readable light 
   const prepared=app(page).locator('.adw-table tbody tr[data-stage="prepared"]');
   await expect(prepared).toHaveCount(1);
   await expect(prepared).toHaveCSS('background-color','rgb(237, 244, 235)');
-  await expect(prepared.locator('.adw-name')).toHaveCSS('color','rgb(36, 67, 49)');
+  await expect(prepared.locator('.adw-name')).toHaveCSS('color','rgb(31, 35, 40)');
   const order=await app(page).locator('.adw-table tbody tr').allTextContents();
   expect(order[0]).toContain('AD2_Broken');
   expect(order[1]).toContain('Prepared or verified downloads');
