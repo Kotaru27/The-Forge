@@ -18,7 +18,7 @@ test('Ink & Paper Home artwork, seven cards and tool finder remain interactive',
   await expect(page.locator('.sketch-notebook-frame')).toHaveCSS('background-color', 'rgb(243, 236, 221)');
   await expect(page.locator('.forge-sketch-ui')).toHaveCSS('color', 'rgb(31, 35, 40)');
   await expect(page.locator('.sketch-header-band')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'The Forge' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'THE FORGE', level: 1, exact: true })).toBeVisible();
   await expect(page.locator('.forge-home-card.sketch-tool-card')).toHaveCount(7);
   await expect(page.locator('.sketch-card-art')).toHaveCount(7);
   await expect(page.locator('.sidebar')).toHaveCount(0);
