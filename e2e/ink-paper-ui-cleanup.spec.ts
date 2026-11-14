@@ -9,8 +9,8 @@ test('Link Generator hides the redundant review title without losing outputs', a
   await page.getByLabel('Folder / Path').fill('Campaign');
   await page.getByLabel('Filenames').fill('first.jpg\nsecond.mp4');
   await page.getByRole('button', { name: 'Generate', exact: true }).click();
-  await expect(page.locator('#link-exposure')).toContainText('first.jpg');
-  await expect(page.locator('#link-exposure')).toContainText('second.mp4');
+  await expect(page.locator('#link-exposure')).toHaveValue(/first\.jpg/);
+  await expect(page.locator('#link-exposure')).toHaveValue(/second\.mp4/);
 });
 
 test('Storyboard places Board Name next to Add Assets and hides advanced UI only', async ({ page }) => {
