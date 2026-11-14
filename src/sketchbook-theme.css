@@ -1850,6 +1850,165 @@
   }
 }
 
+
+/* ---------------------------------------------------------
+ * Ink & Paper legibility pass — semantic foreground palette.
+ * These selectors are scoped to the existing Forge sketch theme;
+ * image canvases, editable label colors and tool engines are not touched.
+ * --------------------------------------------------------- */
+.forge-app.forge-sketch-ui {
+  --sk-text-primary: var(--sk-ink);
+  --sk-text-secondary: var(--sk-slate);
+  --sk-text-subtle: #605a50;
+  --sk-text-danger: #982f26;
+  --sk-text-on-dark: #faf6ec;
+}
+
+/* These advanced settings remain in React state, but are intentionally
+   not shown in the simplified Storyboard interface. */
+.forge-ctk-ui.forge-sketch-ui .storyboard-tool .sb-advanced-hidden[hidden] {
+  display: none !important;
+}
+
+.forge-ctk-ui.forge-sketch-ui .storyboard-tool .sb-topline .sb-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.forge-ctk-ui.forge-sketch-ui .storyboard-tool .sb-board-name-inline {
+  color: var(--sk-text-primary) !important;
+  white-space: nowrap;
+  min-width: 0;
+}
+.forge-ctk-ui.forge-sketch-ui .storyboard-tool .sb-board-name-inline span {
+  color: var(--sk-text-secondary) !important;
+}
+.forge-ctk-ui.forge-sketch-ui .storyboard-tool .sb-board-name-inline input {
+  width: clamp(112px, 13vw, 175px);
+  max-width: 100%;
+}
+@media (max-width: 920px) {
+  .forge-ctk-ui.forge-sketch-ui .storyboard-tool .sb-topline {
+    align-items: flex-start !important;
+  }
+  .forge-ctk-ui.forge-sketch-ui .storyboard-tool .sb-toolbar {
+    margin-left: 0 !important;
+  }
+}
+
+/* Shared paper-surface text: retain separate semantic shades for
+   headings, instructions, filenames, metadata, placeholders and errors. */
+.forge-ctk-ui.forge-sketch-ui :is(
+  .pdf-doc-details span,
+  .pdf-doc-details small:not([role="alert"]),
+  .pdf-progress-label,
+  .pdf-undo,
+  .split-progress,
+  .split-status,
+  .split-selection,
+  .vs-list-heading span,
+  .vs-stack-meta span,
+  .vs-inspect,
+  .vs-modal-head span,
+  .vs-frame-row span,
+  .vs-frame-preview,
+  .vs-modal-foot,
+  .sb-frame span,
+  .sb-fit-head,
+  .adw-header p,
+  .adw-empty span,
+  .adw-summary,
+  .adw-stage,
+  .adw-status:not([data-error="true"]),
+  .link-path-help,
+  .link-panel-heading > div > span,
+  .link-panel-heading > small,
+  .link-mp4-row small,
+  .link-subheading > span,
+  .link-outputs-header > span,
+  .link-import-text span,
+  .link-import-note,
+  .link-filenames-heading h3 span,
+  .link-filenames-foot,
+  .link-preview-empty,
+  .link-preview-index,
+  .link-preview-ext,
+  .link-filename-preview li.link-preview-more
+) {
+  color: var(--sk-text-secondary) !important;
+}
+
+.forge-ctk-ui.forge-sketch-ui :is(
+  .pdf-doc-details strong,
+  .split-filename,
+  .vs-stack-meta strong,
+  .sb-section-head strong,
+  .adw-summary span:first-child,
+  .adw-name,
+  .link-mp4-row strong,
+  .link-import-text strong,
+  .link-preview-name,
+  .link-subheading h3,
+  .link-outputs-header h3,
+  .link-output-block .output-heading label
+) {
+  color: var(--sk-text-primary) !important;
+}
+
+.forge-ctk-ui.forge-sketch-ui :is(
+  .pdf-workspace,
+  .split-workspace,
+  .video-stills,
+  .storyboard-tool,
+  .adw-workspace,
+  .link-generator,
+  .logo-workspace
+) :is(input, textarea)::placeholder {
+  color: var(--sk-text-subtle) !important;
+  opacity: 1 !important;
+}
+
+/* Some legacy dark-theme popovers and status colors would otherwise
+   appear pale or illegible on the new cream notebook surfaces. */
+.forge-ctk-ui.forge-sketch-ui .adw-row-actions details > summary {
+  color: var(--sk-text-primary) !important;
+  background: #f8f1e2 !important;
+  border-color: #9c907c !important;
+}
+.forge-ctk-ui.forge-sketch-ui .adw-row-actions details[open] > summary,
+.forge-ctk-ui.forge-sketch-ui .adw-row-actions details > summary:hover {
+  background: var(--sk-yellow) !important;
+}
+.forge-ctk-ui.forge-sketch-ui .adw-more {
+  background-color: var(--sk-card) !important;
+  border-color: #9c907c !important;
+  color: var(--sk-text-primary) !important;
+}
+.forge-ctk-ui.forge-sketch-ui .link-preview-ext {
+  background-color: #ede3d0 !important;
+  border-color: #b5aa96 !important;
+}
+.forge-ctk-ui.forge-sketch-ui :is(
+  .pdf-error,
+  .split-error,
+  .vs-error,
+  .sb-error,
+  .link-error,
+  .logo-error,
+  .adw-status[data-error="true"],
+  .pdf-doc-details small[role="alert"]
+) {
+  color: var(--sk-text-danger) !important;
+}
+.forge-ctk-ui.forge-sketch-ui :is(
+  .storyboard-tool button.danger,
+  .video-stills button.vs-danger,
+  .pdf-workspace button.pdf-cancel
+):not(:disabled) {
+  color: var(--sk-text-danger) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .forge-app.forge-sketch-ui * {
     transition-duration: 0s !important;
