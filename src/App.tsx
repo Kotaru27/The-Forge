@@ -49,7 +49,7 @@ export default function App() {
   const isHome = activeTool === 'home';
 
   return (
-    <div className={isLogo ? 'forge-app forge-v5-shell' : 'forge-app forge-collection-shell'}>
+    <div className={(isLogo ? 'forge-app forge-v5-shell' : 'forge-app forge-collection-shell') + ' forge-ctk-ui' + (isHome ? ' forge-ctk-home-route' : '')}>
       <aside className="sidebar" aria-label="Tools">
         <div className="brand">
           {isLogo
@@ -78,7 +78,7 @@ export default function App() {
         </nav>
       </aside>
       <main className="main-area">
-        <header className="topbar">{isLogo ? (
+        <header className="topbar">{!isHome && current && <h1 className="forge-ctk-tool-name">{current.label}</h1>}{isLogo ? (
           <>
             <strong className="forge-v5-wordmark">THE <span>F</span>ORGE</strong>
             <span className="forge-v5-top-center">TOOL / LOGO RESIZER</span>
