@@ -16,7 +16,7 @@ test('Home is the landing page and every workbench card launches a real tool', a
   await expect(page).toHaveURL(/#\/home$/);
   await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
   await expect(page.locator('.forge-home-card')).toHaveCount(7);
-  await expect(page.getByRole('button', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('.sidebar')).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath('home-desktop.png') });
   await page.getByRole('button', { name: 'Open PDF to Image' }).click();
   await expect(page).toHaveURL(/#\/pdf-to-image$/);
