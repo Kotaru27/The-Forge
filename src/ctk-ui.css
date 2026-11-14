@@ -719,6 +719,105 @@
 .forge-ctk-ui .adw-table tbody tr:nth-child(even) { background: #f9fbf8 !important; }
 .forge-ctk-ui .adw-table tbody tr:hover { background: #edf4e9 !important; }
 
+/* Remove inherited dark-on-light collisions from the old Forge workrooms.
+ * The CTK reference uses readable green ink, pale paper and dark-green actions.
+ * This only changes presentation; control order, semantics and handlers remain intact. */
+.forge-ctk-ui :is(.pdf-results-head,.split-results-head,.vs-list-heading,.sb-topline,.pdf-page-foot,.link-outputs) {
+  background: #fff !important;
+  color: var(--ctk-ink) !important;
+  border-color: var(--ctk-line) !important;
+}
+.forge-ctk-ui :is(.pdf-doc-thumb,.pdf-page-preview,.split-image-stage,.vs-stack-thumb,.vs-frame-preview) {
+  background-color: #f5f8f2 !important;
+  border-color: #d7e3d6 !important;
+}
+.forge-ctk-ui :is(.pdf-workspace .pdf-field,.pdf-doc-details strong,.split-field,.split-selection,
+  .vs-stack-meta strong,.vs-options,.vs-options > span,.vs-drop span,.pdf-drop span,
+  .split-drop span,.vs-list-heading,.sb-stage p,.sb-controls label) {
+  color: #31543e !important;
+}
+.forge-ctk-ui :is(.pdf-doc-details span,.vs-stack-meta span,.vs-stack-meta small,.pdf-local-note,
+  .vs-notice,.sb-caption) { color: #526958 !important; }
+.forge-ctk-ui :is(.pdf-progress,.vs-status,.vs-empty,.vs-confirm > div,.sb-feedback,.adw-status,
+  .link-panel .checkline,.adw-row-actions summary) {
+  color: #31543e !important;
+  background: #f4f8f2 !important;
+  border-color: #cbdccb !important;
+}
+.forge-ctk-ui :is(.vs-empty,.sb-view-choice,.sb-modes,.sb-controls details,.link-outputs) {
+  background: #fff !important;
+  border-color: #d6e0d6 !important;
+  color: var(--ctk-ink) !important;
+}
+.forge-ctk-ui .sb-modes button:not(.active) {
+  background: transparent !important;
+  color: #526958 !important;
+  border-color: transparent !important;
+}
+.forge-ctk-ui :is(.pdf-drop button:not(:disabled),.split-drop button:not(:disabled),
+  .video-stills .vs-drop button:not(:disabled),.vs-toolbar > button:first-of-type:not(:disabled),
+  .sb-toolbar button:nth-last-child(2):not(.danger):not(:disabled)) {
+  background: #285e43 !important;
+  border-color: #285e43 !important;
+  color: #fff !important;
+}
+.forge-ctk-ui :is(.pdf-drop button,.split-drop button,.video-stills .vs-drop button,
+  .vs-toolbar > button:first-of-type,.sb-toolbar button:nth-last-child(2)):hover:not(:disabled) {
+  background: #194c33 !important;
+  color: #fff !important;
+}
+.forge-ctk-ui :is(.adw-header h2,.adw-summary,.adw-summary span:first-child,
+  .adw-table .adw-name,.adw-stage,.adw-empty,.adw-workspace h3) {
+  color: var(--ctk-ink) !important;
+}
+.forge-ctk-ui :is(.adw-header p,.adw-empty span,.adw-status,.adw-summary span) {
+  color: #526958 !important;
+}
+.forge-ctk-ui .adw-table th {
+  background: #e8f1e7 !important;
+  color: #244331 !important;
+  border-color: #d6e0d6 !important;
+}
+.forge-ctk-ui .adw-table td { color: #244331 !important; }
+.forge-ctk-ui :is(.adw-controls button:not(.adw-primary),.adw-filters button,
+  .adw-row-actions button,.adw-row-actions summary,.adw-more) {
+  color: #285e43 !important;
+  background: #f4f8f2 !important;
+  border-color: #bfd1bf !important;
+}
+.forge-ctk-ui .adw-filters button[aria-pressed='true'] {
+  color: #fff !important;
+  background: #285e43 !important;
+  border-color: #285e43 !important;
+}
+.forge-ctk-ui .adw-workspace :is(button,input,select,textarea):focus-visible {
+  outline: 2px solid #326e4c !important;
+  outline-offset: 2px !important;
+}
+/* Match CTK's desktop tool framing without squeezing the content area. */
+.forge-ctk-ui :is(.pdf-workspace,.split-workspace,.video-stills) {
+  grid-template-columns: minmax(260px,292px) minmax(0,1fr);
+}
+.forge-ctk-ui .sb-layout { grid-template-columns: 292px minmax(0,1fr); }
+.forge-ctk-ui :is(.pdf-setup,.split-settings,.vs-workbench-side,.sb-controls) {
+  padding: 22px 20px !important;
+  border-right: 1px solid var(--ctk-line) !important;
+}
+.forge-ctk-ui :is(.pdf-results-head,.split-results-head,.vs-list-heading) {
+  min-height: 76px;
+  padding: 17px 24px !important;
+}
+@media (max-width: 1030px) {
+  .forge-ctk-ui :is(.pdf-workspace,.split-workspace,.video-stills) {
+    grid-template-columns: minmax(230px,260px) minmax(0,1fr);
+  }
+  .forge-ctk-ui .sb-layout { grid-template-columns: 260px minmax(0,1fr); }
+}
+@media (max-width: 720px) {
+  .forge-ctk-ui :is(.pdf-workspace,.split-workspace,.video-stills) { grid-template-columns: 1fr; }
+  .forge-ctk-ui .sb-layout { grid-template-columns: 1fr; }
+}
+
 /* Standard light dialogs and errors. Preserve modal semantics and handlers. */
 .forge-ctk-ui :is(.logo-modal,.pdf-detail,.pdf-confirm,.split-dialog,.vs-modal,.sb-dialog) {
   background: #fff !important; color: var(--ctk-ink) !important;
