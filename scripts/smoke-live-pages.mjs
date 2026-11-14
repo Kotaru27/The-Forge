@@ -77,7 +77,10 @@ try {
   await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
   await expect(page.locator('.forge-home-card')).toHaveCount(7);
 
-  await nav.getByRole('button', { name: 'Link Generator', exact: true }).click();
+  // CTK's Home is full width and intentionally hides the tool rail.
+  // Launch from the Home card, then verify the rail returns for workrooms.
+  await page.getByRole('button', { name: 'Open Link Generator' }).click();
+  await expect(nav.getByRole('button')).toHaveCount(8);
   await page.getByLabel('Folder / Path').fill('Pages Release');
   await page.getByLabel('Filenames').fill('smoke.png');
   await page.getByRole('button', { name: 'Generate', exact: true }).click();
