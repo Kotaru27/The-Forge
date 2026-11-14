@@ -1,9 +1,11 @@
-name: Publish The Forge GitHub Pages preview
+name: Publish The Forge GitHub Pages
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
-# Publishing is deliberately manual; this workflow never deploys on PR or push.
-# A one-time repository setting is required: Settings > Pages > Source: GitHub Actions.
+# Publishes only tested main commits (or manually dispatched release previews).
+# GitHub Pages uses Source: GitHub Actions.
 permissions:
   contents: read
 
@@ -16,10 +18,10 @@ jobs:
     name: Validate release branch, originals, build and browser flows
     runs-on: ubuntu-latest
     steps:
-      - name: Only allow the approved preview branch
+      - name: Allow main and explicit release preview only
         run: |
-          if [ "$GITHUB_REF" != "refs/heads/release/pages-preview" ]; then
-            echo "::error::Choose release/pages-preview in the Run workflow branch dropdown. Refused to publish $GITHUB_REF."
+          if [ "$GITHUB_REF" != "refs/heads/main" ] && [ "$GITHUB_REF" != "refs/heads/release/pages-preview" ]; then
+            echo "::error::Only main or release/pages-preview can publish Pages. Refused $GITHUB_REF."
             exit 1
           fi
       - name: Checkout The Forge
