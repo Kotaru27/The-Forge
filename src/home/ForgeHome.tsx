@@ -78,7 +78,7 @@ export function ForgeHome({ onOpenTool }: Props) {
       <header className="ctk-home-top">
         <div className="ctk-home-nav">
           <div className="ctk-home-nav-left">
-            <span className="ctk-home-brand-mark" aria-hidden="true">F</span>
+            <button type="button" className="ctk-home-brand-button" aria-label="Home" aria-current="page" onClick={() => { setSearch(''); setHighlighted('logo-resizer'); }}><span className="ctk-home-brand-mark" aria-hidden="true">F</span></button>
             <span>Creative workbench</span>
           </div>
           <div className="ctk-home-nav-right">
