@@ -367,6 +367,28 @@
 .forge-ctk-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.adw-workspace,.link-generator)
   :is(p,small,output,legend) { color: inherit; }
 
+/* Landing brand remains an actual keyboard-accessible Home button. */
+.forge-ctk-ui .ctk-home-brand-button {
+  flex: 0 0 26px; width: 26px; height: 26px;
+  display: grid; place-items: center;
+  margin: 0; padding: 0; border: 0; border-radius: 0;
+  background: transparent; cursor: pointer;
+}
+.forge-ctk-ui .ctk-home-brand-button:focus-visible {
+  outline: 2px solid #c9f6a4; outline-offset: 4px;
+}
+
+/* Legacy dark button backgrounds cannot leak into CTK's light native UI. */
+.forge-ctk-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator)
+  button:not(:disabled) {
+  background: #f4f8f2 !important;
+  border-color: #b7c8b7 !important; color: #234e37 !important;
+}
+.forge-ctk-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator)
+  button:not(:disabled):hover {
+  background: #e5f0e2 !important;
+}
+
 /* Logo Resizer: compact controls, two-by-two presets and pale asset board. */
 .forge-ctk-ui .logo-workspace.forge-logo-v5 {
   --v5-bg: var(--ctk-canvas);
@@ -494,6 +516,14 @@
 }
 .forge-ctk-ui :is(.pdf-muted,.split-muted,.pdf-status,.split-status) { color: #59715f !important; }
 .forge-ctk-ui :is(.pdf-list,.split-card-grid,.pdf-results-head,.split-results-head) { color: var(--ctk-ink); }
+
+.forge-ctk-ui .pdf-drop button:not(:disabled) {
+  background: #285e43 !important; border-color: #285e43 !important;
+  color: #fff !important;
+}
+.forge-ctk-ui .pdf-drop button:not(:disabled):hover {
+  background: #194c33 !important; border-color: #194c33 !important;
+}
 
 /* Video Stills: paper side controls and a neutral frame library. */
 .forge-ctk-ui .video-stills { background: var(--ctk-canvas) !important; color: var(--ctk-ink) !important; }
