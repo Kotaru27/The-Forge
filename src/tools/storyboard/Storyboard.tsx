@@ -403,7 +403,10 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
         <div className="sb-toolbar">
           {mode === 'story' && <>
             <button type="button" onClick={() => imagesInput.current?.click()}>Add Assets</button>
-            <button type="button" onClick={() => folderInput.current?.click()}>Add Folder</button>
+            <label className="sb-board-name-inline">
+              <span>Board Name</span>
+              <input value={active?.name || ''} aria-label="Board Name" onChange={event => renameBoard(event.target.value)} maxLength={80} />
+            </label>
             <button disabled={!active?.images.length || !!busy} type="button" onClick={() => void saveBoard()}>Save JPG</button>
             <button disabled={!other.length || !!busy} type="button" onClick={() => void saveAllBoards()}>Download All ZIP</button>
             <button className="danger" disabled={!active?.images.length} type="button" onClick={clearBoard}>Clear</button>
@@ -433,7 +436,6 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
               <select aria-label="Choose a storyboard" value={activeId} onChange={event => selectBoard(event.target.value)}>{boards.map(board => <option key={board.id} value={board.id}>{board.name}</option>)}</select>
               <button type="button" aria-label="Delete selected storyboard" onClick={() => deleteBoard(active)}>Delete</button>
             </div> : <div className="sb-project-list">{boards.map(board => <div className="sb-project-row" key={board.id}><button aria-current={board.id === activeId ? 'page' : undefined} type="button" onClick={() => selectBoard(board.id)}>{board.name}</button><button type="button" aria-label={'Delete board ' + board.name} onClick={() => deleteBoard(board)}>×</button></div>)}</div>}
-            <label>Board Name <input value={active?.name || ''} aria-label="Board Name" onChange={event => renameBoard(event.target.value)} maxLength={80} /></label>
             <div className="sb-section-head"><strong>Board settings</strong></div>
             <div className="sb-fields">
               <label>Columns <select aria-label="Columns" value={active?.settings.cols || 0} onChange={event => updateBoardSettings({ cols: Number(event.target.value) })}>
@@ -442,7 +444,7 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
               <label className="sb-check"><input aria-label="Auto width" type="checkbox" checked={active?.settings.autoWidth ?? true} onChange={event => updateBoardSettings({ autoWidth:event.target.checked })} />Auto width</label>
               {!active?.settings.autoWidth && <label>Width <input aria-label="Board width" type="number" min={64} max={8192} value={active?.settings.width ?? 1920} onChange={event => updateBoardSettings({ width:Number(event.target.value) })} /></label>}
             </div>
-            <details><summary>More layout settings</summary><div className="sb-fields">
+            <details className="sb-advanced-hidden" hidden><summary>More layout settings</summary><div className="sb-fields">
               <label>Gap <input aria-label="Board gap" type="number" min={0} max={1000} value={active?.settings.gap ?? 0} onChange={event => updateBoardSettings({ gap:Number(event.target.value) })} /></label>
               <label>Image fit <select aria-label="Board image fit" value={active?.settings.fitMode} onChange={event => updateBoardSettings({fitMode:event.target.value as BoardSettings['fitMode']})}><option value="cover">Cover</option><option value="contain">Contain</option></select></label>
               <label>Background <input aria-label="Board background" type="color" value={active?.settings.bgColor || '#ffffff'} onChange={event => updateBoardSettings({bgColor:event.target.value})} /></label>
@@ -459,7 +461,7 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
           <main className="sb-stage" aria-label="Grid Board preview">
             {previewSize && <span className="sb-dimensions">{previewSize}</span>}
             <div className="sb-canvas" ref={boardPreview} />
-            {!active?.images.length && <p>Drop images or videos here, or choose Add Folder to create boards from folders.</p>}
+            {!active?.images.length && <p>Drop images or videos here, or choose Add Assets.</p>}
             {active && !validBoardSettings(active.settings) && <p className="sb-error">Invalid board settings. Adjust width, columns or gap.</p>}
           </main>
         </>}
@@ -469,7 +471,7 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
             <p className="sb-caption" role="status">{fitSource ? `${fitSource.kind === 'board' ? 'Current Board' : 'Uploaded'}: ${fitSource.name}` : 'No storyboard selected. Upload an image or use the current Grid Board.'}</p>
             <button type="button" disabled={!fitSource} className="danger" onClick={clearFitSource}>Remove Source Image</button>
             <label>Statement · Shown in all 3 circles <textarea aria-label="Fit statement" maxLength={400} rows={5} value={fitSettings.statement} onChange={event => updateFitSettings({statement:event.target.value})} /></label>
-            <details><summary>Image and typography</summary><div className="sb-fields">
+            <details className="sb-advanced-hidden" hidden><summary>Image and typography</summary><div className="sb-fields">
               <label>Image fit <select aria-label="Fit image mode" value={fitSettings.imageFit} onChange={event => updateFitSettings({imageFit:event.target.value as FitSettings['imageFit']})}><option value="contain">Contain</option><option value="cover">Cover</option></select></label>
               <label>Image size ({fitSettings.imageSize}%)<input aria-label="Fit image size" type="range" min={60} max={98} value={fitSettings.imageSize} onChange={event => updateFitSettings({imageSize:Number(event.target.value)})} /></label>
               <label>Maximum text size ({fitSettings.fontSize} px)<input aria-label="Fit text size" type="range" min={12} max={24} value={fitSettings.fontSize} onChange={event => updateFitSettings({fontSize:Number(event.target.value)})} /></label>
