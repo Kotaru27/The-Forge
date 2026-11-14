@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
+import { CTKCardArt } from './CTKCardArt';
 
 type Destination = ToolId | 'home';
 
@@ -141,7 +142,7 @@ export function ForgeHome({ onOpenTool }: Props) {
                 <span className="ctk-home-card-arrow" aria-hidden="true">↗</span>
                 <span className="ctk-home-card-glyph" aria-hidden="true"><ToolGlyph tool={tool.id} size={31} /></span>
                 <span className="ctk-home-card-illustration" aria-hidden="true">
-                  <ToolGlyph tool={tool.id} size={105} />
+                  <CTKCardArt tool={tool.id} />
                 </span>
                 <span className="ctk-home-card-copy">
                   <strong>{tool.label}</strong>
