@@ -2009,6 +2009,91 @@
   color: var(--sk-text-danger) !important;
 }
 
+
+/* =========================================================
+ * HOME RESPONSIVENESS — keep the illustrated cards in their
+ * own rows on narrower laptop screens; scroll, never overlap.
+ * ========================================================= */
+.forge-ctk-ui.forge-sketch-ui .sketch-home {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.forge-ctk-ui.forge-sketch-ui .sketch-home-grid {
+  grid-auto-rows: minmax(280px, auto) !important;
+  align-items: stretch;
+  row-gap: 24px !important;
+}
+
+.forge-ctk-ui.forge-sketch-ui .sketch-home-grid > .sketch-card-slot {
+  min-height: 0;
+}
+
+.forge-ctk-ui.forge-sketch-ui .sketch-home-grid .sketch-tool-card {
+  height: auto !important;
+  min-height: 280px;
+  justify-content: space-between;
+}
+
+.forge-ctk-ui.forge-sketch-ui .sketch-home-grid .sketch-card-art {
+  flex: 0 0 112px;
+  min-height: 0;
+}
+
+.forge-ctk-ui.forge-sketch-ui .sketch-home-grid .sketch-card-body {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.forge-ctk-ui.forge-sketch-ui .sketch-home-grid .sketch-card-desc {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+/* Filtered cards need genuine auto-width tracks, not twelve narrow
+   implicit tracks inherited from the default 4 + 3 composition. */
+.forge-ctk-ui.forge-sketch-ui .sketch-home-grid.is-filtered {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)) !important;
+}
+.forge-ctk-ui.forge-sketch-ui .sketch-home-grid.is-filtered > .sketch-card-slot {
+  grid-column: auto !important;
+}
+
+/* Laptop / smaller windows: two generous columns rather than four
+   crowded cards. Preserve 4 + 3 on genuinely wide desktop screens. */
+@media (max-width: 1380px) and (min-width: 741px) {
+  .forge-ctk-ui.forge-sketch-ui .sketch-home-grid:not(.is-filtered) > .sketch-card-slot {
+    grid-column: span 6 !important;
+  }
+  .forge-ctk-ui.forge-sketch-ui .sketch-home-grid:not(.is-filtered) > .sketch-slot-ad-downloader {
+    grid-column: 4 / span 6 !important;
+  }
+}
+
+/* Narrow windows and portrait screens: one card per row, with the
+   original illustration, lettering and handwritten highlights intact. */
+@media (max-width: 740px) {
+  .forge-ctk-ui.forge-sketch-ui .sketch-home {
+    padding: 12px 18px 44px !important;
+  }
+  .forge-ctk-ui.forge-sketch-ui .sketch-home-grid:not(.is-filtered) > .sketch-card-slot {
+    grid-column: span 12 !important;
+  }
+  .forge-ctk-ui.forge-sketch-ui .sketch-home-grid {
+    row-gap: 20px !important;
+  }
+  .forge-ctk-ui.forge-sketch-ui .sketch-hero-center h1 {
+    font-size: clamp(30px, 8vw, 46px);
+  }
+  .forge-ctk-ui.forge-sketch-ui .sketch-subtitle {
+    font-size: clamp(13px, 3.5vw, 18px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .forge-app.forge-sketch-ui * {
     transition-duration: 0s !important;
