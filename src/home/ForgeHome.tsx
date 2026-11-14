@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
+import { CTKCardArt } from './CTKCardArt';
 
 type Destination = ToolId | 'home';
 
@@ -62,56 +63,100 @@ export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: numbe
 type Props = { onOpenTool: (tool: ToolId) => void };
 
 export function ForgeHome({ onOpenTool }: Props) {
-  const featured = toolNotes['logo-resizer'];
-  const otherTools = tools.filter(tool => tool.id !== 'logo-resizer');
-  return <section className="forge-home" aria-label="The Forge home">
-    <div className="forge-home-inner">
-      <header className="forge-home-intro">
-        <div className="forge-home-intro-copy">
-          <p className="forge-home-overline"><span className="forge-home-live" /> YOUR CREATIVE WORKROOM</p>
-          <h1>Make the work.<br /><span>Keep the control.</span></h1>
-          <p className="forge-home-subtitle">Seven focused tools for preparing, reviewing and delivering media. No account, no upload to a server; processing stays in your browser.</p>
+  const [search, setSearch] = useState('');
+  const [highlighted, setHighlighted] = useState<ToolId>('logo-resizer');
+  const term = search.trim().toLocaleLowerCase();
+  const matching = tools.filter(tool =>
+    !term || [tool.label, toolNotes[tool.id].category, toolNotes[tool.id].description]
+      .some(value => value.toLocaleLowerCase().includes(term))
+  );
+  const selected = matching.some(tool => tool.id === highlighted)
+    ? highlighted : matching[0]?.id;
+  const selectedInfo = selected ? toolNotes[selected] : null;
+
+  return (
+    <section className="forge-home ctk-home" aria-label="The Forge home">
+      <header className="ctk-home-top">
+        <div className="ctk-home-nav">
+          <div className="ctk-home-nav-left">
+            <button type="button" className="ctk-home-brand-button" aria-label="Home" aria-current="page" onClick={() => { setSearch(''); setHighlighted('logo-resizer'); }}><span className="ctk-home-brand-mark" aria-hidden="true">F</span></button>
+            <span>Creative workbench</span>
+          </div>
+          <div className="ctk-home-nav-right">
+            <span className="ctk-home-ready" aria-hidden="true" />
+            Seven tools, one workbench
+          </div>
         </div>
-        <div className="forge-home-intro-mark" aria-hidden="true"><span>F</span><small>THE FORGE</small></div>
+        <div className="ctk-home-hero">
+          <h1>The Forge</h1>
+          <div className="ctk-home-manifesto">
+            <span aria-hidden="true" />
+            <p>Resize, convert, capture, arrange, and deliver. Start with the tool your work needs.</p>
+          </div>
+        </div>
       </header>
 
-      <div className="forge-home-section-title">
-        <div><h2>Choose your workbench</h2><p>Open a tool to start. Each workspace keeps its own controls and results.</p></div>
-        <span className="forge-home-count">07 / WORKBENCHES</span>
-      </div>
-
-      <div className="forge-home-grid">
-        <button type="button" className="forge-home-card forge-home-card-feature"
-          onClick={() => onOpenTool('logo-resizer')} aria-label="Open Logo Resizer">
-          <div className="forge-home-card-top"><span className="forge-home-category">{featured.category}</span><span className="forge-home-open">↗</span></div>
-          <div className="forge-home-feature-copy">
-            <div className="forge-home-feature-icon"><ToolGlyph tool="logo-resizer" size={24}/></div>
-            <h3>Logo Resizer</h3>
-            <p>{featured.description}</p>
+      <div className="ctk-home-main">
+        <aside className="ctk-home-intro" aria-label="Find a creative tool">
+          <div>
+            <h2>Choose a tool</h2>
+            <p>Find what you need. Get to work.</p>
+            <label className="ctk-home-find">
+              <svg viewBox="0 0 24 24" aria-hidden="true" width="17" height="17"
+                fill="none" stroke="currentColor" strokeWidth="1.8">
+                <circle cx="10.5" cy="10.5" r="6.8" />
+                <path d="m15.5 15.5 5 5" />
+              </svg>
+              <input type="search" aria-label="Find a Forge tool"
+                placeholder="Find a tool" value={search}
+                onChange={event => setSearch(event.target.value)} />
+            </label>
           </div>
-          <div className="forge-home-feature-art" aria-hidden="true">
-            <div className="forge-home-art-grid" />
-            <div className="forge-home-art-tile"><span className="forge-home-art-f">F<span>.</span></span></div>
-            <div className="forge-home-art-tag">200 × 200 <span>PNG</span></div>
+          <div className="ctk-home-selection" aria-live="polite">
+            <span className="ctk-home-count">{String(matching.length).padStart(2, '0')} / {String(tools.length).padStart(2, '0')} WORKSPACES</span>
+            {selected ? (
+              <>
+                <h3>{tools.find(tool => tool.id === selected)?.label}</h3>
+                <p>{selectedInfo?.description}</p>
+              </>
+            ) : (
+              <>
+                <h3>No matching tools</h3>
+                <p>Try a different tool name or category.</p>
+              </>
+            )}
           </div>
-          <span className="forge-home-card-foot"><span>{featured.detail}</span><strong>Open tool <span aria-hidden="true">→</span></strong></span>
-        </button>
-        {otherTools.map((tool, index) => {
-          const note = toolNotes[tool.id];
-          return <button type="button" className="forge-home-card forge-home-card-small"
-            data-workbench={tool.id} onClick={() => onOpenTool(tool.id)} key={tool.id}
-            aria-label={`Open ${tool.label}`}>
-            <span className="forge-home-card-top"><span className="forge-home-category">{note.category}</span><span className="forge-home-open">↗</span></span>
-            <span className="forge-home-small-icon"><ToolGlyph tool={tool.id} size={25}/></span>
-            <span className="forge-home-small-content">
-              <strong>{tool.label}</strong>
-              <span>{note.description}</span>
-            </span>
-            <span className="forge-home-card-foot"><span>{note.detail}</span><strong>{String(index + 2).padStart(2, '0')}</strong></span>
-          </button>;
-        })}
+        </aside>
+        <div className="forge-home-grid ctk-home-grid" aria-label="Available tools">
+          {tools.map((tool, index) => {
+            const info = toolNotes[tool.id];
+            const matches = matching.some(entry => entry.id === tool.id);
+            return (
+              <button key={tool.id} type="button"
+                className={'forge-home-card ctk-home-card ctk-home-card-' + (index + 1) + (index === 0 ? ' forge-home-card-feature' : '')}
+                disabled={!matches} data-workbench={tool.id}
+                onClick={() => onOpenTool(tool.id)}
+                onMouseEnter={() => setHighlighted(tool.id)}
+                onFocus={() => setHighlighted(tool.id)}
+                aria-label={'Open ' + tool.label}>
+                <span className="ctk-home-card-arrow" aria-hidden="true">↗</span>
+                <span className="ctk-home-card-glyph" aria-hidden="true"><ToolGlyph tool={tool.id} size={31} /></span>
+                <span className="ctk-home-card-illustration" aria-hidden="true">
+                  <CTKCardArt tool={tool.id} />
+                </span>
+                <span className="ctk-home-card-copy">
+                  <strong>{tool.label}</strong>
+                  <span>{info.detail}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-      <footer className="forge-home-footer"><span>THE FORGE</span><span>Made for the work between ideas and delivery.</span><span>LOCAL-FIRST / 2026</span></footer>
-    </div>
-  </section>;
+      <footer className="ctk-home-footer">
+        <span>The Forge · Creative tools</span>
+        <span>Seven creative workspaces. Choose one to begin.</span>
+      </footer>
+    </section>
+  );
 }

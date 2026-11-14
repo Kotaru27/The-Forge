@@ -1,0 +1,87 @@
+name: Publish The Forge main to Pages
+on:
+  push:
+    branches: [main]
+
+# Deploys the verified main revision for user review; preserves manual Pages workflow.
+# GitHub Pages Source: GitHub Actions.
+permissions:
+  contents: read
+
+concurrency:
+  group: the-forge-pages-main
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Validate release branch, originals, build and browser flows
+    runs-on: ubuntu-latest
+    steps:
+      - name: Only publish the tested main branch
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::This publisher only accepts main, not $GITHUB_REF."
+            exit 1
+          fi
+      - name: Checkout The Forge
+        uses: actions/checkout@v4
+      - name: Checkout pinned CTK regression oracle (not deployed)
+        uses: actions/checkout@v4
+        with:
+          repository: Kotaru27/CTK
+          ref: 617615c0b4370c795ddfd6dc4c300920cd595883
+          path: legacy-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Run React and pinned CTK regression suite
+        run: npm test
+      - name: Build native-only website for GitHub Pages
+        run: npm run build
+        env:
+          FORGE_BASE_PATH: /The-Forge/
+      - run: npx playwright install --with-deps chromium
+      - name: Run full browser suite on production build
+        run: npm run test:e2e
+      - name: Upload vetted Pages files
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Publish gated Pages preview
+    needs: verify
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    outputs:
+      site_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Read already-enabled GitHub Pages configuration
+        uses: actions/configure-pages@v5
+      - name: Deploy the verified artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  smoke:
+    name: Verify real published site in Chromium
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Verify seven tools, asset URLs and an actual browser download
+        env:
+          FORGE_LIVE_URL: ${{ needs.deploy.outputs.site_url }}
+        run: node scripts/smoke-live-pages.mjs

@@ -45,7 +45,14 @@ test('direct Storyboard links work and compressor/invalid links open Home', asyn
   await page.evaluate(() => { window.location.hash = '#/not-a-tool'; });
   await expect(page).toHaveURL(/#\/home$/);
   await page.reload();
+  // CTK's full-width Home intentionally replaces the tool rail with seven
+  // actionable workbench cards. Verify the rail returns upon opening a tool.
+  await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
+  await expect(page.locator('.ctk-home-card')).toHaveCount(7);
+  await expect(page.getByRole('button', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('button', { name: 'Open Storyboard' }).click();
   await expect(nav(page).getByRole('button')).toHaveCount(8);
+  await expect(page.getByRole('heading', { name: 'Storyboard', level: 1 })).toBeVisible();
   await expect(page.locator('iframe')).toHaveCount(0);
 });
 
