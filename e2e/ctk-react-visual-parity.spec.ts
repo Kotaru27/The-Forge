@@ -50,3 +50,28 @@ for (const [tool, selector] of workrooms) {
     expect(errors).toEqual([]);
   });
 }
+
+test('Every React workroom uses the same CTK pictogram rail and centered tool header', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  for (const [tool] of workrooms) {
+    await page.goto('#/' + tool);
+    const sidebar = page.locator('.sidebar');
+    const nav = page.getByRole('navigation', { name: 'Select a tool' });
+    const selected = nav.locator('.tool-link[aria-current="page"]');
+    await expect(sidebar).toHaveCSS('background-color', 'rgb(38, 54, 47)');
+    await expect(nav.getByRole('button')).toHaveCount(8);
+    await expect(nav.locator('.forge-ctk-rail-icon svg')).toHaveCount(8);
+    await expect(selected).toHaveAttribute('aria-current', 'page');
+    await expect(selected).toHaveCSS('background-color', 'rgb(229, 236, 228)');
+    await expect(page.locator('.forge-ctk-header-icon svg')).toHaveCount(1);
+    await expect(page.locator('.forge-ctk-top-home')).toHaveText('The Forge');
+    await expect(page.locator('.topbar')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+    const title = await page.locator('.forge-ctk-tool-name').boundingBox();
+    const topbar = await page.locator('.topbar').boundingBox();
+    expect(title && topbar).toBeTruthy();
+    if (title && topbar) {
+      expect(Math.abs(title.x + title.width / 2 - (topbar.x + topbar.width / 2))).toBeLessThan(2);
+    }
+    await page.screenshot({ path: testInfo.outputPath('ctk-unified-' + tool + '.png') });
+  }
+});

@@ -235,94 +235,196 @@
   color: #607366; font-size: 10px;
 }
 
-/* CTK tool shell: compact navigation and a 68px white tool header. */
+/* CTK tool shell: one navigation, icon system and compact header for all seven routes.
+ * The CTK light-mode rail is dark forest (#26362f), with light active tiles. */
 .forge-ctk-ui .sidebar {
-  width: 70px !important; min-width: 70px !important; flex: 0 0 70px;
-  background: #f7f8f3 !important;
-  border-right: 1px solid var(--ctk-line) !important;
+  width: 76px !important;
+  min-width: 76px !important;
+  flex: 0 0 76px !important;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  background: #26362f !important;
+  border-right: 1px solid #405147 !important;
+  color-scheme: dark;
 }
 .forge-ctk-ui .brand {
-  width: 100%; height: 68px !important; min-height: 68px !important;
-  padding: 0 !important; justify-content: center;
-  border-bottom: 1px solid var(--ctk-line) !important;
+  width: 100%;
+  height: 68px !important;
+  min-height: 68px !important;
+  padding: 0 !important;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid #46574c !important;
 }
-.forge-ctk-ui .forge-collection-brand,
-.forge-ctk-ui .forge-v5-f {
-  display: grid; place-items: center;
-  width: 38px; height: 38px;
-  background: #d4eac5 !important; color: #173b29 !important;
-  border: 1px solid #b6d3b4 !important; border-radius: 6px !important;
-  font: 750 24px/1 'Plus Jakarta Sans', sans-serif;
+.forge-ctk-ui .forge-ctk-brand {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid #5f7866;
+  border-radius: 7px;
+  background: #3b5545;
+  color: #e9f4e7;
+  font: italic 700 23px/1 Georgia,serif;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color .2s var(--ctk-ease), border-color .2s var(--ctk-ease);
 }
+.forge-ctk-ui .forge-ctk-brand:hover { background: #496c52; border-color: #8cae92; }
 .forge-ctk-ui .tool-nav {
-  width: 100%; display: flex; align-items: center;
-  padding: 12px 7px !important; gap: 5px !important;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px !important;
+  padding: 15px 10px !important;
+  overflow-y: auto;
+  overflow-x: visible;
   scrollbar-width: thin;
+  scrollbar-color: #536b59 transparent;
 }
 .forge-ctk-ui .tool-link {
-  display: grid; place-items: center;
-  width: 52px !important; min-width: 52px !important;
-  height: 49px !important; min-height: 49px !important;
-  padding: 0 !important; flex: 0 0 49px !important;
-  border: 1px solid transparent !important; border-radius: 6px !important;
-  background: transparent !important; color: #59705d !important;
-  transition: background-color .18s ease, color .18s ease, border-color .18s ease !important;
+  position: relative;
+  display: grid !important;
+  place-items: center;
+  width: 50px !important;
+  min-width: 50px !important;
+  height: 49px !important;
+  min-height: 49px !important;
+  flex: 0 0 49px !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: #b3c7b7 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  transition: background-color .18s var(--ctk-ease), color .18s var(--ctk-ease), border-color .18s var(--ctk-ease) !important;
 }
-.forge-ctk-ui .tool-link:hover { background: #e8f1e7 !important; color: #173b29 !important; }
+.forge-ctk-ui .tool-link:hover {
+  background: #344b3c !important;
+  color: #fff !important;
+}
 .forge-ctk-ui .tool-link.is-active {
-  background: #d9eada !important;
-  color: #22583b !important; border-color: #b7d0b8 !important;
+  background: #e5ece4 !important;
+  color: #172822 !important;
+  border-color: #e5ece4 !important;
 }
 .forge-ctk-ui .tool-link.is-active::before {
-  left: -8px !important; top: 11px !important;
-  height: 25px !important; background: #285e43 !important;
-  border-radius: 2px;
+  content: '';
+  position: absolute;
+  left: -13px !important;
+  top: 13px !important;
+  width: 3px !important;
+  height: 23px !important;
+  border-radius: 3px;
+  background: #c9f6a4 !important;
 }
 .forge-ctk-ui .tool-link::after {
-  background: #173b29 !important; color: white !important;
-  border-color: #2b5540 !important; border-radius: 5px !important;
+  left: 60px;
+  z-index: 50;
+  padding: 9px 12px;
+  border: 1px solid #3e5948 !important;
+  border-radius: 6px !important;
+  background: #182b26 !important;
+  color: #fff !important;
+  font: 600 12px/1.2 'Plus Jakarta Sans', sans-serif !important;
+  box-shadow: 0 7px 24px rgba(4,27,14,.2);
 }
-.forge-ctk-ui .forge-v5-rail-glyph,
-.forge-ctk-ui .forge-collection-rail-icon {
-  color: inherit; font: 700 11px 'Plus Jakarta Sans', sans-serif;
+.forge-ctk-ui .forge-ctk-rail-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+.forge-ctk-ui .forge-ctk-rail-icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  flex: 0 0 22px;
+  color: inherit;
+  stroke-width: 1.7;
 }
 .forge-ctk-ui .topbar {
-  position: relative; display: flex !important; align-items: center;
+  position: relative;
+  display: flex !important;
+  align-items: center;
   justify-content: space-between;
+  width: 100%;
+  height: 68px !important;
+  min-height: 68px !important;
   flex: 0 0 68px !important;
-  width: 100%; height: 68px !important; min-height: 68px !important;
-  padding: 0 24px !important; gap: 12px;
-  background: #fff !important; color: var(--ctk-ink) !important;
+  gap: 14px;
+  padding: 0 22px !important;
+  background: #fff !important;
+  color: var(--ctk-ink) !important;
   border-bottom: 1px solid #dce3db !important;
 }
-.forge-ctk-ui .forge-v5-wordmark,
-.forge-ctk-ui .forge-collection-wordmark {
-  font: 400 25px/1.1 'Kola', 'Plus Jakarta Sans', sans-serif !important;
-  letter-spacing: -.02em !important; color: var(--ctk-ink) !important;
-  text-transform: none; white-space: nowrap;
+.forge-ctk-ui .forge-ctk-top-leading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
-.forge-ctk-ui .forge-v5-wordmark span,
-.forge-ctk-ui .forge-collection-wordmark span { color: #285e43 !important; }
-.forge-ctk-ui .forge-v5-top-center,
-.forge-ctk-ui .forge-collection-top-path { display: none !important; }
-.forge-ctk-ui .forge-v5-top-end,
-.forge-ctk-ui .forge-collection-top-status {
-  margin-left: auto; color: #526958 !important;
-  font: 600 10px 'Plus Jakarta Sans', sans-serif !important;
+.forge-ctk-ui .forge-ctk-header-icon {
+  flex: 0 0 37px;
+  width: 37px;
+  height: 37px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cbded0;
+  border-radius: 8px;
+  color: #275b3b;
+  background: #e8f1e7;
+}
+.forge-ctk-ui .forge-ctk-header-icon svg { display: block; }
+.forge-ctk-ui .forge-ctk-top-home {
+  flex: 0 0 auto;
+  padding: 2px 0;
+  border: 0;
+  background: transparent !important;
+  color: #173b2a !important;
+  font: 400 25px/1.15 'Kola','Plus Jakarta Sans',sans-serif !important;
+  letter-spacing: -.02em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.forge-ctk-ui .forge-ctk-top-home:hover { color: #2c7249 !important; }
+.forge-ctk-ui .forge-ctk-top-privacy {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: auto;
+  color: #526958;
+  font: 600 10px/1.2 'Plus Jakarta Sans',sans-serif;
   letter-spacing: .07em;
+  white-space: nowrap;
 }
-.forge-ctk-ui .forge-v5-top-end i,
-.forge-ctk-ui .forge-collection-top-status i,
-.forge-ctk-ui .forge-v5-live i { background: #285e43 !important; box-shadow: none !important; }
+.forge-ctk-ui .forge-ctk-top-privacy i {
+  width: 7px;
+  height: 7px;
+  display: block;
+  border-radius: 50%;
+  background: #285e43;
+}
 .forge-ctk-ui .forge-ctk-tool-name {
-  position: absolute; top: 50%; left: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%,-50%);
-  width: max-content; max-width: 45%;
-  margin: 0; white-space: nowrap;
-  font: 750 clamp(19px,1.7vw,26px)/1.1 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -.04em; color: var(--ctk-ink);
-  pointer-events: none; text-align: center;
+  width: max-content;
+  max-width: 38%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #173b2a;
+  font: 750 clamp(20px,1.72vw,27px)/1.05 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.04em;
+  pointer-events: none;
+  text-align: center;
 }
 .forge-ctk-ui .forge-suite-context { display: none !important; }
 
@@ -617,6 +719,105 @@
 .forge-ctk-ui .adw-table tbody tr:nth-child(even) { background: #f9fbf8 !important; }
 .forge-ctk-ui .adw-table tbody tr:hover { background: #edf4e9 !important; }
 
+/* Remove inherited dark-on-light collisions from the old Forge workrooms.
+ * The CTK reference uses readable green ink, pale paper and dark-green actions.
+ * This only changes presentation; control order, semantics and handlers remain intact. */
+.forge-ctk-ui :is(.pdf-results-head,.split-results-head,.vs-list-heading,.sb-topline,.pdf-page-foot,.link-outputs) {
+  background: #fff !important;
+  color: var(--ctk-ink) !important;
+  border-color: var(--ctk-line) !important;
+}
+.forge-ctk-ui :is(.pdf-doc-thumb,.pdf-page-preview,.split-image-stage,.vs-stack-thumb,.vs-frame-preview) {
+  background-color: #f5f8f2 !important;
+  border-color: #d7e3d6 !important;
+}
+.forge-ctk-ui :is(.pdf-workspace .pdf-field,.pdf-doc-details strong,.split-field,.split-selection,
+  .vs-stack-meta strong,.vs-options,.vs-options > span,.vs-drop span,.pdf-drop span,
+  .split-drop span,.vs-list-heading,.sb-stage p,.sb-controls label) {
+  color: #31543e !important;
+}
+.forge-ctk-ui :is(.pdf-doc-details span,.vs-stack-meta span,.vs-stack-meta small,.pdf-local-note,
+  .vs-notice,.sb-caption) { color: #526958 !important; }
+.forge-ctk-ui :is(.pdf-progress,.vs-status,.vs-empty,.vs-confirm > div,.sb-feedback,.adw-status,
+  .link-panel .checkline,.adw-row-actions summary) {
+  color: #31543e !important;
+  background: #f4f8f2 !important;
+  border-color: #cbdccb !important;
+}
+.forge-ctk-ui :is(.vs-empty,.sb-view-choice,.sb-modes,.sb-controls details,.link-outputs) {
+  background: #fff !important;
+  border-color: #d6e0d6 !important;
+  color: var(--ctk-ink) !important;
+}
+.forge-ctk-ui .sb-modes button:not(.active) {
+  background: transparent !important;
+  color: #526958 !important;
+  border-color: transparent !important;
+}
+.forge-ctk-ui :is(.pdf-drop button:not(:disabled),.split-drop button:not(:disabled),
+  .video-stills .vs-drop button:not(:disabled),.vs-toolbar > button:first-of-type:not(:disabled),
+  .sb-toolbar button:nth-last-child(2):not(.danger):not(:disabled)) {
+  background: #285e43 !important;
+  border-color: #285e43 !important;
+  color: #fff !important;
+}
+.forge-ctk-ui :is(.pdf-drop button,.split-drop button,.video-stills .vs-drop button,
+  .vs-toolbar > button:first-of-type,.sb-toolbar button:nth-last-child(2)):hover:not(:disabled) {
+  background: #194c33 !important;
+  color: #fff !important;
+}
+.forge-ctk-ui :is(.adw-header h2,.adw-summary,.adw-summary span:first-child,
+  .adw-table .adw-name,.adw-stage,.adw-empty,.adw-workspace h3) {
+  color: var(--ctk-ink) !important;
+}
+.forge-ctk-ui :is(.adw-header p,.adw-empty span,.adw-status,.adw-summary span) {
+  color: #526958 !important;
+}
+.forge-ctk-ui .adw-table th {
+  background: #e8f1e7 !important;
+  color: #244331 !important;
+  border-color: #d6e0d6 !important;
+}
+.forge-ctk-ui .adw-table td { color: #244331 !important; }
+.forge-ctk-ui :is(.adw-controls button:not(.adw-primary),.adw-filters button,
+  .adw-row-actions button,.adw-row-actions summary,.adw-more) {
+  color: #285e43 !important;
+  background: #f4f8f2 !important;
+  border-color: #bfd1bf !important;
+}
+.forge-ctk-ui .adw-filters button[aria-pressed='true'] {
+  color: #fff !important;
+  background: #285e43 !important;
+  border-color: #285e43 !important;
+}
+.forge-ctk-ui .adw-workspace :is(button,input,select,textarea):focus-visible {
+  outline: 2px solid #326e4c !important;
+  outline-offset: 2px !important;
+}
+/* Match CTK's desktop tool framing without squeezing the content area. */
+.forge-ctk-ui :is(.pdf-workspace,.split-workspace,.video-stills) {
+  grid-template-columns: minmax(260px,292px) minmax(0,1fr);
+}
+.forge-ctk-ui .sb-layout { grid-template-columns: 292px minmax(0,1fr); }
+.forge-ctk-ui :is(.pdf-setup,.split-settings,.vs-workbench-side,.sb-controls) {
+  padding: 22px 20px !important;
+  border-right: 1px solid var(--ctk-line) !important;
+}
+.forge-ctk-ui :is(.pdf-results-head,.split-results-head,.vs-list-heading) {
+  min-height: 76px;
+  padding: 17px 24px !important;
+}
+@media (max-width: 1030px) {
+  .forge-ctk-ui :is(.pdf-workspace,.split-workspace,.video-stills) {
+    grid-template-columns: minmax(230px,260px) minmax(0,1fr);
+  }
+  .forge-ctk-ui .sb-layout { grid-template-columns: 260px minmax(0,1fr); }
+}
+@media (max-width: 720px) {
+  .forge-ctk-ui :is(.pdf-workspace,.split-workspace,.video-stills) { grid-template-columns: 1fr; }
+  .forge-ctk-ui .sb-layout { grid-template-columns: 1fr; }
+}
+
 /* Standard light dialogs and errors. Preserve modal semantics and handlers. */
 .forge-ctk-ui :is(.logo-modal,.pdf-detail,.pdf-confirm,.split-dialog,.vs-modal,.sb-dialog) {
   background: #fff !important; color: var(--ctk-ink) !important;
@@ -659,7 +860,7 @@
   .forge-ctk-ui .ctk-home-find { margin-top: 16px; }
   .forge-ctk-ui .ctk-home-grid { grid-template-rows: repeat(3,168px); min-height: 0; }
   .forge-ctk-ui .forge-ctk-tool-name { font-size: 18px; }
-  .forge-ctk-ui .forge-v5-top-end,.forge-ctk-ui .forge-collection-top-status { font-size: 9px !important; }
+  .forge-ctk-ui .forge-ctk-top-privacy { font-size: 9px !important; }
 }
 @media (max-width: 620px) {
   .forge-ctk-ui .ctk-home-top { padding: 19px 21px 25px; }
@@ -675,11 +876,11 @@
   }
   .forge-ctk-ui .ctk-home-card-copy { left: 15px; right: 11px; bottom: 14px; }
   .forge-ctk-ui .ctk-home-card-copy strong { font-size: 17px; }
-  .forge-ctk-ui .sidebar { width: 57px !important; min-width: 57px !important; flex-basis: 57px; }
+  .forge-ctk-ui .sidebar { width: 57px !important; min-width: 57px !important; flex: 0 0 57px !important; }\n  .forge-ctk-ui .tool-nav { padding: 12px 3px !important; }\n  .forge-ctk-ui .tool-link { width: 46px !important; min-width: 46px !important; }
   .forge-ctk-ui .topbar { padding: 0 12px !important; }
-  .forge-ctk-ui .forge-v5-wordmark,.forge-ctk-ui .forge-collection-wordmark { font-size: 18px !important; }
+  .forge-ctk-ui .forge-ctk-top-home { font-size: 18px !important; }\n  .forge-ctk-ui .forge-ctk-header-icon { width: 31px; height: 31px; flex-basis: 31px; }\n  .forge-ctk-ui .forge-ctk-top-leading { gap: 7px; }
   .forge-ctk-ui .forge-ctk-tool-name { font-size: 15px; max-width: 42%; }
-  .forge-ctk-ui .forge-v5-top-end,.forge-ctk-ui .forge-collection-top-status { display: none; }
+  .forge-ctk-ui .forge-ctk-top-privacy { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .forge-ctk-ui *,

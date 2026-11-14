@@ -5,7 +5,6 @@ import type { StoryboardRef } from './tools/storyboard/engine';
 import type { TransferGroup, TransferResult } from './tools/video-stills/engine';
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
-import { LogoResizerIcon } from './tools/logo-resizer/LogoResizerIcon';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
@@ -52,15 +51,14 @@ export default function App() {
     <div className={(isLogo ? 'forge-app forge-v5-shell' : 'forge-app forge-collection-shell') + ' forge-ctk-ui' + (isHome ? ' forge-ctk-home-route' : '')}>
       <aside className="sidebar" aria-label="Tools">
         <div className="brand">
-          {isLogo
-            ? <span className="forge-v5-f">F</span>
-            : <button type="button" className="forge-collection-brand" onClick={() => openTool('home')} aria-label="The Forge home">F<span>.</span></button>}
+          <button type="button" className="forge-ctk-brand" onClick={() => openTool('home')}
+            aria-label="The Forge home" title="The Forge home">F</button>
         </div>
         <nav className="tool-nav" aria-label="Select a tool">
           <button className={'tool-link forge-home-nav' + (isHome ? ' is-active' : '')}
             type="button" aria-current={isHome ? 'page' : undefined}
             aria-label="Home" title="Home" onClick={() => openTool('home')}>
-            <span className={isLogo ? 'forge-v5-rail-glyph' : 'forge-collection-rail-icon'}><ToolGlyph tool="home" /></span>
+            <span className="forge-ctk-rail-icon"><ToolGlyph tool="home" size={22} /></span>
           </button>
           {tools.map(tool => (
             <button
@@ -71,24 +69,22 @@ export default function App() {
               aria-label={tool.label}
               title={tool.label}
               onClick={() => { if (tool.id === 'storyboard') storyboardRef.current?.openMode('story'); openTool(tool.id); }}
-            >{isLogo ? (
-              <span className="forge-v5-rail-glyph">{tool.id === 'logo-resizer' ? <LogoResizerIcon /> : <span>{tool.label.split(' ').map(word => word[0]).join('').substring(0,2)}</span>}</span>
-            ) : <span className="forge-collection-rail-icon"><ToolGlyph tool={tool.id} /></span>}</button>
+            ><span className="forge-ctk-rail-icon"><ToolGlyph tool={tool.id} size={22} /></span></button>
           ))}
         </nav>
       </aside>
       <main className="main-area">
-        <header className="topbar">{!isHome && current && <h1 className="forge-ctk-tool-name">{current.label}</h1>}{isLogo ? (
-          <>
-            <strong className="forge-v5-wordmark">THE <span>F</span>ORGE</strong>
-            <span className="forge-v5-top-center">TOOL / LOGO RESIZER</span>
-            <span className="forge-v5-top-end"><i aria-hidden="true" /> ALL PROCESSING STAYS IN YOUR BROWSER</span>
-          </>
-        ) : <>
-          <strong className="forge-collection-wordmark">THE <span>F</span>ORGE</strong>
-          <span className="forge-collection-top-path">{isHome ? 'WORKROOM / OVERVIEW' : 'TOOL / ' + (current?.label.toUpperCase() ?? '')}</span>
-          <span className="forge-collection-top-status"><i aria-hidden="true" /> LOCAL PROCESSING</span>
-        </>}</header>
+        <header className="topbar">
+          {!isHome && current && <>
+            <div className="forge-ctk-top-leading">
+              <span className="forge-ctk-header-icon"><ToolGlyph tool={current.id} size={21} /></span>
+              <button type="button" className="forge-ctk-top-home" onClick={() => openTool('home')}
+                aria-label="The Forge home">The Forge</button>
+            </div>
+            <h1 className="forge-ctk-tool-name">{current.label}</h1>
+            <span className="forge-ctk-top-privacy"><i aria-hidden="true" />LOCAL PROCESSING</span>
+          </>}
+        </header>
 
         {!isHome && !isLogo && current && <div className="forge-suite-context">
           <span className="forge-suite-glyph"><ToolGlyph tool={current.id} size={28}/></span>
