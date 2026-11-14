@@ -48,13 +48,13 @@ export const toolDetails = toolNotes;
 export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: number }) {
   const paths: Record<Destination, ReactNode> = {
     home: <><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></>,
-    'logo-resizer': <><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8v8H8zM3 9h3m12 6h3M9 3v3m6 12v3"/></>,
-    'pdf-to-image': <><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 12h6m-6 4h6"/></>,
-    'image-splitter': <><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16m6-16v16M3 12h18"/></>,
-    'video-stills': <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3zM6 3v2m6-2v2m6-2v2M6 19v2m6-2v2m6-2v2"/></>,
-    storyboard: <><rect x="2.5" y="3.5" width="8" height="7" rx="1"/><rect x="13.5" y="3.5" width="8" height="7" rx="1"/><rect x="2.5" y="13.5" width="8" height="7" rx="1"/><rect x="13.5" y="13.5" width="8" height="7" rx="1"/></>,
-    'link-generator': <><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7 7l1.7-1.7"/></>,
-    'ad-downloader': <><path d="M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4"/><path d="M5 4h4m6 0h4"/></>,
+    'logo-resizer': <><rect x="4" y="4" width="12" height="12" rx="2"/><path d="M9 9h11v11H9"/><path d="m13 7 3-3m-3 0h3v3"/></>,
+    'pdf-to-image': <><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4"/><circle cx="11" cy="12" r="1.3"/><path d="m8 18 3-3 2 2 2-2 2 3"/></>,
+    'image-splitter': <><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></>,
+    'video-stills': <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4"/><path d="m10 9 5 3-5 3z"/></>,
+    storyboard: <><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M10 9v11M3 15h7M10 15h11"/></>,
+    'link-generator': <><path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10 5.93"/><path d="M14 11a5 5 0 0 0-7.07 0l-2.12 2.12a5 5 0 0 0 7.07 7.07L14 18.07"/></>,
+    'ad-downloader': <><path d="M12 3v13m-5-5 5 5 5-5"/><path d="M4 16v4h16v-4"/><path d="M6 4h3M15 4h3"/></>,
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
     strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[tool]}</svg>;
