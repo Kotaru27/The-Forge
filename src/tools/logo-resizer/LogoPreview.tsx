@@ -109,7 +109,15 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
       requestPreview(canvas, renderRef.current, false);
     }
     return () => cancelPreview(canvas);
-  }, [asset, settings, width, height]);
+  // Filename, download format and filename-sync edits do not affect pixels.
+  // Only image/geometry/text changes invalidate the bitmap canvas.
+  }, [
+    asset.image, asset.source, asset.label, asset.fontSizeOverride,
+    asset.paddingOverride, asset.imageOffset, asset.textOffset,
+    settings.width, settings.height, settings.padding, settings.imageOffset,
+    settings.fontSize, settings.fontFamily, settings.fontColor, settings.bold,
+    width, height,
+  ]);
 
   useEffect(() => {
     const canvas = ref.current;
