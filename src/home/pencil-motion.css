@@ -1,24 +1,9 @@
-/*
- * THE FORGE — pencil-stroke motion (visual-only)
- *
- * Home UI borders are ALWAYS static. True illustration paths and the contours
- * of actual Kalam letters are the only authored entrance strokes. Native
- * labels remain in the DOM and retain their dimensions and accessible names.
- * Avoid page-wide filters, full-line clipping, mount-time animation loops,
- * and animation triggered by control input/value changes.
- */
-
-.pencil-written-text {
-  display: inline;
-  white-space: normal;
-}
-.pencil-written-word {
-  display: inline-block;
-  white-space: nowrap;
-}
+/* The Forge — pencil writing is exclusively an INTRO-to-HOME treatment.
+ * Normal Home, all tool routes, scroll and control updates are static.
+ * The original visible Kalam text stays the only accessible text. */
+.pencil-written-text { display: inline; white-space: normal; }
+.pencil-written-word { display: inline-block; white-space: nowrap; }
 .pencil-written-glyph {
-  /* Inline glyphs concatenate naturally in the accessibility tree.
-     inline-block made buttons read A d d ... and broke real controls. */
   display: inline;
   position: relative;
   white-space: pre;
@@ -30,10 +15,6 @@
 }
 .pencil-glyph-face { display: inline; opacity: 1; }
 .pencil-glyph-vector {
-  /* Critical accessibility invariant: positioned/block SVG descendants
-     cause Chromium to insert separators between otherwise inline letters.
-     An inline decorative stroke, with zero net advance, preserves the
-     native button/tab/label name while still tracing over its glyph. */
   position: relative;
   display: inline;
   width: var(--pencil-glyph-advance, .56em);
@@ -56,225 +37,152 @@
   stroke-dashoffset: 1;
 }
 
-/* One pencil writes each actual letter outline, follows with graphite fill,
-   then yields to the unchanged native text. No line-wide wiping at any point. */
 @keyframes forgePencilContour {
   from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
 }
 @keyframes forgePencilOriginalLetter {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes forgePencilVectorYield {
   0%, 60% { opacity: 1; }
   100% { opacity: 0; }
 }
 
-/* Writing begins on the handoff or when a STATIC workroom is opened.
-   No React frame-by-frame state, and absolutely no rewriting live values. */
-.forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home .pencil-written-glyph,
-.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-written-glyph,
-.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar .pencil-written-glyph,
-.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar .pencil-written-glyph {
+/* Only the INTRO handoff (or its brief finishing tail) can mount these SVGs.
+ * The same animation properties apply in both phases, with matching delays:
+ * removing the intro overlay NEVER restarts a letter's animation. */
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-home .pencil-written-glyph {
   --pencil-start: calc(var(--pencil-write-base, .10s) + var(--pencil-letter-index) * .020s);
   animation: none !important;
   opacity: 1 !important;
   clip-path: none !important;
+  -webkit-text-stroke: 0 !important;
 }
-:is(
-  .forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home,
-  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]),
-  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
-  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
-) .pencil-glyph-vector {
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-home .pencil-glyph-vector {
   animation: forgePencilVectorYield .17s linear calc(var(--pencil-start) + .28s) both;
 }
-:is(
-  .forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home,
-  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]),
-  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
-  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
-) .pencil-glyph-stroke {
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-home .pencil-glyph-stroke {
   animation: forgePencilContour .34s cubic-bezier(.32,.04,.16,1) var(--pencil-start) both;
 }
-:is(
-  .forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home,
-  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]),
-  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
-  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
-) .pencil-glyph-face {
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-home .pencil-glyph-face {
   animation: forgePencilOriginalLetter .12s ease-out calc(var(--pencil-start) + .30s) both;
+  -webkit-text-stroke: 0 !important;
 }
-
-/* If an uncommon character has no authored stroke path, it stays readable
-   immediately. Never hide a value or substitute an unreadable placeholder. */
-.forge-app.forge-sketch-ui .pencil-written-glyph.is-direct-glyph .pencil-glyph-face {
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-home .is-direct-glyph .pencil-glyph-face {
   animation: none !important;
   opacity: 1 !important;
 }
 
-/* Semantic choreography: illustrations lead, labels are handwritten
-   immediately after, and a single colored-pencil pass lands last. */
-.forge-app.forge-intro-handoff .sketch-checklist-wrap { --pencil-write-base: .14s; }
-.forge-app.forge-intro-handoff .sketch-subtitle { --pencil-write-base: .32s; }
-.forge-app.forge-intro-handoff .sketch-welcome-copy { --pencil-write-base: .48s; }
-.forge-app.forge-intro-handoff .sketch-card-slot { --pencil-write-base: var(--draw-copy-delay, .95s); }
-.forge-app.forge-intro-handoff .sketch-card-desc { --pencil-write-base: calc(var(--draw-copy-delay, .95s) + .43s); }
-/* Keep the SAME delay variables when the intro overlay exits.
-   Otherwise CSS replaces the current animation mid-word, causing long
-   instructions to appear fully drawn without ever finishing their strokes. */
-.forge-app.forge-home-continuous-draw .sketch-checklist-wrap { --pencil-write-base: .14s; }
-.forge-app.forge-home-continuous-draw .sketch-subtitle { --pencil-write-base: .32s; }
-.forge-app.forge-home-continuous-draw .sketch-welcome-copy { --pencil-write-base: .48s; }
-.forge-app.forge-home-continuous-draw .sketch-card-slot { --draw-copy-delay: .94s; --pencil-write-base: var(--draw-copy-delay); }
-.forge-app.forge-home-continuous-draw .sketch-card-slot:nth-child(2) { --draw-copy-delay: 1s; }
-.forge-app.forge-home-continuous-draw .sketch-card-slot:nth-child(3) { --draw-copy-delay: .96s; }
-.forge-app.forge-home-continuous-draw .sketch-card-slot:nth-child(4) { --draw-copy-delay: 1.03s; }
-.forge-app.forge-home-continuous-draw .sketch-card-slot:nth-child(n+5) { --draw-copy-delay: 1.08s; }
-.forge-app.forge-home-continuous-draw .sketch-card-desc { --pencil-write-base: calc(var(--draw-copy-delay, .95s) + .43s); }
+/* Use the precise intro timing in BOTH phases to prevent a mid-word reset. */
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-checklist-wrap { --pencil-write-base: .14s; }
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-subtitle { --pencil-write-base: .32s; }
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-welcome-copy { --pencil-write-base: .48s; }
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-card-slot {
+  --draw-copy-delay: .94s;
+  --pencil-write-base: var(--draw-copy-delay);
+}
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-card-slot:nth-child(2) { --draw-copy-delay: 1s; }
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-card-slot:nth-child(3) { --draw-copy-delay: .96s; }
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-card-slot:nth-child(4) { --draw-copy-delay: 1.03s; }
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-card-slot:nth-child(5) { --draw-copy-delay: 1.09s; }
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-card-slot:nth-child(6) { --draw-copy-delay: 1.15s; }
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-card-slot:nth-child(7) { --draw-copy-delay: 1.12s; }
+.forge-app:is(.forge-intro-handoff,.forge-home-finishing) .sketch-card-desc {
+  --pencil-write-base: calc(var(--draw-copy-delay, .95s) + .43s);
+}
 .forge-app.forge-intro-handoff .sketch-subtitle .sketch-highlight-sweep::before {
   animation-delay: 1.66s !important;
 }
 .forge-app.forge-intro-handoff .sketch-card-title .sketch-highlight-mark::before {
   animation-delay: calc(var(--draw-copy-delay, .95s) + .74s) !important;
 }
-.forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home .pencil-written-glyph {
-  -webkit-text-stroke: 0 !important;
-}
-.forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home .pencil-glyph-face {
-  -webkit-text-stroke: 0 !important;
-}
 
-/* The previous clip-based letter and heading effects are not handwriting.
-   They must never overlap our authored SVG contours. */
-.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) :is(
-  .sb-section-head strong,
-  .pdf-section-title,
-  .split-section-title,
-  .vs-list-heading strong,
-  .link-panel-heading h2,
-  .adw-header h2,
-  .logo-workspace h2
-),
-.forge-app.forge-sketch-ui .sketch-welcome-copy :is(h2,p),
-.forge-app.forge-sketch-ui .sketch-card-desc,
-.forge-app.forge-sketch-ui .sketch-card-title .sketch-highlight-mark {
-  animation: none !important;
-  clip-path: none !important;
-}
-
-/* Home/tool card borders, notebook frame, and sidebar edges remain physically
-   present. They are not drafted, erased, redrawn or animated during scroll. */
-.forge-app.forge-sketch-ui :is(.sketch-card-border-svg, .sketch-page-frame-svg) path {
-  animation: none !important;
-  stroke-dashoffset: 0 !important;
-  clip-path: none !important;
-}
-.forge-app.forge-sketch-ui .sketch-ongoing-card-border {
-  display: none !important;
-  animation: none !important;
-}
-.forge-app.forge-sketch-ui :is(.sketch-page-frame-svg, .sketch-card-border-svg) {
-  transition: none !important;
-}
-
-/* Only existing illustrated SVG geometry draws in the Home handoff.
-   Keep SVG text IN the illustration behind the same pencil-writing schedule;
-   the small PDF and URL labels no longer materialize before the drawing. */
-.forge-app.forge-intro-handoff .sketch-card-art > svg text {
-  stroke: #344d67 !important;
-  stroke-width: .65px !important;
-  stroke-dasharray: 300;
-  stroke-dashoffset: 300;
-  fill-opacity: 0;
-  animation:
-    forgeSketchArtTextTrace .48s cubic-bezier(.3,.03,.2,1) calc(var(--draw-art-delay,.6s) + .24s) both,
-    forgeSketchArtTextFill .22s ease-out calc(var(--draw-art-delay,.6s) + .45s) both;
-}
-@keyframes forgeSketchArtTextTrace {
-  from { stroke-dashoffset: 300; }
-  to { stroke-dashoffset: 0; }
-}
-@keyframes forgeSketchArtTextFill {
-  from { fill-opacity: 0; }
-  to { fill-opacity: 1; }
-}
-
-/* Previous prototype also looped standalone card and title underlines.
-   The approved motion grammar allows *only illustrated details* to recur. */
-.forge-app.forge-sketch-ui .sketch-ongoing-card-underline,
-.forge-app.forge-sketch-ui .sketch-ongoing-hero-line {
-  display: none !important;
-}
-.forge-app.forge-sketch-ui .sketch-ongoing-card-underline path,
-.forge-app.forge-sketch-ui .sketch-ongoing-hero-line path {
-  animation: none !important;
-}
-
-/* Continuous life belongs to tiny NON-DESTRUCTIVE marks on illustrations.
-   All underlying art and captions are fully visible after drawing ends.
-   Individual marks get staggered 13-second cycles: never redraw the border. */
+/* Retain animated pencil strokes on illustrations ONLY during the intro.
+ * The home is a finished piece of paper afterward, never a CPU/GPU loop. */
 .pencil-ongoing-illustration-detail {
   fill: none;
   stroke: #665a48;
   stroke-width: 1.2px;
   stroke-linecap: round;
   stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  opacity: 0;
+  stroke-dashoffset: 0;
+  opacity: .48;
   pointer-events: none;
 }
-.forge-app.forge-home-continuous-draw .sketch-card-slot .pencil-ongoing-illustration-detail {
-  animation: forge-home-ongoing-graphite 13s linear var(--forge-pencil-loop-delay) infinite;
-}
-/* Preserve the previous native scroll performance gate after moving the loop
-   from card borders onto the illustrations themselves. */
-.forge-app.forge-home-continuous-draw .sketch-home[data-scrolling="true"] .pencil-ongoing-illustration-detail {
-  animation-play-state: paused !important;
-}
-
-/* Tool-workroom writing is a short, interruptible FIRST-ENTRANCE only.
-   Hiding a route immediately drops its animations: no stale placeholders. */
-.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-write-heading { --pencil-write-base: .06s; }
-.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-write-instruction { --pencil-write-base: .28s; }
-.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-write-control { --pencil-write-base: .45s; }
-.forge-app.forge-sketch-ui .sketch-topbar { --pencil-write-base: .06s; }
-.forge-app.forge-sketch-ui .sketch-sidebar { --pencil-write-base: .12s; }
-
-/* Icons are graphical illustrations, not the borders around their controls. */
-@keyframes forgeWorkroomIllustrationTrace {
-  from { stroke-dashoffset: 1; }
-  to { stroke-dashoffset: 0; }
-}
-.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar .forge-ctk-header-icon svg :is(path,circle,rect,line,polyline),
-.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-illustration svg :is(path,circle,rect,line,polyline) {
-  stroke-dasharray: 1;
+.forge-app.forge-intro-handoff .pencil-ongoing-illustration-detail {
   stroke-dashoffset: 1;
-  animation: forgeWorkroomIllustrationTrace .52s cubic-bezier(.27,.03,.18,1) .05s both;
+  animation: forgePencilContour .55s ease-out .68s both;
 }
 
-/* No movement of layout geometry or workroom buttons/inputs during writing. */
-.forge-app.forge-sketch-ui .pencil-written-glyph,
-.forge-app.forge-sketch-ui .pencil-glyph-vector {
-  transform: none !important;
+/* Existing Home reveal rules from older themes must NOT play during normal
+ * navigation; only the intro can draw elements. Fixed borders stay fixed. */
+.forge-app.forge-sketch-ui :is(.sketch-card-border-svg,.sketch-page-frame-svg) path {
+  animation: none !important;
+  stroke-dashoffset: 0 !important;
+  clip-path: none !important;
 }
+.forge-app.forge-sketch-ui .sketch-ongoing-card-border,
+.forge-app.forge-sketch-ui :is(.sketch-ongoing-card-underline,.sketch-ongoing-hero-line) {
+  display: none !important;
+}
+.forge-app.forge-sketch-ui .sketch-home :is(
+  .sketch-welcome-copy h2,
+  .sketch-welcome-copy p,
+  .sketch-welcome-ink,
+  .sketch-card-title,
+  .sketch-card-title .sketch-highlight-mark,
+  .sketch-card-desc
+) {
+  animation: none !important;
+  clip-path: none !important;
+}
+.forge-app.forge-home-resting .sketch-home :is(
+  .sketch-card-art > svg,
+  .sketch-header-kiln > svg,
+  .sketch-title-ticks svg,
+  .sketch-welcome-ticks svg
+) :is(path,circle,rect,line,polyline,polygon,text) {
+  animation: none !important;
+  stroke-dashoffset: 0 !important;
+  fill-opacity: 1 !important;
+}
+
+/* Workroom headings and topbar never do the legacy rectangular "typing"
+ * reveal. Sidebar rail may still expand, but its labels do not get written. */
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) :is(
+  .native-tool:not([hidden]) .sb-section-head strong,
+  .native-tool:not([hidden]) .pdf-section-title,
+  .native-tool:not([hidden]) .split-section-title,
+  .native-tool:not([hidden]) .vs-list-heading strong,
+  .native-tool:not([hidden]) .link-panel-heading h2,
+  .native-tool:not([hidden]) .adw-header h2,
+  .native-tool:not([hidden]) .logo-workspace h2,
+  .sketch-topbar .sketch-highlight-mark
+) {
+  animation: none !important;
+  clip-path: none !important;
+}
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar .sketch-highlight-mark::before {
+  animation: none !important;
+  clip-path: none !important;
+}
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar :is(
+  .sketch-nav-label,
+  .sketch-subtool-label,
+  .sketch-brand-word,
+  .sketch-sidebar-tagline
+) {
+  clip-path: none !important;
+  transition: opacity .17s ease, max-width .2s ease, max-height .2s ease !important;
+}
+
+/* Always prioritize static, fully legible text over decoration for users who
+ * request reduced motion; all tool controls are native text regardless. */
 @media (prefers-reduced-motion: reduce) {
-  /* visibility:hidden preserves inline text concatenation in Chromium.
-     display:none on each interleaved SVG split accessible names in
-     reduced-motion mode (e.g. Add Assets became A d d A s s e t s). */
-  .forge-app.forge-sketch-ui .pencil-glyph-vector {
-    display: inline !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    animation: none !important;
-  }
-  .forge-app.forge-sketch-ui .pencil-glyph-face { animation: none !important; opacity: 1 !important; }
-  .forge-app.forge-sketch-ui .pencil-glyph-stroke { animation: none !important; }
-  .forge-app.forge-sketch-ui .sketch-card-art svg :is(path,circle,rect,ellipse,line,polyline,polygon,text),
-  .forge-app.forge-sketch-ui .pencil-ongoing-illustration-detail {
-    animation: none !important;
-    stroke-dashoffset: 0 !important;
-    fill-opacity: 1 !important;
-  }
+  .forge-app .pencil-glyph-vector { animation: none !important; visibility: hidden !important; opacity: 0 !important; }
+  .forge-app .pencil-glyph-face { animation: none !important; opacity: 1 !important; }
+  .forge-app .pencil-glyph-stroke { animation: none !important; stroke-dashoffset: 0 !important; }
+  .forge-app .pencil-ongoing-illustration-detail { animation: none !important; stroke-dashoffset: 0 !important; }
 }

@@ -1,4 +1,3 @@
-import { PencilLettering } from '../../home/PencilLettering';
 import { useCallback, useEffect, useMemo, useRef, useState, Fragment, type ChangeEvent, type DragEvent } from 'react';
 import { downloadBlob } from '../../utils/download';
 import { AutoNamer } from './auto-name';
@@ -185,30 +184,30 @@ export function AdDownloader() {
   function onInput(event:ChangeEvent<HTMLInputElement>) {void upload(event.target.files?.[0]);}
   return <section className="adw-workspace" aria-label="Ad Downloader">
     <header className="adw-header">
-      <div><h2><PencilLettering text="Ad Downloader" className="pencil-write-heading" /></h2><p><PencilLettering text="Choose your download folder, import an Excel workbook, then manage campaign assets." className="pencil-write-instruction" /></p></div>
+      <div><h2>{"Ad Downloader"}</h2><p>{"Choose your download folder, import an Excel workbook, then manage campaign assets."}</p></div>
       <div className="adw-controls">
-        <button type="button" onClick={()=>void chooseFolder()} aria-label="Choose Auto-name folder"><PencilLettering text="Auto-name:" className="pencil-write-control" /> {folderName||'Choose folder'}</button>
+        <button type="button" onClick={()=>void chooseFolder()} aria-label="Choose Auto-name folder">{"Auto-name:"} {folderName||'Choose folder'}</button>
         <label className={`adw-upload${!folderApproved?' adw-locked':''}`} aria-disabled={!folderApproved}>
           <input ref={fileInput} type="file" accept=".xlsx,.xls" disabled={!folderApproved || importing} aria-label="Upload Excel workbook" onChange={onInput}/>
           {importing?'Importing…':'Upload Excel'}
         </label>
-        <button type="button" disabled={!entries.length} onClick={()=>void copy(entries.map(e=>e.displayName).join('\n'),'All names')}><PencilLettering text="Copy Names" className="pencil-write-control" /></button>
-        <button type="button" disabled={!buckets.length} onClick={()=>void copy(copyBucketTable(buckets),'Bucket table')}><PencilLettering text="Copy Bucket Table" className="pencil-write-control" /></button>
-        <button type="button" disabled={!buckets.length} onClick={()=>void copy(copyForstaScript(buckets),'Forsta script')}><PencilLettering text="Copy Script" className="pencil-write-control" /></button>
+        <button type="button" disabled={!entries.length} onClick={()=>void copy(entries.map(e=>e.displayName).join('\n'),'All names')}>{"Copy Names"}</button>
+        <button type="button" disabled={!buckets.length} onClick={()=>void copy(copyBucketTable(buckets),'Bucket table')}>{"Copy Bucket Table"}</button>
+        <button type="button" disabled={!buckets.length} onClick={()=>void copy(copyForstaScript(buckets),'Forsta script')}>{"Copy Script"}</button>
         <button type="button" className="adw-primary" disabled={!chosen.length||busy} onClick={()=>void downloadBulk()}>Download selected ({chosen.length})</button>
       </div>
     </header>
     <div className="adw-status" role={status.error?'alert':'status'} data-error={status.error}>{status.message}</div>
     {!entries.length ?
       <div className="adw-empty" onDragOver={e=>e.preventDefault()} onDrop={onDrop} aria-label="Excel drop zone">
-        <strong><PencilLettering text="Waiting for a workbook" className="pencil-write-heading" /></strong><span>{folderApproved?'Drop an .xlsx or .xls file here, or select Upload Excel.':'Choose a writable Auto-name folder to unlock Excel import.'}</span>
+        <strong>{"Waiting for a workbook"}</strong><span>{folderApproved?'Drop an .xlsx or .xls file here, or select Upload Excel.':'Choose a writable Auto-name folder to unlock Excel import.'}</span>
       </div> : <>
       <div className="adw-filters adw-selection-tools" role="group" aria-label="Ready asset selection">
-        <button type="button" onClick={()=>setSelected(true)}><PencilLettering text="Select ready" className="pencil-write-control" /></button>
-        <button type="button" onClick={()=>setSelected(false)}><PencilLettering text="Deselect ready" className="pencil-write-control" /></button>
+        <button type="button" onClick={()=>setSelected(true)}>{"Select ready"}</button>
+        <button type="button" onClick={()=>setSelected(false)}>{"Deselect ready"}</button>
       </div>
       <div className="adw-table-wrap" onDragOver={e=>e.preventDefault()} onDrop={onDrop}>
-        <table className="adw-table"><thead><tr><th><PencilLettering text="Ad No" className="pencil-write-heading" /></th><th><PencilLettering text="Generated Name" className="pencil-write-heading" /></th><th><PencilLettering text="Status" className="pencil-write-heading" /></th><th><PencilLettering text="Actions" className="pencil-write-heading" /></th></tr></thead>
+        <table className="adw-table"><thead><tr><th>{"Ad No"}</th><th>{"Generated Name"}</th><th>{"Status"}</th><th>{"Actions"}</th></tr></thead>
           <tbody>{queued.map((entry,index)=><Fragment key={entry.id}>
             {stage(entry)!=='ready' && (index===0||stage(queued[index-1])!==stage(entry)) &&
               <tr className="adw-queue-divider"><td colSpan={4}>{stage(entry)==='requested'

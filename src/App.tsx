@@ -10,7 +10,6 @@ import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { ForgeHome, ToolGlyph } from './home/ForgeHome';
 import { ForgeSketchIntro } from './intro/ForgeSketchIntro';
-import { PencilLettering } from './home/PencilLettering';
 import {
   AnvilMark,
   MountainDoodle,
@@ -24,7 +23,7 @@ import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
 
 type Route = ToolId | 'home';
-type IntroPhase = 'pending' | 'handoff' | 'settled';
+type IntroPhase = 'pending' | 'handoff' | 'finishing' | 'settled';
 
 // First root visit sketches once per tab; deep links are never delayed.
 const INTRO_SESSION_KEY = 'forge-pencil-intro-played-v2';
@@ -47,6 +46,12 @@ export default function App() {
   const [introRun, setIntroRun] = useState(0);
   const finishIntro = useCallback(() => {
     try { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); } catch { /* Storage is optional. */ }
+    // Only a completed handoff may finish writing. Skip and direct routes
+    // always show the fully drawn interface without animation.
+    setIntroPhase(phase => phase === 'handoff' ? 'finishing' : 'settled');
+  }, []);
+  const skipIntro = useCallback(() => {
+    try { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); } catch { /* Storage is optional. */ }
     setIntroPhase('settled');
   }, []);
   const handoffIntro = useCallback(() => setIntroPhase('handoff'), []);
@@ -55,6 +60,14 @@ export default function App() {
     setIntroRun(previous => previous + 1);
     setIntroPhase('pending');
   }, []);
+
+  useEffect(() => {
+    if (introPhase !== 'finishing') return;
+    // Allow the longest Home description to finish handwriting once.
+    // This timer does not run while working in any tool or revisiting Home.
+    const timeout = window.setTimeout(() => setIntroPhase('settled'), 2200);
+    return () => window.clearTimeout(timeout);
+  }, [introPhase]);
 
   const openTool = useCallback((tool: Route) => {
     if (tool !== 'home' && !isToolId(tool)) return;
@@ -92,7 +105,8 @@ export default function App() {
         (isHome ? ' forge-ctk-home-route forge-sketch-home-route' : '') +
         (isHome && introPhase === 'pending' ? ' forge-intro-before-home' : '') +
         (isHome && introPhase === 'handoff' ? ' forge-intro-handoff' : '') +
-        (isHome && introPhase === 'settled' ? ' forge-home-continuous-draw' : '')
+        (isHome && introPhase === 'finishing' ? ' forge-home-finishing' : '') +
+        (isHome && introPhase === 'settled' ? ' forge-home-resting' : '')
       }
     >
       <SketchSvgDefs />
@@ -116,7 +130,7 @@ export default function App() {
                 title="The Forge home"
               >
                 <AnvilMark size={50} />
-                <span className="sketch-brand-word"><PencilLettering text="THE FORGE" className="pencil-write-heading" /></span>
+                <span className="sketch-brand-word">{"THE FORGE"}</span>
               </button>
             </div>
             <SketchDividerLine compact />
@@ -132,7 +146,7 @@ export default function App() {
                 <span className="sketch-nav-icon" aria-hidden="true">
                   <ToolGlyph tool="home" size={20} />
                 </span>
-                <span className="sketch-nav-label"><PencilLettering text="Home" className="pencil-write-control" /></span>
+                <span className="sketch-nav-label">{"Home"}</span>
               </button>
 
               <div className="sketch-tool-sublist" role="group" aria-label="Creative tools">
@@ -152,7 +166,7 @@ export default function App() {
                     <span className="sketch-subtool-icon" aria-hidden="true">
                       <ToolGlyph tool={tool.id} size={19} />
                     </span>
-                    <span className="sketch-subtool-label"><PencilLettering text={tool.label} className="pencil-write-control" /></span>
+                    <span className="sketch-subtool-label">{tool.label}</span>
                   </button>
                 ))}
               </div>
@@ -183,9 +197,9 @@ export default function App() {
                 </span>
               </div>
               <h1 className="forge-ctk-tool-name">
-                <span key={current.id} className="sketch-highlight-mark"><PencilLettering text={current.label} className="pencil-write-heading" /></span>
+                <span key={current.id} className="sketch-highlight-mark">{current.label}</span>
               </h1>
-              <span className="forge-ctk-top-privacy"><PencilLettering text="LOCAL PROCESSING" className="pencil-write-instruction" /></span>
+              <span className="forge-ctk-top-privacy">{"LOCAL PROCESSING"}</span>
               <span className="sketch-topbar-seam" aria-hidden="true">
                 <SketchDividerLine />
               </span>
@@ -193,7 +207,11 @@ export default function App() {
           )}
 
           <div className="native-tool" hidden={!isHome}>
-            <ForgeHome onOpenTool={openTool} onReplayIntro={replayIntro} />
+            <ForgeHome
+              onOpenTool={openTool}
+              onReplayIntro={replayIntro}
+              animateWriting={isHome && (introPhase === 'handoff' || introPhase === 'finishing')}
+            />
           </div>
           <div className="native-tool" hidden={activeTool !== 'link-generator'}>
             <LinkGenerator />
@@ -218,8 +236,8 @@ export default function App() {
           </div>
         </main>
       </div>
-      {isHome && introPhase !== 'settled' && (
-        <ForgeSketchIntro key={introRun} onHandoff={handoffIntro} onFinish={finishIntro} />
+      {isHome && (introPhase === 'pending' || introPhase === 'handoff') && (
+        <ForgeSketchIntro key={introRun} onHandoff={handoffIntro} onFinish={finishIntro} onSkip={skipIntro} />
       )}
     </div>
   );

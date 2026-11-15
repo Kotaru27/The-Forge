@@ -1,84 +1,91 @@
 import { expect, test } from '@playwright/test';
 
 const workrooms = [
-  { route: 'logo-resizer', heading: 'Logo resizer', target: 'Add assets' },
-  { route: 'pdf-to-image', heading: 'PDF to Image', target: 'Add PDF Files' },
-  { route: 'image-splitter', heading: 'Image Splitter', target: 'Add Images' },
-  { route: 'video-stills', heading: 'Video collections', target: 'Add Videos' },
-  { route: 'storyboard', heading: 'Board settings', target: 'Add Assets' },
-  { route: 'link-generator', heading: 'Source & filenames', target: 'Generate' },
-  { route: 'ad-downloader', heading: 'Ad Downloader', target: 'Copy Names' },
+  { route: 'logo-resizer', label: 'Logo Resizer', target: 'Add assets', panel: '.forge-v5-head' },
+  { route: 'pdf-to-image', label: 'PDF to Image', target: 'Add PDF Files', panel: '.pdf-setup' },
+  { route: 'image-splitter', label: 'Image Splitter', target: 'Add Images', panel: '.split-settings' },
+  { route: 'video-stills', label: 'Video Stills', target: 'Add Videos', panel: '.vs-workbench-side' },
+  { route: 'storyboard', label: 'Storyboard', target: 'Add Assets', panel: '.sb-controls' },
+  { route: 'link-generator', label: 'Link Generator', target: 'Generate', panel: '.link-panel' },
+  { route: 'ad-downloader', label: 'Ad Downloader', target: 'Copy Names', panel: '.adw-header' },
 ] as const;
 
-test('all seven workrooms handwrite static headings, instructions and control names using actual SVG contours', async ({ page }, testInfo) => {
+test('all seven tools open with fully visible static pencil typography and native controls', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 940 });
-  for (const {route, heading, target} of workrooms) {
+  for (const { route, label, target, panel } of workrooms) {
     await page.goto('#/' + route);
     const tool = page.locator('.native-tool:not([hidden])');
     await expect(tool).toBeVisible();
-    // Logo Resizer retains a hidden legacy eyebrow in the DOM. CSS
-    // animations on display:none ancestors do not advance, so test the
-    // first visible letter rather than a hidden decorative workroom note.
-    const letter = tool.locator('.pencil-written-glyph:visible').first();
-    const svg = letter.locator('.pencil-glyph-vector');
-    const ink = letter.locator('.pencil-glyph-face');
-    const strokes = letter.locator('.pencil-glyph-stroke');
-    await expect(letter).toHaveCSS('clip-path','none');
-    await expect(svg).toHaveCount(1);
-    await expect(strokes).toHaveCSS('animation-name', /forgePencilContour/);
-    await expect(strokes).toHaveCSS('stroke-dasharray', /[0-9]/);
-    await expect(ink).toHaveCSS('animation-name','forgePencilOriginalLetter');
-    await expect(tool.locator('.pencil-written-text').filter({ hasText: heading }).first()).toHaveText(heading);
-    await expect(page.getByRole('button', {name: target, exact: route !== 'link-generator'}).first()).toBeVisible();
-    // Text is never line-clipped or missing after the finite writing pass.
-    await page.waitForTimeout(1000);
-    await expect(ink).toHaveCSS('opacity','1');
+    await expect(page.getByRole('heading', { name: label, level: 1 })).toBeVisible();
+    await expect(page.getByRole('button', { name: target, exact: route !== 'link-generator' }).first()).toBeVisible();
+
+    // The previous build animated and mounted one SVG for EACH LETTER of EVERY
+    // workroom control, restarting on navigation and reducing responsiveness.
+    await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
+    await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
+    await expect(page.locator('.forge-app')).not.toHaveClass(/forge-intro-handoff|forge-home-finishing/);
+    await expect(page.locator('.sketch-topbar .sketch-highlight-mark')).toHaveCSS('animation-name', 'none');
+
+    // Static hand-drawn graphite hatching is real CSS on the workroom panel,
+    // not an overlay image, so upload/selection interactions are unchanged.
+    const surface = tool.locator(panel).first();
+    await expect(surface).toBeVisible();
+    await expect(surface).toHaveCSS('background-image', /data:image\/svg/);
     await page.screenshot({
-      path: testInfo.outputPath(`pencil-workroom-${route}.png`),
+      path: testInfo.outputPath('static-pencil-' + route + '.png'),
       animations: 'disabled',
       fullPage: true,
     });
   }
 });
 
-test('existing interactive controls keep their values and semantics without re-handwriting on change', async ({page}) => {
+test('repeated tool switching, inputs and Storyboard tabs never mount handwriting', async ({ page }) => {
   await page.goto('#/logo-resizer');
-  // The inline handwriting spans must preserve exact control names, not
-  // produce "A d d a s s e t s" in Chromium's accessibility tree.
-  await expect(page.getByRole('button', {name:'Add assets', exact:true})).toHaveCount(1);
-  await expect(page.getByRole('button', {name:'Generate links', exact:true})).toHaveCount(1);
-  const label = page.locator('.forge-v5-group-title .pencil-glyph-stroke').first();
-  await expect(label).toHaveCSS('animation-name', /forgePencilContour/);
-  const size = page.getByRole('spinbutton', {name:'Width in pixels'});
-  await size.fill('250');
-  await expect(size).toHaveValue('250');
-  await expect(label).toHaveCSS('animation-iteration-count', /1/);
-  await page.getByRole('button', {name:'Generate links'}).click();
-  await expect(page.locator('.logo-workspace')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add assets', exact: true })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Generate links', exact: true })).toHaveCount(1);
+  const width = page.getByRole('spinbutton', { name: 'Width in pixels' });
+  await width.fill('250');
+  await expect(width).toHaveValue('250');
+  await page.getByRole('button', { name: 'Generate links' }).click();
 
   await page.goto('#/storyboard');
-  await expect(page.getByRole('button', {name:'Add Assets', exact:true})).toHaveCount(1);
-  await expect(page.getByRole('tab', {name:'Grid Board', exact:true})).toHaveCount(1);
-  const boardName = page.getByRole('textbox', {name:'Board Name'});
+  await expect(page.getByRole('button', { name: 'Add Assets', exact: true })).toHaveCount(1);
+  await expect(page.getByRole('tab', { name: 'Grid Board', exact: true })).toHaveCount(1);
+  const boardName = page.getByRole('textbox', { name: 'Board Name' });
   await boardName.fill('Illustrated pitch');
   await expect(boardName).toHaveValue('Illustrated pitch');
-  await page.getByRole('tab', {name:'Fit to Platform'}).click();
-  await expect(page.getByRole('button', {name:'Upload Image'})).toBeVisible();
+  await page.getByRole('tab', { name: 'Fit to Platform' }).click();
+  await expect(page.getByRole('button', { name: 'Upload Image' })).toBeVisible();
+
+  await page.goto('#/home');
+  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
+  await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Open Ad Downloader' }).click();
+  await expect(page.getByRole('heading', { name: 'Ad Downloader', level: 1 })).toBeVisible();
+  await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
+  await page.getByRole('button', { name: 'The Forge home' }).click();
+  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
+  await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
 });
 
-test('illustrations animate while all visible paper and card borders remain stationary', async ({page}) => {
+test('direct Home and reduced motion are completely drawn and never loop', async ({ page }) => {
   await page.goto('#/home');
-  const pageFrame = page.locator('.sketch-page-frame-svg path').first();
-  const border = page.locator('.sketch-card-border-svg [data-pencil-trace]').first();
-  await expect(pageFrame).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
+  await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
+  await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
+  const frame = page.locator('.sketch-page-frame-svg path').first();
+  const border = page.locator('.sketch-card-border-svg path[stroke]').first();
+  const detail = page.locator('.pencil-ongoing-illustration-detail').first();
+  await expect(frame).toHaveCSS('animation-name', 'none');
   await expect(border).toHaveCSS('animation-name', 'none');
-  const illustration = page.locator('.sketch-card-art .pencil-ongoing-illustration-detail').first();
-  await expect(illustration).toHaveCSS('animation-name','forge-home-ongoing-graphite');
-  await expect(page.locator('.sketch-card-art .pencil-ongoing-illustration-detail')).toHaveCount(7);
-  await page.getByRole('searchbox', {name:'Find a Forge tool'}).fill('ad downloader');
+  await expect(detail).toHaveCSS('animation-name', 'none');
+  await expect(detail).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
+
+  await page.getByRole('searchbox', { name: 'Find a Forge tool' }).fill('ad downloader');
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(1);
-  await expect(page.locator('.sketch-card-border-svg path').first()).toHaveCSS('animation-name','none');
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await expect(page.locator('.sketch-home-grid .pencil-glyph-vector').first()).toBeHidden();
-  await expect(page.locator('.sketch-home-grid .pencil-glyph-face').first()).toHaveCSS('opacity','1');
+  await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(detail).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
 });

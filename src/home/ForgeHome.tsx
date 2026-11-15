@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { PencilWordmark } from './PencilWordmark';
 import { PencilLettering } from './PencilLettering';
 import type { ToolId } from '../tools';
@@ -149,31 +149,11 @@ export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: numbe
 type Props = {
   onOpenTool: (tool: ToolId) => void;
   onReplayIntro?: () => void;
+  animateWriting: boolean;
 };
 
-export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
+export function ForgeHome({ onOpenTool, onReplayIntro, animateWriting }: Props) {
   const [search, setSearch] = useState('');
-  const homeRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const home = homeRef.current;
-    if (!home) return;
-    let resumeTimer = 0;
-    const onHomeScroll = () => {
-      // One DOM attribute change at scroll start/end, not a React render on
-      // every wheel frame. Keep the expensive perpetual SVG traces off paint
-      // while the browser is moving the paper.
-      if (home.dataset.scrolling !== 'true') home.dataset.scrolling = 'true';
-      window.clearTimeout(resumeTimer);
-      resumeTimer = window.setTimeout(() => { delete home.dataset.scrolling; }, 160);
-    };
-    home.addEventListener('scroll', onHomeScroll, { passive: true });
-    return () => {
-      home.removeEventListener('scroll', onHomeScroll);
-      window.clearTimeout(resumeTimer);
-      delete home.dataset.scrolling;
-    };
-  }, []);
   const term = search.trim().toLocaleLowerCase();
   const visibleIds = tools.filter(tool =>
     !term || [tool.label, toolNotes[tool.id].category, toolNotes[tool.id].description]
@@ -187,7 +167,7 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
   const isFilteredView = search.trim().length > 0;
 
   return (
-    <section ref={homeRef} className="forge-home sketch-home" aria-label="The Forge home">
+    <section className="forge-home sketch-home" aria-label="The Forge home">
       <header className="sketch-header-band">
         <div className="sketch-checklist-wrap" aria-hidden="true">
           <ul className="sketch-checklist">
@@ -197,7 +177,7 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
                   <span className="sketch-checkbox-box" aria-hidden="true">
                     <SketchCheckboxIcon checked={item.done} />
                   </span>
-                  <span><PencilLettering text={item.label} /></span>
+                  <span><PencilLettering text={item.label}  enabled={animateWriting} /></span>
                 </span>
               </li>
             ))}
@@ -226,7 +206,7 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
           </div>
           <p className="sketch-subtitle">
             <span className="sketch-subtitle-rule" aria-hidden="true" />
-            <span className="sketch-highlight-sweep"><PencilLettering text="A creative production toolkit" /></span>
+            <span className="sketch-highlight-sweep"><PencilLettering text="A creative production toolkit"  enabled={animateWriting} /></span>
             <span className="sketch-subtitle-rule" aria-hidden="true" />
           </p>
         </div>
@@ -240,12 +220,12 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
       <div className="sketch-welcome-row">
         <div className="sketch-welcome-copy">
           <h2>
-            <span className="sketch-welcome-ink"><PencilLettering text="Welcome to The Forge" /></span>{' '}
+            <span className="sketch-welcome-ink"><PencilLettering text="Welcome to The Forge"  enabled={animateWriting} /></span>{' '}
             <span className="sketch-wave-mark" aria-hidden="true">
               <SketchWavingHand />
             </span>
           </h2>
-          <p><PencilLettering text="Pick a tool and get to work." /></p>
+          <p><PencilLettering text="Pick a tool and get to work."  enabled={animateWriting} /></p>
           <span className="sketch-welcome-ticks" aria-hidden="true">
             <svg viewBox="0 0 24 22" fill="none" stroke="#b85337" strokeWidth="1.7" strokeLinecap="round">
               <path pathLength={100} data-pencil-trace="true" d="M4 6 L16 2 M6 13 L20 11 M4 19 L15 20" />
@@ -339,9 +319,9 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
                           <path pathLength={100} data-pencil-trace="true" d="M18 4 L6 8 M18 11 L4 11 M18 18 L6 14" />
                         </svg>
                       )}
-                      <span className="sketch-highlight-mark"><PencilLettering text={tool.label} /></span>
+                      <span className="sketch-highlight-mark"><PencilLettering text={tool.label}  enabled={animateWriting} /></span>
                     </strong>
-                    <span className="sketch-card-desc"><PencilLettering text={info.cardCopy} /></span>
+                    <span className="sketch-card-desc"><PencilLettering text={info.cardCopy}  enabled={animateWriting} /></span>
                     <svg className="sketch-ongoing-card-underline" viewBox="0 0 182 14" preserveAspectRatio="none" aria-hidden="true">
                       <path pathLength={1} d="M5 8 Q44 4 90 8 T177 7 M18 11 Q81 9 152 11" fill="none" stroke="#695e50" strokeWidth="1.35" strokeLinecap="round" />
                     </svg>

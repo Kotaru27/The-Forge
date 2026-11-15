@@ -1,4 +1,3 @@
-import { PencilLettering } from '../../home/PencilLettering';
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
@@ -222,20 +221,20 @@ export function VideoStills({ onTransfer }: Props) {
         <div className="vs-drop" onDragOver={event => { event.preventDefault(); setDragged(true); }}
           onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragged(false); }}
           onDrop={onDrop} data-dragging={dragged}>
-          <button type="button" onClick={() => input.current?.click()}><PencilLettering text="Add Videos" className="pencil-write-control" /></button>
-          <span><PencilLettering text="or drop video files here" className="pencil-write-instruction" /></span>
+          <button type="button" onClick={() => input.current?.click()}>{"Add Videos"}</button>
+          <span>{"or drop video files here"}</span>
           <input ref={input} type="file" accept="video/*,.mp4,.webm,.mov,.m4v,.ogg,.ogv,.avi,.mkv" multiple hidden onChange={onFileInput} aria-label="Choose video files" />
         </div>
-        <button type="button" disabled={!totalSelected || transferring} onClick={() => void send()}><PencilLettering text="Send to Board" className="pencil-write-control" /></button>
-        <button type="button" disabled={!downloadable || zipProgress !== null} onClick={() => void download(exportAll(collectionsRef.current), 'video_extras.zip')}><PencilLettering text="Download All" className="pencil-write-control" /></button>
-        <button className="vs-danger" type="button" disabled={!collections.length} onClick={() => setConfirmClear(true)}><PencilLettering text="Clear" className="pencil-write-control" /></button>
+        <button type="button" disabled={!totalSelected || transferring} onClick={() => void send()}>{"Send to Board"}</button>
+        <button type="button" disabled={!downloadable || zipProgress !== null} onClick={() => void download(exportAll(collectionsRef.current), 'video_extras.zip')}>{"Download All"}</button>
+        <button className="vs-danger" type="button" disabled={!collections.length} onClick={() => setConfirmClear(true)}>{"Clear"}</button>
       </div>
       <div className="vs-options">
-        <label><input type="checkbox" checked={contactSheet !== 0} onChange={e => setContactSheet(e.target.checked ? 4 : 0)} /> <PencilLettering text="Create contact sheet" className="pencil-write-control" /></label>
+        <label><input type="checkbox" checked={contactSheet !== 0} onChange={e => setContactSheet(e.target.checked ? 4 : 0)} /> {"Create contact sheet"}</label>
         {contactSheet !== 0 && <label>Layout <select aria-label="Contact sheet layout" value={contactSheet} onChange={event => setContactSheet(Number(event.target.value) as 4 | 6 | 9)}>
           <option value="4">2 × 2</option><option value="6">3 × 2</option><option value="9">3 × 3</option>
         </select></label>}
-        <span><PencilLettering text="One JPEG still per second of video · Original frame dimensions" className="pencil-write-instruction" /></span>
+        <span>{"One JPEG still per second of video · Original frame dimensions"}</span>
       </div>
       {busy && <div className="vs-status" role="status">{uploadProgress || 'Processing videos…'} <button type="button" onClick={() => activeAbort.current?.abort()}>Cancel current</button></div>}
       {zipProgress !== null && <div className="vs-status" role="status">Creating ZIP: {zipProgress}%</div>}
@@ -243,8 +242,8 @@ export function VideoStills({ onTransfer }: Props) {
       {notice && <p className="vs-notice" role="status">{notice}</p>}
       </div>
       <div className="vs-content">
-        <div className="vs-list-heading"><h2><PencilLettering text="Video collections" className="pencil-write-heading" /></h2><span>{collections.length} videos</span></div>
-        {!collections.length && <div className="vs-empty"><PencilLettering text="Upload videos to extract still frames. Processing stays on this device." className="pencil-write-instruction" /></div>}
+        <div className="vs-list-heading"><h2>{"Video collections"}</h2><span>{collections.length} videos</span></div>
+        {!collections.length && <div className="vs-empty">{"Upload videos to extract still frames. Processing stays on this device."}</div>}
         <div className="vs-stacks">
           {collections.map(group => <button type="button" key={group.id} className="vs-stack" disabled={!group.frames.length}
             onClick={() => { setActiveId(group.id); setActiveFrame(0); }} aria-label={`Inspect stills from ${group.name}`}>
@@ -275,9 +274,9 @@ export function VideoStills({ onTransfer }: Props) {
                 <input type="checkbox" checked={frame.checked} onChange={event => toggleFrame(current.id, index, event.target.checked)} aria-label={`Select ${frame.type === 'storyboard' ? 'contact sheet' : `frame ${frame.num}`}`} />
               </div>)}
             </div>
-            <div className="vs-frame-preview"><span><PencilLettering text="Frame preview" className="pencil-write-heading" /></span>
+            <div className="vs-frame-preview"><span>{"Frame preview"}</span>
               {current.frames[activeFrame] && <img src={current.frames[activeFrame].url} alt={`${current.name}, ${current.frames[activeFrame].type === 'storyboard' ? 'contact sheet' : `frame ${current.frames[activeFrame].num}`}`} />}
-              <span><PencilLettering text="Original frame · JPEG" className="pencil-write-instruction" /></span>
+              <span>{"Original frame · JPEG"}</span>
             </div>
           </div>
           <footer className="vs-modal-foot">Use ← → keys to move between frames. Ctrl+A selects all. Esc closes.</footer>

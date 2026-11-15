@@ -90,15 +90,16 @@ test('graphite lines and lettering draw in place, with reduced-motion fallback',
   const pencilPath = page.locator('.sketch-card-border-svg [data-pencil-trace]').first();
   const title = page.locator('.sketch-hero-center h1');
   await expect(pencilPath).toHaveAttribute('pathLength','1');
-  // The original border stays fully inked after the intro; a separate trace loops.
+  // Paper borders and illustration details are now static on every direct Home visit.
   await expect(pencilPath).toHaveCSS('animation-name','none');
   await expect(title.locator('.pencil-wordmark-art')).toHaveCount(1);
   await expect(title).toHaveCSS('animation-name','none');
   const oldBorderLoop = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
   await expect(oldBorderLoop).toHaveCSS('animation-name','none');
   const ongoing = page.locator('.sketch-card-art .pencil-ongoing-illustration-detail').first();
-  await expect(ongoing).toHaveCSS('animation-name','forge-home-ongoing-graphite');
-  await expect(ongoing).toHaveCSS('animation-iteration-count','infinite');
+  await expect(ongoing).toHaveCSS('animation-name','none');
+  await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
+  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
   await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('transform','none');
 
   await page.emulateMedia({reducedMotion:'reduce'});

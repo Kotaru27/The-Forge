@@ -6,10 +6,10 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   const intro = page.getByRole('dialog', { name: 'The Forge opening pencil sketch' });
   await expect(intro).toBeVisible();
   await expect(intro).toHaveAttribute('data-intro-stage', 'drawing');
-  // Home must not pre-write behind the intro overlay. It starts at handoff,
-  // and its last finished glyph must remain static after the intro settles.
+  // Home carries ZERO per-letter SVGs before handoff. It starts to write
+  // only when the genuine opening intro reaches Home.
   const homePencil = page.locator('.sketch-home .pencil-glyph-stroke').first();
-  await expect(homePencil).toHaveCSS('animation-name', 'none');
+  await expect(homePencil).toHaveCount(0);
   await expect(intro.locator('#forge-intro-layer-drafting-guides')).toHaveCount(1);
   await expect(intro.locator('#forge-intro-layer-frame-and-emblem')).toHaveCount(1);
   await expect(intro.locator('#forge-intro-layer-title')).toHaveCount(1);
@@ -75,9 +75,9 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   await expect(page.locator('.forge-app')).not.toHaveClass(/forge-intro-handoff/);
   await expect(page.getByRole('heading', { name: 'THE FORGE', level: 1 })).toBeVisible();
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
-  // The opening ends, but the Home drawing does NOT stop: non-destructive
-  // pencil over-strokes continue looping without concealing title/buttons.
-  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-continuous-draw/);
+  // The overlay ends while the last written lines finish ONCE, then Home
+  // becomes a completely static notebook page with no recurring SVGs.
+  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-finishing/);
   expect((await highlightState(subtitleHighlight)).name).toBe('none');
   expect((await highlightState(cardHighlight)).name).toBe('none');
   await page.waitForTimeout(300);
@@ -87,8 +87,8 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   await expect(oldBorderLoop).toHaveCSS('animation-name', 'none');
   await expect(oldBorderLoop).toBeHidden();
   const ongoing = page.locator('.sketch-card-art .pencil-ongoing-illustration-detail').first();
-  await expect(ongoing).toHaveCSS('animation-name','forge-home-ongoing-graphite');
-  await expect(ongoing).toHaveCSS('animation-iteration-count','infinite');
+  await expect(ongoing).toHaveCSS('animation-name', 'none');
+  await expect(ongoing).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
   await expect(page.locator('.sketch-card-art .pencil-ongoing-illustration-detail')).toHaveCount(7);
   await expect(page.getByRole('button', {name:'Open Storyboard'})).toBeVisible();
   // The intro-to-settled handoff must not restart the old full-line wipe:
@@ -101,13 +101,13 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   // SVG contours remain attached to every phrase; native letters are fully
   // visible after the one-shot writing finishes, with no line-wide clipping.
   await expect(page.locator('.sketch-home-grid .pencil-glyph-face').first()).toHaveCSS('opacity','1');
-  // Long descriptions finish writing without a reset when the intro overlay
-  // unmounts; the SAME finite pen stroke remains active in settled Home.
-  await expect(page.locator('.sketch-home-grid .pencil-glyph-stroke').first()).toHaveCSS('animation-name','forgePencilContour');
-  const lastDescriptionGlyph = page.locator('.sketch-home-grid .sketch-card-desc .pencil-glyph-face').last();
-  await expect(lastDescriptionGlyph).toHaveCSS('animation-name','forgePencilOriginalLetter');
-  await expect(lastDescriptionGlyph).toHaveCSS('opacity', '1', { timeout: 5500 });
-  await expect(page.locator('.sketch-home-grid .pencil-written-glyph').first()).toHaveCSS('clip-path','none');
+  // The brief completion phase ends automatically, removing every
+  // expensive per-letter SVG while keeping ALL seven descriptions readable.
+  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/, { timeout: 6500 });
+  await expect(page.locator('.sketch-home-grid .pencil-written-glyph')).toHaveCount(0);
+  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
+  await expect(ongoing).toHaveCSS('animation-name', 'none');
+  await expect(description).toContainText(/.+/);
 
   await page.screenshot({ path: testInfo.outputPath('intro-home-finished.png') });
 
@@ -122,6 +122,8 @@ test('intro skip and user-triggered replay never change tool routing', async ({ 
   await expect(intro).toBeVisible();
   await page.getByRole('button', { name: /Skip intro/ }).click();
   await expect(intro).toHaveCount(0);
+  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
+  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
   await page.getByRole('button', { name: /Replay pencil sketch intro/ }).click();
   await expect(intro).toBeVisible();
 
@@ -131,6 +133,7 @@ test('intro skip and user-triggered replay never change tool routing', async ({ 
   await expect(page.locator('.logo-workspace')).toBeVisible();
   await page.goto('#/home');
   await expect(intro).toHaveCount(0);
+  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
   // Existing search matches card description text as well as tool names.
   // Use a uniquely matching query; do not change the application's search.
   await page.getByRole('searchbox', { name: 'Find a Forge tool' }).fill('ad downloader');
@@ -143,6 +146,8 @@ test('deep links and reduced-motion preferences show settled Home without animat
   await page.goto('#/home');
   await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
+  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
+  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
