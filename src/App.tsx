@@ -10,6 +10,8 @@ import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { ForgeHome, ToolGlyph } from './home/ForgeHome';
 import { ForgeSketchIntro } from './intro/ForgeSketchIntro';
+import { ToolOpenTransition, type ToolOpenOrigin } from './motion/ToolOpenTransition';
+import { WorkspaceParallax } from './motion/WorkspaceParallax';
 import {
   AnvilMark,
   MountainDoodle,
@@ -42,6 +44,12 @@ function initialTool(): Route {
 export default function App() {
   const [activeTool, setActiveTool] = useState<Route>(initialTool);
   const storyboardRef = useRef<StoryboardRef>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const routeRef = useRef<Route>(initialTool());
+  const openingSequence = useRef(0);
+  const [opening, setOpening] = useState<{
+    id: number; tool: ToolId; origin: ToolOpenOrigin | null;
+  } | null>(null);
   const [introPhase, setIntroPhase] = useState<IntroPhase>(initialIntroPhase);
   const [introRun, setIntroRun] = useState(0);
   const finishIntro = useCallback(() => {
@@ -69,12 +77,31 @@ export default function App() {
     return () => window.clearTimeout(timeout);
   }, [introPhase]);
 
-  const openTool = useCallback((tool: Route) => {
+  const openTool = useCallback((tool: Route, origin?: ToolOpenOrigin) => {
     if (tool !== 'home' && !isToolId(tool)) return;
+    const changed = routeRef.current !== tool;
+    routeRef.current = tool;
+    // A short, nonblocking visual handoff for genuine tool navigation only.
+    // Initial loading, reselecting a tool, direct Home returns and reduced
+    // motion all remain immediate and fully visible.
+    if (changed && tool !== 'home' && !reducedMotion()) {
+      setOpening({ id: ++openingSequence.current, tool, origin: origin ?? null });
+    } else {
+      setOpening(null);
+    }
     setActiveTool(tool);
     if (tool !== 'home') setIntroPhase('settled');
     if (window.location.hash !== '#/' + tool) history.replaceState(null, '', '#/' + tool);
   }, []);
+
+  useEffect(() => {
+    if (!opening) return;
+    // Also clears when the tab is backgrounded and animationend never fires.
+    const timeout = window.setTimeout(() => {
+      setOpening(current => current?.id === opening.id ? null : current);
+    }, 380);
+    return () => window.clearTimeout(timeout);
+  }, [opening]);
 
   useEffect(() => {
     openTool(initialTool());
@@ -106,7 +133,8 @@ export default function App() {
         (isHome && introPhase === 'pending' ? ' forge-intro-before-home' : '') +
         (isHome && introPhase === 'handoff' ? ' forge-intro-handoff' : '') +
         (isHome && introPhase === 'finishing' ? ' forge-home-finishing' : '') +
-        (isHome && introPhase === 'settled' ? ' forge-home-resting' : '')
+        (isHome && introPhase === 'settled' ? ' forge-home-resting' : '') +
+        (opening && !isHome ? ' forge-tool-opening' : '')
       }
     >
       <SketchSvgDefs />
@@ -188,7 +216,7 @@ export default function App() {
           </aside>
         )}
 
-        <main className="main-area sketch-main-area">
+        <main ref={mainRef} className="main-area sketch-main-area">
           {!isHome && current && (
             <header className="topbar sketch-topbar">
               <div className="forge-ctk-top-leading">
@@ -234,8 +262,12 @@ export default function App() {
           <div className="native-tool" hidden={activeTool !== 'ad-downloader'}>
             <AdDownloader />
           </div>
+          <WorkspaceParallax activeTool={activeTool === 'home' ? null : activeTool} />
         </main>
       </div>
+      {opening?.origin && opening.tool === activeTool && (
+        <ToolOpenTransition key={opening.id} origin={opening.origin} targetRef={mainRef} />
+      )}
       {isHome && (introPhase === 'pending' || introPhase === 'handoff') && (
         <ForgeSketchIntro key={introRun} onHandoff={handoffIntro} onFinish={finishIntro} onSkip={skipIntro} />
       )}

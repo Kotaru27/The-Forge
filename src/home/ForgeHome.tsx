@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { PencilWordmark } from './PencilWordmark';
 import { PencilLettering } from './PencilLettering';
 import type { ToolId } from '../tools';
+import type { ToolOpenOrigin } from '../motion/ToolOpenTransition';
 import { tools } from '../tools';
 import {
   ChecklistArrow,
@@ -147,7 +148,7 @@ export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: numbe
 }
 
 type Props = {
-  onOpenTool: (tool: ToolId) => void;
+  onOpenTool: (tool: ToolId, origin?: ToolOpenOrigin) => void;
   onReplayIntro?: () => void;
   animateWriting: boolean;
 };
@@ -304,7 +305,15 @@ export function ForgeHome({ onOpenTool, onReplayIntro, animateWriting }: Props) 
                   type="button"
                   className={`forge-home-card sketch-tool-card sketch-card-${tool.id}`}
                   data-workbench={tool.id}
-                  onClick={() => onOpenTool(tool.id)}
+                  onClick={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    onOpenTool(tool.id, {
+                      x: rect.x,
+                      y: rect.y,
+                      width: rect.width,
+                      height: rect.height,
+                    });
+                  }}
                   aria-label={`Open ${tool.label}`}
                 >
                   <SketchCardBorder spiral={isSpiralCard} />
