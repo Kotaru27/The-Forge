@@ -46,9 +46,9 @@
    Cancel that competing keyframe in ALL Home phases; only the handoff may
    shade once. Direct visits and settled Home show completed pigment. */
 .forge-app.forge-sketch-ui .sketch-home :is(
-  .sketch-subtitle .sketch-highlight-sweep::before,
-  .sketch-card-title .sketch-highlight-mark::before
-) {
+  .sketch-subtitle .sketch-highlight-sweep,
+  .sketch-card-title .sketch-highlight-mark
+)::before {
   animation: none !important;
   clip-path: none;
 }
@@ -85,9 +85,9 @@
   clip-path: none !important;
 }
 .forge-app.forge-home-continuous-draw .sketch-home :is(
-  .sketch-card-title .sketch-highlight-mark::before,
-  .sketch-subtitle .sketch-highlight-sweep::before
-) {
+  .sketch-card-title .sketch-highlight-mark,
+  .sketch-subtitle .sketch-highlight-sweep
+)::before {
   animation: none !important;
   clip-path: none !important;
 }
