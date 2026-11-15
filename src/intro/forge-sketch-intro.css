@@ -946,8 +946,6 @@
 .forge-app.forge-intro-handoff .sketch-subtitle {--draw-copy-delay:.22s}
 .forge-app.forge-intro-handoff .sketch-welcome-copy {--draw-copy-delay:.40s}
 .forge-app.forge-intro-handoff .sketch-card-slot:nth-child(n+5) {--draw-copy-delay:1.08s}
-.forge-app.forge-intro-handoff .sketch-card-title {--draw-copy-delay:var(--draw-copy-delay)}
-.forge-app.forge-intro-handoff .sketch-card-desc {--draw-copy-delay:var(--draw-copy-delay)}
 
 /* Card frames are already real SVG pathLength=1 tracers from V3. Their
    crosshatching is revealed after the pencil outlines, not all at once. */
