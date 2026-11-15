@@ -59,7 +59,7 @@ export function ForgeSketchIntro({ onHandoff, onFinish }: Props) {
       <div className="forge-intro-canvas">
         <IntroSketchArtwork />
         <div className="forge-intro-title-bridge" ref={wordmarkRef} aria-hidden="true">
-          <PencilWordmark idPrefix="forge-intro" />
+          <PencilWordmark idPrefix="forge-intro" pencilWriting />
         </div>
       </div>
       <div className="forge-intro-footer" aria-hidden="true">
