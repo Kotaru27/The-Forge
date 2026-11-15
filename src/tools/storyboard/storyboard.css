@@ -57,3 +57,37 @@
 .sb-lightbox img{max-width:92vw;max-height:85vh;object-fit:contain}
 @media(max-width:1080px){.sb-layout{grid-template-columns:300px minmax(0,1fr)}.sb-topline{gap:8px}.sb-topline button{font-size:12px;padding:8px}}
 @media(max-width:800px){.sb-layout{grid-template-columns:1fr;overflow:auto}.sb-controls{border-right:0;border-bottom:1px solid #333;max-height:none}.sb-stage{min-height:340px}}
+
+/* Exposes the two pre-existing Storyboard import controls. The menu is a
+   native button group; directory import still uses the original hidden
+   webkitdirectory input and exact same folderGroups() engine. */
+.storyboard-tool .sb-import-picker{position:relative;display:inline-flex;align-items:center;flex:0 0 auto}
+.storyboard-tool .sb-import-trigger{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.storyboard-tool .sb-import-trigger > span{font-size:15px;line-height:1;transition:transform .16s ease}
+.storyboard-tool .sb-import-trigger[aria-expanded="true"] > span{transform:rotate(180deg)}
+.storyboard-tool .sb-import-options{
+  position:absolute;z-index:50;top:calc(100% + 7px);left:0;
+  display:flex;flex-direction:column;gap:4px;min-width:204px;
+  padding:8px;border:1px solid #403d37;background:#f9f3e7;
+  box-shadow:2px 3px 0 rgba(47,45,42,.19);
+}
+.storyboard-tool .sb-import-options button{
+  width:100%;text-align:left;white-space:nowrap;
+  font:700 13px/1.35 Kalam, 'Segoe Print',sans-serif;
+  color:#282d31;background:#f9f3e7;border:1px solid transparent;
+  padding:8px 11px;
+}
+.storyboard-tool .sb-import-options button:hover,
+.storyboard-tool .sb-import-options button:focus-visible{
+  color:#263b54;background:#f2e7c9;border-color:#536177;
+}
+.forge-sketch-ui .storyboard-tool .sb-import-options{
+  border:2px solid #48443d;border-radius:2px;
+  background:#f9f3e7 var(--pencil-fiber,none);
+}
+@media(max-width:520px){
+ .storyboard-tool .sb-import-options{left:auto;right:0;min-width:195px}
+}
+@media(prefers-reduced-motion:reduce){
+ .storyboard-tool .sb-import-trigger > span{transition:none}
+}

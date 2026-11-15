@@ -7,6 +7,7 @@ import './home/ctk-card-art.css';
 import './sketchbook-theme.css';
 import './pencil-graphite.css';
 import './pencil/pencil-controls.css';
+import './intro/forge-sketch-intro.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><App /></React.StrictMode>

@@ -100,6 +100,7 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
   const [message, setMessage] = useState('');
   const [confirm, setConfirm] = useState<ConfirmAction>(null);
   const [dragging, setDragging] = useState(false);
+  const [assetMenuOpen, setAssetMenuOpen] = useState(false);
   const [previewSize, setPreviewSize] = useState('');
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [progress, setProgress] = useState('');
@@ -107,6 +108,7 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
   const fitPreview = useRef<HTMLCanvasElement>(null);
   const fitFileInput = useRef<HTMLInputElement>(null);
   const folderInput = useRef<HTMLInputElement>(null);
+  const assetMenuRef = useRef<HTMLDivElement>(null);
   const imagesInput = useRef<HTMLInputElement>(null);
   const urls = useRef(new Set<string>());
   const lastBoardCanvas = useRef<HTMLCanvasElement | null>(null);
@@ -135,6 +137,22 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
       urls.current.clear();
     };
   }, []);
+
+  useEffect(() => {
+    if (!assetMenuOpen) return;
+    const dismiss = (event: PointerEvent) => {
+      if (!assetMenuRef.current?.contains(event.target as Node)) setAssetMenuOpen(false);
+    };
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setAssetMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', dismiss);
+    document.addEventListener('keydown', onEscape);
+    return () => {
+      document.removeEventListener('pointerdown', dismiss);
+      document.removeEventListener('keydown', onEscape);
+    };
+  }, [assetMenuOpen]);
 
   const active = boards.find(board => board.id === activeId) || boards[0];
   const other = boards.filter(board => board.images.length);
@@ -402,7 +420,21 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
         </div>
         <div className="sb-toolbar">
           {mode === 'story' && <>
-            <button type="button" onClick={() => imagesInput.current?.click()}>Add Assets</button>
+            <div className="sb-import-picker" ref={assetMenuRef}>
+              <button
+                type="button"
+                className="sb-import-trigger"
+                aria-expanded={assetMenuOpen}
+                aria-controls="storyboard-import-options"
+                onClick={() => setAssetMenuOpen(open => !open)}
+              >Add Assets <span aria-hidden="true">⌄</span></button>
+              {assetMenuOpen && (
+                <div className="sb-import-options" id="storyboard-import-options" role="group" aria-label="Choose asset import method">
+                  <button type="button" onClick={() => { setAssetMenuOpen(false); imagesInput.current?.click(); }}>Individual images / videos</button>
+                  <button type="button" onClick={() => { setAssetMenuOpen(false); folderInput.current?.click(); }}>Folder</button>
+                </div>
+              )}
+            </div>
             <label className="sb-board-name-inline">
               <span>Board Name</span>
               <input value={active?.name || ''} aria-label="Board Name" onChange={event => renameBoard(event.target.value)} maxLength={80} />
