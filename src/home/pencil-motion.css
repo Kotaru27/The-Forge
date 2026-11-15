@@ -1,0 +1,244 @@
+/*
+ * THE FORGE — pencil-stroke motion (visual-only)
+ *
+ * Home UI borders are ALWAYS static. True illustration paths and the contours
+ * of actual Kalam letters are the only authored entrance strokes. Native
+ * labels remain in the DOM and retain their dimensions and accessible names.
+ * Avoid page-wide filters, full-line clipping, mount-time animation loops,
+ * and animation triggered by control input/value changes.
+ */
+
+.pencil-written-text {
+  display: inline;
+  white-space: normal;
+}
+.pencil-written-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.pencil-written-glyph {
+  display: inline-block;
+  position: relative;
+  white-space: pre;
+  font: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  opacity: 1;
+  clip-path: none;
+}
+.pencil-glyph-face { display: inline; opacity: 1; }
+.pencil-glyph-vector {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 1.12em;
+  overflow: visible;
+  font: inherit;
+  color: inherit;
+  pointer-events: none;
+  opacity: 0;
+}
+.pencil-glyph-stroke {
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: inherit;
+  font-style: inherit;
+  letter-spacing: inherit;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: .044em;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  paint-order: stroke;
+  fill-opacity: 0;
+  stroke-dasharray: var(--pencil-glyph-length, 5.4em);
+  stroke-dashoffset: var(--pencil-glyph-length, 5.4em);
+}
+
+/* One pencil writes each actual letter outline, follows with graphite fill,
+   then yields to the unchanged native text. No line-wide wiping at any point. */
+@keyframes forgePencilContour {
+  from { stroke-dashoffset: var(--pencil-glyph-length, 5.4em); }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes forgePencilPigment {
+  0%, 30% { fill-opacity: 0; }
+  100% { fill-opacity: 1; }
+}
+@keyframes forgePencilOriginalLetter {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes forgePencilVectorYield {
+  0%, 60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Writing begins on the handoff or when a STATIC workroom is opened.
+   No React frame-by-frame state, and absolutely no rewriting live values. */
+.forge-app.forge-intro-handoff .sketch-home .pencil-written-glyph,
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-written-glyph,
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar .pencil-written-glyph,
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar .pencil-written-glyph {
+  --pencil-start: calc(var(--pencil-write-base, .10s) + var(--pencil-letter-index) * .020s);
+  animation: none !important;
+  opacity: 1 !important;
+  clip-path: none !important;
+}
+:is(
+  .forge-app.forge-intro-handoff .sketch-home,
+  .forge-app.forge-sketch-ui .native-tool:not([hidden]),
+  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
+  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
+) .pencil-glyph-vector {
+  animation: forgePencilVectorYield .17s linear calc(var(--pencil-start) + .28s) both;
+}
+:is(
+  .forge-app.forge-intro-handoff .sketch-home,
+  .forge-app.forge-sketch-ui .native-tool:not([hidden]),
+  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
+  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
+) .pencil-glyph-stroke {
+  animation:
+    forgePencilContour .34s cubic-bezier(.32,.04,.16,1) var(--pencil-start) both,
+    forgePencilPigment .17s ease-out calc(var(--pencil-start) + .19s) both;
+}
+:is(
+  .forge-app.forge-intro-handoff .sketch-home,
+  .forge-app.forge-sketch-ui .native-tool:not([hidden]),
+  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
+  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
+) .pencil-glyph-face {
+  animation: forgePencilOriginalLetter .12s ease-out calc(var(--pencil-start) + .30s) both;
+}
+
+/* Semantic choreography: illustrations lead, labels are handwritten
+   immediately after, and a single colored-pencil pass lands last. */
+.forge-app.forge-intro-handoff .sketch-checklist-wrap { --pencil-write-base: .14s; }
+.forge-app.forge-intro-handoff .sketch-subtitle { --pencil-write-base: .32s; }
+.forge-app.forge-intro-handoff .sketch-welcome-copy { --pencil-write-base: .48s; }
+.forge-app.forge-intro-handoff .sketch-card-slot { --pencil-write-base: var(--draw-copy-delay, .95s); }
+.forge-app.forge-intro-handoff .sketch-card-desc { --pencil-write-base: calc(var(--draw-copy-delay, .95s) + .43s); }
+.forge-app.forge-intro-handoff .sketch-subtitle .sketch-highlight-sweep::before {
+  animation-delay: 1.66s !important;
+}
+.forge-app.forge-intro-handoff .sketch-card-title .sketch-highlight-mark::before {
+  animation-delay: calc(var(--draw-copy-delay, .95s) + .74s) !important;
+}
+.forge-app.forge-intro-handoff .sketch-home .pencil-written-glyph {
+  -webkit-text-stroke: 0 !important;
+}
+.forge-app.forge-intro-handoff .sketch-home .pencil-glyph-face {
+  -webkit-text-stroke: 0 !important;
+}
+
+/* The previous clip-based letter and heading effects are not handwriting.
+   They must never overlap our authored SVG contours. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+  .sb-section-head strong,
+  .pdf-section-title,
+  .split-section-title,
+  .vs-list-heading strong,
+  .link-panel-heading h2,
+  .adw-header h2,
+  .logo-workspace h2
+),
+.forge-app.forge-sketch-ui .sketch-welcome-copy :is(h2,p),
+.forge-app.forge-sketch-ui .sketch-card-desc,
+.forge-app.forge-sketch-ui .sketch-card-title .sketch-highlight-mark {
+  animation: none !important;
+  clip-path: none !important;
+}
+
+/* Home/tool card borders, notebook frame, and sidebar edges remain physically
+   present. They are not drafted, erased, redrawn or animated during scroll. */
+.forge-app.forge-sketch-ui :is(.sketch-card-border-svg, .sketch-page-frame-svg) path {
+  animation: none !important;
+  stroke-dashoffset: 0 !important;
+  clip-path: none !important;
+}
+.forge-app.forge-sketch-ui .sketch-ongoing-card-border {
+  display: none !important;
+  animation: none !important;
+}
+.forge-app.forge-sketch-ui :is(.sketch-page-frame-svg, .sketch-card-border-svg) {
+  transition: none !important;
+}
+
+/* Only existing illustrated SVG geometry draws in the Home handoff.
+   Keep SVG text IN the illustration behind the same pencil-writing schedule;
+   the small PDF and URL labels no longer materialize before the drawing. */
+.forge-app.forge-intro-handoff .sketch-card-art > svg text {
+  stroke: #344d67 !important;
+  stroke-width: .65px !important;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  fill-opacity: 0;
+  animation:
+    forgeSketchArtTextTrace .48s cubic-bezier(.3,.03,.2,1) calc(var(--draw-art-delay,.6s) + .24s) both,
+    forgeSketchArtTextFill .22s ease-out calc(var(--draw-art-delay,.6s) + .45s) both;
+}
+@keyframes forgeSketchArtTextTrace {
+  from { stroke-dashoffset: 300; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes forgeSketchArtTextFill {
+  from { fill-opacity: 0; }
+  to { fill-opacity: 1; }
+}
+
+/* Continuous life belongs to tiny NON-DESTRUCTIVE marks on illustrations.
+   All underlying art and captions are fully visible after drawing ends.
+   Individual marks get staggered 13-second cycles: never redraw the border. */
+.pencil-ongoing-illustration-detail {
+  fill: none;
+  stroke: #665a48;
+  stroke-width: 1.2px;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  pointer-events: none;
+}
+.forge-app.forge-home-continuous-draw .sketch-card-slot .pencil-ongoing-illustration-detail {
+  animation: forge-home-ongoing-graphite 13s linear var(--forge-pencil-loop-delay) infinite;
+}
+
+/* Tool-workroom writing is a short, interruptible FIRST-ENTRANCE only.
+   Hiding a route immediately drops its animations: no stale placeholders. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-write-heading { --pencil-write-base: .06s; }
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-write-instruction { --pencil-write-base: .28s; }
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-write-control { --pencil-write-base: .45s; }
+.forge-app.forge-sketch-ui .sketch-topbar { --pencil-write-base: .06s; }
+.forge-app.forge-sketch-ui .sketch-sidebar { --pencil-write-base: .12s; }
+
+/* Icons are graphical illustrations, not the borders around their controls. */
+@keyframes forgeWorkroomIllustrationTrace {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar .forge-ctk-header-icon svg :is(path,circle,rect,line,polyline),
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-illustration svg :is(path,circle,rect,line,polyline) {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: forgeWorkroomIllustrationTrace .52s cubic-bezier(.27,.03,.18,1) .05s both;
+}
+
+/* No movement of layout geometry or workroom buttons/inputs during writing. */
+.forge-app.forge-sketch-ui .pencil-written-glyph,
+.forge-app.forge-sketch-ui .pencil-glyph-vector {
+  transform: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .forge-app.forge-sketch-ui .pencil-glyph-vector { display: none !important; animation: none !important; }
+  .forge-app.forge-sketch-ui .pencil-glyph-face { animation: none !important; opacity: 1 !important; }
+  .forge-app.forge-sketch-ui .pencil-glyph-stroke { animation: none !important; }
+  .forge-app.forge-sketch-ui .sketch-card-art svg :is(path,circle,rect,ellipse,line,polyline,polygon,text),
+  .forge-app.forge-sketch-ui .pencil-ongoing-illustration-detail {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+    fill-opacity: 1 !important;
+  }
+}
