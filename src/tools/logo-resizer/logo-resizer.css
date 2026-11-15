@@ -196,6 +196,15 @@
 /* A dozen simultaneous width/height animations would force repeated grid
  * layout during a bulk resize. Small imports retain the existing motion. */
 .forge-logo-v5.logo-bulk-workspace .logo-card .logo-preview-frame{transition:none}
+/* During wheel scrolling the cursor repeatedly crosses cards. Legacy
+ * pencil-hover transforms made the grid appear to jitter under the pointer. */
+@media (hover: hover) and (pointer: fine) {
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-bulk-workspace .logo-card:hover,
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-bulk-workspace .logo-preview-button:hover {
+    transform: none !important;
+  }
+}
+
 
 .forge-logo-v5 .logo-card-heading{min-height:46px;padding:0 11px;gap:9px;background:#151d16;border-bottom-color:#304032}
 .forge-v5-card-index{color:#d9fb79;font:10px Consolas,monospace}
