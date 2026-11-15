@@ -137,3 +137,37 @@ test('reduced motion preserves native scrolling but removes smooth programmatic 
   await expect(page.locator('.sb-controls')).toHaveCSS('scroll-behavior', 'auto');
   await expect(page.locator('.forge-parallax-art, .forge-parallax-near, .forge-parallax-far')).toHaveCount(0);
 });
+
+test('sidebar quick-switch has header-only interruptible motion and does not scale workrooms', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 860 });
+  await page.goto('#/logo-resizer');
+  await page.evaluate(() => {
+    const main = document.querySelector('.sketch-main-area')!;
+    const globals = window as typeof window & { __routeCueCount?: number };
+    globals.__routeCueCount = 0;
+    new MutationObserver(() => {
+      if (main.querySelector('.forge-switching-tool .forge-route-pencil-stroke'))
+        globals.__routeCueCount!++;
+    }).observe(main, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  });
+  await page.getByRole('button', { name: 'Storyboard', exact: true }).click();
+  await expect(page).toHaveURL(/#\/storyboard$/);
+  await page.getByRole('button', { name: 'PDF to Image', exact: true }).click();
+  await expect(page).toHaveURL(/#\/pdf-to-image$/);
+  await expect.poll(() => page.evaluate(() =>
+    (window as typeof window & { __routeCueCount?: number }).__routeCueCount ?? 0
+  )).toBeGreaterThanOrEqual(2);
+  await expect(page.locator('.forge-app')).not.toHaveClass(/forge-tool-opening/);
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('transform', 'none');
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.forge-route-pencil-stroke')).toHaveCount(0, { timeout: 1000 });
+});
+
+test('sidebar tool-switch cue is disabled for reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('#/logo-resizer');
+  await page.getByRole('button', { name: 'Storyboard', exact: true }).click();
+  await expect(page).toHaveURL(/#\/storyboard$/);
+  await expect(page.locator('.forge-route-pencil-stroke')).toHaveCount(0);
+  await expect(page.locator('.sketch-topbar')).not.toHaveClass(/forge-switching-tool/);
+});
