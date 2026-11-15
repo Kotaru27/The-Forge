@@ -10,7 +10,7 @@ const workrooms = [
   { route: 'ad-downloader', heading: 'Ad Downloader', target: 'Copy Names' },
 ] as const;
 
-test('all seven workrooms handwrite static headings, instructions and control names using actual SVG contours', async ({ page }) => {
+test('all seven workrooms handwrite static headings, instructions and control names using actual SVG contours', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 940 });
   for (const {route, heading, target} of workrooms) {
     await page.goto('#/' + route);
@@ -30,6 +30,11 @@ test('all seven workrooms handwrite static headings, instructions and control na
     // Text is never line-clipped or missing after the finite writing pass.
     await page.waitForTimeout(1000);
     await expect(ink).toHaveCSS('opacity','1');
+    await page.screenshot({
+      path: testInfo.outputPath(`pencil-workroom-${route}.png`),
+      animations: 'disabled',
+      fullPage: true,
+    });
   }
 });
 
