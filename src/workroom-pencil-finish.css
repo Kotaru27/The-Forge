@@ -1,0 +1,124 @@
+/*
+ * THE FORGE — Static graphite workroom finish.
+ * The seven workspaces are FINISHED SKETCHES, never live drawing canvases.
+ * This file modifies only visual materials; no sizes, handlers, scroll
+ * containers, grid placement, control semantics or image-preview pixels.
+ */
+.forge-app.forge-sketch-ui {
+  --forge-pencil-ctrl-edge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M5 5 Q47 2.5 95 5 Q97 52 95 96 Q49 97 5 95 Q2.5 53 5 5Z' fill='none' stroke='%23262a2b' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M8 8 Q50 6 92 8 M92 8 Q94 51 92 92 M91 92 Q49 94 8 92 M8 92 Q6 51 8 8' fill='none' stroke='%23685d4d' stroke-opacity='.42' stroke-width='.9' stroke-linecap='round'/%3E%3Cpath d='M7 13 l4 -2 M13 7 l2 4 M89 90 l4 -2' stroke='%233c3933' stroke-opacity='.22' stroke-width='.85' fill='none'/%3E%3C/svg%3E");
+  --forge-pencil-corner-hatch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 58 35' width='58' height='35'%3E%3Cg fill='none' stroke='%23594b3c' stroke-width='.85' stroke-linecap='round' opacity='.29'%3E%3Cpath d='M5 30 L17 19 M11 32 L28 13 M18 32 L37 10 M27 32 L46 12 M36 30 L51 16 M44 29 L53 22'/%3E%3Cpath d='M23 16 L40 27 M32 12 L49 23 M40 12 L52 20' opacity='.42'/%3E%3C/g%3E%3C/svg%3E");
+  --forge-pencil-blue-shade: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='26' viewBox='0 0 54 26'%3E%3Cg fill='none' stroke='%232f4562' stroke-width='.7' stroke-opacity='.13'%3E%3Cpath d='M0 17 L14 4 M8 23 L27 4 M18 24 L38 4 M29 23 L49 4 M42 22 L54 11'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Dry-pencil edges around native controls. Border geometry, border widths and
+ * all button/field states continue to come from the existing tool styles. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+  button,
+  select,
+  textarea,
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color'])
+) {
+  border-image-source: var(--forge-pencil-ctrl-edge) !important;
+}
+
+/* Pencil-shaded controls keep full contrast for dimensions, filenames,
+ * server URLs and other precise technical inputs. No filters on previews. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']),
+  textarea,
+  select
+) {
+  background-image: var(--sk-paper-grain) !important;
+  background-repeat: repeat !important;
+  background-size: 180px 180px !important;
+  box-shadow: inset .7px .7px 0 rgba(68,58,43,.12), 1.5px 2px 0 rgba(36,39,43,.12) !important;
+}
+
+/* Hand-hatched paper corners — small, deterministic graphite pencil marks,
+ * never a noisy fullscreen texture, and never placed over output pixels. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+  .pdf-setup,
+  .split-settings,
+  .vs-workbench-side,
+  .sb-controls,
+  .link-panel,
+  .adw-header,
+  .forge-v5-head
+) {
+  background-image: var(--sk-paper-grain), var(--forge-pencil-corner-hatch) !important;
+  background-position: 0 0, right 12px bottom 10px !important;
+  background-size: 180px 180px, 58px 35px !important;
+  background-repeat: repeat, no-repeat !important;
+}
+
+/* Drop and empty states become tiny drafting-paper notes. This is a surface
+ * decoration only; file chooser/drop handlers and click targets stay native. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+  .pdf-drop,.split-drop,.vs-drop,.logo-empty,.pdf-empty,.split-empty,.vs-empty,.adw-empty
+) {
+  background-image: var(--sk-paper-grain), var(--forge-pencil-corner-hatch) !important;
+  background-position: 0 0, right 12px bottom 10px !important;
+  background-size: 180px 180px, 58px 35px !important;
+  background-repeat: repeat, no-repeat !important;
+}
+
+/* Technical subheads look graphite-shaded instead of flat digital text.
+ * The handwritten Kalam font remains, and content/layout never reflows. */
+.forge-app.forge-sketch-ui :is(
+  .forge-v5-group-title,.sb-section-head strong,.link-panel h3,
+  .vs-list-heading strong,.pdf-results-head h2,.split-results-head h2
+) {
+  text-shadow: .38px .38px 0 rgba(62,53,41,.24);
+}
+
+/* A very light blue colored-pencil hatch on selection only.
+ * Never replace the selected state's background-color or interaction rules. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+  .forge-v5-preset-grid button.selected,
+  .sb-modes button.active,
+  .sb-view-choice button[aria-pressed='true'],
+  .adw-filters button[aria-pressed='true'],
+  .sb-project-row button[aria-current='page']
+) {
+  background-image: var(--forge-pencil-blue-shade) !important;
+  background-repeat: repeat !important;
+  background-size: 54px 26px !important;
+}
+
+/* Buttons feel like a graphite note, not a floating dashboard widget.
+ * Keep the small, existing hover feedback; no typing, looping, or fly-ins. */
+@media (hover: hover) {
+  .forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+    button,.adw-upload
+  ):not(:disabled):hover {
+    box-shadow: 2px 2px 0 rgba(35,37,40,.23) !important;
+  }
+}
+
+/* Pen-pressure effect on paper grid tables; never on user data pixels. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+  .adw-table thead,.adw-table th,.sb-dimensions,.link-preview-ext
+) {
+  background-image: var(--sk-paper-grain) !important;
+  background-size: 180px 180px !important;
+}
+
+/* Explicit motion lock. Workroom content is always finished when opened.
+ * Preserve state-driven progress, upload, and button hover transitions. */
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) :is(
+  .sketch-topbar .sketch-highlight-mark,
+  .native-tool:not([hidden]) .sb-section-head strong,
+  .native-tool:not([hidden]) .pdf-section-title,
+  .native-tool:not([hidden]) .split-section-title,
+  .native-tool:not([hidden]) .vs-list-heading strong,
+  .native-tool:not([hidden]) .link-panel-heading h2,
+  .native-tool:not([hidden]) .adw-header h2,
+  .native-tool:not([hidden]) .logo-workspace h2
+) {
+  animation: none !important;
+  clip-path: none !important;
+}
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar .sketch-highlight-mark::before {
+  animation: none !important;
+  clip-path: none !important;
+}
