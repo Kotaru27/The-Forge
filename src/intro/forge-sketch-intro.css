@@ -970,3 +970,16 @@
     clip-path:none !important;
   }
 }
+
+/* Colored pencils are applied AFTER the graphite handwriting, as real
+   side-to-side shading strokes. Never show full yellow bars before letters. */
+.forge-app.forge-intro-handoff .sketch-card-title .sketch-highlight-mark::before,
+.forge-app.forge-intro-handoff .sketch-subtitle .sketch-highlight-sweep::before {
+  transform-origin:left center;
+  animation:forgePencilShadeSweep .50s cubic-bezier(.20,.02,.19,1)
+    calc(var(--draw-copy-delay,.3s) + .32s) both !important;
+}
+@keyframes forgePencilShadeSweep {
+  from {transform:scaleX(0)}
+  to {transform:scaleX(1)}
+}
