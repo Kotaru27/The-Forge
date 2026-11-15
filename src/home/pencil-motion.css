@@ -260,7 +260,15 @@
   transform: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  .forge-app.forge-sketch-ui .pencil-glyph-vector { display: none !important; animation: none !important; }
+  /* visibility:hidden preserves inline text concatenation in Chromium.
+     display:none on each interleaved SVG split accessible names in
+     reduced-motion mode (e.g. Add Assets became A d d A s s e t s). */
+  .forge-app.forge-sketch-ui .pencil-glyph-vector {
+    display: inline !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    animation: none !important;
+  }
   .forge-app.forge-sketch-ui .pencil-glyph-face { animation: none !important; opacity: 1 !important; }
   .forge-app.forge-sketch-ui .pencil-glyph-stroke { animation: none !important; }
   .forge-app.forge-sketch-ui .sketch-card-art svg :is(path,circle,rect,ellipse,line,polyline,polygon,text),
