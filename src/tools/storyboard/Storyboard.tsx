@@ -176,7 +176,7 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
         setPreviewSize(`${canvas.width} × ${canvas.height}`);
       }
     } catch (cause) { setError('Board preview: ' + describe(cause)); }
-  }, [active]);
+  }, [activeId, active?.images, active?.settings]);
 
   useEffect(() => {
     const source = fitSource?.kind === 'board' ? lastBoardCanvas.current : fitSource?.image ?? null;
@@ -192,7 +192,7 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
       setFitReady(rendered.ready);
       setFitMessage(rendered.message);
     } catch (cause) { setFitReady(false); setFitMessage('Fit preview: ' + describe(cause)); }
-  }, [fitSource, fitSettings, active]);
+  }, [fitSource, fitSettings, activeId, active?.images, active?.settings]);
 
   function updateBoardSettings(patch: Partial<BoardSettings>) {
     commitBoards(old => old.map(board => board.id === activeId ? {
