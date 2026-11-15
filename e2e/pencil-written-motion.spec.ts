@@ -16,7 +16,10 @@ test('all seven workrooms handwrite static headings, instructions and control na
     await page.goto('#/' + route);
     const tool = page.locator('.native-tool:not([hidden])');
     await expect(tool).toBeVisible();
-    const letter = tool.locator('.pencil-written-glyph').first();
+    // Logo Resizer retains a hidden legacy eyebrow in the DOM. CSS
+    // animations on display:none ancestors do not advance, so test the
+    // first visible letter rather than a hidden decorative workroom note.
+    const letter = tool.locator('.pencil-written-glyph:visible').first();
     const svg = letter.locator('.pencil-glyph-vector');
     const ink = letter.locator('.pencil-glyph-face');
     const strokes = letter.locator('.pencil-glyph-stroke');
