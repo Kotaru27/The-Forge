@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { VideoStills } from './tools/video-stills/VideoStills';
 import { Storyboard } from './tools/storyboard/Storyboard';
 import type { StoryboardRef } from './tools/storyboard/engine';
@@ -22,6 +22,17 @@ import {
 } from './home/SketchIllustrations';
 import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
+
+// Route changes must not re-render heavy, still-mounted hidden workrooms.
+// React.memo preserves each tool's local state and existing callback/ref API.
+const StableForgeHome = memo(ForgeHome);
+const StableLinkGenerator = memo(LinkGenerator);
+const StableLogoResizer = memo(LogoResizer);
+const StableImageSplitter = memo(ImageSplitter);
+const StablePdfToImage = memo(PdfToImage);
+const StableVideoStills = memo(VideoStills);
+const StableStoryboard = memo(Storyboard);
+const StableAdDownloader = memo(AdDownloader);
 
 type Route = ToolId | 'home';
 type IntroPhase = 'pending' | 'handoff' | 'finishing' | 'settled';
@@ -83,7 +94,7 @@ export default function App() {
     // A short, nonblocking visual handoff for genuine tool navigation only.
     // Initial loading, reselecting a tool, direct Home returns and reduced
     // motion all remain immediate and fully visible.
-    if (changed && tool !== 'home' && !reducedMotion()) {
+    if (changed && tool !== 'home' && origin && !reducedMotion()) {
       setOpening({ id: ++openingSequence.current, tool, origin: origin ?? null });
     } else {
       setOpening(null);
@@ -146,6 +157,7 @@ export default function App() {
         </span>
 
         {!isHome && (
+          <div className="sketch-sidebar-rail">
           <aside className="sidebar sketch-sidebar" aria-label="Workspace navigation">
             <SketchVerticalDivider />
             <div className="brand sketch-brand">
@@ -213,6 +225,7 @@ export default function App() {
               </p>
             </div>
           </aside>
+          </div>
         )}
 
         <main ref={mainRef} className="main-area sketch-main-area">
@@ -234,32 +247,32 @@ export default function App() {
           )}
 
           <div className="native-tool" hidden={!isHome}>
-            <ForgeHome
+            <StableForgeHome
               onOpenTool={openTool}
               onReplayIntro={replayIntro}
               animateWriting={isHome && (introPhase === 'handoff' || introPhase === 'finishing')}
             />
           </div>
           <div className="native-tool" hidden={activeTool !== 'link-generator'}>
-            <LinkGenerator />
+            <StableLinkGenerator />
           </div>
           <div className="native-tool" hidden={!isLogo}>
-            <LogoResizer />
+            <StableLogoResizer />
           </div>
           <div className="native-tool" hidden={activeTool !== 'image-splitter'}>
-            <ImageSplitter />
+            <StableImageSplitter />
           </div>
           <div className="native-tool" hidden={activeTool !== 'pdf-to-image'}>
-            <PdfToImage />
+            <StablePdfToImage />
           </div>
           <div className="native-tool" hidden={activeTool !== 'video-stills'}>
-            <VideoStills onTransfer={handleStillsTransfer} />
+            <StableVideoStills onTransfer={handleStillsTransfer} />
           </div>
           <div className="native-tool" hidden={activeTool !== 'storyboard'}>
-            <Storyboard ref={storyboardRef} />
+            <StableStoryboard ref={storyboardRef} />
           </div>
           <div className="native-tool" hidden={activeTool !== 'ad-downloader'}>
-            <AdDownloader />
+            <StableAdDownloader />
           </div>
         </main>
       </div>
