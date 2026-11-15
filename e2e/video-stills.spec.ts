@@ -86,8 +86,17 @@ test('Download All keeps collections separate even when filenames collide', asyn
   ]);
 });
 
-test('optional contact sheet exports storyboard.jpg and keeps still frame count', async ({ page }) => {
-  await page.getByLabel('Create contact sheet').check();
+test('contact sheet option stays hidden while the existing export engine remains unchanged', async ({ page }) => {
+  const option = page.getByLabel('Create contact sheet');
+  await expect(option).toBeHidden();
+  await expect(page.getByLabel('Contact sheet layout')).toHaveCount(0);
+
+  // Verification-only: temporarily expose the existing control in this test,
+  // to prove that hiding the UI did not delete its original export logic.
+  await page.locator('.vs-contact-sheet-option').evaluate(el => {
+    (el as HTMLElement).style.setProperty('display', 'flex', 'important');
+  });
+  await option.check();
   await page.getByLabel('Contact sheet layout').selectOption('6');
   await expect(page.getByLabel('Contact sheet layout')).toHaveValue('6');
   const card = await upload(page, 'Campaign One.webm', 4);

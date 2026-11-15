@@ -13,6 +13,8 @@
 .video-stills button.vs-danger{color:#f5b8b8;border-color:#492c2c}
 .vs-options{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin:16px 0 22px;color:#aaa;font-size:12px}
 .vs-options label{display:flex;align-items:center;gap:7px}
+/* Keep the contact-sheet engine intact, but remove the optional control from the Video Stills UI. */
+.video-stills .vs-options .vs-contact-sheet-option{display:none!important}
 .vs-options select{color:#fff;background:#111;border:1px solid #333;padding:7px;border-radius:4px}
 .vs-options input[type=checkbox],.vs-modal input[type=checkbox]{accent-color:#ddd}
 .vs-options>span{margin-left:auto;color:#777}
