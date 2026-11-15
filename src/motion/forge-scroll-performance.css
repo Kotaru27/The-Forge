@@ -1,0 +1,124 @@
+/*
+ * THE FORGE — Scroll and motion performance treatment.
+ *
+ * Preserve the graphite-paper visuals, native scroll containers, one-time
+ * intro and existing workflows. Keep movement out of the scrolling content.
+ * Only small noninteractive sketch elements may track scroll.
+ */
+
+/* A containing block for the one optional decorative portal. This does not
+ * change scroll geometry or native input handling. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+  .logo-gallery,
+  .pdf-list,
+  .split-card-grid,
+  .vs-stacks,
+  .sb-controls,
+  .link-generator,
+  .adw-workspace
+) {
+  position: relative;
+}
+
+/* Avoid making the art wrapper a scroll container! overflow:hidden created
+ * a nested scroller and would break scroll(nearest block) on its children.
+ * contain:paint clips the drawing without changing the native scroller. */
+.forge-app.forge-sketch-ui .forge-parallax-art {
+  overflow: clip;
+  contain: layout paint;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+/* The earlier implementation permanently requested four or more composited
+ * layers in some tools. CSS scroll-linked motion is compositor-eligible and
+ * requires NO scroll callbacks, rAF loop, React rerenders or inline style
+ * changes on each frame. Unsupported browsers get static artwork. */
+.forge-app.forge-sketch-ui .forge-parallax-art :is(
+  .forge-parallax-near,
+  .forge-parallax-far
+) {
+  will-change: auto !important;
+  transform: translate3d(0,0,0);
+}
+@keyframes forgePencilParallaxNear {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(0,190px,0); }
+}
+@keyframes forgePencilParallaxFar {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(0,92px,0); }
+}
+@supports (animation-timeline: scroll(nearest block)) {
+  .forge-app.forge-sketch-ui .native-tool:not([hidden]) .forge-parallax-art .forge-parallax-near {
+    animation: forgePencilParallaxNear 1s linear both;
+    animation-timeline: scroll(nearest block);
+    animation-range: 0px 340px;
+  }
+  .forge-app.forge-sketch-ui .native-tool:not([hidden]) .forge-parallax-art .forge-parallax-far {
+    animation: forgePencilParallaxFar 1s linear both;
+    animation-timeline: scroll(nearest block);
+    animation-range: 0px 340px;
+  }
+}
+
+/* The real tool can contain dozens of images or canvas surfaces. Scaling or
+ * fading that entire DOM subtree on entry forces a large composite layer.
+ * Preserve the small paper sheet/card continuity + centered header entrance,
+ * but keep the complete workroom at its final geometry immediately. */
+.forge-app.forge-tool-opening:not(.forge-ctk-home-route)
+.sketch-main-area > .native-tool:not([hidden]) {
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* Sidebar remains expandable and scrollable. Changing four flex/layout
+ * dimensions on every hover frame used to relayout the whole workroom.
+ * Change its width only once; lightly fade the labels rather than changing
+ * max widths and repainting clip-path glyphs on every frame. */
+.forge-app.forge-sketch-ui .sidebar.sketch-sidebar {
+  transition: none !important;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar :is(
+  .sketch-nav-link,
+  .sketch-subtool-link
+) {
+  transition: color .14s ease, background-color .14s ease !important;
+}
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sidebar.sketch-sidebar :is(
+  .sketch-nav-label,
+  .sketch-subtool-label,
+  .sketch-brand-word,
+  .sketch-sidebar-tagline
+) {
+  clip-path: none !important;
+  transition: opacity .16s ease !important;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-doodle svg {
+  transition: none !important;
+}
+
+/* Eliminate repeated page-panel entrance effects and per-row transforms in
+ * Link Generator. Its meaningful input/selection/hover feedback remains. */
+.forge-app.forge-sketch-ui .native-tool:not([hidden])
+.link-generator-folder :is(.link-panel,.link-filename-preview li) {
+  animation: none !important;
+  transform: none;
+  opacity: 1;
+}
+
+/* Lower-power/compact workspaces prioritize input latency. Paper remains
+ * fully illustrated even when the optional parallax is disabled. */
+@media (max-width: 1000px), (prefers-reduced-motion: reduce) {
+  .forge-app.forge-sketch-ui .forge-parallax-art {
+    display: none !important;
+  }
+  .forge-app.forge-sketch-ui .forge-parallax-art :is(
+    .forge-parallax-near,.forge-parallax-far
+  ) {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+}
