@@ -12,33 +12,23 @@
   z-index: 75;
   pointer-events: none !important;
   overflow: hidden;
-  background: #f7f1e4;
+  background: rgba(247,241,228,.6);
   background-image: var(--sk-paper-grain);
-  border: 2px solid rgba(49, 49, 46, .68);
-  border-radius: 4px;
-  box-shadow: 4px 5px 0 rgba(64, 52, 38, .12);
+  border: 3px solid transparent;
+  border-image: var(--sk-border-ctrl) 18 stretch;
+  box-shadow: 2px 2px 0 rgba(64, 52, 38, .09);
   transform-origin: top left;
   will-change: transform, opacity;
   animation: forgeToolPaperUnfold .30s cubic-bezier(.2,.78,.22,1) both;
 }
-.forge-app.forge-sketch-ui .forge-tool-opening-sheet svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke: #4f4a42;
-  stroke-width: 1.3;
-  stroke-linecap: round;
-  opacity: .65;
-}
 @keyframes forgeToolPaperUnfold {
   0% {
-    opacity: .9;
+    opacity: .52;
     transform: translate3d(var(--forge-open-dx, 0px),var(--forge-open-dy, 0px),0)
       scale(var(--forge-open-sx, 1),var(--forge-open-sy, 1));
   }
-  68% { opacity: .55; }
-  100% { opacity: 0; transform: translate3d(0,0,0) scale(1); }
+  45% { opacity: .16; }
+  78%, 100% { opacity: 0; transform: translate3d(0,0,0) scale(1); }
 }
 .forge-app.forge-tool-opening:not(.forge-ctk-home-route) .sketch-main-area > .native-tool:not([hidden]) {
   animation: forgeToolSurfaceEnter .23s cubic-bezier(.22,.75,.2,1) both;
