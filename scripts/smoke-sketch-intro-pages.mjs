@@ -50,6 +50,23 @@ try {
   await page.getByRole('button',{name:/Skip intro/}).click();
   await expect(dialog).toHaveCount(0);
 
+  // Visual behavior is path tracing, not an image-wide clip animation.
+  await page.getByRole('button', { name:'Replay pencil sketch intro' }).click();
+  await expect(page.locator('.forge-intro-title-bridge .pencil-writing-glyph')).toHaveCount(9);
+  await page.getByRole('button', { name:/Skip intro/ }).click();
+
+  // The Add Assets menu must expose the two already-existing native import
+  // paths on the live deployed Storyboard, not just in source code.
+  await page.goto(introUrl+'#/storyboard');
+  const addAssets = page.getByRole('button', { name:'Add Assets' });
+  await addAssets.click();
+  await expect(addAssets).toHaveAttribute('aria-expanded','true');
+  const choices = page.getByRole('group', { name:'Choose asset import method' });
+  await expect(choices.getByRole('button',{name:'Individual images / videos'})).toBeVisible();
+  await expect(choices.getByRole('button',{name:'Folder'})).toBeVisible();
+  await expect(page.getByLabel('Choose storyboard folder')).toHaveAttribute('webkitdirectory','');
+  await page.screenshot({ path:'forge-storyboard-import-chooser.png' });
+
   await page.goto(introUrl+'#/logo-resizer');
   await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
   await expect(page.locator('.logo-workspace')).toBeVisible();
