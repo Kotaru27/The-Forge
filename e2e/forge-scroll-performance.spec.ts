@@ -58,12 +58,12 @@ test('every workroom scrolls natively without parallax layers or wheel intercept
   expect(errors).toEqual([]);
 });
 
-test('sidebar expands without layout-property animations and focus remains usable', async ({ page }) => {
+test('sidebar expands within fixed rail and focus remains usable', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 850 });
   await page.goto('#/storyboard');
   const rail = page.locator('.sketch-sidebar');
   await expect(rail).toBeVisible();
-  await expect(rail).toHaveCSS('transition-property', 'none');
+  await expect(rail).toHaveCSS('transition-property', 'width');
 
   const before = await rail.evaluate(el => el.getBoundingClientRect().width);
   await rail.hover({ position: { x: 18, y: 140 } });
@@ -83,6 +83,34 @@ test('sidebar expands without layout-property animations and focus remains usabl
   await page.getByRole('button', { name: 'Home', exact: true }).click();
   await expect(page).toHaveURL(/#\/home$/);
   await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
+});
+
+test('sidebar opens smoothly without moving the workroom or losing hover', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 850 });
+  await page.goto('#/logo-resizer');
+  const sidebar = page.locator('.sketch-sidebar');
+  const rail = page.locator('.sketch-sidebar-rail');
+  const main = page.locator('.sketch-main-area');
+  await expect(rail).toBeVisible();
+  const before = await main.evaluate(el => el.getBoundingClientRect().left);
+  await expect(rail).toHaveCSS('width', '76px');
+  await expect(sidebar).toHaveCSS('transition-property', 'width');
+
+  await sidebar.hover({ position: { x: 22, y: 170 } });
+  await expect.poll(() => sidebar.evaluate(el => Math.round(el.getBoundingClientRect().width))).toBe(210);
+  const after = await main.evaluate(el => el.getBoundingClientRect().left);
+  expect(Math.abs(after - before)).toBeLessThanOrEqual(1);
+
+  const bounds = await sidebar.boundingBox();
+  expect(bounds).toBeTruthy();
+  await page.mouse.move(bounds!.x + 145, bounds!.y + 210);
+  await expect.poll(() => sidebar.evaluate(el => Math.round(el.getBoundingClientRect().width))).toBe(210);
+  const brand = sidebar.getByRole('button', { name: 'The Forge home' });
+  await expect(brand).toBeVisible();
+  await page.getByRole('button', { name: 'Storyboard', exact: true }).click();
+  await expect(page).toHaveURL(/#\/storyboard$/);
+  await expect(page.locator('.forge-app')).not.toHaveClass(/forge-tool-opening/);
+  expect(Math.abs((await main.evaluate(el => el.getBoundingClientRect().left)) - before)).toBeLessThanOrEqual(1);
 });
 
 test('populated workroom motion does not scale the whole tool surface', async ({ page }) => {

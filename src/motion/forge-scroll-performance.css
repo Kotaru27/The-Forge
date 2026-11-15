@@ -41,12 +41,106 @@
   opacity: 1 !important;
 }
 
-/* Sidebar remains expandable and scrollable. Changing four flex/layout
- * dimensions on every hover frame used to relayout the whole workroom.
- * Change its width only once; lightly fade the labels rather than changing
- * max widths and repainting clip-path glyphs on every frame. */
-.forge-app.forge-sketch-ui .sidebar.sketch-sidebar {
-  transition: none !important;
+/* The previous sidebar resized the notebook's flex child from 76px to
+ * 210px, relaying out every open tool. Keep a fixed-width rail in flow and
+ * expand only its absolutely positioned menu above the workroom. */
+.forge-app.forge-sketch-ui .sketch-sidebar-rail {
+  position: relative;
+  z-index: 20;
+  flex: 0 0 76px;
+  width: 76px;
+  min-width: 76px;
+  min-height: 0;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail > .sidebar.sketch-sidebar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  width: 76px !important;
+  min-width: 76px !important;
+  flex: none !important;
+  padding: 12px 10px 14px 22px !important;
+  transition: width .19s cubic-bezier(.22, .8, .2, 1) !important;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail > .sidebar.sketch-sidebar:is(:hover,:has(:focus-visible)) {
+  width: 210px !important;
+  min-width: 210px !important;
+  flex: none !important;
+  padding: 12px 10px 14px 22px !important;
+}
+/* Stable icon positions and panel height: no label, brand or footer growth
+ * may reposition another navigation control during expansion. */
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .brand.sketch-brand {
+  flex: 0 0 74px;
+  height: 74px !important;
+  min-height: 74px !important;
+  justify-content: flex-start !important;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-brand-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 48px;
+  width: 100%;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-brand-btn svg {
+  width: 38px !important;
+  flex: 0 0 38px;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-brand-word {
+  max-height: 50px !important;
+  white-space: nowrap;
+  opacity: 0;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-sidebar:is(:hover,:has(:focus-visible)) .sketch-brand-word {
+  opacity: 1;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail :is(.sketch-nav-link,.sketch-subtool-link),
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-sidebar:is(:hover,:has(:focus-visible)) :is(.sketch-nav-link,.sketch-subtool-link) {
+  justify-content: flex-start;
+  gap: 10px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-sidebar-footer {
+  flex: 0 0 126px;
+  height: 126px;
+  min-height: 126px;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-sidebar-tagline {
+  max-height: 70px !important;
+  opacity: 0;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-sidebar:is(:hover,:has(:focus-visible)) .sketch-sidebar-tagline {
+  opacity: 1;
+}
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-sidebar-doodle svg,
+.forge-app.forge-sketch-ui .sketch-sidebar-rail .sketch-sidebar:is(:hover,:has(:focus-visible)) .sketch-sidebar-doodle svg {
+  width: 40px !important;
+}
+@media (max-width: 820px) {
+  .forge-app.forge-sketch-ui .sketch-sidebar-rail {
+    flex-basis: 64px;
+    width: 64px;
+    min-width: 64px;
+  }
+  .forge-app.forge-sketch-ui .sketch-sidebar-rail > .sidebar.sketch-sidebar {
+    width: 64px !important;
+    min-width: 64px !important;
+    padding: 10px 8px 12px 10px !important;
+  }
+  .forge-app.forge-sketch-ui .sketch-sidebar-rail > .sidebar.sketch-sidebar:is(:hover,:has(:focus-visible)) {
+    width: 184px !important;
+    min-width: 184px !important;
+    padding: 10px 8px 12px 10px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .forge-app.forge-sketch-ui .sketch-sidebar-rail > .sidebar.sketch-sidebar {
+    transition: none !important;
+  }
 }
 .forge-app.forge-sketch-ui .sketch-sidebar :is(
   .sketch-nav-link,
