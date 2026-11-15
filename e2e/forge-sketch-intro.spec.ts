@@ -30,6 +30,9 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   await page.waitForTimeout(2150);
   await page.screenshot({ path: testInfo.outputPath('intro-pencil-drawing.png') });
   await expect(intro).toHaveAttribute('data-intro-stage', 'handoff', { timeout: 5500 });
+  // No ghosted intro anvil/guide drawing may overlay cards during the
+  // continuing graphite Home sketch; ONLY the shared wordmark flies.
+  await expect(intro.locator('.forge-intro-artwork')).toHaveCSS('visibility', 'hidden');
   await expect(page.locator('.forge-app')).toHaveClass(/forge-intro-handoff/);
   const border = page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first();
   await expect(border).toHaveAttribute('pathLength', '1');
