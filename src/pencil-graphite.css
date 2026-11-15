@@ -127,7 +127,7 @@
   background-image: var(--pencil-blue-shade),var(--pencil-fiber) !important;
   background-size: 80px 48px,130px 92px !important;
   background-repeat: repeat,repeat !important;
-  color: var(--pencil-graphite) !important;
+  color: var(--sk-ink) !important;
   box-shadow: 1.5px 2px 0 rgba(56,56,55,.17) !important;
 }
 .forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) button:not(:disabled):not(.forge-v5-primary):not(.logo-primary):not(.pdf-primary):not(.split-primary):not(.primary):not(.adw-primary):not(.selected):not(.active):not([aria-pressed='true']):hover {
