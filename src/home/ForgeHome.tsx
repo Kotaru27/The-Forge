@@ -147,9 +147,10 @@ export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: numbe
 
 type Props = {
   onOpenTool: (tool: ToolId) => void;
+  onReplayIntro?: () => void;
 };
 
-export function ForgeHome({ onOpenTool }: Props) {
+export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
   const [search, setSearch] = useState('');
   const term = search.trim().toLocaleLowerCase();
   const visibleIds = tools.filter(tool =>
@@ -228,6 +229,7 @@ export function ForgeHome({ onOpenTool }: Props) {
         </div>
 
         <div className="sketch-welcome-controls">
+          {onReplayIntro && <button type="button" className="forge-intro-replay" onClick={onReplayIntro} aria-label="Replay pencil sketch intro">↻ Replay sketch</button>}
           {isFilteredView && (
             <button type="button" className="sketch-reset-view" onClick={() => setSearch('')}>
               Show all tools
