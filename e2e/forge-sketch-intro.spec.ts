@@ -101,7 +101,12 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   // SVG contours remain attached to every phrase; native letters are fully
   // visible after the one-shot writing finishes, with no line-wide clipping.
   await expect(page.locator('.sketch-home-grid .pencil-glyph-face').first()).toHaveCSS('opacity','1');
-  await expect(page.locator('.sketch-home-grid .pencil-glyph-stroke').first()).toHaveCSS('animation-name','none');
+  // Long descriptions finish writing without a reset when the intro overlay
+  // unmounts; the SAME finite pen stroke remains active in settled Home.
+  await expect(page.locator('.sketch-home-grid .pencil-glyph-stroke').first()).toHaveCSS('animation-name','forgePencilContour');
+  const lastDescriptionGlyph = page.locator('.sketch-home-grid .sketch-card-desc .pencil-glyph-face').last();
+  await expect(lastDescriptionGlyph).toHaveCSS('animation-name','forgePencilOriginalLetter');
+  await expect(lastDescriptionGlyph).toHaveCSS('opacity', '1', { timeout: 5500 });
   await expect(page.locator('.sketch-home-grid .pencil-written-glyph').first()).toHaveCSS('clip-path','none');
 
   await page.screenshot({ path: testInfo.outputPath('intro-home-finished.png') });
