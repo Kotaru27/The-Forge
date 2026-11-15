@@ -65,11 +65,13 @@ test('Osmo-inspired two-depth graphite artwork attaches to every active workspac
     const panel = page.locator('.native-tool:not([hidden]) ' + selector).first();
     await expect(panel).toBeVisible();
     await expect(panel).toHaveClass(/forge-parallax-scroll/);
-    expect(await panel.evaluate(el => {
-      const near = getComputedStyle(el, '::before');
-      const far = getComputedStyle(el, '::after');
-      return near.backgroundImage.includes('data:image/svg') && far.backgroundImage.includes('data:image/svg');
-    })).toBe(true);
+    const near = panel.locator('.forge-parallax-near');
+    const far = panel.locator('.forge-parallax-far');
+    await expect(near).toHaveCount(1);
+    await expect(far).toHaveCount(1);
+    await expect(near).toHaveCSS('background-image', /data:image\/svg/);
+    await expect(far).toHaveCSS('background-image', /data:image\/svg/);
+    await expect(panel.locator('.forge-parallax-art')).toHaveCSS('pointer-events', 'none');
     await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
   }
   // Inactive, still-mounted workrooms must not keep a scroll listener/animation.
@@ -91,12 +93,18 @@ test('parallax uses native panel scrollTop and only moves decorative layers', as
     el.appendChild(filler);
     el.scrollTop = 220;
   });
-  await expect.poll(() => panel.evaluate(el => getComputedStyle(el).getPropertyValue('--forge-parallax-near').trim())).toBe('123px');
+  await expect.poll(() => panel.locator('.forge-parallax-near').evaluate(
+    el => (el as HTMLElement).style.transform
+  )).toContain('123px');
+  await expect.poll(() => panel.locator('.forge-parallax-far').evaluate(
+    el => (el as HTMLElement).style.transform
+  )).toContain('59px');
   expect(await panel.evaluate(el => Math.round(el.scrollTop))).toBe(220);
   await expect(panel).toHaveCSS('overflow-y', 'auto');
 
   await page.goto('#/storyboard');
   await expect(page.locator('.logo-gallery')).not.toHaveClass(/forge-parallax-scroll/);
+  await expect(page.locator('.logo-gallery .forge-parallax-art')).toHaveCount(0);
   await expect(page.locator('.logo-gallery')).not.toHaveAttribute('style', /--forge-parallax/);
   await expect(page.locator('.sb-controls')).toHaveClass(/forge-parallax-scroll/);
 });
@@ -110,6 +118,7 @@ test('reduced-motion preference disables FLIP and scroll parallax without changi
   await expect(page.locator('.forge-app')).not.toHaveClass(/forge-tool-opening/);
   const panel = page.locator('.pdf-list');
   await expect(panel).toHaveClass(/forge-parallax-disabled/);
-  expect(await panel.evaluate(el => getComputedStyle(el, '::before').opacity)).toBe('0');
+  await expect(panel.locator('.forge-parallax-near')).toHaveCSS('opacity', '0');
+  await expect(panel.locator('.forge-parallax-far')).toHaveCSS('opacity', '0');
   await expect(page.getByRole('button', { name: 'Add PDF Files' })).toBeVisible();
 });
