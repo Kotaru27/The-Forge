@@ -1,10 +1,11 @@
+import type { CSSProperties } from 'react';
 /** Graphite-pencil hero lettering: a layered, dry-grain drawing, not a marker font.
  * The h1 supplies accessible text; SVG is purely decorative.
  * The individual hatching strokes stay deterministic across React renders.
  */
-export function PencilWordmark({ idPrefix = 'forge' }: { idPrefix?: string } = {}) {
+export function PencilWordmark({ idPrefix = 'forge', pencilWriting = false }: { idPrefix?: string; pencilWriting?: boolean } = {}) {
   return (
-    <svg className="pencil-wordmark-art" viewBox="0 0 670 115" role="presentation" aria-hidden="true" focusable="false">
+    <svg className={'pencil-wordmark-art' + (pencilWriting ? ' is-pencilling' : '')} viewBox="0 0 670 115" role="presentation" aria-hidden="true" focusable="false">
       <defs>
         <pattern id={`${idPrefix}-graphite-grain`} width="27" height="19" patternUnits="userSpaceOnUse">
           <rect width="27" height="19" fill="#27282a" />
@@ -19,7 +20,11 @@ export function PencilWordmark({ idPrefix = 'forge' }: { idPrefix?: string } = {
       </defs>
       <g transform="translate(19 96) rotate(-2.2 310 -42) skewX(-5)" filter={`url(#${idPrefix}-graphite-edge)`}>
         <text x="2" y="2" textLength="625" lengthAdjust="spacingAndGlyphs" fontSize="100" fontWeight="700" fontFamily="Kalam, cursive" fontStyle="italic" fill="#68635b" opacity=".27">THE FORGE</text>
-        <text x="0" y="0" textLength="625" lengthAdjust="spacingAndGlyphs" fontSize="100" fontWeight="700" fontFamily="Kalam, cursive" fontStyle="italic" fill={`url(#${idPrefix}-graphite-grain)`} stroke="#26272a" strokeWidth=".75" paintOrder="stroke">THE FORGE</text>
+        <text x="0" y="0" textLength="625" lengthAdjust="spacingAndGlyphs" fontSize="100" fontWeight="700" fontFamily="Kalam, cursive" fontStyle="italic" fill={`url(#${idPrefix}-graphite-grain)`} stroke="#26272a" strokeWidth=".75" paintOrder="stroke">{pencilWriting
+          ? [...'THE FORGE'].map((character, index) => (
+            <tspan key={index} className="pencil-writing-glyph" style={{ '--glyph-index': index } as CSSProperties}>{character}</tspan>
+          ))
+          : 'THE FORGE'}</text>
       </g>
       {/* Side hatches and lightly erased construction ticks, separate from glyphs */}
       <g fill="none" stroke="#343538" strokeLinecap="round" opacity=".72">
