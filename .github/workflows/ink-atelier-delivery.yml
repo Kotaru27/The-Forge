@@ -1,4 +1,4 @@
-name: Ink Atelier isolated preview via approved release branch
+name: Graphite Pencil isolated preview via approved release branch
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ink-atelier-approved-release-pages-preview
+  group: graphite-pencil-approved-release-pages-preview
   cancel-in-progress: false
 
 jobs:
@@ -26,10 +26,10 @@ jobs:
           ref: main
           path: main-source
           persist-credentials: false
-      - name: Checkout isolated Ink Atelier branch
+      - name: Checkout isolated Graphite Pencil branch
         uses: actions/checkout@v4
         with:
-          ref: design/ink-atelier-preview-20261115
+          ref: design/graphite-pencil-preview-20261115
           path: candidate
           persist-credentials: false
       - name: Checkout pinned CTK regression oracle for candidate tests
@@ -57,14 +57,14 @@ jobs:
       - name: Install Chromium
         working-directory: candidate
         run: npx playwright install --with-deps chromium
-      - name: Run complete browser regression suite, including Ink Atelier
+      - name: Run complete browser regression suite, including Graphite Pencil
         working-directory: candidate
         run: npm run test:e2e
       - name: Save preview UI review screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ink-atelier-browser-review-${{ github.run_id }}
+          name: graphite-pencil-browser-review-${{ github.run_id }}
           path: candidate/test-results
           if-no-files-found: ignore
           retention-days: 14
@@ -73,7 +73,7 @@ jobs:
         working-directory: candidate
         run: npm run build
         env:
-          FORGE_BASE_PATH: /The-Forge/ink-atelier-preview/
+          FORGE_BASE_PATH: /The-Forge/graphite-pencil-preview/
 
       - name: Build production from unchanged main
         working-directory: main-source
@@ -85,14 +85,14 @@ jobs:
 
       - name: Assemble root = main, subpath = candidate
         run: |
-          mkdir -p combined-site/ink-atelier-preview
+          mkdir -p combined-site/graphite-pencil-preview
           cp -a main-source/dist/. combined-site/
-          cp -a candidate/dist/. combined-site/ink-atelier-preview/
+          cp -a candidate/dist/. combined-site/graphite-pencil-preview/
           test -s combined-site/index.html
-          test -s combined-site/ink-atelier-preview/index.html
-          diff -qr main-source/dist combined-site --exclude ink-atelier-preview
+          test -s combined-site/graphite-pencil-preview/index.html
+          diff -qr main-source/dist combined-site --exclude graphite-pencil-preview
           grep -q '/The-Forge/assets/' combined-site/index.html
-          grep -q '/The-Forge/ink-atelier-preview/assets/' combined-site/ink-atelier-preview/index.html
+          grep -q '/The-Forge/graphite-pencil-preview/assets/' combined-site/graphite-pencil-preview/index.html
           echo 'PRODUCTION ROOT VERIFIED BYTE-FOR-BYTE IDENTICAL TO FRESH main BUILD'
 
       - name: Upload safe combined Pages artifact
@@ -101,12 +101,12 @@ jobs:
           path: combined-site
 
   deploy:
-    name: Publish root plus isolated Ink Atelier preview
+    name: Publish root plus isolated Graphite Pencil preview
     needs: verify-and-assemble
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.publish.outputs.page_url }}ink-atelier-preview/
+      url: ${{ steps.publish.outputs.page_url }}graphite-pencil-preview/
     permissions:
       contents: read
       pages: write
@@ -118,13 +118,13 @@ jobs:
         uses: actions/deploy-pages@v4
 
   smoke:
-    name: Verify live main and Ink Atelier URLs
+    name: Verify live main and Graphite Pencil URLs
     needs: deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: design/ink-atelier-preview-20261115
+          ref: design/graphite-pencil-preview-20261115
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -132,14 +132,14 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - name: Smoke test both live sites in Chromium
-        run: node scripts/smoke-ink-atelier-pages.mjs
+        run: node scripts/smoke-pencil-pages.mjs
       - name: Upload live comparison screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ink-atelier-live-pages-${{ github.run_id }}
+          name: graphite-pencil-live-pages-${{ github.run_id }}
           path: |
             production-home-smoke.png
-            ink-atelier-home-smoke.png
+            graphite-pencil-home-smoke.png
           if-no-files-found: ignore
           retention-days: 14

@@ -1,8 +1,8 @@
 name: Publish The Forge Studio preview
+# Studio publisher remains manually available; automatic publishing is paused
+# so the isolated graphite candidate cannot race and overwrite verified main.
 on:
-  push:
-    branches:
-      - release/pages-preview
+  workflow_dispatch:
 
 permissions:
   contents: read
