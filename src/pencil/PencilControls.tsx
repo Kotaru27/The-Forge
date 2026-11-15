@@ -18,7 +18,6 @@ export function PencilButton({
 }: PencilButtonProps) {
   return (
     <button {...props} className={`pencil-art-button pencil-art-variant-${pencilVariant} ${className}`.trim()}>
-      {children}
       <svg className="pencil-button-linework" viewBox="0 0 240 68" preserveAspectRatio="none" aria-hidden="true" focusable="false">
         <g className="pencil-button-paper">
           <path d="M9 11 C59 6 127 9 226 10 Q231 18 229 55 Q174 61 76 57 L10 56 Q7 39 9 11 Z" fill="#fbf6e9" />
@@ -49,6 +48,7 @@ export function PencilButton({
         <path className="pencil-button-focus" d="M4 6 Q65 2 134 4 T235 6 Q238 34 235 62 Q125 65 5 62 Z"
           fill="none" stroke="#a55343" strokeWidth="1.45" strokeDasharray="11 5 3 8" strokeLinecap="round"/>
       </svg>
+      <span className="pencil-button-content">{children}</span>
     </button>
   );
 }
