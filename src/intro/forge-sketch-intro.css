@@ -680,20 +680,28 @@
   transition:opacity .30s ease-out !important;
 }
 .forge-intro-portal.is-handoff .forge-intro-title-bridge {
-  animation:forgeIntroSharedWordmarkFlight 1.02s cubic-bezier(.20,.80,.22,1) both;
+  /* Only the shared title travels. Composited transform avoids repainting
+     a full filtered SVG on each frame and preserves the paper backdrop. */
+  will-change: transform, opacity;
+  animation:forgeIntroSharedWordmarkFlight 1.04s cubic-bezier(.22,.79,.20,1) both;
+}
+.forge-intro-portal.is-handoff .forge-intro-title-bridge .pencil-wordmark-art g[filter] {
+  /* Dry graphite lives in the authored pattern during motion; turbulence
+     is restored on the settled Home illustration. */
+  filter:none;
 }
 @keyframes forgeIntroSharedWordmarkFlight {
   0% {
     transform:translate(-50%,-50%) scale(1);
     opacity:1;
   }
-  79% {
+  84% {
     transform:translate(calc(-50% + var(--forge-handoff-x,0px)),calc(-50% + var(--forge-handoff-y,-200px))) scale(var(--forge-handoff-scale,.8));
     opacity:1;
   }
-  87% {
+  91% {
     transform:translate(calc(-50% + var(--forge-handoff-x,0px)),calc(-50% + var(--forge-handoff-y,-200px))) scale(var(--forge-handoff-scale,.8));
-    opacity:0;
+    opacity:.34;
   }
   100% {
     transform:translate(calc(-50% + var(--forge-handoff-x,0px)),calc(-50% + var(--forge-handoff-y,-200px))) scale(var(--forge-handoff-scale,.8));
@@ -703,7 +711,7 @@
 /* Home title only takes over after the bridge arrives. The two drawings are
    identical. Unlike the prior handoff, we never overlay serif and Kalam glyphs. */
 .forge-app.forge-intro-handoff .sketch-hero-center .pencil-wordmark-art {
-  animation:forgeIntroSameWordmarkArrival .12s ease-out .88s both !important;
+  animation:forgeIntroSameWordmarkArrival .16s cubic-bezier(.25,.75,.2,1) .92s both !important;
 }
 @keyframes forgeIntroSameWordmarkArrival {
   from {opacity:0}
@@ -848,8 +856,11 @@
   opacity:1 !important;
 }
 .forge-intro-portal .pencil-wordmark-art.is-pencilling g text:first-of-type {
+  /* One quiet graphite underdrawing, after the letters finish. The former
+     stronger/earlier shadow looked like a second copy of THE FORGE. */
+  opacity:.20;
   fill-opacity:0;
-  animation:forgePencilWordmarkShadow .22s ease-out 1.63s both;
+  animation:forgePencilWordmarkShadow .24s ease-out 1.91s both;
 }
 @keyframes forgePencilWordmarkShadow {
   from {fill-opacity:0}
@@ -862,8 +873,8 @@
   stroke-dashoffset:660;
   fill-opacity:0;
   animation:
-    forgePencilGlyphTrace .30s cubic-bezier(.28,.04,.12,1) calc(.48s + var(--glyph-index) * .108s) both,
-    forgePencilGlyphShading .22s ease-in calc(.64s + var(--glyph-index) * .108s) both;
+    forgePencilGlyphTrace .39s cubic-bezier(.29,.02,.16,1) calc(.48s + var(--glyph-index) * .135s) both,
+    forgePencilGlyphShading .25s cubic-bezier(.23,.72,.25,1) calc(.69s + var(--glyph-index) * .135s) both;
 }
 @keyframes forgePencilGlyphTrace {
   from {stroke-dashoffset:660}
@@ -971,17 +982,12 @@
   }
 }
 
-/* Colored pencils are applied AFTER the graphite handwriting, as real
-   side-to-side shading strokes. Never show full yellow bars before letters. */
-.forge-app.forge-intro-handoff .sketch-card-title .sketch-highlight-mark::before,
-.forge-app.forge-intro-handoff .sketch-subtitle .sketch-highlight-sweep::before {
-  transform-origin:left center;
-  animation:forgePencilShadeSweep .50s cubic-bezier(.20,.02,.19,1)
-    calc(var(--draw-copy-delay,.3s) + .32s) both !important;
-}
+/* Exactly one colored-pencil pass after each handwritten label. Clip the
+   pigment in place (never scale/rotate the entire colored-pencil texture).
+   The Home stylesheet owns phase overrides so it cannot restart at handoff. */
 @keyframes forgePencilShadeSweep {
-  from {transform:scaleX(0)}
-  to {transform:scaleX(1)}
+  from {clip-path:inset(0 100% 0 0)}
+  to {clip-path:inset(0 0 0 0)}
 }
 
 /* Live Chromium visual QA: anvil + construction grid must NOT ghost through

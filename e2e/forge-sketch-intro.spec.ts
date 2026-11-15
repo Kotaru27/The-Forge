@@ -17,7 +17,10 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   const homeTitle = page.locator('.sketch-hero-center .pencil-wordmark-art');
   await expect(introTitle).toHaveCount(1);
   await expect(introTitle.locator('text').last()).toHaveText('THE FORGE');
-  await expect(introTitle.locator('tspan.pencil-writing-glyph')).toHaveCount(9);
+  await expect(introTitle.locator('tspan.pencil-writing-glyph')).toHaveCount(8);
+  await expect(introTitle.locator('tspan.pencil-writing-glyph').last()).toHaveAttribute('style', /--glyph-index:\s*7/);
+  // The word space has no empty pencil-writing beat.
+  await expect(introTitle.locator('text').last().locator('tspan:not(.pencil-writing-glyph)')).toHaveCount(1);
   await expect(introTitle).toHaveCSS('clip-path','none');
   await expect(introTitle.locator('tspan.pencil-writing-glyph').first()).toHaveCSS('animation-name', /forgePencilGlyphTrace/);
   await expect(introTitle.locator('pattern')).toHaveAttribute('id', 'forge-intro-graphite-grain');
@@ -26,6 +29,16 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
     .toEqual(await homeTitle.locator('text').last().getAttribute('font-family'));
   await expect(intro.locator('.title-charcoal-ghost, .title-charcoal-fill, .title-stroke-6b')).toHaveCount(0);
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
+  const subtitleHighlight = page.locator('.sketch-subtitle .sketch-highlight-sweep');
+  const cardHighlight = page.locator('.sketch-home-grid .sketch-card-title .sketch-highlight-mark').first();
+  const highlightState = async (locator: typeof subtitleHighlight) => locator.evaluate(element => {
+    const css = getComputedStyle(element, '::before');
+    return { name: css.animationName, iterations: css.animationIterationCount };
+  });
+  // The intro is drawing on a separate sheet. Hidden Home highlights must
+  // not play the old theme animation underneath, then replay after the handoff.
+  expect((await highlightState(subtitleHighlight)).name).toBe('none');
+  expect((await highlightState(cardHighlight)).name).toBe('none');
 
   await page.waitForTimeout(2150);
   await page.screenshot({ path: testInfo.outputPath('intro-pencil-drawing.png') });
@@ -34,6 +47,9 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   // continuing graphite Home sketch; ONLY the shared wordmark flies.
   await expect(intro.locator('.forge-intro-artwork')).toHaveCSS('visibility', 'hidden');
   await expect(page.locator('.forge-app')).toHaveClass(/forge-intro-handoff/);
+  expect(await highlightState(subtitleHighlight)).toEqual({ name: 'forgePencilShadeSweep', iterations: '1' });
+  expect(await highlightState(cardHighlight)).toEqual({ name: 'forgePencilShadeSweep', iterations: '1' });
+  await expect(introTitle.locator('g[filter]').first()).toHaveCSS('filter', 'none');
   const border = page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first();
   await expect(border).toHaveAttribute('pathLength', '1');
   await expect(border).toHaveCSS('animation-name', 'forgeIntroActualCardStroke');
@@ -52,6 +68,11 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   // The opening ends, but the Home drawing does NOT stop: non-destructive
   // pencil over-strokes continue looping without concealing title/buttons.
   await expect(page.locator('.forge-app')).toHaveClass(/forge-home-continuous-draw/);
+  expect((await highlightState(subtitleHighlight)).name).toBe('none');
+  expect((await highlightState(cardHighlight)).name).toBe('none');
+  await page.waitForTimeout(300);
+  expect((await highlightState(subtitleHighlight)).name).toBe('none');
+  expect((await highlightState(cardHighlight)).name).toBe('none');
   const ongoing = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
   await expect(ongoing).toHaveCSS('animation-name','forge-home-ongoing-graphite');
   await expect(ongoing).toHaveCSS('animation-iteration-count','infinite');
