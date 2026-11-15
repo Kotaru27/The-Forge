@@ -89,14 +89,19 @@ test('graphite lines and lettering draw in place, with reduced-motion fallback',
   await page.goto('#/home');
   const pencilPath = page.locator('.sketch-card-border-svg [data-pencil-trace]').first();
   const title = page.locator('.sketch-hero-center h1');
-  await expect(pencilPath).toHaveAttribute('pathLength','100');
+  await expect(pencilPath).toHaveAttribute('pathLength','1');
   await expect(pencilPath).toHaveCSS('animation-name','sketch-pencil-trace');
-  await expect(title).toHaveCSS('animation-name','sketch-pencil-lettering');
+  await expect(title.locator('.pencil-wordmark-art')).toHaveCount(1);
+  await expect(title).toHaveCSS('animation-name','none');
+  const ongoing = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
+  await expect(ongoing).toHaveCSS('animation-name','forge-home-ongoing-graphite');
+  await expect(ongoing).toHaveCSS('animation-iteration-count','infinite');
   await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('transform','none');
 
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(pencilPath).toHaveCSS('animation-name','none');
   await expect(title).toHaveCSS('animation-name','none');
+  await expect(ongoing).toHaveCSS('animation-name','none');
 
   await page.goto('#/storyboard');
   await expect(page.getByRole('button', {name:'Add Assets'})).toBeVisible();
