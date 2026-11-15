@@ -4,6 +4,7 @@ import { PENCIL_GLYPH_PATHS } from './PencilGlyphPaths';
 type PencilLetteringProps = {
   text: string;
   className?: string;
+  enabled?: boolean;
 };
 
 /**
@@ -23,7 +24,11 @@ function approximateGlyphAdvance(letter: string): string {
   return '.56em';
 }
 
-export function PencilLettering({ text, className = '' }: PencilLetteringProps) {
+export function PencilLettering({ text, className = '', enabled = false }: PencilLetteringProps) {
+  // During ordinary work, Home and all seven tools use one native text node.
+  // Only the explicit opening/replay sequence authorizes per-letter SVG paths.
+  if (!enabled) return <span className={`pencil-written-text ${className}`.trim()}>{text}</span>;
+
   let position = 0;
   const parts = text.split(/(\s+)/);
 
