@@ -187,13 +187,13 @@ export function ForgeHome({ onOpenTool }: Props) {
           <div className="sketch-title-lockup">
             <span className="sketch-title-ticks sketch-title-ticks-left" aria-hidden="true">
               <svg viewBox="0 0 28 38" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path pathLength={100} data-pencil-trace d="M6 10 L22 15 M2 20 L20 20 M7 30 L22 25" />
+                <path pathLength={100} data-pencil-trace="true" d="M6 10 L22 15 M2 20 L20 20 M7 30 L22 25" />
               </svg>
             </span>
             <h1>THE FORGE</h1>
             <span className="sketch-title-ticks sketch-title-ticks-right" aria-hidden="true">
               <svg viewBox="0 0 28 38" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path pathLength={100} data-pencil-trace d="M22 10 L6 15 M26 20 L8 20 M21 30 L6 25" />
+                <path pathLength={100} data-pencil-trace="true" d="M22 10 L6 15 M26 20 L8 20 M21 30 L6 25" />
               </svg>
             </span>
           </div>
@@ -221,7 +221,7 @@ export function ForgeHome({ onOpenTool }: Props) {
           <p>Pick a tool and get to work.</p>
           <span className="sketch-welcome-ticks" aria-hidden="true">
             <svg viewBox="0 0 24 22" fill="none" stroke="#b85337" strokeWidth="1.7" strokeLinecap="round">
-              <path pathLength={100} data-pencil-trace d="M4 6 L16 2 M6 13 L20 11 M4 19 L15 20" />
+              <path pathLength={100} data-pencil-trace="true" d="M4 6 L16 2 M6 13 L20 11 M4 19 L15 20" />
             </svg>
           </span>
         </div>
@@ -246,7 +246,7 @@ export function ForgeHome({ onOpenTool }: Props) {
               onChange={(event) => setSearch(event.target.value)}
             />
             <svg className="sketch-search-underline" viewBox="0 0 220 8" preserveAspectRatio="none" fill="none" aria-hidden="true">
-              <path pathLength={100} data-pencil-trace d="M2 4 Q65 2 125 4.5 T218 3.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              <path pathLength={100} data-pencil-trace="true" d="M2 4 Q65 2 125 4.5 T218 3.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
           </label>
         </div>
@@ -308,7 +308,7 @@ export function ForgeHome({ onOpenTool }: Props) {
                     <strong className="sketch-card-title">
                       {hasTitleSparks && (
                         <svg className="sketch-title-sparks" viewBox="0 0 22 22" fill="none" stroke="#b85337" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
-                          <path pathLength={100} data-pencil-trace d="M18 4 L6 8 M18 11 L4 11 M18 18 L6 14" />
+                          <path pathLength={100} data-pencil-trace="true" d="M18 4 L6 8 M18 11 L4 11 M18 18 L6 14" />
                         </svg>
                       )}
                       <span className="sketch-highlight-mark">{tool.label}</span>
@@ -318,7 +318,7 @@ export function ForgeHome({ onOpenTool }: Props) {
 
                   {hasRustUnderline && (
                     <svg className="sketch-rust-flourish" viewBox="0 0 90 12" fill="none" stroke="#b85337" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-                      <path pathLength={100} data-pencil-trace d="M4 8 Q46 3 86 5 M18 11 Q54 7 78 8" />
+                      <path pathLength={100} data-pencil-trace="true" d="M4 8 Q46 3 86 5 M18 11 Q54 7 78 8" />
                     </svg>
                   )}
                 </button>
