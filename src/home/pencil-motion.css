@@ -68,7 +68,7 @@
 /* Writing begins on the handoff or when a STATIC workroom is opened.
    No React frame-by-frame state, and absolutely no rewriting live values. */
 .forge-app.forge-intro-handoff .sketch-home .pencil-written-glyph,
-.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-written-glyph,
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-written-glyph,
 .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar .pencil-written-glyph,
 .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar .pencil-written-glyph {
   --pencil-start: calc(var(--pencil-write-base, .10s) + var(--pencil-letter-index) * .020s);
@@ -78,7 +78,7 @@
 }
 :is(
   .forge-app.forge-intro-handoff .sketch-home,
-  .forge-app.forge-sketch-ui .native-tool:not([hidden]),
+  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]),
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
 ) .pencil-glyph-vector {
@@ -86,7 +86,7 @@
 }
 :is(
   .forge-app.forge-intro-handoff .sketch-home,
-  .forge-app.forge-sketch-ui .native-tool:not([hidden]),
+  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]),
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
 ) .pencil-glyph-stroke {
@@ -94,7 +94,7 @@
 }
 :is(
   .forge-app.forge-intro-handoff .sketch-home,
-  .forge-app.forge-sketch-ui .native-tool:not([hidden]),
+  .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]),
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
 ) .pencil-glyph-face {
@@ -130,7 +130,7 @@
 
 /* The previous clip-based letter and heading effects are not handwriting.
    They must never overlap our authored SVG contours. */
-.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) :is(
   .sb-section-head strong,
   .pdf-section-title,
   .split-section-title,
@@ -218,9 +218,9 @@
 
 /* Tool-workroom writing is a short, interruptible FIRST-ENTRANCE only.
    Hiding a route immediately drops its animations: no stale placeholders. */
-.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-write-heading { --pencil-write-base: .06s; }
-.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-write-instruction { --pencil-write-base: .28s; }
-.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-write-control { --pencil-write-base: .45s; }
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-write-heading { --pencil-write-base: .06s; }
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-write-instruction { --pencil-write-base: .28s; }
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-write-control { --pencil-write-base: .45s; }
 .forge-app.forge-sketch-ui .sketch-topbar { --pencil-write-base: .06s; }
 .forge-app.forge-sketch-ui .sketch-sidebar { --pencil-write-base: .12s; }
 
@@ -230,7 +230,7 @@
   to { stroke-dashoffset: 0; }
 }
 .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar .forge-ctk-header-icon svg :is(path,circle,rect,line,polyline),
-.forge-app.forge-sketch-ui .native-tool:not([hidden]) .pencil-illustration svg :is(path,circle,rect,line,polyline) {
+.forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-illustration svg :is(path,circle,rect,line,polyline) {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   animation: forgeWorkroomIllustrationTrace .52s cubic-bezier(.27,.03,.18,1) .05s both;
