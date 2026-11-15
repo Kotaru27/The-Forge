@@ -24,7 +24,8 @@ async function png(page: Page, width = 1000, height = 600): Promise<Buffer> {
 async function wheelProfile(page: Page, selector: string) {
   const panel = page.locator(selector).first();
   await expect(panel).toBeVisible();
-  await panel.hover();
+  // Hover the container edge, not a child textarea that could capture wheel input.
+  await panel.hover({ position: { x: 10, y: 18 } });
   const start = await panel.evaluate(el => {
     el.scrollTop = 0;
     const startTop = el.scrollTop;
@@ -99,7 +100,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
     name: 'Frame_' + i + '.png', mimeType: 'image/png', buffer: frame,
   })));
   await expect(page.locator('.sb-frame')).toHaveCount(10);
-  report.storyboard = await wheelProfile(page, '.sb-controls');
+  report.storyboard = await wheelProfile(page, '.sb-asset-list');
 
   await page.goto('#/image-splitter');
   await page.getByLabel('Upload images').setInputFiles(Array.from({ length: 14 }, (_, i) => ({
@@ -121,14 +122,14 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
     name: 'Clip_' + i + '.webm', mimeType: 'video/webm', buffer: video,
   })));
   await expect(page.getByRole('button', { name: /Inspect stills from/ })).toHaveCount(3, { timeout: 60000 });
-  report['video-stills'] = await wheelProfile(page, '.vs-stacks');
+  report['video-stills'] = await wheelProfile(page, '.video-stills');
 
   await page.goto('#/link-generator');
   await page.getByLabel('Filenames').fill(
     Array.from({ length: 100 }, (_, i) => 'Advertisement_' + i + '.jpg').join('\n')
   );
   await page.getByRole('button', { name: 'Generate', exact: true }).click();
-  report['link-generator'] = await wheelProfile(page, '.link-generator');
+  report['link-generator'] = await wheelProfile(page, '.link-filename-preview');
 
   await page.addInitScript(() => {
     Object.defineProperty(window, 'showDirectoryPicker', { configurable: true, value: async () => ({
@@ -154,7 +155,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
     buffer: Buffer.from(XLSX.write(book, { type: 'buffer', bookType: 'xlsx' })),
   });
   await expect(page.locator('.adw-table tbody tr[data-stage="ready"]')).toHaveCount(45);
-  report['ad-downloader'] = await wheelProfile(page, '.adw-workspace');
+  report['ad-downloader'] = await wheelProfile(page, '.adw-table-wrap');
 
   console.info('Real populated workroom wheel benchmark (CI hardware, no absolute FPS promises):',
     JSON.stringify(report, null, 2));
