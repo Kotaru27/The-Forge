@@ -13,12 +13,12 @@ This branch tests a reusable, hand-drawn visual system based on the user-supplie
 
 ## Isolated GitHub Pages URL
 
-The preview workflow combines a fresh build of unchanged `main` at the production root with the tested design-branch build in a subdirectory:
+The approved `release/pages-preview` branch runs `.github/workflows/ink-atelier-delivery.yml`. It checks out this design branch, combines a fresh build of unchanged `main` at the production root with the tested design-branch build in a subdirectory, and deploys both:
 
 - **Production:** https://kotaru27.github.io/The-Forge/
 - **Ink Atelier branch preview:** https://kotaru27.github.io/The-Forge/ink-atelier-preview/
 
-The workflow verifies that all files copied to the production root match its untouched `main` build before publishing. It never commits to `main`.
+The release workflow verifies that the production root is byte-for-byte identical to a fresh `main` build before publishing. It never commits to `main`. The initial direct design-branch publishing workflow was removed after it was blocked by the repository's Pages environment branch restriction.
 
 A later `main` Pages deployment normally replaces the site artifact and can remove this temporary preview subdirectory; rerunning the preview workflow restores it. Never use the original manual Pages preview workflow for this experiment, because it publishes over the production root.
 
