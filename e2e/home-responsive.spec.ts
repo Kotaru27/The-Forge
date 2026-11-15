@@ -106,7 +106,7 @@ test('scrolling Home pauses only the continuous pencil over-strokes, without mov
   // Direct links are settled immediately, so continuous drawing is active.
   await page.goto('#/home');
   const home = page.locator('.sketch-home');
-  const stroke = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
+  const stroke = page.locator('.sketch-card-art .pencil-ongoing-illustration-detail').first();
   await expect(stroke).toHaveCSS('animation-play-state', 'running');
   const before = await home.evaluate(element => ({
     width: element.scrollWidth,

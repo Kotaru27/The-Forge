@@ -94,7 +94,9 @@ test('graphite lines and lettering draw in place, with reduced-motion fallback',
   await expect(pencilPath).toHaveCSS('animation-name','none');
   await expect(title.locator('.pencil-wordmark-art')).toHaveCount(1);
   await expect(title).toHaveCSS('animation-name','none');
-  const ongoing = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
+  const oldBorderLoop = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
+  await expect(oldBorderLoop).toHaveCSS('animation-name','none');
+  const ongoing = page.locator('.sketch-card-art .pencil-ongoing-illustration-detail').first();
   await expect(ongoing).toHaveCSS('animation-name','forge-home-ongoing-graphite');
   await expect(ongoing).toHaveCSS('animation-iteration-count','infinite');
   await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('transform','none');

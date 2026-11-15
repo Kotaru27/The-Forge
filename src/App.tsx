@@ -10,6 +10,7 @@ import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { ForgeHome, ToolGlyph } from './home/ForgeHome';
 import { ForgeSketchIntro } from './intro/ForgeSketchIntro';
+import { PencilLettering } from './home/PencilLettering';
 import {
   AnvilMark,
   MountainDoodle,
@@ -115,7 +116,7 @@ export default function App() {
                 title="The Forge home"
               >
                 <AnvilMark size={50} />
-                <span className="sketch-brand-word">THE FORGE</span>
+                <span className="sketch-brand-word"><PencilLettering text="THE FORGE" className="pencil-write-heading" /></span>
               </button>
             </div>
             <SketchDividerLine compact />
@@ -131,7 +132,7 @@ export default function App() {
                 <span className="sketch-nav-icon" aria-hidden="true">
                   <ToolGlyph tool="home" size={20} />
                 </span>
-                <span className="sketch-nav-label">Home</span>
+                <span className="sketch-nav-label"><PencilLettering text="Home" className="pencil-write-control" /></span>
               </button>
 
               <div className="sketch-tool-sublist" role="group" aria-label="Creative tools">
@@ -151,7 +152,7 @@ export default function App() {
                     <span className="sketch-subtool-icon" aria-hidden="true">
                       <ToolGlyph tool={tool.id} size={19} />
                     </span>
-                    <span className="sketch-subtool-label">{tool.label}</span>
+                    <span className="sketch-subtool-label"><PencilLettering text={tool.label} className="pencil-write-control" /></span>
                   </button>
                 ))}
               </div>
@@ -182,9 +183,9 @@ export default function App() {
                 </span>
               </div>
               <h1 className="forge-ctk-tool-name">
-                <span key={current.id} className="sketch-highlight-mark">{current.label}</span>
+                <span key={current.id} className="sketch-highlight-mark"><PencilLettering text={current.label} className="pencil-write-heading" /></span>
               </h1>
-              <span className="forge-ctk-top-privacy">LOCAL PROCESSING</span>
+              <span className="forge-ctk-top-privacy"><PencilLettering text="LOCAL PROCESSING" className="pencil-write-instruction" /></span>
               <span className="sketch-topbar-seam" aria-hidden="true">
                 <SketchDividerLine />
               </span>

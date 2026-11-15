@@ -94,7 +94,7 @@ test('Ink & Paper Logo Resizer keeps input actions and accessible control contra
 test('Ink & Paper Image Splitter drop zone retains contrast and action', async ({ page }) => {
   await page.goto('#/image-splitter');
   await expect(page.locator('.split-drop')).toHaveCSS('background-color','rgba(247, 241, 227, 0.85)');
-  await expect(page.locator('.split-drop span')).toHaveCSS('color','rgb(47, 69, 98)');
+  await expect(page.locator('.split-drop > span')).toHaveCSS('color','rgb(47, 69, 98)');
   await expect(page.getByRole('button',{name:'Add Images'})).toHaveCSS('background-color','rgb(248, 241, 226)');
   await expect(page.getByRole('button',{name:'Add Images'})).toHaveCSS('color','rgb(31, 35, 40)');
 });

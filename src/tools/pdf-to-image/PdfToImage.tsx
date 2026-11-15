@@ -1,3 +1,4 @@
+import { PencilLettering } from '../../home/PencilLettering';
 import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
@@ -275,33 +276,33 @@ export function PdfToImage() {
 
   return <section className="pdf-workspace" aria-label="PDF to Image">
     <aside className="pdf-setup" aria-label="PDF settings">
-      <h2>PDF to Image</h2>
-      <p className="pdf-muted">Convert PDF pages into PNG or JPG images.</p>
+      <h2><PencilLettering text="PDF to Image" className="pencil-write-heading" /></h2>
+      <p className="pdf-muted"><PencilLettering text="Convert PDF pages into PNG or JPG images." className="pencil-write-instruction" /></p>
       <div className={`pdf-drop${dragging ? ' is-dragging' : ''}`} onDrop={onDrop}
         onDragOver={event => { event.preventDefault(); setDragging(true); }}
         onDragLeave={event => { event.preventDefault(); setDragging(false); }}>
         <input type="file" ref={inputRef} accept=".pdf,application/pdf" multiple
           aria-label="Upload PDF files" onChange={onUpload} />
-        <button type="button" onClick={() => inputRef.current?.click()}>Add PDF Files</button>
-        <span>or drop PDF files here</span>
+        <button type="button" onClick={() => inputRef.current?.click()}><PencilLettering text="Add PDF Files" className="pencil-write-control" /></button>
+        <span><PencilLettering text="or drop PDF files here" className="pencil-write-instruction" /></span>
       </div>
-      <label className="pdf-field">Output format
+      <label className="pdf-field"><PencilLettering text="Output format" className="pencil-write-control" />
         <select value={format} onChange={event => setFormat(event.target.value as PdfOutputFormat)}>
           <option value="image/png">PNG</option>
           <option value="image/jpeg">JPG</option>
         </select>
       </label>
-      <p className="pdf-muted">PNG for sharp detail · JPG for smaller files.</p>
-      {busy && <button className="pdf-cancel" type="button" onClick={cancel}>Cancel processing</button>}
+      <p className="pdf-muted"><PencilLettering text="PNG for sharp detail · JPG for smaller files." className="pencil-write-instruction" /></p>
+      {busy && <button className="pdf-cancel" type="button" onClick={cancel}><PencilLettering text="Cancel processing" className="pencil-write-control" /></button>}
       <button className="pdf-secondary" type="button" disabled={downloading || documents.length === 0}
         onClick={() => setShowClearConfirm(true)}>Clear all</button>
       {undoSnapshot && <div className="pdf-undo" role="status">PDFs cleared. <button onClick={undoClear} type="button">Undo</button></div>}
-      <p className="pdf-muted pdf-local-note">Processed on your device.</p>
+      <p className="pdf-muted pdf-local-note"><PencilLettering text="Processed on your device." className="pencil-write-instruction" /></p>
     </aside>
 
     <div className="pdf-results">
       <div className="pdf-results-head">
-        <div><h2>Converted documents</h2><p className="pdf-muted">
+        <div><h2><PencilLettering text="Converted documents" className="pencil-write-heading" /></h2><p className="pdf-muted">
           {documents.length} document{documents.length === 1 ? '' : 's'} · {pageCount} converted page{pageCount === 1 ? '' : 's'}
         </p></div>
         <button type="button" className="pdf-primary" aria-label="Download all converted PDF pages as a ZIP archive"
@@ -315,7 +316,7 @@ export function PdfToImage() {
       </div>}
       {error && <p role="alert" className="pdf-error">{error}</p>}
       <div className="pdf-list">
-        {documents.length === 0 && <div className="pdf-empty">No PDFs uploaded</div>}
+        {documents.length === 0 && <div className="pdf-empty"><PencilLettering text="No PDFs uploaded" className="pencil-write-instruction" /></div>}
         {documents.map(doc => <button type="button" key={doc.id} className="pdf-doc-card"
           aria-label={`Inspect PDF ${doc.name}`} onClick={() => setDetailId(doc.id)}>
           <div className="pdf-doc-thumb">
