@@ -832,3 +832,143 @@
     stroke-dashoffset:0 !important;
   }
 }
+
+/* ==========================================================================
+   V4 — PENCIL ACTUALLY DRAWS. No full-element wipes or magical card reveals.
+   Each SVG line advances along its OWN pathLength-normalized graphite contour.
+   UI geometry never leaves its final grid position, and real controls work
+   independently of the animation.
+   ========================================================================== */
+
+/* The exact shared wordmark's glyph outlines are traced one letter at a time.
+   This replaces V3's horizontal sweep of a pre-rendered title. */
+.forge-intro-portal .forge-intro-title-bridge > .pencil-wordmark-art.is-pencilling {
+  animation:none !important;
+  clip-path:none !important;
+  opacity:1 !important;
+}
+.forge-intro-portal .pencil-wordmark-art.is-pencilling g text:first-of-type {
+  fill-opacity:0;
+  animation:forgePencilWordmarkShadow .22s ease-out 1.63s both;
+}
+@keyframes forgePencilWordmarkShadow {
+  from {fill-opacity:0}
+  to {fill-opacity:.27}
+}
+.forge-intro-portal .pencil-wordmark-art.is-pencilling .pencil-writing-glyph {
+  stroke:#302f2e;
+  stroke-width:1.2px;
+  stroke-dasharray:660;
+  stroke-dashoffset:660;
+  fill-opacity:0;
+  animation:
+    forgePencilGlyphTrace .30s cubic-bezier(.28,.04,.12,1) calc(.48s + var(--glyph-index) * .108s) both,
+    forgePencilGlyphShading .22s ease-in calc(.64s + var(--glyph-index) * .108s) both;
+}
+@keyframes forgePencilGlyphTrace {
+  from {stroke-dashoffset:660}
+  to {stroke-dashoffset:0}
+}
+@keyframes forgePencilGlyphShading {
+  0%,38% {fill-opacity:0}
+  100% {fill-opacity:1}
+}
+
+/* Disable the V3 full-card and full-illustration clip wipes. Draw every
+   geometry using the SVG's original authored path instead. */
+.forge-app.forge-intro-handoff .sketch-card-art > svg,
+.forge-app.forge-intro-handoff .sketch-card-title,
+.forge-app.forge-intro-handoff .sketch-card-desc,
+.forge-app.forge-intro-handoff :is(.sketch-subtitle,.sketch-welcome-copy,.sketch-welcome-controls,.sketch-header-band > .sketch-checklist-wrap,.sketch-header-band > .sketch-header-kiln,.sketch-bottom-mountains,.sketch-bottom-gears),
+.forge-app.forge-intro-handoff .sketch-header-band + .sketch-wavy-divider {
+  animation:none !important;
+  opacity:1 !important;
+  clip-path:none !important;
+  transform:none !important;
+}
+.forge-app.forge-intro-handoff .sketch-card-art > svg :is(path,circle,rect,ellipse,line,polyline,polygon),
+.forge-app.forge-intro-handoff .sketch-kiln-svg :is(path,circle,rect,ellipse,line),
+.forge-app.forge-intro-handoff .sketch-checklist :is(path,circle,rect),
+.forge-app.forge-intro-handoff .sketch-wavy-divider :is(path,circle,rect),
+.forge-app.forge-intro-handoff :is(.sketch-bottom-mountains,.sketch-bottom-gears) :is(path,circle,rect) {
+  stroke-dasharray:1;
+  stroke-dashoffset:1;
+  fill-opacity:0;
+  --pencil-stroke-order:0;
+  animation:
+    forgePencilTraceRealPath .64s cubic-bezier(.33,.04,.18,1) calc(var(--draw-art-delay,.42s) + var(--pencil-stroke-order) * .053s) both,
+    forgePencilShadeAfterOutline .25s ease-out calc(var(--draw-art-delay,.42s) + .35s + var(--pencil-stroke-order) * .053s) both;
+}
+.forge-app.forge-intro-handoff .sketch-card-art > svg :is(path,circle,rect):nth-of-type(5n+2),
+.forge-app.forge-intro-handoff .sketch-kiln-svg :is(path,circle,rect):nth-of-type(5n+2) {--pencil-stroke-order:2}
+.forge-app.forge-intro-handoff .sketch-card-art > svg :is(path,circle,rect):nth-of-type(5n+3),
+.forge-app.forge-intro-handoff .sketch-kiln-svg :is(path,circle,rect):nth-of-type(5n+3) {--pencil-stroke-order:3}
+.forge-app.forge-intro-handoff .sketch-card-art > svg :is(path,circle,rect):nth-of-type(5n+4),
+.forge-app.forge-intro-handoff .sketch-kiln-svg :is(path,circle,rect):nth-of-type(5n+4) {--pencil-stroke-order:1}
+.forge-app.forge-intro-handoff .sketch-card-art > svg :is(path,circle,rect):nth-of-type(5n),
+.forge-app.forge-intro-handoff .sketch-kiln-svg :is(path,circle,rect):nth-of-type(5n) {--pencil-stroke-order:4}
+@keyframes forgePencilTraceRealPath {
+  from {stroke-dashoffset:1}
+  to {stroke-dashoffset:0}
+}
+@keyframes forgePencilShadeAfterOutline {
+  0%,22% {fill-opacity:0}
+  100% {fill-opacity:1}
+}
+/* Divider, guide and header drawings are physically traced before card content. */
+.forge-app.forge-intro-handoff .sketch-header-band > .sketch-header-kiln {--draw-art-delay:.14s}
+.forge-app.forge-intro-handoff .sketch-header-band > .sketch-checklist-wrap {--draw-art-delay:.19s}
+.forge-app.forge-intro-handoff .sketch-header-band + .sketch-wavy-divider {--draw-art-delay:.11s}
+.forge-app.forge-intro-handoff :is(.sketch-bottom-mountains,.sketch-bottom-gears) {--draw-art-delay:1.04s}
+
+/* Text appears in handwriting order, ONE glyph at a time. Letter outlines
+   receive a dry graphite edge and then their fill; the old full-line clip
+   reveal is completely disabled. */
+.pencil-written-text {
+  display:inline;
+  white-space:normal;
+}
+.pencil-written-word {display:inline-block;white-space:nowrap}
+.pencil-written-glyph {display:inline-block;white-space:pre;transform:none}
+.forge-app.forge-intro-handoff .pencil-written-glyph {
+  color:inherit;
+  opacity:0;
+  -webkit-text-stroke:.42px currentColor;
+  animation:forgePencilHandwriteLetter .18s cubic-bezier(.25,.07,.25,1)
+    calc(var(--draw-copy-delay,.32s) + var(--pencil-letter-index) * .020s) both;
+}
+@keyframes forgePencilHandwriteLetter {
+  0% {opacity:0;clip-path:inset(0 98% 0 0)}
+  30% {opacity:.52}
+  100% {opacity:1;clip-path:inset(0 0 0 0)}
+}
+.forge-app.forge-intro-handoff .sketch-checklist-wrap {--draw-copy-delay:.13s}
+.forge-app.forge-intro-handoff .sketch-subtitle {--draw-copy-delay:.22s}
+.forge-app.forge-intro-handoff .sketch-welcome-copy {--draw-copy-delay:.40s}
+.forge-app.forge-intro-handoff .sketch-card-slot:nth-child(n+5) {--draw-copy-delay:1.08s}
+.forge-app.forge-intro-handoff .sketch-card-title {--draw-copy-delay:var(--draw-copy-delay)}
+.forge-app.forge-intro-handoff .sketch-card-desc {--draw-copy-delay:var(--draw-copy-delay)}
+
+/* Card frames are already real SVG pathLength=1 tracers from V3. Their
+   crosshatching is revealed after the pencil outlines, not all at once. */
+.forge-app.forge-intro-handoff .sketch-card-border-svg path:not([stroke]) {
+  fill-opacity:0;
+  animation:forgePencilShadeAfterOutline .30s ease-out calc(var(--draw-border-delay) + .57s) both;
+}
+/* Keep the interactive search and replay buttons available from first view;
+   decorative motion must never delay keyboard input. */
+.forge-app.forge-intro-handoff .sketch-welcome-controls {
+  opacity:1 !important;
+  pointer-events:auto;
+}
+@media(prefers-reduced-motion:reduce) {
+  .forge-intro-portal .pencil-wordmark-art.is-pencilling .pencil-writing-glyph,
+  .forge-app.forge-intro-handoff .pencil-written-glyph,
+  .forge-app.forge-intro-handoff .sketch-card-art > svg :is(path,circle,rect,ellipse,line,polyline,polygon) {
+    animation:none !important;
+    stroke-dashoffset:0 !important;
+    fill-opacity:1 !important;
+    opacity:1 !important;
+    clip-path:none !important;
+  }
+}
