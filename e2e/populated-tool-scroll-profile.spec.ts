@@ -87,7 +87,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
 
   await page.goto('#/logo-resizer');
   const image = await png(page);
-  await page.getByLabel('Upload images').setInputFiles(Array.from({ length: 30 }, (_, i) => ({
+  await page.locator('.logo-workspace input[type="file"]').setInputFiles(Array.from({ length: 30 }, (_, i) => ({
     name: 'Logo_' + i + '.png', mimeType: 'image/png', buffer: image,
   })));
   await expect(page.locator('.logo-card')).toHaveCount(30);
