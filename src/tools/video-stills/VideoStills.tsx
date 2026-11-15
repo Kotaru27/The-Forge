@@ -230,7 +230,7 @@ export function VideoStills({ onTransfer }: Props) {
         <button className="vs-danger" type="button" disabled={!collections.length} onClick={() => setConfirmClear(true)}>{"Clear"}</button>
       </div>
       <div className="vs-options">
-        <label><input type="checkbox" checked={contactSheet !== 0} onChange={e => setContactSheet(e.target.checked ? 4 : 0)} /> {"Create contact sheet"}</label>
+        <label className="vs-contact-sheet-option"><input type="checkbox" checked={contactSheet !== 0} onChange={e => setContactSheet(e.target.checked ? 4 : 0)} /> {"Create contact sheet"}</label>
         {contactSheet !== 0 && <label>Layout <select aria-label="Contact sheet layout" value={contactSheet} onChange={event => setContactSheet(Number(event.target.value) as 4 | 6 | 9)}>
           <option value="4">2 × 2</option><option value="6">3 × 2</option><option value="9">3 × 3</option>
         </select></label>}
