@@ -3,7 +3,7 @@ import { IntroSketchArtwork } from './IntroSketchArtwork';
 import { PencilWordmark } from '../home/PencilWordmark';
 
 const SKETCH_DURATION_MS = 3450;
-const HANDOFF_DURATION_MS = 1820;
+const HANDOFF_DURATION_MS = 2680;
 
 type Props = {
   onHandoff: () => void;
