@@ -90,7 +90,8 @@ test('graphite lines and lettering draw in place, with reduced-motion fallback',
   const pencilPath = page.locator('.sketch-card-border-svg [data-pencil-trace]').first();
   const title = page.locator('.sketch-hero-center h1');
   await expect(pencilPath).toHaveAttribute('pathLength','1');
-  await expect(pencilPath).toHaveCSS('animation-name','sketch-pencil-trace');
+  // The original border stays fully inked after the intro; a separate trace loops.
+  await expect(pencilPath).toHaveCSS('animation-name','none');
   await expect(title.locator('.pencil-wordmark-art')).toHaveCount(1);
   await expect(title).toHaveCSS('animation-name','none');
   const ongoing = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
