@@ -17,7 +17,9 @@
   white-space: nowrap;
 }
 .pencil-written-glyph {
-  display: inline-block;
+  /* Inline glyphs concatenate naturally in the accessibility tree.
+     inline-block made buttons read A d d ... and broke real controls. */
+  display: inline;
   position: relative;
   white-space: pre;
   font: inherit;
