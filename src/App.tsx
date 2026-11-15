@@ -262,7 +262,7 @@ export default function App() {
           <div className="native-tool" hidden={activeTool !== 'ad-downloader'}>
             <AdDownloader />
           </div>
-          <WorkspaceParallax activeTool={isHome ? null : activeTool} />
+          <WorkspaceParallax activeTool={activeTool === 'home' ? null : activeTool} />
         </main>
       </div>
       {opening?.origin && opening.tool === activeTool && (
