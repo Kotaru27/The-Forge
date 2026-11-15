@@ -17,6 +17,9 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   const homeTitle = page.locator('.sketch-hero-center .pencil-wordmark-art');
   await expect(introTitle).toHaveCount(1);
   await expect(introTitle.locator('text').last()).toHaveText('THE FORGE');
+  await expect(introTitle.locator('tspan.pencil-writing-glyph')).toHaveCount(9);
+  await expect(introTitle).toHaveCSS('clip-path','none');
+  await expect(introTitle.locator('tspan.pencil-writing-glyph').first()).toHaveCSS('animation-name', /forgePencilGlyphTrace/);
   await expect(introTitle.locator('pattern')).toHaveAttribute('id', 'forge-intro-graphite-grain');
   await expect(homeTitle.locator('pattern')).toHaveAttribute('id', 'forge-graphite-grain');
   expect(await introTitle.locator('text').last().getAttribute('font-family'))
@@ -31,8 +34,12 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   const border = page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first();
   await expect(border).toHaveAttribute('pathLength', '1');
   await expect(border).toHaveCSS('animation-name', 'forgeIntroActualCardStroke');
-  await expect(page.locator('.sketch-home-grid .sketch-card-art > svg').first())
-    .toHaveCSS('animation-name', 'forgeIntroIllustrationReveal');
+  const pencilGeometry = page.locator('.sketch-home-grid .sketch-card-art > svg path').first();
+  await expect(pencilGeometry).toHaveAttribute('pathLength','1');
+  await expect(pencilGeometry).toHaveCSS('animation-name', /forgePencilTraceRealPath/);
+  await expect(page.locator('.sketch-home-grid .sketch-card-art > svg').first()).toHaveCSS('clip-path','none');
+  await expect(page.locator('.sketch-home-grid .pencil-written-glyph').first()).toHaveCSS('animation-name','forgePencilHandwriteLetter');
+
   await page.waitForTimeout(570);
   await page.screenshot({ path: testInfo.outputPath('intro-home-handoff.png') });
   await expect(intro).toHaveCount(0, { timeout: 3500 });
