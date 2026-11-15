@@ -293,3 +293,23 @@ test('switching tools preserves an imported batch and does not trigger navigatio
   await expect(page.locator('.logo-card')).toHaveCount(2);
   await expect(page.locator('.logo-preview').first()).toHaveJSProperty('width', 200);
 });
+
+
+test('Focus Mode opens as an overlay without shrinking the populated gallery', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 860 });
+  await addFiles(page, [sample, { ...sample, name: 'FocusSecond.png' }]);
+  const gallery = page.locator('.logo-gallery');
+  const before = await gallery.evaluate(el => el.getBoundingClientRect().width);
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
+  const focus = page.getByLabel('Focus Mode', { exact: true });
+  await expect(focus).toBeVisible();
+  await expect(focus).toHaveCSS('position', 'absolute');
+  await expect(focus).toHaveCSS('animation-name', 'forgeFocusEnter');
+  const after = await gallery.evaluate(el => el.getBoundingClientRect().width);
+  expect(Math.abs(after - before)).toBeLessThanOrEqual(1);
+  await focus.getByRole('button', { name: 'Next logo' }).click();
+  await expect(focus.getByLabel('Filename')).toHaveValue(/FocusSecond|SampleLogo/);
+  await focus.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(focus).toHaveCount(0);
+  expect(Math.abs((await gallery.evaluate(el => el.getBoundingClientRect().width)) - before)).toBeLessThanOrEqual(1);
+});
