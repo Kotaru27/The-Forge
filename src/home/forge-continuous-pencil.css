@@ -65,10 +65,9 @@
   clip-path: none !important;
 }
 
-/* Removing the intro's handoff class must NOT restart the older one-shot
-   Home animation and temporarily erase captions. Keep the finished page
-   fully drawn; only the separate strokes below are permitted to repeat. */
-.forge-app.forge-home-continuous-draw .sketch-home :is(
+/* After the cinematic drawing finishes, Home is a complete sketch.
+   It never replays the old whole-line wipes on search, navigation or remount. */
+.forge-app:is(.forge-home-finishing,.forge-home-resting) .sketch-home :is(
   .sketch-card-desc,
   .sketch-card-title .sketch-highlight-mark,
   .sketch-welcome-ink,
@@ -84,116 +83,22 @@
   stroke-dashoffset: 0 !important;
   clip-path: none !important;
 }
-.forge-app.forge-home-continuous-draw .sketch-home :is(
+.forge-app:is(.forge-home-finishing,.forge-home-resting) .sketch-home :is(
   .sketch-card-title .sketch-highlight-mark,
   .sketch-subtitle .sketch-highlight-sweep
 )::before {
   animation: none !important;
   clip-path: none !important;
 }
-
-/* These are ADDITIONAL hand-pencilled outlines, not replacements for the
-   static drawing. Never clear or replay text/controls to fake a loop. */
-.forge-sketch-ui .sketch-ongoing-card-border,
-.forge-sketch-ui .sketch-ongoing-card-underline path,
-.forge-sketch-ui .sketch-ongoing-hero-line path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.forge-sketch-ui .sketch-card-body {
-  position: relative;
-}
-.forge-sketch-ui .sketch-ongoing-card-underline {
-  position: absolute;
-  bottom: -8px;
-  left: 14%;
-  width: 72%;
-  height: 10px;
-  overflow: visible;
-  pointer-events: none;
-}
-.forge-sketch-ui .sketch-ongoing-hero-line {
-  position: absolute;
-  bottom: -8px;
-  left: 26%;
-  width: 48%;
-  height: 12px;
-  overflow: visible;
-  pointer-events: none;
-}
-
-/* Draw, settle, then leave the existing graphite work untouched.
-   Across a 13-second cycle only one or two cards receive a quiet over-stroke. */
-@keyframes forge-home-ongoing-graphite {
-  0%, 1% { stroke-dashoffset: 1; opacity: 0; }
-  3% { opacity: 0.58; }
-  11% { stroke-dashoffset: 0; opacity: 0.53; }
-  14% { stroke-dashoffset: 0; opacity: 0; }
-  100% { stroke-dashoffset: 1; opacity: 0; }
-}
-@keyframes forge-home-ongoing-letterline {
-  0%, 1% { stroke-dashoffset: 1; opacity: 0; }
-  3% { opacity: 0.68; }
-  10% { stroke-dashoffset: 0; opacity: 0.64; }
-  13% { stroke-dashoffset: 0; opacity: 0; }
-  100% { stroke-dashoffset: 1; opacity: 0; }
-}
-.forge-sketch-ui .sketch-card-slot { --forge-pencil-loop-delay: 0s; }
-.forge-sketch-ui .sketch-card-slot:nth-child(2) { --forge-pencil-loop-delay: 1.35s; }
-.forge-sketch-ui .sketch-card-slot:nth-child(3) { --forge-pencil-loop-delay: 2.7s; }
-.forge-sketch-ui .sketch-card-slot:nth-child(4) { --forge-pencil-loop-delay: 4.05s; }
-.forge-sketch-ui .sketch-card-slot:nth-child(5) { --forge-pencil-loop-delay: 5.4s; }
-.forge-sketch-ui .sketch-card-slot:nth-child(6) { --forge-pencil-loop-delay: 6.75s; }
-.forge-sketch-ui .sketch-card-slot:nth-child(7) { --forge-pencil-loop-delay: 8.1s; }
-
-.forge-app.forge-home-continuous-draw .sketch-card-border-svg .sketch-ongoing-card-border {
-  animation: forge-home-ongoing-graphite 13s linear var(--forge-pencil-loop-delay) infinite;
-}
-.forge-app.forge-home-continuous-draw .sketch-ongoing-card-underline path {
-  animation: forge-home-ongoing-letterline 13s linear calc(var(--forge-pencil-loop-delay) + 0.28s) infinite;
-}
-.forge-app.forge-home-continuous-draw .sketch-ongoing-hero-line path {
-  animation: forge-home-ongoing-graphite 13s linear 1.05s infinite;
-}
-
-/* A user should never have to wait for pencil motion to click or read.
-   Filtering does not force expensive page-wide SVG re-paints. */
-.forge-app.forge-home-continuous-draw .sketch-home-grid.is-filtered :is(
-  .sketch-ongoing-card-border,
-  .sketch-ongoing-card-underline path
+/* Artwork lives on the static page after the intro, never loops in idle. */
+.forge-app.forge-sketch-ui .sketch-home :is(
+  .sketch-ongoing-card-underline,
+  .sketch-ongoing-hero-line,
+  .sketch-ongoing-card-border
 ) {
-  animation: none !important;
-  stroke-dashoffset: 0;
-  opacity: 0;
+  display: none !important;
 }
-
-/* Native wheel/touch scrolling stays in charge. During an actual scroll,
-   pause only perpetual decorative SVG paint work; never pause content,
-   scrollbar input, or tool interactions. */
 .forge-ctk-ui.forge-sketch-ui .sketch-home {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-}
-.forge-app.forge-home-continuous-draw .sketch-home[data-scrolling="true"] :is(
-  .sketch-ongoing-card-border,
-  .sketch-ongoing-card-underline path,
-  .sketch-ongoing-hero-line path
-) {
-  animation-play-state: paused !important;
-}
-
-/* Respect user settings and expose the complete static art immediately. */
-@media (prefers-reduced-motion: reduce) {
-  .forge-app.forge-home-continuous-draw :is(
-    .sketch-ongoing-card-border,
-    .sketch-ongoing-card-underline path,
-    .sketch-ongoing-hero-line path
-  ) {
-    animation: none !important;
-    stroke-dashoffset: 0;
-    opacity: 0;
-  }
 }
