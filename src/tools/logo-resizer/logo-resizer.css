@@ -310,3 +310,33 @@
 @media(prefers-reduced-motion:reduce){
  .forge-logo-v5 .logo-preview-frame,.forge-logo-v5 button{transition:none!important}
 }
+
+/* Focus Mode overlays the gallery rather than taking a flex column and
+ * reflowing every thumbnail whenever it opens. Preserve right-side editing
+ * and keyboard navigation with a short compositor-only entrance. */
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-body {
+  position: relative;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-detail {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(390px, 36vw);
+  min-width: 0;
+  height: 100%;
+  flex: none;
+  animation: forgeFocusEnter .19s cubic-bezier(.22, .8, .2, 1) both;
+}
+@keyframes forgeFocusEnter {
+  from { opacity: .8; transform: translate3d(22px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (max-width: 960px) {
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-detail {
+    width: min(390px, 90%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-detail {
+    animation: none !important;
+  }
+}
