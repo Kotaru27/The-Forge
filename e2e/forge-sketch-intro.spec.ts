@@ -43,10 +43,12 @@ test('intro skip and user-triggered replay never change tool routing', async ({ 
   await expect(page.locator('.logo-workspace')).toBeVisible();
   await page.goto('#/home');
   await expect(intro).toHaveCount(0);
-  await page.getByRole('searchbox', { name: 'Find a Forge tool' }).fill('storyboard');
+  // Existing search matches card description text as well as tool names.
+  // Use a uniquely matching query; do not change the application's search.
+  await page.getByRole('searchbox', { name: 'Find a Forge tool' }).fill('ad downloader');
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Open Storyboard' }).click();
-  await expect(page).toHaveURL(/#\/storyboard$/);
+  await page.getByRole('button', { name: 'Open Ad Downloader' }).click();
+  await expect(page).toHaveURL(/#\/ad-downloader$/);
 });
 
 test('deep links and reduced-motion preferences show settled Home without animation', async ({ page }) => {
