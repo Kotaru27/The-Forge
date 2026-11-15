@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { RoughInkFrame } from './RoughInkFrame';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
 import {
@@ -300,6 +301,7 @@ export function ForgeHome({ onOpenTool }: Props) {
                   aria-label={`Open ${tool.label}`}
                 >
                   <SketchCardBorder spiral={isSpiralCard} />
+                  <RoughInkFrame seed={17 + tools.findIndex(item => item.id === tool.id) * 29} spiral={isSpiralCard} />
                   <span className="sketch-card-art" aria-hidden="true">
                     <SketchCardArt tool={tool.id} />
                   </span>

@@ -9,6 +9,7 @@ The packages declared in [package.json](package.json) include:
 | Dependency | Source / role |
 | --- | --- |
 | React, React DOM | https://react.dev — application UI |
+| Rough.js (`roughjs`) | https://github.com/rough-stuff/rough — seeded pencil-stroke SVG borders in the Ink Atelier design preview (MIT; upstream copyright Preet Shihn) |
 | JSZip | https://stuk.github.io/jszip — archive creation |
 | Pica | https://github.com/nodeca/pica — image resizing |
 | PDF.js (`pdfjs-dist`) | https://mozilla.github.io/pdf.js/ — PDF rendering |
