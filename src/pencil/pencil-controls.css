@@ -257,7 +257,7 @@
 }
 .forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-swatch {
   border: 0 !important;
-  background: #fdf8ee url('./assets/pencil-field.svg') center/100% 100% no-repeat !important;
+  background: #f6efe0 url('./assets/pencil-field.svg') center/100% 100% no-repeat !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
@@ -279,8 +279,8 @@
   border: 0 !important;
   border-image: none !important;
   border-radius: 0 !important;
-  background: #f7ecda url('./assets/pencil-field.svg') center/100% 100% no-repeat !important;
-  color: #292b2d !important;
+  background: #f6efe0 url('./assets/pencil-field.svg') center/100% 100% no-repeat !important;
+  color: #1f2328 !important;
   font-family: 'Kalam', cursive !important;
   font-size: 12px !important;
   padding: 0 7px !important;
