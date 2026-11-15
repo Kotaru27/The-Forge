@@ -3,63 +3,31 @@
  *
  * Preserve the graphite-paper visuals, native scroll containers, one-time
  * intro and existing workflows. Keep movement out of the scrolling content.
- * Only small noninteractive sketch elements may track scroll.
+ * No scroll-linked transforms, wheel interception or extra render layers.
  */
 
-/* A containing block for the one optional decorative portal. This does not
- * change scroll geometry or native input handling. */
-.forge-app.forge-sketch-ui .native-tool:not([hidden]) :is(
+/* Use native scrolling on the existing workroom surfaces. Smooth behavior
+ * applies to programmatic/anchor scrolling, not physical wheel or touch input.
+ * Never intercept wheel events or translate scrolling content in JavaScript. */
+.forge-app.forge-sketch-ui :is(
   .logo-gallery,
   .pdf-list,
   .split-card-grid,
   .vs-stacks,
   .sb-controls,
   .link-generator,
-  .adw-workspace
+  .adw-workspace,
+  .sketch-nav,
+  .sketch-home
 ) {
-  position: relative;
+  scroll-behavior: smooth;
 }
-
-/* Avoid making the art wrapper a scroll container! overflow:hidden created
- * a nested scroller and would break scroll(nearest block) on its children.
- * contain:paint clips the drawing without changing the native scroller. */
-.forge-app.forge-sketch-ui .forge-parallax-art {
-  overflow: clip;
-  contain: layout paint;
-  isolation: isolate;
-  pointer-events: none;
-}
-
-/* The earlier implementation permanently requested four or more composited
- * layers in some tools. CSS scroll-linked motion is compositor-eligible and
- * requires NO scroll callbacks, rAF loop, React rerenders or inline style
- * changes on each frame. Unsupported browsers get static artwork. */
-.forge-app.forge-sketch-ui .forge-parallax-art :is(
-  .forge-parallax-near,
-  .forge-parallax-far
-) {
-  will-change: auto !important;
-  transform: translate3d(0,0,0);
-}
-@keyframes forgePencilParallaxNear {
-  from { transform: translate3d(0,0,0); }
-  to { transform: translate3d(0,190px,0); }
-}
-@keyframes forgePencilParallaxFar {
-  from { transform: translate3d(0,0,0); }
-  to { transform: translate3d(0,92px,0); }
-}
-@supports (animation-timeline: scroll(nearest block)) {
-  .forge-app.forge-sketch-ui .native-tool:not([hidden]) .forge-parallax-art .forge-parallax-near {
-    animation: forgePencilParallaxNear 1s linear both;
-    animation-timeline: scroll(nearest block);
-    animation-range: 0px 340px;
-  }
-  .forge-app.forge-sketch-ui .native-tool:not([hidden]) .forge-parallax-art .forge-parallax-far {
-    animation: forgePencilParallaxFar 1s linear both;
-    animation-timeline: scroll(nearest block);
-    animation-range: 0px 340px;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .forge-app.forge-sketch-ui :is(
+    .logo-gallery, .pdf-list, .split-card-grid, .vs-stacks,
+    .sb-controls, .link-generator, .adw-workspace,
+    .sketch-nav, .sketch-home
+  ) { scroll-behavior: auto; }
 }
 
 /* The real tool can contain dozens of images or canvas surfaces. Scaling or
@@ -95,7 +63,10 @@
   clip-path: none !important;
   transition: opacity .16s ease !important;
 }
-.forge-app.forge-sketch-ui .sketch-sidebar-doodle svg {
+.forge-app.forge-sketch-ui .sketch-sidebar-doodle svg,
+.forge-app.forge-sketch-ui .sketch-brand-btn svg {
+  /* The sidebar snaps to its final width; do not animate its child sizes
+   * across layout while the navigation labels are revealing. */
   transition: none !important;
 }
 
@@ -127,17 +98,3 @@
   opacity: 1;
 }
 
-/* Lower-power/compact workspaces prioritize input latency. Paper remains
- * fully illustrated even when the optional parallax is disabled. */
-@media (max-width: 1000px), (prefers-reduced-motion: reduce) {
-  .forge-app.forge-sketch-ui .forge-parallax-art {
-    display: none !important;
-  }
-  .forge-app.forge-sketch-ui .forge-parallax-art :is(
-    .forge-parallax-near,.forge-parallax-far
-  ) {
-    animation: none !important;
-    transform: none !important;
-    will-change: auto !important;
-  }
-}

@@ -11,7 +11,6 @@ import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { ForgeHome, ToolGlyph } from './home/ForgeHome';
 import { ForgeSketchIntro } from './intro/ForgeSketchIntro';
 import { ToolOpenTransition, type ToolOpenOrigin } from './motion/ToolOpenTransition';
-import { WorkspaceParallax } from './motion/WorkspaceParallax';
 import {
   AnvilMark,
   MountainDoodle,
@@ -262,7 +261,6 @@ export default function App() {
           <div className="native-tool" hidden={activeTool !== 'ad-downloader'}>
             <AdDownloader />
           </div>
-          <WorkspaceParallax activeTool={activeTool === 'home' ? null : activeTool} />
         </main>
       </div>
       {opening?.origin && opening.tool === activeTool && (
