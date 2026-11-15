@@ -74,6 +74,12 @@ test('sidebar expands without layout-property animations and focus remains usabl
   await expect.poll(() => rail.evaluate(el => Math.round(el.getBoundingClientRect().width))).toBeGreaterThan(Math.round(before) + 60);
   const label = page.locator('.sketch-subtool-label').first();
   await expect(label).toHaveCSS('clip-path', 'none');
+  const highlight = await page.locator('.sketch-subtool-link').first().evaluate(el => {
+    const before = getComputedStyle(el, '::before');
+    return { clip: before.clipPath, transition: before.transitionProperty };
+  });
+  expect(highlight.clip).toBe('none');
+  expect(highlight.transition).toBe('transform');
   await expect(page.getByRole('button', { name: 'Home', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Home', exact: true }).click();
   await expect(page).toHaveURL(/#\/home$/);
