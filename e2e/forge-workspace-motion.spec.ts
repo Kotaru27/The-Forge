@@ -7,7 +7,7 @@ const panelMap = [
   ['video-stills', '.vs-stacks'],
   ['storyboard', '.sb-controls'],
   ['link-generator', '.link-generator'],
-  ['ad-downloader', '.adw-table-wrap'],
+  ['ad-downloader', '.adw-workspace'],
 ] as const;
 
 test('Home card opens a tool with one nonblocking paper FLIP instead of retyping the UI', async ({ page }, testInfo) => {
