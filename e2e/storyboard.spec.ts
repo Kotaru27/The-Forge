@@ -81,9 +81,8 @@ test('clear and delete require confirmation; Cancel retains frames',async ({page
   await expect(page.getByLabel('Choose a storyboard').locator('option')).toHaveCount(1);
 });
 
-test('Add Assets exposes both existing image and folder pickers with keyboard dismissal', async ({page}) => {
+test('Add Assets opens the real image and folder choosers with keyboard dismissal', async ({page}) => {
   const addAssets = page.getByRole('button', {name:'Add Assets'});
-  const imageInput = page.getByLabel('Choose storyboard assets');
   const folderInput = page.getByLabel('Choose storyboard folder');
 
   await expect(addAssets).toHaveAttribute('aria-expanded','false');
@@ -93,24 +92,23 @@ test('Add Assets exposes both existing image and folder pickers with keyboard di
   await expect(page.getByRole('button', {name:'Add Folder'})).toBeVisible();
   await expect(folderInput).toHaveAttribute('webkitdirectory','');
 
-  // Intercept only the native picker opening: imported file handling remains
-  // exercised by the real upload and directory-grouping tests below.
-  await page.evaluate(() => {
-    for (const [name, marker] of [
-      ['Choose storyboard assets','pickedImages'],
-      ['Choose storyboard folder','pickedFolder'],
-    ] as const) {
-      const input = document.querySelector<HTMLInputElement>(`input[aria-label="${name}"]`)!;
-      input.click = () => { input.dataset[marker] = 'yes'; };
-    }
-  });
-  await page.getByRole('button', {name:'Add Images'}).click();
-  await expect(imageInput).toHaveAttribute('data-picked-images','yes');
+  const [imagePicker] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.getByRole('button', {name:'Add Images'}).click(),
+  ]);
+  expect(imagePicker.isMultiple()).toBe(true);
+  await imagePicker.setFiles({name:'from-picker.png',mimeType:'image/png',buffer:await png(page)});
+  await expect(page.locator('.sb-frame')).toHaveCount(1);
   await expect(addAssets).toHaveAttribute('aria-expanded','false');
 
   await addAssets.click();
-  await page.getByRole('button', {name:'Add Folder'}).click();
-  await expect(folderInput).toHaveAttribute('data-picked-folder','yes');
+  const [folderPicker] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.getByRole('button', {name:'Add Folder'}).click(),
+  ]);
+  expect(folderPicker.isMultiple()).toBe(true);
+  await expect(await folderPicker.element()).toHaveAttribute('webkitdirectory','');
+  await folderPicker.setFiles([]);
   await expect(addAssets).toHaveAttribute('aria-expanded','false');
 
   await addAssets.click();
