@@ -107,7 +107,7 @@ test('Add Assets opens the real image and folder choosers with keyboard dismissa
     page.getByRole('button', {name:'Add Folder'}).click(),
   ]);
   expect(folderPicker.isMultiple()).toBe(true);
-  await expect(await folderPicker.element()).toHaveAttribute('webkitdirectory','');
+  expect(await (await folderPicker.element()).getAttribute('webkitdirectory')).toBe('');
   await folderPicker.setFiles([]);
   await expect(addAssets).toHaveAttribute('aria-expanded','false');
 
