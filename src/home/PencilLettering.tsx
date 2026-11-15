@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { PENCIL_GLYPH_PATHS } from './PencilGlyphPaths';
 
 type PencilLetteringProps = {
   text: string;
@@ -6,26 +7,17 @@ type PencilLetteringProps = {
 };
 
 /**
- * Authored handwriting on the existing Kalam glyph contours.
+ * Real centerline pencil strokes, not a masked paragraph or SVG font outline.
  *
- * The native span retains the EXACT original font metrics and wraps normally.
- * During a one-time entrance, an SVG text outline is stroked character by
- * character; pigment fills each letter before the native face takes over.
- * We never clip a completed line or animate live inputs/results.
- *
- * Decorative SVG text is ignored by accessibility APIs. The single phrase
- * remains the accessible name, and all original text is available without JS.
+ * Each character keeps its ORIGINAL Kalam HTML face and measured width,
+ * enabling native wrapping and an unchanged accessible name. The animated SVG
+ * path is decorative and contains NO duplicated text nodes. Typed inputs,
+ * filename lists, result text, and other live values never use this component.
  */
-function traceLength(character: string): string {
-  if (/^[ilI1.!:,;|']$/.test(character)) return '2.8em';
-  if (/^[MWmw@%&]$/.test(character)) return '8em';
-  if (/^[frtJ7]$/.test(character)) return '3.7em';
-  return '5.4em';
-}
-
 export function PencilLettering({ text, className = '' }: PencilLetteringProps) {
   let position = 0;
   const parts = text.split(/(\s+)/);
+
   return (
     <span className={`pencil-written-text ${className}`.trim()} role="text" aria-label={text}>
       {parts.map((part, group) => {
@@ -38,17 +30,31 @@ export function PencilLettering({ text, className = '' }: PencilLetteringProps) 
           <span key={group} className="pencil-written-word" aria-hidden="true">
             {[...part].map((character, index) => {
               const order = position++;
-              const variables = {
-                '--pencil-letter-index': order,
-                '--pencil-glyph-length': traceLength(character),
-              } as CSSProperties;
+              const path = PENCIL_GLYPH_PATHS[character];
+              const variables = { '--pencil-letter-index': order } as CSSProperties;
 
               return (
-                <span key={index} className="pencil-written-glyph" style={variables}>
+                <span
+                  key={index}
+                  className={'pencil-written-glyph' + (path ? '' : ' is-direct-glyph')}
+                  style={variables}
+                >
                   <span className="pencil-glyph-face">{character}</span>
-                  <svg className="pencil-glyph-vector" aria-hidden="true" focusable="false">
-                    <text x="0" y=".87em" className="pencil-glyph-stroke">{character}</text>
-                  </svg>
+                  {path && (
+                    <svg className="pencil-glyph-vector" viewBox="0 0 20 24" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                      <path
+                        pathLength={1}
+                        className="pencil-glyph-stroke"
+                        d={path}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                  )}
                 </span>
               );
             })}
