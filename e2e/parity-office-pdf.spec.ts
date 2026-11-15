@@ -13,9 +13,8 @@ async function uploadLogoOffice(page: import('@playwright/test').Page, name: str
   await page.goto('#/logo-resizer');
   await expect(page.getByRole('region', { name: 'Logo Resizer' })).toBeVisible();
   await page.locator('.logo-workspace input[type="file"]').setInputFiles({ name, mimeType, buffer: bytes });
-  const dimensions = page.getByRole('dialog', { name: 'Set logo dimensions' });
-  await expect(dimensions).toBeVisible();
-  await dimensions.getByRole('button', { name: 'Apply & process' }).click();
+  // Import begins immediately; output size is selected afterwards in the header.
+  await expect(page.getByRole('dialog', { name: 'Set logo dimensions' })).toHaveCount(0);
 }
 
 async function powerPointWithSvgFallback(): Promise<Buffer> {
