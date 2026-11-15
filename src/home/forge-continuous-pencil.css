@@ -40,6 +40,31 @@
   }
 }
 
+/* HOME COLORED PENCIL — one owner, one pass.
+   The earlier theme replayed sketch-pencil-shading during initial render,
+   while the intro overrode it with forgePencilShadeSweep on the same mark.
+   Cancel that competing keyframe in ALL Home phases; only the handoff may
+   shade once. Direct visits and settled Home show completed pigment. */
+.forge-app.forge-sketch-ui .sketch-home :is(
+  .sketch-subtitle .sketch-highlight-sweep::before,
+  .sketch-card-title .sketch-highlight-mark::before
+) {
+  animation: none !important;
+  clip-path: none;
+}
+.forge-app.forge-intro-handoff.forge-sketch-ui .sketch-home .sketch-subtitle .sketch-highlight-sweep::before {
+  animation: forgePencilShadeSweep .46s cubic-bezier(.23,.13,.24,1) 1.02s both !important;
+}
+.forge-app.forge-intro-handoff.forge-sketch-ui .sketch-home .sketch-card-title .sketch-highlight-mark::before {
+  animation: forgePencilShadeSweep .46s cubic-bezier(.23,.13,.24,1)
+    calc(var(--draw-copy-delay, .9s) + .43s) both !important;
+}
+/* Filtering must never redraw the pigment with every search edit. */
+.forge-app.forge-intro-handoff .sketch-home-grid.is-filtered .sketch-card-title .sketch-highlight-mark::before {
+  animation: none !important;
+  clip-path: none !important;
+}
+
 /* Removing the intro's handoff class must NOT restart the older one-shot
    Home animation and temporarily erase captions. Keep the finished page
    fully drawn; only the separate strokes below are permitted to repeat. */
@@ -143,6 +168,21 @@
   animation: none !important;
   stroke-dashoffset: 0;
   opacity: 0;
+}
+
+/* Native wheel/touch scrolling stays in charge. During an actual scroll,
+   pause only perpetual decorative SVG paint work; never pause content,
+   scrollbar input, or tool interactions. */
+.forge-ctk-ui.forge-sketch-ui .sketch-home {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.forge-app.forge-home-continuous-draw .sketch-home[data-scrolling="true"] :is(
+  .sketch-ongoing-card-border,
+  .sketch-ongoing-card-underline path,
+  .sketch-ongoing-hero-line path
+) {
+  animation-play-state: paused !important;
 }
 
 /* Respect user settings and expose the complete static art immediately. */
