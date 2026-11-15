@@ -10,7 +10,7 @@ const nativePanels = [
   ['ad-downloader', '.adw-workspace'],
 ] as const;
 
-test('every workroom keeps native scrolling, only one passive pencil decoration and no perpetual JS-driven transforms', async ({ page }) => {
+test('every workroom scrolls natively without parallax layers or wheel interception', async ({ page }) => {
   await page.setViewportSize({ width: 1496, height: 880 });
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -21,14 +21,9 @@ test('every workroom keeps native scrolling, only one passive pencil decoration 
     await expect(tool).toBeVisible();
     const panel = tool.locator(selector).first();
     await expect(panel).toBeVisible();
-    const artwork = panel.locator(':scope > .forge-parallax-art');
-    await expect(artwork).toHaveCount(1);
-    await expect(artwork).toHaveCSS('pointer-events', 'none');
-    await expect(artwork).toHaveCSS('overflow', 'clip');
-    await expect(tool.locator('.forge-parallax-art')).toHaveCount(1);
-    await expect(page.locator('.native-tool[hidden] .forge-parallax-art')).toHaveCount(0);
-    await expect(artwork.locator('.forge-parallax-near')).not.toHaveAttribute('style', /transform/);
-    await expect(artwork.locator('.forge-parallax-far')).not.toHaveAttribute('style', /transform/);
+    // All route-specific parallax portals are completely removed.
+    await expect(page.locator('.forge-parallax-art, .forge-parallax-near, .forge-parallax-far')).toHaveCount(0);
+    await expect(panel).toHaveCSS('scroll-behavior', 'smooth');
 
     // Verify the actual scroll container is still browser-driven.
     // A synthetic empty-state spacer tests scrolling without importing media
@@ -47,7 +42,6 @@ test('every workroom keeps native scrolling, only one passive pencil decoration 
       el.scrollTop = 190;
     });
     await expect.poll(() => panel.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
-    await expect(artwork).toHaveCSS('pointer-events', 'none');
     // No unusual horizontal overflow is introduced by the parallax portal.
     const after = await panel.evaluate(el => ({
       width: el.scrollWidth,
@@ -105,13 +99,10 @@ test('populated workroom motion does not scale the whole tool surface', async ({
   await expect(page.locator('[data-motion="tool-card-to-workspace"]')).toHaveCount(0);
 });
 
-test('reduced-motion and compact workspaces never allocate scrolling animation surfaces', async ({ page }) => {
+test('reduced motion preserves native scrolling but removes smooth programmatic transitions', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('#/storyboard');
   await expect(page.getByRole('button', { name: 'Add Assets' })).toBeVisible();
-  await expect(page.locator('.sb-controls .forge-parallax-art')).toBeHidden();
-  await expect(page.locator('.sb-controls .forge-parallax-near')).toHaveCSS('animation-name', 'none');
-  await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.setViewportSize({ width: 880, height: 760 });
-  await expect(page.locator('.sb-controls .forge-parallax-art')).toBeHidden();
+  await expect(page.locator('.sb-controls')).toHaveCSS('scroll-behavior', 'auto');
+  await expect(page.locator('.forge-parallax-art, .forge-parallax-near, .forge-parallax-far')).toHaveCount(0);
 });
