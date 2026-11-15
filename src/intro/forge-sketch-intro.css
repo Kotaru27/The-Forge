@@ -633,3 +633,202 @@
       from { opacity: 0.4; transform: scale(0.85); }
       to   { opacity: 1;   transform: scale(1.15); }
     }
+
+/* ==========================================================================
+   V3 — ONE GRAPHITE WORDMARK, THEN AN ACTUAL PENCIL-DRAWN HOME
+   No substitute fonts, no reflow/positions: the SAME PencilWordmark React SVG
+   travels from the original intro drawing to the Home masthead.
+   ========================================================================== */
+
+/* The old uploaded serif title had a fake grey ghost and partial trace paths.
+   The artwork source now keeps only guides, anvil, frame and colored pencil.
+   Its title is rendered with the *exact* Home SVG, so glyphs cannot morph. */
+.forge-intro-portal .forge-intro-title-bridge {
+  position:absolute;
+  left:50%;
+  top:58.1%;
+  z-index:3;
+  width:71%;
+  aspect-ratio:670 / 115;
+  transform:translate(-50%,-50%) scale(1);
+  transform-origin:center center;
+  pointer-events:none;
+  opacity:1;
+}
+.forge-intro-portal .forge-intro-title-bridge > .pencil-wordmark-art {
+  display:block;
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  overflow:visible;
+  clip-path:inset(0 100% 0 0);
+  animation:forgeIntroActualPencilWrite 1.06s cubic-bezier(.42,.07,.27,1) .98s both;
+}
+@keyframes forgeIntroActualPencilWrite {
+  0% {clip-path:inset(0 100% 0 0);opacity:.14}
+  17% {opacity:.73}
+  100% {clip-path:inset(0 0 0 0);opacity:1}
+}
+/* Do NOT fade the flight's parent. Earlier code faded the entire intro canvas
+   halfway through its title transfer, creating a missing/jumping wordmark. */
+.forge-intro-portal.is-handoff .forge-intro-canvas {
+  opacity:1 !important;
+  transition:none !important;
+}
+.forge-intro-portal.is-handoff .forge-intro-artwork {
+  opacity:0;
+  transition:opacity .30s ease-out !important;
+}
+.forge-intro-portal.is-handoff .forge-intro-title-bridge {
+  animation:forgeIntroSharedWordmarkFlight 1.02s cubic-bezier(.20,.80,.22,1) both;
+}
+@keyframes forgeIntroSharedWordmarkFlight {
+  0% {
+    transform:translate(-50%,-50%) scale(1);
+    opacity:1;
+  }
+  79% {
+    transform:translate(calc(-50% + var(--forge-handoff-x,0px)),calc(-50% + var(--forge-handoff-y,-200px))) scale(var(--forge-handoff-scale,.8));
+    opacity:1;
+  }
+  87% {
+    transform:translate(calc(-50% + var(--forge-handoff-x,0px)),calc(-50% + var(--forge-handoff-y,-200px))) scale(var(--forge-handoff-scale,.8));
+    opacity:0;
+  }
+  100% {
+    transform:translate(calc(-50% + var(--forge-handoff-x,0px)),calc(-50% + var(--forge-handoff-y,-200px))) scale(var(--forge-handoff-scale,.8));
+    opacity:0;
+  }
+}
+/* Home title only takes over after the bridge arrives. The two drawings are
+   identical. Unlike the prior handoff, we never overlay serif and Kalam glyphs. */
+.forge-app.forge-intro-handoff .sketch-hero-center .pencil-wordmark-art {
+  animation:forgeIntroSameWordmarkArrival .12s ease-out .88s both !important;
+}
+@keyframes forgeIntroSameWordmarkArrival {
+  from {opacity:0}
+  to {opacity:1}
+}
+
+/* The introduction's static layout was previously fading/sliding entire cards.
+   Keep all Home positions perfectly fixed: reveal real pencil SVG outline paths,
+   illustration fills, colored-pencil highlights and handwritten note lines. */
+.forge-app.forge-intro-handoff .sketch-header-band,
+.forge-app.forge-intro-handoff .sketch-welcome-row,
+.forge-app.forge-intro-handoff .sketch-home-grid,
+.forge-app.forge-intro-handoff .sketch-home-grid > .sketch-card-slot {
+  animation:none !important;
+  opacity:1 !important;
+  transform:none !important;
+}
+.forge-app.forge-intro-handoff .sketch-card-slot {
+  --draw-border-delay:.31s;
+  --draw-art-delay:.60s;
+  --draw-copy-delay:.94s;
+}
+.forge-app.forge-intro-handoff .sketch-card-slot:nth-child(2) {
+  --draw-border-delay:.35s;
+  --draw-art-delay:.66s;
+  --draw-copy-delay:1s;
+}
+.forge-app.forge-intro-handoff .sketch-card-slot:nth-child(3) {
+  --draw-border-delay:.32s;
+  --draw-art-delay:.62s;
+  --draw-copy-delay:.96s;
+}
+.forge-app.forge-intro-handoff .sketch-card-slot:nth-child(4) {
+  --draw-border-delay:.38s;
+  --draw-art-delay:.71s;
+  --draw-copy-delay:1.03s;
+}
+.forge-app.forge-intro-handoff .sketch-card-slot:nth-child(5) {
+  --draw-border-delay:.53s;
+  --draw-art-delay:.81s;
+  --draw-copy-delay:1.09s;
+}
+.forge-app.forge-intro-handoff .sketch-card-slot:nth-child(6) {
+  --draw-border-delay:.57s;
+  --draw-art-delay:.88s;
+  --draw-copy-delay:1.15s;
+}
+.forge-app.forge-intro-handoff .sketch-card-slot:nth-child(7) {
+  --draw-border-delay:.56s;
+  --draw-art-delay:.84s;
+  --draw-copy-delay:1.12s;
+}
+.forge-app.forge-intro-handoff .sketch-card-border-svg path[stroke] {
+  /* SketchCardBorder paths have pathLength=1, so this is a true tracing
+     animation regardless of portrait/landscape SVG/viewBox dimensions. */
+  stroke-dasharray:1;
+  stroke-dashoffset:1;
+  animation:forgeIntroActualCardStroke .82s cubic-bezier(.36,.02,.14,1) var(--draw-border-delay) both;
+}
+.forge-app.forge-intro-handoff .sketch-card-border-svg path[stroke]:nth-of-type(2n) {
+  animation-delay:calc(var(--draw-border-delay) + .07s);
+}
+@keyframes forgeIntroActualCardStroke {
+  from {stroke-dashoffset:1}
+  to {stroke-dashoffset:0}
+}
+/* Reveal full original vector illustration as an artist works left to right.
+   Clip the actual artwork, not a fake overlaid placeholder icon. */
+.forge-app.forge-intro-handoff .sketch-card-art > svg {
+  clip-path:inset(0 100% 0 0);
+  animation:forgeIntroIllustrationReveal .79s cubic-bezier(.26,.55,.2,1) var(--draw-art-delay) both;
+}
+@keyframes forgeIntroIllustrationReveal {
+  0% {clip-path:inset(0 100% 0 0);opacity:.5}
+  100% {clip-path:inset(0 0 0 0);opacity:1}
+}
+/* Handwritten annotation is uncovered AFTER its associated artwork is drawn. */
+.forge-app.forge-intro-handoff .sketch-card-title {
+  animation:forgeIntroWrittenCaption .55s cubic-bezier(.12,.66,.26,1) var(--draw-copy-delay) both;
+}
+.forge-app.forge-intro-handoff .sketch-card-desc {
+  animation:forgeIntroWrittenCaption .46s cubic-bezier(.2,.7,.2,1) calc(var(--draw-copy-delay) + .10s) both;
+}
+@keyframes forgeIntroWrittenCaption {
+  from {clip-path:inset(0 100% 0 0);opacity:.36}
+  to {clip-path:inset(0 0 0 0);opacity:1}
+}
+/* Notebook tape and sketch binding follow the card drawing, rather than
+   materializing before there is a card for them to attach to. */
+.forge-app.forge-intro-handoff .sketch-card-slot > :is(.sketch-tape,.sketch-card-spiral) {
+  animation:forgeIntroPencilDetails .33s ease-out calc(var(--draw-border-delay) + .65s) both;
+}
+@keyframes forgeIntroPencilDetails {
+  from {opacity:0}
+  to {opacity:1}
+}
+/* The checklist, anvil workshop kiln, ruled sheet, note, and bottom doodles
+   all get their own deliberately restrained pencil trace/colored-pencil pass.
+   Never nest parent fade/slide with a second child entrance. */
+.forge-app.forge-intro-handoff .sketch-header-band > :is(.sketch-checklist-wrap,.sketch-header-kiln) {
+  animation:forgeIntroIllustrationReveal .65s cubic-bezier(.2,.65,.2,1) .24s both;
+}
+.forge-app.forge-intro-handoff .sketch-subtitle {
+  animation:forgeIntroWrittenCaption .44s ease-out .92s both;
+}
+.forge-app.forge-intro-handoff .sketch-header-band + .sketch-wavy-divider {
+  animation:forgeIntroWrittenCaption .44s ease-out .25s both;
+}
+.forge-app.forge-intro-handoff .sketch-welcome-copy {
+  animation:forgeIntroWrittenCaption .55s cubic-bezier(.2,.68,.2,1) .82s both;
+}
+.forge-app.forge-intro-handoff .sketch-welcome-controls {
+  animation:forgeIntroWrittenCaption .42s ease-out 1.05s both;
+}
+.forge-app.forge-intro-handoff :is(.sketch-bottom-mountains,.sketch-bottom-gears) {
+  animation:forgeIntroIllustrationReveal .48s ease-out 1.07s both;
+}
+@media (prefers-reduced-motion:reduce) {
+  .forge-intro-portal .forge-intro-title-bridge,
+  .forge-intro-portal .forge-intro-title-bridge > .pencil-wordmark-art,
+  .forge-app.forge-intro-handoff :is(.sketch-card-art > svg,.sketch-card-title,.sketch-card-desc,.sketch-bottom-mountains,.sketch-bottom-gears,.sketch-checklist-wrap,.sketch-header-kiln,.sketch-subtitle,.sketch-welcome-copy,.sketch-welcome-controls),
+  .forge-app.forge-intro-handoff .sketch-card-border-svg path[stroke] {
+    animation:none !important;
+    opacity:1 !important;
+    clip-path:none !important;
+    stroke-dashoffset:0 !important;
+  }
+}
