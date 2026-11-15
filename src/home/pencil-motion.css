@@ -73,7 +73,7 @@
 
 /* Writing begins on the handoff or when a STATIC workroom is opened.
    No React frame-by-frame state, and absolutely no rewriting live values. */
-.forge-app.forge-intro-handoff .sketch-home .pencil-written-glyph,
+.forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home .pencil-written-glyph,
 .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]) .pencil-written-glyph,
 .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar .pencil-written-glyph,
 .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar .pencil-written-glyph {
@@ -83,7 +83,7 @@
   clip-path: none !important;
 }
 :is(
-  .forge-app.forge-intro-handoff .sketch-home,
+  .forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]),
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
@@ -91,7 +91,7 @@
   animation: forgePencilVectorYield .17s linear calc(var(--pencil-start) + .28s) both;
 }
 :is(
-  .forge-app.forge-intro-handoff .sketch-home,
+  .forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]),
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
@@ -99,7 +99,7 @@
   animation: forgePencilContour .34s cubic-bezier(.32,.04,.16,1) var(--pencil-start) both;
 }
 :is(
-  .forge-app.forge-intro-handoff .sketch-home,
+  .forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .native-tool:not([hidden]),
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
@@ -121,16 +121,28 @@
 .forge-app.forge-intro-handoff .sketch-welcome-copy { --pencil-write-base: .48s; }
 .forge-app.forge-intro-handoff .sketch-card-slot { --pencil-write-base: var(--draw-copy-delay, .95s); }
 .forge-app.forge-intro-handoff .sketch-card-desc { --pencil-write-base: calc(var(--draw-copy-delay, .95s) + .43s); }
+/* Keep the SAME delay variables when the intro overlay exits.
+   Otherwise CSS replaces the current animation mid-word, causing long
+   instructions to appear fully drawn without ever finishing their strokes. */
+.forge-app.forge-home-continuous-draw .sketch-checklist-wrap { --pencil-write-base: .14s; }
+.forge-app.forge-home-continuous-draw .sketch-subtitle { --pencil-write-base: .32s; }
+.forge-app.forge-home-continuous-draw .sketch-welcome-copy { --pencil-write-base: .48s; }
+.forge-app.forge-home-continuous-draw .sketch-card-slot { --draw-copy-delay: .94s; --pencil-write-base: var(--draw-copy-delay); }
+.forge-app.forge-home-continuous-draw .sketch-card-slot:nth-child(2) { --draw-copy-delay: 1s; }
+.forge-app.forge-home-continuous-draw .sketch-card-slot:nth-child(3) { --draw-copy-delay: .96s; }
+.forge-app.forge-home-continuous-draw .sketch-card-slot:nth-child(4) { --draw-copy-delay: 1.03s; }
+.forge-app.forge-home-continuous-draw .sketch-card-slot:nth-child(n+5) { --draw-copy-delay: 1.08s; }
+.forge-app.forge-home-continuous-draw .sketch-card-desc { --pencil-write-base: calc(var(--draw-copy-delay, .95s) + .43s); }
 .forge-app.forge-intro-handoff .sketch-subtitle .sketch-highlight-sweep::before {
   animation-delay: 1.66s !important;
 }
 .forge-app.forge-intro-handoff .sketch-card-title .sketch-highlight-mark::before {
   animation-delay: calc(var(--draw-copy-delay, .95s) + .74s) !important;
 }
-.forge-app.forge-intro-handoff .sketch-home .pencil-written-glyph {
+.forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home .pencil-written-glyph {
   -webkit-text-stroke: 0 !important;
 }
-.forge-app.forge-intro-handoff .sketch-home .pencil-glyph-face {
+.forge-app:is(.forge-intro-handoff, .forge-home-continuous-draw) .sketch-home .pencil-glyph-face {
   -webkit-text-stroke: 0 !important;
 }
 
