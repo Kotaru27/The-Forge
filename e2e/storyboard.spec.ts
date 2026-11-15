@@ -144,3 +144,34 @@ test('navigation away preserves multiple board state',async ({page})=>{
   await expect(page.locator('.sb-frame')).toHaveCount(1);
 });
 
+
+test('Add Assets exposes individual image selection and existing folder import', async ({page}) => {
+  const addAssets = page.getByRole('button', { name: 'Add Assets' });
+  await addAssets.click();
+  await expect(addAssets).toHaveAttribute('aria-expanded', 'true');
+  const choices = page.getByRole('group', { name: 'Choose asset import method' });
+  await expect(choices.getByRole('button', { name: 'Individual images / videos' })).toBeVisible();
+  await expect(choices.getByRole('button', { name: 'Folder' })).toBeVisible();
+
+  const chooseFiles = page.waitForEvent('filechooser');
+  await choices.getByRole('button', { name: 'Individual images / videos' }).click();
+  await (await chooseFiles).setFiles({ name:'individual.png', mimeType:'image/png', buffer:await png(page) });
+  await expect(page.locator('.sb-frame')).toHaveCount(1);
+  await expect(addAssets).toHaveAttribute('aria-expanded', 'false');
+
+  await addAssets.click();
+  await page.keyboard.press('Escape');
+  await expect(addAssets).toHaveAttribute('aria-expanded', 'false');
+
+  // Folder chooser already exists; verify the visible menu actually invokes it.
+  // Intercept the native .click() rather than launching an OS directory dialog.
+  await page.evaluate(() => {
+    const folder = document.querySelector<HTMLInputElement>('input[aria-label="Choose storyboard folder"]')!;
+    folder.click = () => { folder.dataset.folderButtonInvoked = 'yes'; };
+  });
+  await addAssets.click();
+  await choices.getByRole('button', { name:'Folder', exact:true }).click();
+  await expect(page.getByLabel('Choose storyboard folder')).toHaveAttribute('data-folder-button-invoked','yes');
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+  await expect(page.getByLabel('Choose storyboard folder')).toHaveAttribute('webkitdirectory','');
+});
