@@ -313,3 +313,105 @@ test('Focus Mode opens as an overlay without shrinking the populated gallery', a
   await expect(focus).toHaveCount(0);
   expect(Math.abs((await gallery.evaluate(el => el.getBoundingClientRect().width)) - before)).toBeLessThanOrEqual(1);
 });
+
+
+test('large custom export size does not allocate a full-resolution thumbnail canvas', async ({ page }) => {
+  await addFiles(page, [sample]);
+  await page.getByRole('spinbutton', { name: 'Width in pixels' }).fill('1200');
+  await page.getByRole('spinbutton', { name: 'Height in pixels' }).fill('800');
+  const thumbnail = page.locator('.logo-card .logo-preview').first();
+  await expect(thumbnail).toHaveJSProperty('width', 250);
+  const size = await thumbnail.evaluate(el => {
+    const canvas = el as HTMLCanvasElement;
+    return { width: canvas.width, height: canvas.height };
+  });
+  expect(size.width).toBeLessThan(1200);
+  expect(size.height).toBeLessThan(800);
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).click();
+  const detail = page.locator('.logo-detail-preview canvas');
+  await expect(detail).toHaveJSProperty('width', 280);
+  await page.getByRole('button', { name: 'Close Focus Mode' }).click();
+
+  // Preview dimensions must never alter the downloaded image resolution.
+  const event = page.waitForEvent('download');
+  await page.locator('.logo-card-footer').getByRole('button', { name: 'Save' }).click();
+  const bytes = await readFile(await (await event).path());
+  expect(bytes.subarray(0, 8)).toEqual(Buffer.from([137,80,78,71,13,10,26,10]));
+  expect([bytes.readUInt32BE(16), bytes.readUInt32BE(20)]).toEqual([1200,800]);
+});
+
+test('changing only the logo filename does not reset its preview pixels', async ({ page }) => {
+  await addFiles(page, [sample]);
+  const preview = page.locator('.logo-card .logo-preview').first();
+  await expect(preview).toHaveJSProperty('width', 200);
+  await preview.evaluate(el => {
+    const target = el as HTMLCanvasElement & { resetCount?: number };
+    target.resetCount = 0;
+    new MutationObserver(records => { target.resetCount! += records.length; })
+      .observe(target, { attributes: true, attributeFilter: ['width', 'height'] });
+  });
+  await page.getByRole('textbox', { name: 'Filename for SampleLogo.png' }).fill('Renamed');
+  await expect(page.locator('.logo-card-heading input')).toHaveValue('Renamed');
+  await page.evaluate(() => new Promise<void>(resolve =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  ));
+  expect(await preview.evaluate(el =>
+    (el as HTMLCanvasElement & { resetCount?: number }).resetCount
+  )).toBe(0);
+});
+
+test('record a populated logo gallery wheel-scroll frame sample', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 850 });
+  const base64 = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1000; canvas.height = 800;
+    const context = canvas.getContext('2d')!;
+    context.fillStyle = '#375e99';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  const source = Buffer.from(base64, 'base64');
+  await addFiles(page, Array.from({length: 18}, (_, i) => ({
+    name: 'LargeLogo_' + String(i).padStart(2, '0') + '.png',
+    mimeType: 'image/png',
+    buffer: source,
+  })));
+  await expect(page.locator('.logo-card')).toHaveCount(18);
+  const track = page.evaluate(async () => {
+    const frames: number[] = [];
+    let longTasks = 0;
+    const observer = typeof PerformanceObserver !== 'undefined' &&
+      PerformanceObserver.supportedEntryTypes.includes('longtask')
+      ? new PerformanceObserver(list => { longTasks += list.getEntries().length; })
+      : null;
+    observer?.observe({ entryTypes: ['longtask'] });
+    await new Promise<void>(resolve => {
+      const sampleFrame = (time: number) => {
+        frames.push(time);
+        if (frames.length < 90) requestAnimationFrame(sampleFrame);
+        else resolve();
+      };
+      requestAnimationFrame(sampleFrame);
+    });
+    observer?.disconnect();
+    const gaps = frames.slice(1).map((time, i) => time - frames[i]).sort((a,b) => a-b);
+    return {
+      frames: frames.length, longTasks,
+      medianGapMs: gaps[Math.floor(gaps.length/2)],
+      p95GapMs: gaps[Math.floor(gaps.length*.95)],
+      maxGapMs: gaps[gaps.length-1],
+    };
+  });
+  await page.locator('.logo-gallery').hover();
+  for (let i=0; i<14; i++) {
+    await page.mouse.wheel(0, 390);
+    await page.waitForTimeout(30);
+  }
+  const metrics = await track;
+  expect(metrics.frames).toBe(90);
+  await testInfo.attach('populated-logo-wheel-frame-sample.json', {
+    body: Buffer.from(JSON.stringify(metrics, null, 2)),
+    contentType: 'application/json',
+  });
+  console.info('Populated Logo Resizer wheel-scroll sample (CI runner only):', metrics);
+});
