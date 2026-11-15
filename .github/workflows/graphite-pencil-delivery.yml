@@ -35,7 +35,7 @@ jobs:
       - name: Checkout pinned pencil intro candidate
         uses: actions/checkout@v4
         with:
-          ref: 236adcd49980b937abdc0ed89070628273f0dcb8
+          ref: 21b5ada2f64d26fd5a3ae4df63a7c54c77453265
           path: intro-candidate
           persist-credentials: false
       - name: Checkout pinned CTK regression oracle for candidate tests
@@ -167,7 +167,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 236adcd49980b937abdc0ed89070628273f0dcb8
+          ref: 21b5ada2f64d26fd5a3ae4df63a7c54c77453265
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
