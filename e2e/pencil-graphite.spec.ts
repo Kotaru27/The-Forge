@@ -54,7 +54,7 @@ test('pencil component skin keeps the original seven tool routes and keyboard fo
   page.on('pageerror',error=>errors.push(error.message));
   for (const route of routes) {
     await page.goto('#/'+route);
-    const panel = page.locator('.native-tool');
+    const panel = page.locator('.native-tool:visible');
     await expect(panel).toBeVisible();
     const box = await panel.evaluate(el => {
       const root = document.querySelector<HTMLElement>('.forge-app')!;
@@ -79,8 +79,8 @@ test('pencil home retains responsive no-overlap layout and search navigation', a
       expect(Math.min(a.right,b.right)-Math.max(a.x,b.x)<=1||Math.min(a.bottom,b.bottom)-Math.max(a.y,b.y)<=1,width+'px overlap '+i+' '+j).toBe(true);
     }
   }
-  await page.getByRole('searchbox',{name:'Find a Forge tool'}).fill('storyboard');
+  await page.getByRole('searchbox',{name:'Find a Forge tool'}).fill('ad downloader');
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(1);
-  await page.getByRole('button',{name:'Open Storyboard'}).click();
+  await page.getByRole('button',{name:'Open Ad Downloader'}).click();
   await expect(page).toHaveURL(/#\/storyboard$/);
 });
