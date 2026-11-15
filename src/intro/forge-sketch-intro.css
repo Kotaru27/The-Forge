@@ -983,3 +983,12 @@
   from {transform:scaleX(0)}
   to {transform:scaleX(1)}
 }
+
+/* Live Chromium visual QA: anvil + construction grid must NOT ghost through
+   the new Home while the shared PencilWordmark travels. This removes the old
+   fade-through overlay; only the real title remains in the handoff layer. */
+.forge-intro-portal.is-handoff .forge-intro-artwork {
+  opacity:0 !important;
+  visibility:hidden !important;
+  transition:none !important;
+}
