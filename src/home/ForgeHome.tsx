@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { PencilWordmark } from './PencilWordmark';
+import { PencilLettering } from './PencilLettering';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
 import {
@@ -175,7 +176,7 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
                   <span className="sketch-checkbox-box" aria-hidden="true">
                     <SketchCheckboxIcon checked={item.done} />
                   </span>
-                  <span>{item.label}</span>
+                  <span><PencilLettering text={item.label} /></span>
                 </span>
               </li>
             ))}
@@ -201,7 +202,7 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
           </div>
           <p className="sketch-subtitle">
             <span className="sketch-subtitle-rule" aria-hidden="true" />
-            <span className="sketch-highlight-sweep">A creative production toolkit</span>
+            <span className="sketch-highlight-sweep"><PencilLettering text="A creative production toolkit" /></span>
             <span className="sketch-subtitle-rule" aria-hidden="true" />
           </p>
         </div>
@@ -215,12 +216,12 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
       <div className="sketch-welcome-row">
         <div className="sketch-welcome-copy">
           <h2>
-            <span className="sketch-welcome-ink">Welcome to The Forge</span>{' '}
+            <span className="sketch-welcome-ink"><PencilLettering text="Welcome to The Forge" /></span>{' '}
             <span className="sketch-wave-mark" aria-hidden="true">
               <SketchWavingHand />
             </span>
           </h2>
-          <p>Pick a tool and get to work.</p>
+          <p><PencilLettering text="Pick a tool and get to work." /></p>
           <span className="sketch-welcome-ticks" aria-hidden="true">
             <svg viewBox="0 0 24 22" fill="none" stroke="#b85337" strokeWidth="1.7" strokeLinecap="round">
               <path d="M4 6 L16 2 M6 13 L20 11 M4 19 L15 20" />
@@ -314,9 +315,9 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
                           <path d="M18 4 L6 8 M18 11 L4 11 M18 18 L6 14" />
                         </svg>
                       )}
-                      <span className="sketch-highlight-mark">{tool.label}</span>
+                      <span className="sketch-highlight-mark"><PencilLettering text={tool.label} /></span>
                     </strong>
-                    <span className="sketch-card-desc">{info.cardCopy}</span>
+                    <span className="sketch-card-desc"><PencilLettering text={info.cardCopy} /></span>
                   </span>
 
                   {hasRustUnderline && (
