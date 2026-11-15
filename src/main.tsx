@@ -9,6 +9,7 @@ import './intro/forge-sketch-intro.css';
 import './home/forge-continuous-pencil.css';
 import './home/pencil-motion.css';
 import './workroom-pencil-finish.css';
+import './motion/forge-motion.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><App /></React.StrictMode>
