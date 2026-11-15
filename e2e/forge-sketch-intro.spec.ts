@@ -10,12 +10,30 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   await expect(intro.locator('#forge-intro-layer-frame-and-emblem')).toHaveCount(1);
   await expect(intro.locator('#forge-intro-layer-title')).toHaveCount(1);
   await expect(intro.locator('#forge-intro-layer-caption')).toHaveCount(1);
+  // Exactly the SAME authored rough-pencil font/drawing in intro and Home.
+  // The old serif title + partial stroke paths produced the broken letters
+  // visible in the user screenshot; neither may render now.
+  const introTitle = intro.locator('.forge-intro-title-bridge .pencil-wordmark-art');
+  const homeTitle = page.locator('.sketch-hero-center .pencil-wordmark-art');
+  await expect(introTitle).toHaveCount(1);
+  await expect(introTitle.locator('text').last()).toHaveText('THE FORGE');
+  await expect(introTitle.locator('pattern')).toHaveAttribute('id', 'forge-intro-graphite-grain');
+  await expect(homeTitle.locator('pattern')).toHaveAttribute('id', 'forge-graphite-grain');
+  expect(await introTitle.locator('text').last().getAttribute('font-family'))
+    .toEqual(await homeTitle.locator('text').last().getAttribute('font-family'));
+  await expect(intro.locator('.title-charcoal-ghost, .title-charcoal-fill, .title-stroke-6b')).toHaveCount(0);
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
 
   await page.waitForTimeout(2150);
   await page.screenshot({ path: testInfo.outputPath('intro-pencil-drawing.png') });
   await expect(intro).toHaveAttribute('data-intro-stage', 'handoff', { timeout: 5500 });
   await expect(page.locator('.forge-app')).toHaveClass(/forge-intro-handoff/);
+  const border = page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first();
+  await expect(border).toHaveAttribute('pathLength', '1');
+  await expect(border).toHaveCSS('animation-name', 'forgeIntroActualCardStroke');
+  await expect(page.locator('.sketch-home-grid .sketch-card-art > svg').first())
+    .toHaveCSS('animation-name', 'forgeIntroIllustrationReveal');
+  await page.waitForTimeout(570);
   await page.screenshot({ path: testInfo.outputPath('intro-home-handoff.png') });
   await expect(intro).toHaveCount(0, { timeout: 3500 });
   await expect(page.locator('.forge-app')).not.toHaveClass(/forge-intro-handoff/);
