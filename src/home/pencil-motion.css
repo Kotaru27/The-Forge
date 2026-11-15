@@ -30,12 +30,16 @@
 }
 .pencil-glyph-face { display: inline; opacity: 1; }
 .pencil-glyph-vector {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: block;
-  width: 100%;
+  /* Critical accessibility invariant: positioned/block SVG descendants
+     cause Chromium to insert separators between otherwise inline letters.
+     An inline decorative stroke, with zero net advance, preserves the
+     native button/tab/label name while still tracing over its glyph. */
+  position: relative;
+  display: inline;
+  width: var(--pencil-glyph-advance, .56em);
   height: 1.12em;
+  margin-left: calc(-1 * var(--pencil-glyph-advance, .56em));
+  vertical-align: -.19em;
   overflow: visible;
   font: inherit;
   color: inherit;
