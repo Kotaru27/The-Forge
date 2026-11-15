@@ -183,6 +183,17 @@
   to { fill-opacity: 1; }
 }
 
+/* Previous prototype also looped standalone card and title underlines.
+   The approved motion grammar allows *only illustrated details* to recur. */
+.forge-app.forge-sketch-ui .sketch-ongoing-card-underline,
+.forge-app.forge-sketch-ui .sketch-ongoing-hero-line {
+  display: none !important;
+}
+.forge-app.forge-sketch-ui .sketch-ongoing-card-underline path,
+.forge-app.forge-sketch-ui .sketch-ongoing-hero-line path {
+  animation: none !important;
+}
+
 /* Continuous life belongs to tiny NON-DESTRUCTIVE marks on illustrations.
    All underlying art and captions are fully visible after drawing ends.
    Individual marks get staggered 13-second cycles: never redraw the border. */
