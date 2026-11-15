@@ -19,15 +19,15 @@ export function PencilLettering({ text, className = '' }: PencilLetteringProps) 
   const parts = text.split(/(\s+)/);
 
   return (
-    <span className={`pencil-written-text ${className}`.trim()} role="text" aria-label={text}>
+    <span className={`pencil-written-text ${className}`.trim()}>
       {parts.map((part, group) => {
         if (/^\s+$/.test(part)) {
           position += part.length;
-          return <span key={group} aria-hidden="true">{part}</span>;
+          return <span key={group}>{part}</span>;
         }
 
         return (
-          <span key={group} className="pencil-written-word" aria-hidden="true">
+          <span key={group} className="pencil-written-word">
             {[...part].map((character, index) => {
               const order = position++;
               const path = PENCIL_GLYPH_PATHS[character];
