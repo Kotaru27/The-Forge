@@ -9,6 +9,7 @@ import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
 import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { ForgeHome, ToolGlyph } from './home/ForgeHome';
+import { ForgeSketchIntro } from './intro/ForgeSketchIntro';
 import {
   AnvilMark,
   MountainDoodle,
@@ -22,6 +23,16 @@ import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
 
 type Route = ToolId | 'home';
+type IntroPhase = 'pending' | 'handoff' | 'settled';
+
+// First root visit sketches once per tab; deep links are never delayed.
+const INTRO_SESSION_KEY = 'forge-pencil-intro-played-v2';
+const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+function initialIntroPhase(): IntroPhase {
+  if (window.location.hash || reducedMotion()) return 'settled';
+  try { return sessionStorage.getItem(INTRO_SESSION_KEY) ? 'settled' : 'pending'; }
+  catch { return 'pending'; }
+}
 
 function initialTool(): Route {
   const saved = window.location.hash.replace(/^#\/?/, '');
@@ -31,10 +42,23 @@ function initialTool(): Route {
 export default function App() {
   const [activeTool, setActiveTool] = useState<Route>(initialTool);
   const storyboardRef = useRef<StoryboardRef>(null);
+  const [introPhase, setIntroPhase] = useState<IntroPhase>(initialIntroPhase);
+  const [introRun, setIntroRun] = useState(0);
+  const finishIntro = useCallback(() => {
+    try { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); } catch { /* Storage is optional. */ }
+    setIntroPhase('settled');
+  }, []);
+  const handoffIntro = useCallback(() => setIntroPhase('handoff'), []);
+  const replayIntro = useCallback(() => {
+    if (reducedMotion()) return;
+    setIntroRun(previous => previous + 1);
+    setIntroPhase('pending');
+  }, []);
 
   const openTool = useCallback((tool: Route) => {
     if (tool !== 'home' && !isToolId(tool)) return;
     setActiveTool(tool);
+    if (tool !== 'home') setIntroPhase('settled');
     if (window.location.hash !== '#/' + tool) history.replaceState(null, '', '#/' + tool);
   }, []);
 
@@ -64,7 +88,10 @@ export default function App() {
       className={
         (isLogo ? 'forge-app forge-v5-shell' : 'forge-app forge-collection-shell') +
         ' forge-ctk-ui forge-sketch-ui' +
-        (isHome ? ' forge-ctk-home-route forge-sketch-home-route' : '')
+        (isHome ? ' forge-ctk-home-route forge-sketch-home-route' : '') +
+        (isHome && introPhase === 'pending' ? ' forge-intro-before-home' : '') +
+        (isHome && introPhase === 'handoff' ? ' forge-intro-handoff' : '') +
+        (isHome && introPhase === 'settled' ? ' forge-home-continuous-draw' : '')
       }
     >
       <SketchSvgDefs />
@@ -165,7 +192,7 @@ export default function App() {
           )}
 
           <div className="native-tool" hidden={!isHome}>
-            <ForgeHome onOpenTool={openTool} />
+            <ForgeHome onOpenTool={openTool} onReplayIntro={replayIntro} />
           </div>
           <div className="native-tool" hidden={activeTool !== 'link-generator'}>
             <LinkGenerator />
@@ -190,6 +217,9 @@ export default function App() {
           </div>
         </main>
       </div>
+      {isHome && introPhase !== 'settled' && (
+        <ForgeSketchIntro key={introRun} onHandoff={handoffIntro} onFinish={finishIntro} />
+      )}
     </div>
   );
 }
