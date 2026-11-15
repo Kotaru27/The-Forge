@@ -1,14 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ToolId } from '../tools';
 
 /**
- * The Forge has real, independent native scroll panels. Attach decorative
- * motion only to the ACTIVE tool's named panel(s); never control wheel input,
- * add smooth-scrolling libraries, or move previews, cards, text or controls.
- *
- * Osmo-inspired parallax: two graphite sketches drift at different fractions
- * of the panel's scrollTop. Each panel writes just two transform variables via
- * a single passive, rAF-coalesced scroll listener. No React frame renders.
+ * Select the actual NATIVE scroll panels inside each workroom. Some inner
+ * panels (e.g., Ad Downloader's queue) mount only after files are imported;
+ * their always-present workspace is still an active parallax target.
  */
 const PANELS: Record<ToolId, readonly string[]> = {
   'logo-resizer': ['.logo-gallery', '.logo-detail'],
@@ -22,63 +19,92 @@ const PANELS: Record<ToolId, readonly string[]> = {
 
 type Props = { activeTool: ToolId | null };
 
+/**
+ * Osmo-inspired two-depth parallax without a virtual scrolling stack.
+ *
+ * Portal the lightweight ARTWORK into the active native panel(s), then
+ * transform the two actual DOM layers directly in a single passive-scroll
+ * rAF. No React renders per frame, no inherited CSS variable invalidation,
+ * no changes to wheel input, layout, previews, data or control elements.
+ */
 export function WorkspaceParallax({ activeTool }: Props) {
-  useEffect(() => {
-    if (!activeTool) return;
+  const [panels, setPanels] = useState<HTMLElement[]>([]);
 
+  useLayoutEffect(() => {
+    if (!activeTool) {
+      setPanels([]);
+      return;
+    }
     const wrapper = document.querySelector<HTMLElement>('.sketch-main-area .native-tool:not([hidden])');
-    if (!wrapper) return;
+    const targets = wrapper
+      ? [...new Set(PANELS[activeTool].flatMap(selector =>
+        [...wrapper.querySelectorAll<HTMLElement>(selector)]
+      ))]
+      : [];
+    setPanels(targets);
+  }, [activeTool]);
 
+  useEffect(() => {
+    if (!activeTool || !panels.length) return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const panels = [...new Set(PANELS[activeTool].flatMap(selector =>
-      [...wrapper.querySelectorAll<HTMLElement>(selector)]
-    ))];
 
-    const disposers = panels.map((panel) => {
-      const originalPosition = panel.style.position;
-      const addPosition = getComputedStyle(panel).position === 'static';
-      if (addPosition) panel.style.position = 'relative';
+    const disposers = panels.map(panel => {
+      const near = panel.querySelector<HTMLElement>('.forge-parallax-near');
+      const far = panel.querySelector<HTMLElement>('.forge-parallax-far');
+      if (!near || !far) return () => {};
 
+      const previousPosition = panel.style.position;
+      const changedPosition = getComputedStyle(panel).position === 'static';
+      if (changedPosition) panel.style.position = 'relative';
       panel.classList.add('forge-parallax-scroll');
-      let raf = 0;
+
+      let frame = 0;
       let disposed = false;
-      const update = () => {
-        raf = 0;
+      const paint = () => {
+        frame = 0;
         if (disposed) return;
         if (reduced.matches) {
-          panel.style.removeProperty('--forge-parallax-near');
-          panel.style.removeProperty('--forge-parallax-far');
           panel.classList.add('forge-parallax-disabled');
+          near.style.transform = '';
+          far.style.transform = '';
           return;
         }
         panel.classList.remove('forge-parallax-disabled');
-        // Clamp drift, never translate contents or allow limitless movement.
-        const progress = Math.max(0, Math.min(340, panel.scrollTop));
-        panel.style.setProperty('--forge-parallax-near', Math.round(progress * .56) + 'px');
-        panel.style.setProperty('--forge-parallax-far', Math.round(progress * .27) + 'px');
+        const distance = Math.max(0, Math.min(340, panel.scrollTop));
+        near.style.transform = 'translate3d(0,' + Math.round(distance * .56) + 'px,0)';
+        far.style.transform = 'translate3d(0,' + Math.round(distance * .27) + 'px,0)';
       };
       const onScroll = () => {
-        if (!raf && !disposed) raf = window.requestAnimationFrame(update);
+        if (!frame && !disposed) frame = window.requestAnimationFrame(paint);
       };
-
       panel.addEventListener('scroll', onScroll, { passive: true });
       reduced.addEventListener('change', onScroll);
-      update();
+      paint();
 
       return () => {
         disposed = true;
         panel.removeEventListener('scroll', onScroll);
         reduced.removeEventListener('change', onScroll);
-        if (raf) window.cancelAnimationFrame(raf);
+        if (frame) window.cancelAnimationFrame(frame);
         panel.classList.remove('forge-parallax-scroll', 'forge-parallax-disabled');
-        panel.style.removeProperty('--forge-parallax-near');
-        panel.style.removeProperty('--forge-parallax-far');
-        if (addPosition) panel.style.position = originalPosition;
+        near.style.transform = '';
+        far.style.transform = '';
+        if (changedPosition) panel.style.position = previousPosition;
       };
     });
-
     return () => { disposers.forEach(dispose => dispose()); };
-  }, [activeTool]);
+  }, [activeTool, panels]);
 
-  return null;
+  return (
+    <>
+      {panels.map((panel, index) => createPortal(
+        <div className="forge-parallax-art" aria-hidden="true" data-parallax-panel={activeTool || undefined}>
+          <span className="forge-parallax-near" />
+          <span className="forge-parallax-far" />
+        </div>,
+        panel,
+        'forge-parallax-' + index,
+      ))}
+    </>
+  );
 }
