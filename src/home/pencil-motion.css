@@ -199,6 +199,11 @@
 .forge-app.forge-home-continuous-draw .sketch-card-slot .pencil-ongoing-illustration-detail {
   animation: forge-home-ongoing-graphite 13s linear var(--forge-pencil-loop-delay) infinite;
 }
+/* Preserve the previous native scroll performance gate after moving the loop
+   from card borders onto the illustrations themselves. */
+.forge-app.forge-home-continuous-draw .sketch-home[data-scrolling="true"] .pencil-ongoing-illustration-detail {
+  animation-play-state: paused !important;
+}
 
 /* Tool-workroom writing is a short, interruptible FIRST-ENTRANCE only.
    Hiding a route immediately drops its animations: no stale placeholders. */
