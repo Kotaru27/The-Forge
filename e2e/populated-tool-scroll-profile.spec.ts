@@ -110,10 +110,10 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
   report['image-splitter'] = await wheelProfile(page, '.split-card-grid');
 
   await page.goto('#/pdf-to-image');
-  await page.getByLabel('Upload PDF files').setInputFiles(Array.from({ length: 5 }, (_, i) => ({
-    name: 'Report_' + i + '.pdf', mimeType: 'application/pdf', buffer: createPdf(2, 'blue'),
+  await page.getByLabel('Upload PDF files').setInputFiles(Array.from({ length: 18 }, (_, i) => ({
+    name: 'Report_' + i + '.pdf', mimeType: 'application/pdf', buffer: createPdf(1, 'blue'),
   })));
-  await expect(page.locator('.pdf-doc-card')).toHaveCount(5, { timeout: 30000 });
+  await expect(page.locator('.pdf-doc-card')).toHaveCount(18, { timeout: 60000 });
   report['pdf-to-image'] = await wheelProfile(page, '.pdf-list');
 
   await page.goto('#/video-stills');
