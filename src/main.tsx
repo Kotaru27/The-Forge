@@ -10,6 +10,7 @@ import './home/forge-continuous-pencil.css';
 import './home/pencil-motion.css';
 import './workroom-pencil-finish.css';
 import './motion/forge-motion.css';
+import './motion/forge-scroll-performance.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><App /></React.StrictMode>
