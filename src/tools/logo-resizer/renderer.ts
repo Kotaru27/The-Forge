@@ -55,7 +55,7 @@ const PREVIEW_SOURCE_MAX = 512;
 
 export function getLogoPreviewBitmap(asset: LogoAsset): Promise<ImageBitmap | null> {
   const image = asset.image;
-  if (asset.source.type === 'image/svg+xml' || /\\.svg$/i.test(asset.source.name) ||
+  if (asset.source.type === 'image/svg+xml' || /\.svg$/i.test(asset.source.name) ||
       typeof createImageBitmap !== 'function') return Promise.resolve(null);
   const longest = Math.max(image.naturalWidth, image.naturalHeight);
   if (longest <= PREVIEW_SOURCE_MAX) return Promise.resolve(null);
