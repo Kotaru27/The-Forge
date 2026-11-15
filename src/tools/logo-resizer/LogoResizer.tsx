@@ -1,4 +1,3 @@
-import { PencilLettering } from '../../home/PencilLettering';
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
@@ -289,22 +288,22 @@ export function LogoResizer() {
       <input ref={inputRef} type="file" accept="image/*,.pptx,.xlsx,.xlsm" multiple hidden onChange={onFileInput} />
       <div className="forge-v5-head" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
         <div className="forge-v5-intro">
-          <div className="forge-v5-eyebrow"><PencilLettering text="WORKROOM 01 / IMAGE PROCESSING" className="pencil-write-heading" /></div>
-          <div className="forge-v5-title"><LogoResizerIcon /><h1><PencilLettering text="Logo resizer" className="pencil-write-heading" /><span>.</span></h1></div>
+          <div className="forge-v5-eyebrow">{"WORKROOM 01 / IMAGE PROCESSING"}</div>
+          <div className="forge-v5-title"><LogoResizerIcon /><h1>{"Logo resizer"}<span>.</span></h1></div>
         </div>
         <div className="forge-v5-command-deck" aria-label="Global logo settings and actions">
           <div className="forge-v5-control-grid">
             <div className="forge-v5-group forge-v5-import">
-              <span className="forge-v5-group-title"><PencilLettering text="IMPORT / LINKS" className="pencil-write-heading" /></span>
+              <span className="forge-v5-group-title">{"IMPORT / LINKS"}</span>
               <div className="forge-v5-button-stack">
                 <button type="button" className="forge-v5-action forge-v5-primary" onClick={() => inputRef.current?.click()} disabled={busy}>
-                  <span aria-hidden="true">＋</span> <PencilLettering text="Add assets" className="pencil-write-control" />
+                  <span aria-hidden="true">＋</span> {"Add assets"}
                 </button>
-                <button type="button" className="forge-v5-action" onClick={openLinkDialog}><PencilLettering text="Generate links" className="pencil-write-control" /></button>
+                <button type="button" className="forge-v5-action" onClick={openLinkDialog}>{"Generate links"}</button>
               </div>
             </div>
             <div className="forge-v5-group forge-v5-presets">
-              <span className="forge-v5-group-title"><PencilLettering text="CANVAS PRESETS" className="pencil-write-heading" /></span>
+              <span className="forge-v5-group-title">{"CANVAS PRESETS"}</span>
               <div className="forge-v5-preset-grid" aria-label="Size presets">
                 {LOGO_PRESETS.map(preset => <button
                   key={preset.label} type="button"
@@ -315,21 +314,21 @@ export function LogoResizer() {
               </div>
             </div>
             <div className="forge-v5-group forge-v5-custom">
-              <span className="forge-v5-group-title"><PencilLettering text="CUSTOM" className="pencil-write-heading" /> <small><PencilLettering text="PX" className="pencil-write-control" /></small></span>
+              <span className="forge-v5-group-title">{"CUSTOM"} <small>{"PX"}</small></span>
               <div className="forge-v5-dimensions">
-                <label><span><PencilLettering text="W" className="pencil-write-control" /></span><input aria-label="Width in pixels" type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width',event.target.value)} /></label>
-                <label><span><PencilLettering text="H" className="pencil-write-control" /></span><input aria-label="Height in pixels" type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height',event.target.value)} /></label>
+                <label><span>{"W"}</span><input aria-label="Width in pixels" type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width',event.target.value)} /></label>
+                <label><span>{"H"}</span><input aria-label="Height in pixels" type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height',event.target.value)} /></label>
               </div>
             </div>
             <div className="forge-v5-group forge-v5-format">
-              <span className="forge-v5-group-title"><PencilLettering text="SAVE AS" className="pencil-write-heading" /></span>
+              <span className="forge-v5-group-title">{"SAVE AS"}</span>
               <select aria-label="Download format" value={settings.format} onChange={event => patchSettings({format:event.target.value as 'png' | 'jpeg'})}>
                 <option value="png">PNG</option><option value="jpeg">JPG</option>
               </select>
-              <small className="forge-v5-subnote"><PencilLettering text="WHITE CANVAS" className="pencil-write-instruction" /></small>
+              <small className="forge-v5-subnote">{"WHITE CANVAS"}</small>
             </div>
             <div className="forge-v5-group forge-v5-typography">
-              <span className="forge-v5-group-title"><PencilLettering text="LABEL TYPOGRAPHY" className="pencil-write-heading" /></span>
+              <span className="forge-v5-group-title">{"LABEL TYPOGRAPHY"}</span>
               <div className="forge-v5-type-controls">
                 <select aria-label="Font family" value={settings.fontFamily} onChange={event => patchSettings({fontFamily:event.target.value})}>
                   {LOGO_FONTS.map(font => <option key={font} value={font}>{font}</option>)}
@@ -339,24 +338,24 @@ export function LogoResizer() {
                   <input aria-label="Text color" type="color" value={settings.fontColor} onChange={event=>patchSettings({fontColor:event.target.value})}/>
                 </label>
               </div>
-              <small className="forge-v5-subnote"><PencilLettering text="FONT · SIZE · COLOR" className="pencil-write-instruction" /></small>
+              <small className="forge-v5-subnote">{"FONT · SIZE · COLOR"}</small>
             </div>
             <div className="forge-v5-group forge-v5-options">
-              <span className="forge-v5-group-title"><PencilLettering text="LABEL OPTIONS" className="pencil-write-heading" /></span>
+              <span className="forge-v5-group-title">{"LABEL OPTIONS"}</span>
               <div className="forge-v5-checkboxes">
-                <label><input type="checkbox" checked={settings.bold} onChange={event=>patchSettings({bold:event.target.checked})}/> <PencilLettering text="Bold" className="pencil-write-control" /></label>
-                <label><input type="checkbox" checked={settings.syncFilename} onChange={event=>patchSettings({syncFilename:event.target.checked})}/> <PencilLettering text="Sync filename" className="pencil-write-control" /></label>
+                <label><input type="checkbox" checked={settings.bold} onChange={event=>patchSettings({bold:event.target.checked})}/> {"Bold"}</label>
+                <label><input type="checkbox" checked={settings.syncFilename} onChange={event=>patchSettings({syncFilename:event.target.checked})}/> {"Sync filename"}</label>
               </div>
             </div>
             <div className="forge-v5-group forge-v5-position">
-              <span className="forge-v5-group-title"><PencilLettering text="IMAGE POSITIONING" className="pencil-write-heading" /></span>
+              <span className="forge-v5-group-title">{"IMAGE POSITIONING"}</span>
               <div className="forge-v5-sliders">
-                <label><span><PencilLettering text="PADDING" className="pencil-write-control" /></span>
+                <label><span>{"PADDING"}</span>
                   <input type="range" aria-label="Global image padding" min="0" max="150" value={settings.padding}
                     onChange={event=>patchSettings({padding:Number(event.target.value)})}/>
                   <output>{settings.padding} px</output>
                 </label>
-                <label><span><PencilLettering text="IMAGE Y" className="pencil-write-control" /></span>
+                <label><span>{"IMAGE Y"}</span>
                   <input type="range" aria-label="Global vertical image offset" min="-50" max="50" value={settings.imageOffset}
                     onChange={event=>patchSettings({imageOffset:Number(event.target.value)})}/>
                   <output>{settings.imageOffset}</output>
@@ -364,16 +363,16 @@ export function LogoResizer() {
               </div>
             </div>
             <div className="forge-v5-group forge-v5-exports">
-              <span className="forge-v5-group-title"><PencilLettering text="WORKROOM ACTIONS" className="pencil-write-heading" /></span>
+              <span className="forge-v5-group-title">{"WORKROOM ACTIONS"}</span>
               <div className="forge-v5-button-stack">
-                <button className="forge-v5-action forge-v5-ghost" type="button" onClick={()=>setConfirmClear(true)} disabled={!cards.length || busy}><PencilLettering text="Clear workroom" className="pencil-write-control" /></button>
-                <button className="forge-v5-action forge-v5-primary" type="button" onClick={()=>void exportZip()} disabled={!cards.length || busy}><PencilLettering text="Export batch ZIP" className="pencil-write-control" /> <span aria-hidden="true">↗</span></button>
+                <button className="forge-v5-action forge-v5-ghost" type="button" onClick={()=>setConfirmClear(true)} disabled={!cards.length || busy}>{"Clear workroom"}</button>
+                <button className="forge-v5-action forge-v5-primary" type="button" onClick={()=>void exportZip()} disabled={!cards.length || busy}>{"Export batch ZIP"} <span aria-hidden="true">↗</span></button>
               </div>
             </div>
           </div>
           <div className="forge-v5-deck-foot">
-            <span><PencilLettering text="ASPECT RATIO PRESERVED" className="pencil-write-instruction" /></span>
-            <span><PencilLettering text="ALL EDITS STAY IN YOUR BROWSER" className="pencil-write-instruction" /></span>
+            <span>{"ASPECT RATIO PRESERVED"}</span>
+            <span>{"ALL EDITS STAY IN YOUR BROWSER"}</span>
             <output className="forge-v5-current-size">{settings.width} × {settings.height} <small>PX</small></output>
           </div>
         </div>
@@ -387,8 +386,8 @@ export function LogoResizer() {
           {!cards.length ? (
             <div className="logo-empty">
               <div className="forge-v5-drop-icon"><ToolGlyph tool="logo-resizer" size={76} /></div>
-              <h3><PencilLettering text="Make room for your logos." className="pencil-write-heading" /></h3>
-              <p><PencilLettering text="Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually." className="pencil-write-instruction" /></p>
+              <h3>{"Make room for your logos."}</h3>
+              <p>{"Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually."}</p>
               <small>PNG · JPG · WEBP · SVG · PPTX · XLSX · XLSM</small>
             </div>
           ) : (
@@ -417,7 +416,7 @@ export function LogoResizer() {
         </main>
         {detail && <aside className="logo-detail" aria-label="Focus Mode">
           <div className="logo-detail-heading">
-            <strong><PencilLettering text="Focus Mode" className="pencil-write-heading" /></strong>
+            <strong>{"Focus Mode"}</strong>
             <div className="logo-detail-buttons">
               <button type="button" aria-label="Previous logo" onClick={() => navigateFocus(-1)}>←</button>
               <button type="button" aria-label="Next logo" onClick={() => navigateFocus(1)}>→</button>
