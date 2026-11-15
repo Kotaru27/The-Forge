@@ -135,14 +135,14 @@ export function SketchCardBorder({ spiral = false }: { spiral?: boolean }) {
       aria-hidden="true"
     >
       {/* Subtle outer graphite smudge / hatch strokes hugging bottom and right outside edge */}
-      <path
+      <path pathLength={1}
         d="M18 219 Q154 222 293 217 Q299 180 298 22"
         stroke="#2b2d30"
         strokeWidth="4.5"
         strokeOpacity="0.11"
         strokeLinecap="round"
       />
-      <path
+      <path pathLength={1}
         d="M16 218 L22 224 M28 218 L34 224 M42 218 L48 224 M58 218 L64 224 M74 218 L80 224 M92 218 L98 224 M110 218 L116 224 M128 218 L134 224 M148 218 L154 224 M168 218 L174 224 M188 218 L194 224 M208 218 L214 224 M228 218 L234 224 M248 218 L254 224 M268 218 L274 224 M286 216 L293 222 M296 28 L302 34 M296 48 L302 54 M296 68 L302 74 M296 88 L302 94 M296 108 L302 114 M296 128 L302 134 M296 148 L302 154 M296 168 L302 174 M296 188 L302 194 M295 204 L301 211"
         stroke="#2e3136"
         strokeWidth="1.05"
@@ -151,13 +151,13 @@ export function SketchCardBorder({ spiral = false }: { spiral?: boolean }) {
       />
 
       {/* Organic corner pencil shading triangles tucked inside corners */}
-      <path d="M12 182 Q13 212 44 214 L12 214 Z" fill="url(#pencil-shade-light)" opacity="0.82" />
-      <path d="M254 214 Q293 212 294 180 L294 214 Z" fill="url(#pencil-shade-light)" opacity="0.88" />
-      <path d="M262 10 L294 10 L294 38 Q276 24 262 10 Z" fill="url(#pencil-shade-light)" opacity="0.62" />
-      {!spiral && <path d="M11 10 L38 10 Q23 21 11 33 Z" fill="url(#pencil-shade-light)" opacity="0.52" />}
+      <path pathLength={1} d="M12 182 Q13 212 44 214 L12 214 Z" fill="url(#pencil-shade-light)" opacity="0.82" />
+      <path pathLength={1} d="M254 214 Q293 212 294 180 L294 214 Z" fill="url(#pencil-shade-light)" opacity="0.88" />
+      <path pathLength={1} d="M262 10 L294 10 L294 38 Q276 24 262 10 Z" fill="url(#pencil-shade-light)" opacity="0.62" />
+      {!spiral && <path pathLength={1} d="M11 10 L38 10 Q23 21 11 33 Z" fill="url(#pencil-shade-light)" opacity="0.52" />}
 
       {/* Rough hand-drawn outer ink pass with tiny sketchy corner overshoots */}
-      <path
+      <path pathLength={1}
         d={
           spiral
             ? 'M16 10 Q154 6 296 11 M293 7 Q297 114 293 217 M297 214 Q154 218 15 214 M18 217 Q14 114 18 7'
@@ -169,7 +169,7 @@ export function SketchCardBorder({ spiral = false }: { spiral?: boolean }) {
         strokeLinejoin="round"
         />
       {/* Faint offset double-ink pass around edges */}
-      <path
+      <path pathLength={1}
         d={
           spiral
             ? 'M20 12.5 Q156 9 291 12.5 Q294 116 291 212 Q156 215 19 212'
