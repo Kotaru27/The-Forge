@@ -10,6 +10,10 @@ test('Logo Resizer buttons are native with real stable authored pencil strokes a
   await expect(buttons).toHaveCount(8);
   const add = page.getByRole('button', { name: /Add assets/i });
   await expect(add).toBeVisible();
+  // The source artwork must NEVER cover primary-action lettering.
+  await expect(add.locator('.pencil-button-content')).toHaveCSS('color', 'rgb(31, 35, 40)');
+  await expect(add.locator('.pencil-button-content')).toHaveCSS('z-index', '2');
+  await expect(add).toHaveCSS('border-image-source', 'none');
   expect(await add.evaluate(el => ({ tag: el.tagName, paths: el.querySelectorAll('svg path').length, hidden: el.querySelector('svg')?.getAttribute('aria-hidden') })))
     .toMatchObject({ tag: 'BUTTON', hidden: 'true' });
   expect(await add.locator('svg path').count()).toBeGreaterThan(13);
