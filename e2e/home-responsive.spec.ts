@@ -100,3 +100,37 @@ test('filtered Home cards remain usable in narrow viewports', async ({page}) => 
   await page.getByRole('button', {name: 'Open PDF to Image'}).click();
   await expect(page).toHaveURL(/#\/pdf-to-image$/);
 });
+
+test('scrolling Home pauses only the continuous pencil over-strokes, without moving card geometry', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 600 });
+  // Direct links are settled immediately, so continuous drawing is active.
+  await page.goto('#/home');
+  const home = page.locator('.sketch-home');
+  const stroke = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
+  await expect(stroke).toHaveCSS('animation-play-state', 'running');
+  const before = await home.evaluate(element => ({
+    width: element.scrollWidth,
+    inner: element.clientWidth,
+    available: element.scrollHeight - element.clientHeight,
+  }));
+  expect(before.available).toBeGreaterThan(150);
+  expect(before.width).toBeLessThanOrEqual(before.inner + 1);
+
+  // Native scroll events switch a single attribute; they never write
+  // React state every frame or animate the scroll position themselves.
+  await home.evaluate(element => element.scrollTo({ top: 260, behavior: 'instant' }));
+  await expect(home).toHaveAttribute('data-scrolling', 'true');
+  await expect(stroke).toHaveCSS('animation-play-state', 'paused');
+  const moved = await home.evaluate(element => ({
+    top: element.scrollTop,
+    width: element.scrollWidth,
+    inner: element.clientWidth,
+  }));
+  expect(moved.top).toBeGreaterThan(0);
+  expect(moved.width).toBeLessThanOrEqual(moved.inner + 1);
+
+  await expect(home).not.toHaveAttribute('data-scrolling', 'true');
+  await expect(stroke).toHaveCSS('animation-play-state', 'running');
+  await page.getByRole('button', { name: 'Open Ad Downloader' }).click();
+  await expect(page).toHaveURL(/#\/ad-downloader$/);
+});
