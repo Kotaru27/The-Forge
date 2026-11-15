@@ -137,6 +137,9 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
     }) });
   });
   await page.goto('#/ad-downloader');
+  // Hash-only SPA navigation does not rerun addInitScript. A real reload
+  // ensures the permitted folder fixture is installed before the tool mounts.
+  await page.reload();
   const book = XLSX.utils.book_new();
   const sheet = XLSX.utils.aoa_to_sheet([
     ['Ad No', 'URL', 'Type'],
