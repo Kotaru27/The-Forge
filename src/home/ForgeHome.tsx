@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { PencilWordmark } from './PencilWordmark';
 import { PencilLettering } from './PencilLettering';
 import type { ToolId } from '../tools';
@@ -153,6 +153,27 @@ type Props = {
 
 export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
   const [search, setSearch] = useState('');
+  const homeRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const home = homeRef.current;
+    if (!home) return;
+    let resumeTimer = 0;
+    const onHomeScroll = () => {
+      // One DOM attribute change at scroll start/end, not a React render on
+      // every wheel frame. Keep the expensive perpetual SVG traces off paint
+      // while the browser is moving the paper.
+      if (home.dataset.scrolling !== 'true') home.dataset.scrolling = 'true';
+      window.clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(() => { delete home.dataset.scrolling; }, 160);
+    };
+    home.addEventListener('scroll', onHomeScroll, { passive: true });
+    return () => {
+      home.removeEventListener('scroll', onHomeScroll);
+      window.clearTimeout(resumeTimer);
+      delete home.dataset.scrolling;
+    };
+  }, []);
   const term = search.trim().toLocaleLowerCase();
   const visibleIds = tools.filter(tool =>
     !term || [tool.label, toolNotes[tool.id].category, toolNotes[tool.id].description]
@@ -166,7 +187,7 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
   const isFilteredView = search.trim().length > 0;
 
   return (
-    <section className="forge-home sketch-home" aria-label="The Forge home">
+    <section ref={homeRef} className="forge-home sketch-home" aria-label="The Forge home">
       <header className="sketch-header-band">
         <div className="sketch-checklist-wrap" aria-hidden="true">
           <ul className="sketch-checklist">
