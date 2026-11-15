@@ -77,8 +77,18 @@
 }
 @keyframes forgeIntroTitleHandoff {
   0% {transform:translate(0,0) scale(1);opacity:1}
-  72% {transform:translate(var(--forge-handoff-x,0px),var(--forge-handoff-y,-200px)) scale(var(--forge-handoff-scale,.65));opacity:1}
+  61% {transform:translate(var(--forge-handoff-x,0px),var(--forge-handoff-y,-200px)) scale(var(--forge-handoff-scale,.65));opacity:1}
+  77% {transform:translate(var(--forge-handoff-x,0px),var(--forge-handoff-y,-200px)) scale(var(--forge-handoff-scale,.65));opacity:0}
   100% {transform:translate(var(--forge-handoff-x,0px),var(--forge-handoff-y,-200px)) scale(var(--forge-handoff-scale,.65));opacity:0}
+}
+/* One readable title at a time: original graphite lettering yields to Home's
+   existing uppercase pencil wordmark only after reaching the destination. */
+.forge-app.forge-intro-handoff .sketch-title-lockup {
+  animation:forgeIntroHomeTitleArrival .24s ease-out .64s both;
+}
+@keyframes forgeIntroHomeTitleArrival {
+  from {opacity:0}
+  to {opacity:1}
 }
 .forge-intro-footer {
   position:absolute;
