@@ -2102,7 +2102,7 @@
  * Static geometry and all controls remain in their final place.
  * ========================================================= */
 @keyframes sketch-pencil-trace {
-  from { stroke-dashoffset: 100; }
+  from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
 }
 @keyframes sketch-pencil-lettering {
@@ -2117,14 +2117,14 @@
 /* The paths carry an authored pathLength=100 so dash positions
    trace real SVG contours, not a rectangular wipe over artwork. */
 .forge-sketch-ui .sketch-page-frame-svg [data-pencil-trace] {
-  stroke-dasharray: 100;
+  stroke-dasharray: 1;
   animation: sketch-pencil-trace 920ms linear both;
 }
 .forge-sketch-ui .sketch-page-frame-svg [data-pencil-trace]:last-child {
   animation-delay: 170ms;
 }
 .forge-sketch-ui .sketch-wavy-divider [data-pencil-trace] {
-  stroke-dasharray: 100;
+  stroke-dasharray: 1;
   animation: sketch-pencil-trace 470ms linear both;
 }
 .forge-sketch-ui .sketch-wavy-divider [data-pencil-trace]:last-child {
@@ -2163,7 +2163,7 @@
 .sketch-card-slot:nth-child(6) { --sk-card-pencil-delay: 325ms; }
 .sketch-card-slot:nth-child(7) { --sk-card-pencil-delay: 390ms; }
 .forge-sketch-ui .sketch-card-border-svg [data-pencil-trace] {
-  stroke-dasharray: 100;
+  stroke-dasharray: 1;
   animation: sketch-pencil-trace 590ms linear both;
   animation-delay: var(--sk-card-pencil-delay);
 }
@@ -2186,7 +2186,7 @@
 .forge-sketch-ui .sketch-title-sparks [data-pencil-trace],
 .forge-sketch-ui .sketch-welcome-ticks [data-pencil-trace],
 .forge-sketch-ui .sketch-rust-flourish [data-pencil-trace] {
-  stroke-dasharray: 100;
+  stroke-dasharray: 1;
   animation: sketch-pencil-trace 390ms linear both;
 }
 .forge-sketch-ui .sketch-title-sparks [data-pencil-trace],
