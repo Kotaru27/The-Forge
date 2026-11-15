@@ -473,3 +473,38 @@
     transition: none !important;
   }
 }
+
+/* Readability guard: the paper sketch sits below real button text.
+ * The older global primary-action rules paint dark backgrounds; remove those
+ * ONLY for these hand-drawn Logo buttons, not for the other six tools. */
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 button.pencil-art-button > .pencil-button-linework {
+  z-index: 1 !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 button.pencil-art-button > .pencil-button-content {
+  position: relative !important;
+  z-index: 2 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  max-width: 100%;
+  white-space: inherit;
+  pointer-events: none;
+  color: #1f2328 !important;
+  -webkit-text-fill-color: #1f2328 !important;
+  text-shadow: none !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 button.pencil-art-button > .pencil-button-content span {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 .forge-v5-command-deck .forge-v5-action.pencil-art-button.forge-v5-primary,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 .logo-detail-actions button.pencil-art-button.logo-primary,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 .logo-modal-actions button.pencil-art-button.logo-primary {
+  background: transparent !important;
+  color: #1f2328 !important;
+  -webkit-text-fill-color: #1f2328 !important;
+  border: 0 !important;
+  border-image: none !important;
+  box-shadow: none !important;
+}
