@@ -58,12 +58,12 @@ test('every workroom scrolls natively without parallax layers or wheel intercept
   expect(errors).toEqual([]);
 });
 
-test('sidebar expands without layout-property animations and focus remains usable', async ({ page }) => {
+test('sidebar expands within fixed rail and focus remains usable', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 850 });
   await page.goto('#/storyboard');
   const rail = page.locator('.sketch-sidebar');
   await expect(rail).toBeVisible();
-  await expect(rail).toHaveCSS('transition-property', 'none');
+  await expect(rail).toHaveCSS('transition-property', 'width');
 
   const before = await rail.evaluate(el => el.getBoundingClientRect().width);
   await rail.hover({ position: { x: 18, y: 140 } });
