@@ -41,31 +41,20 @@
   opacity: 0;
 }
 .pencil-glyph-stroke {
-  font-family: inherit;
-  font-size: 1em;
-  font-weight: inherit;
-  font-style: inherit;
-  letter-spacing: inherit;
-  fill: currentColor;
+  fill: none;
   stroke: currentColor;
-  stroke-width: .044em;
+  stroke-width: 1.2px;
   stroke-linejoin: round;
   stroke-linecap: round;
-  paint-order: stroke;
-  fill-opacity: 0;
-  stroke-dasharray: var(--pencil-glyph-length, 5.4em);
-  stroke-dashoffset: var(--pencil-glyph-length, 5.4em);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
 }
 
 /* One pencil writes each actual letter outline, follows with graphite fill,
    then yields to the unchanged native text. No line-wide wiping at any point. */
 @keyframes forgePencilContour {
-  from { stroke-dashoffset: var(--pencil-glyph-length, 5.4em); }
+  from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
-}
-@keyframes forgePencilPigment {
-  0%, 30% { fill-opacity: 0; }
-  100% { fill-opacity: 1; }
 }
 @keyframes forgePencilOriginalLetter {
   0% { opacity: 0; }
@@ -101,9 +90,7 @@
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-topbar,
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
 ) .pencil-glyph-stroke {
-  animation:
-    forgePencilContour .34s cubic-bezier(.32,.04,.16,1) var(--pencil-start) both,
-    forgePencilPigment .17s ease-out calc(var(--pencil-start) + .19s) both;
+  animation: forgePencilContour .34s cubic-bezier(.32,.04,.16,1) var(--pencil-start) both;
 }
 :is(
   .forge-app.forge-intro-handoff .sketch-home,
@@ -112,6 +99,13 @@
   .forge-app.forge-sketch-ui:not(.forge-ctk-home-route) .sketch-sidebar
 ) .pencil-glyph-face {
   animation: forgePencilOriginalLetter .12s ease-out calc(var(--pencil-start) + .30s) both;
+}
+
+/* If an uncommon character has no authored stroke path, it stays readable
+   immediately. Never hide a value or substitute an unreadable placeholder. */
+.forge-app.forge-sketch-ui .pencil-written-glyph.is-direct-glyph .pencil-glyph-face {
+  animation: none !important;
+  opacity: 1 !important;
 }
 
 /* Semantic choreography: illustrations lead, labels are handwritten
