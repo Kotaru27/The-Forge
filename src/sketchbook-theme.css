@@ -2198,11 +2198,11 @@
 .forge-sketch-ui .sketch-home-grid.is-filtered :is(
   .sketch-card-border-svg [data-pencil-trace],
   .sketch-card-title .sketch-highlight-mark,
-  .sketch-card-title .sketch-highlight-mark::before,
   .sketch-card-desc,
   .sketch-title-sparks [data-pencil-trace],
   .sketch-rust-flourish [data-pencil-trace]
-) {
+),
+.forge-sketch-ui .sketch-home-grid.is-filtered .sketch-card-title .sketch-highlight-mark::before {
   animation: none !important;
   stroke-dashoffset: 0;
   clip-path: none;
