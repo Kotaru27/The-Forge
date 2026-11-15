@@ -25,6 +25,7 @@ test('Home card opens a tool with one nonblocking paper FLIP instead of retyping
   const flight = page.locator('[data-motion="tool-card-to-workspace"]');
   await expect(flight).toBeAttached();
   await expect(flight).toHaveCSS('pointer-events', 'none');
+  await expect(flight.locator('svg')).toHaveCount(0); // no distorted full-workroom frame
   await expect(page.getByRole('spinbutton', { name: 'Width in pixels' })).toBeVisible();
   await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath('forge-tool-opening.png') });
