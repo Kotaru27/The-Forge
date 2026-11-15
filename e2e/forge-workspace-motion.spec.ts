@@ -65,8 +65,10 @@ test('Osmo-inspired two-depth graphite artwork attaches to every active workspac
     const panel = page.locator('.native-tool:not([hidden]) ' + selector).first();
     await expect(panel).toBeVisible();
     await expect(panel).toHaveClass(/forge-parallax-scroll/);
-    const near = panel.locator('.forge-parallax-near');
-    const far = panel.locator('.forge-parallax-far');
+    // The Link Generator has a nested scrollable preview: it legitimately
+    // contains a second portal. Inspect only THIS panel's direct overlay.
+    const near = panel.locator(':scope > .forge-parallax-art > .forge-parallax-near');
+    const far = panel.locator(':scope > .forge-parallax-art > .forge-parallax-far');
     await expect(near).toHaveCount(1);
     await expect(far).toHaveCount(1);
     await expect(near).toHaveCSS('background-image', /data:image\/svg/);
