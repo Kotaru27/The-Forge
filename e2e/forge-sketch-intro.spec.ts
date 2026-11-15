@@ -6,6 +6,10 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   const intro = page.getByRole('dialog', { name: 'The Forge opening pencil sketch' });
   await expect(intro).toBeVisible();
   await expect(intro).toHaveAttribute('data-intro-stage', 'drawing');
+  // Home must not pre-write behind the intro overlay. It starts at handoff,
+  // and its last finished glyph must remain static after the intro settles.
+  const homePencil = page.locator('.sketch-home .pencil-glyph-stroke').first();
+  await expect(homePencil).toHaveCSS('animation-name', 'none');
   await expect(intro.locator('#forge-intro-layer-drafting-guides')).toHaveCount(1);
   await expect(intro.locator('#forge-intro-layer-frame-and-emblem')).toHaveCount(1);
   await expect(intro.locator('#forge-intro-layer-title')).toHaveCount(1);
@@ -47,6 +51,7 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   // continuing graphite Home sketch; ONLY the shared wordmark flies.
   await expect(intro.locator('.forge-intro-artwork')).toHaveCSS('visibility', 'hidden');
   await expect(page.locator('.forge-app')).toHaveClass(/forge-intro-handoff/);
+  await expect(homePencil).toHaveCSS('animation-name', 'forgePencilContour');
   expect(await highlightState(subtitleHighlight)).toEqual({ name: 'forgePencilShadeSweep', iterations: '1' });
   expect(await highlightState(cardHighlight)).toEqual({ name: 'forgePencilShadeSweep', iterations: '1' });
   await expect(introTitle.locator('g[filter]').first()).toHaveCSS('filter', 'none');
