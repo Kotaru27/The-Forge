@@ -54,6 +54,23 @@ test('board list navigation, rename, per-board settings and reorder work', async
   await expect(page.locator('.sb-frame')).toHaveCount(3);
 });
 
+
+test('renaming a populated board retains its canvas and does not re-render pixels', async ({page}) => {
+  await add(page, ['one.png', 'two.png', 'three.png']);
+  const canvas = page.locator('.sb-canvas canvas').first();
+  await expect(canvas).toBeVisible();
+  await canvas.evaluate(el => { (el as HTMLCanvasElement & { retained?: boolean }).retained = true; });
+  const name = page.getByLabel('Board Name');
+  await name.fill('Storyboard Renamed Without Redraw');
+  await expect(name).toHaveValue('Storyboard Renamed Without Redraw');
+  await expect(page.locator('.sb-canvas canvas')).toHaveCount(1);
+  // replaceChildren(renderBoard(...)) would replace the element on every name keystroke.
+  expect(await canvas.evaluate(el => (el as HTMLCanvasElement & { retained?: boolean }).retained)).toBe(true);
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Save JPG' }).click();
+  expect((await download).suggestedFilename()).toBe('Storyboard Renamed Without Redraw.jpg');
+});
+
 test('bulk ZIP includes all populated boards without duplicate filenames',async ({page})=>{
   await add(page,['first.png']);
   await page.getByRole('button',{name:'+ New Board'}).click();
