@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { PencilWordmark } from './PencilWordmark';
 import type { ToolId } from '../tools';
 import { tools } from '../tools';
 import {
@@ -190,7 +191,7 @@ export function ForgeHome({ onOpenTool }: Props) {
                 <path d="M6 10 L22 15 M2 20 L20 20 M7 30 L22 25" />
               </svg>
             </span>
-            <h1>THE FORGE</h1>
+            <h1 className="pencil-wordmark" aria-label="THE FORGE"><PencilWordmark /></h1>
             <span className="sketch-title-ticks sketch-title-ticks-right" aria-hidden="true">
               <svg viewBox="0 0 28 38" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M22 10 L6 15 M26 20 L8 20 M21 30 L6 25" />

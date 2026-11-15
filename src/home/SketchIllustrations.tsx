@@ -23,6 +23,13 @@ export function SketchSvgDefs() {
           <path d="M2.8 0 Q3.5 2.7 2.5 5.5" stroke="#23272c" strokeWidth="0.9" strokeOpacity="0.26" fill="none" />
         </pattern>
 
+        {/* Dry colored-pencil pigment: red PDF label is cross-layered pencil, not solid ink. */}
+        <pattern id="pencil-red-shade" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
+          <rect width="10" height="10" fill="#c77a65" fillOpacity="0.92" />
+          <path d="M-2 2 Q3 0.5 12 2 M-2 5.2 Q4 3.7 12 5.2 M-1 8.5 Q4 7 11 8.5" fill="none" stroke="#9b4535" strokeWidth="1.1" strokeOpacity="0.69" />
+          <path d="M2 0 L4.5 10 M8 0 L10 9" stroke="#e7a18a" strokeWidth="0.64" strokeOpacity="0.7" />
+        </pattern>
+
         {/* Crosshatch shadow pattern */}
         <pattern id="pencil-crosshatch" width="8" height="8" patternUnits="userSpaceOnUse">
           <path d="M0 8 L8 0 M-2 2 L2 -2 M6 10 L10 6" stroke="#2a2d31" strokeWidth="1.15" strokeOpacity="0.34" />
@@ -378,7 +385,7 @@ export function SketchCardArt({ tool }: { tool: ToolId }) {
           <path d="M87 17.5 L87 32 L101 32" fill="url(#pencil-shade-light)" />
           <path d="M51 34 H78 M51 43 H74 M51 82 H88 M51 88 H76" strokeWidth="1.35" opacity="0.65" />
           {/* Rough terracotta PDF tag */}
-          <path d="M27 51 L73 50.5 L71.5 73 L28 73.5 Z" fill={rust} stroke="#6b2715" strokeWidth="1.65" />
+          <path d="M27 51 L73 50.5 L71.5 73 L28 73.5 Z" fill="url(#pencil-red-shade)" stroke="#8e4133" strokeWidth="1.65" />
           <text x="50" y="66.5" textAnchor="middle" fill="#fff9f2" stroke="none" fontSize="13.5" fontWeight="700" fontFamily="Kalam, cursive">PDF</text>
           {/* Arrow */}
           <path d="M111 58 Q123 57 134 58.5 M126 52 L135 58.5 L126 65" strokeWidth="2.1" />

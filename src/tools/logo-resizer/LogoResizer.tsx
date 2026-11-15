@@ -3,7 +3,8 @@ import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
 import { LogoPreview } from './LogoPreview';
 import { LogoResizerIcon } from './LogoResizerIcon';
-import { ToolGlyph } from '../../home/ForgeHome';
+import { SketchCardArt } from '../../home/SketchIllustrations';
+import { PencilButton, PencilDeckDrawing } from '../../pencil/PencilControls';
 import { logoToBlob } from './renderer';
 import { extractOfficeImages } from './office';
 import { generateLogoLinks } from './links';
@@ -292,25 +293,26 @@ export function LogoResizer() {
           <div className="forge-v5-title"><LogoResizerIcon /><h1>Logo resizer<span>.</span></h1></div>
         </div>
         <div className="forge-v5-command-deck" aria-label="Global logo settings and actions">
+          <PencilDeckDrawing />
           <div className="forge-v5-control-grid">
             <div className="forge-v5-group forge-v5-import">
               <span className="forge-v5-group-title">IMPORT / LINKS</span>
               <div className="forge-v5-button-stack">
-                <button type="button" className="forge-v5-action forge-v5-primary" onClick={() => inputRef.current?.click()} disabled={busy}>
+                <PencilButton type="button" className="forge-v5-action forge-v5-primary" onClick={() => inputRef.current?.click()} disabled={busy}>
                   <span aria-hidden="true">＋</span> Add assets
-                </button>
-                <button type="button" className="forge-v5-action" onClick={openLinkDialog}>Generate links</button>
+                </PencilButton>
+                <PencilButton type="button" className="forge-v5-action" onClick={openLinkDialog}>Generate links</PencilButton>
               </div>
             </div>
             <div className="forge-v5-group forge-v5-presets">
               <span className="forge-v5-group-title">CANVAS PRESETS</span>
               <div className="forge-v5-preset-grid" aria-label="Size presets">
-                {LOGO_PRESETS.map(preset => <button
+                {LOGO_PRESETS.map((preset, index) => <PencilButton pencilVariant={(index % 3) as 0 | 1 | 2}
                   key={preset.label} type="button"
                   className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''}
                   aria-pressed={settings.width === preset.width && settings.height === preset.height}
                   onClick={() => setSize(preset.width, preset.height)}
-                >{preset.label}</button>)}
+                >{preset.label}</PencilButton>)}
               </div>
             </div>
             <div className="forge-v5-group forge-v5-custom">
@@ -365,8 +367,8 @@ export function LogoResizer() {
             <div className="forge-v5-group forge-v5-exports">
               <span className="forge-v5-group-title">WORKROOM ACTIONS</span>
               <div className="forge-v5-button-stack">
-                <button className="forge-v5-action forge-v5-ghost" type="button" onClick={()=>setConfirmClear(true)} disabled={!cards.length || busy}>Clear workroom</button>
-                <button className="forge-v5-action forge-v5-primary" type="button" onClick={()=>void exportZip()} disabled={!cards.length || busy}>Export batch ZIP <span aria-hidden="true">↗</span></button>
+                <PencilButton className="forge-v5-action forge-v5-ghost" type="button" onClick={()=>setConfirmClear(true)} disabled={!cards.length || busy}>Clear workroom</PencilButton>
+                <PencilButton className="forge-v5-action forge-v5-primary" type="button" onClick={()=>void exportZip()} disabled={!cards.length || busy}>Export batch ZIP <span aria-hidden="true">↗</span></PencilButton>
               </div>
             </div>
           </div>
@@ -379,13 +381,13 @@ export function LogoResizer() {
       </div>
       {progress && <div className="logo-progress" role="status">{progress}</div>}
       {error && <div className="logo-error" role="alert">{error}</div>}
-      {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
+      {snapshot && <div className="logo-undo" role="status">Workspace cleared. <PencilButton type="button" onClick={undoClear}>Undo with all edits</PencilButton> <PencilButton type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</PencilButton></div>}
       <div className="logo-body">
         <main className="logo-gallery" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
           <div className="forge-v5-board-heading"><div><span>01 — CANVAS / ASSET BOARD</span><h2>{cards.length ? cards.length + (cards.length === 1 ? " logo in your workboard" : " logos in your workboard") : "Your workboard is empty"}</h2></div></div>
           {!cards.length ? (
             <div className="logo-empty">
-              <div className="forge-v5-drop-icon"><ToolGlyph tool="logo-resizer" size={76} /></div>
+              <div className="forge-v5-drop-icon pencil-drop-sketch"><SketchCardArt tool="logo-resizer" /></div>
               <h3>Make room for your logos.</h3>
               <p>Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually.</p>
               <small>PNG · JPG · WEBP · SVG · PPTX · XLSX · XLSM</small>
@@ -396,7 +398,7 @@ export function LogoResizer() {
                 <article key={asset.id} className="logo-card">
                   <div className="logo-card-heading"><span className="forge-v5-card-index">{String(cards.length - cards.indexOf(asset)).padStart(2,"0")}</span>
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
-                    <button type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</button>
+                    <PencilButton type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</PencilButton>
                   </div>
                   <button className="logo-preview-button" type="button" onClick={() => setFocused(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
                     <LogoPreview asset={asset} settings={settings} />
@@ -406,7 +408,7 @@ export function LogoResizer() {
                     <label>Overlay label<textarea rows={2} value={asset.label} placeholder="Optional label" onChange={event => updateLabel(asset, event.target.value)} /></label>
                     <div className="logo-card-footer">
                       <label>Font size <input type="number" min="1" placeholder="Auto" value={asset.fontSizeOverride ?? ''} onChange={event => patchCard(asset.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
-                      <button type="button" onClick={() => void exportOne(asset)} disabled={busy}>Save</button>
+                      <PencilButton type="button" onClick={() => void exportOne(asset)} disabled={busy}>Save</PencilButton>
                     </div>
                   </div>
                 </article>
@@ -418,9 +420,9 @@ export function LogoResizer() {
           <div className="logo-detail-heading">
             <strong>Focus Mode</strong>
             <div className="logo-detail-buttons">
-              <button type="button" aria-label="Previous logo" onClick={() => navigateFocus(-1)}>←</button>
-              <button type="button" aria-label="Next logo" onClick={() => navigateFocus(1)}>→</button>
-              <button type="button" aria-label="Close Focus Mode" onClick={() => setFocused(null)}>×</button>
+              <PencilButton type="button" aria-label="Previous logo" onClick={() => navigateFocus(-1)}>←</PencilButton>
+              <PencilButton type="button" aria-label="Next logo" onClick={() => navigateFocus(1)}>→</PencilButton>
+              <PencilButton type="button" aria-label="Close Focus Mode" onClick={() => setFocused(null)}>×</PencilButton>
             </div>
           </div>
           <p className="logo-subtle">{cards.findIndex(asset => asset.id === detail.id) + 1} of {cards.length}</p>
@@ -429,12 +431,12 @@ export function LogoResizer() {
           <label>Overlay label<textarea rows={3} value={detail.label} onChange={event => updateLabel(detail, event.target.value)} /></label>
           <label>Font size override<input type="number" min="1" placeholder="Use global setting" value={detail.fontSizeOverride ?? ''} onChange={event => patchCard(detail.id, { fontSizeOverride: event.target.value === '' ? null : Number(event.target.value) })} /></label>
           <label>Image padding {detail.paddingOverride ?? settings.padding}px <input type="range" min="0" max="150" value={detail.paddingOverride ?? settings.padding} onChange={event => patchCard(detail.id, { paddingOverride: Number(event.target.value) })} /></label>
-          <button type="button" onClick={() => patchCard(detail.id, { paddingOverride: null })}>Reset padding to global</button>
+          <PencilButton type="button" onClick={() => patchCard(detail.id, { paddingOverride: null })}>Reset padding to global</PencilButton>
           <label>Image Y offset {detail.imageOffset} <input type="range" min="-50" max="50" value={detail.imageOffset} onChange={event => patchCard(detail.id, { imageOffset: Number(event.target.value) })} /></label>
           <label>Text Y offset {detail.textOffset} <input type="range" min="0" max="100" value={detail.textOffset} onChange={event => patchCard(detail.id, { textOffset: Number(event.target.value) })} /></label>
           <div className="logo-detail-actions">
-            <button className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</button>
-            <button type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</button>
+            <PencilButton className="logo-primary" type="button" disabled={busy} onClick={() => void exportOne(detail)}>Save image</PencilButton>
+            <PencilButton type="button" disabled={busy} onClick={() => removeAsset(detail)}>Delete</PencilButton>
           </div>
         </aside>}
       </div>
@@ -443,24 +445,24 @@ export function LogoResizer() {
           <h2>Set logo dimensions</h2>
           <p>Confirm the size before importing {pending.length} file(s).</p>
           <div className="logo-presets">
-            {LOGO_PRESETS.map(preset => <button type="button" key={preset.label} className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''} onClick={() => setSize(preset.width, preset.height)}>{preset.label}</button>)}
+            {LOGO_PRESETS.map((preset, index) => <PencilButton pencilVariant={(index % 3) as 0 | 1 | 2} type="button" key={preset.label} className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''} onClick={() => setSize(preset.width, preset.height)}>{preset.label}</PencilButton>)}
           </div>
           <div className="logo-two-fields">
             <label>Width (px)<input type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width', event.target.value)} /></label>
             <label>Height (px)<input type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height', event.target.value)} /></label>
           </div>
-          <div className="logo-modal-actions"><button type="button" onClick={() => setPending(null)}>Cancel</button><button className="logo-primary" type="button" onClick={() => void importPending()}>Apply &amp; process</button></div>
+          <div className="logo-modal-actions"><PencilButton type="button" onClick={() => setPending(null)}>Cancel</PencilButton><PencilButton className="logo-primary" type="button" onClick={() => void importPending()}>Apply &amp; process</PencilButton></div>
         </div>
       </div>}
-      {confirmClear && <div className="logo-modal-backdrop"><div className="logo-modal" role="dialog" aria-modal="true" aria-label="Clear logo workspace"><h2>Clear all logos?</h2><p>Remove all uploaded logos and reset settings? You can undo this with your edits intact.</p><div className="logo-modal-actions"><button type="button" onClick={() => setConfirmClear(false)}>Cancel</button><button type="button" onClick={clearAll}>Clear all</button></div></div></div>}
+      {confirmClear && <div className="logo-modal-backdrop"><div className="logo-modal" role="dialog" aria-modal="true" aria-label="Clear logo workspace"><h2>Clear all logos?</h2><p>Remove all uploaded logos and reset settings? You can undo this with your edits intact.</p><div className="logo-modal-actions"><PencilButton type="button" onClick={() => setConfirmClear(false)}>Cancel</PencilButton><PencilButton type="button" onClick={clearAll}>Clear all</PencilButton></div></div></div>}
       {showLinks && <div className="logo-modal-backdrop"><div className="logo-modal logo-link-dialog" role="dialog" aria-modal="true" aria-label="Generate logo links">
-        <div className="logo-link-title"><h2>Generate logo links</h2><button type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</button></div>
+        <div className="logo-link-title"><h2>Generate logo links</h2><PencilButton type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</PencilButton></div>
         <div className="logo-two-fields"><label>Server<select value={server} onChange={event => setServer(event.target.value as LogoServer)}><option value="s3">S3 Media</option><option value="aldi">Aldi Media</option></select></label><label>Folder path<input value={folder} onChange={event => setFolder(event.target.value)} placeholder="logos/2026/summer" /></label></div>
         <label>Brand names (one per line)<textarea rows={7} value={brands} onChange={event => setBrands(event.target.value)} placeholder="Brand A&#10;Brand B" /></label>
         <label>Generated HTML<textarea rows={7} value={links} readOnly /></label>
         <p className="logo-subtle" role="status">{linkMessage}</p>
-        <div className="logo-modal-actions"><button type="button" onClick={() => setShowLinks(false)}>Close</button><button type="button" onClick={() => makeLinks()}>Generate</button><button className="logo-primary" type="button" onClick={() => void copyLinks()}>Copy HTML</button></div>
-        {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded"><p>No logos are uploaded. Generate links using the brand names as filenames?</p><button type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</button><button type="button" onClick={() => makeLinks(true)}>Proceed anyway</button></div>}
+        <div className="logo-modal-actions"><PencilButton type="button" onClick={() => setShowLinks(false)}>Close</PencilButton><PencilButton type="button" onClick={() => makeLinks()}>Generate</PencilButton><PencilButton className="logo-primary" type="button" onClick={() => void copyLinks()}>Copy HTML</PencilButton></div>
+        {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded"><p>No logos are uploaded. Generate links using the brand names as filenames?</p><PencilButton type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</PencilButton><PencilButton type="button" onClick={() => makeLinks(true)}>Proceed anyway</PencilButton></div>}
       </div></div>}
     </section>
   );
