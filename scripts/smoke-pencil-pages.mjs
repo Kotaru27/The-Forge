@@ -55,6 +55,19 @@ try {
       await expect(page.getByRole('heading', { name, level: 1 })).toBeVisible();
       assert.equal(new URL(page.url()).hash, '#/' + route, 'Wrong route: ' + route);
     }
+    // Verify the new pencil controls actually render in the publicly deployed
+    // Logo Resizer. Native events and file logic are covered by the full E2E suite.
+    await page.goto(previewUrl.href + '#/logo-resizer', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('.logo-workspace button.pencil-art-button')).toHaveCount(8);
+    await expect(page.locator('.logo-workspace .pencil-drop-sketch svg')).toBeVisible();
+    const button = page.getByRole('button', { name: /Add assets/i });
+    await expect(button.locator('svg.pencil-button-linework')).toHaveCount(1);
+    await page.getByRole('button', { name: '150 × 150' }).click();
+    await expect(page.getByRole('button', { name: '150 × 150' })).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('combobox', { name: 'Download format' }).selectOption('jpeg');
+    await expect(page.getByRole('combobox', { name: 'Download format' })).toHaveValue('jpeg');
+    await page.screenshot({ path: 'graphite-pencil-logo-smoke.png' });
+
     await page.goto(previewUrl.href + '#/link-generator', { waitUntil: 'domcontentloaded' });
     await page.getByLabel('Folder / Path').fill('Graphite Pencil');
     await page.getByLabel('Filenames').fill('sample.png');
