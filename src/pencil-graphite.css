@@ -1,0 +1,306 @@
+/* FORGE GRAPHITE PENCIL V1 — source-of-truth material: BLACK GRAPHITE & COLORED PENCILS.
+ * Preserve existing semantic React controls, toolbar geometry, routes and file processing.
+ * No ink, marker, digital glow, per-render random wobble, or full-page SVG filters.
+ */
+.forge-app.forge-sketch-ui {
+  --pencil-graphite: #292a2b;
+  --pencil-graphite-soft: #59564f;
+  --pencil-blue: #2f4562;
+  --pencil-paper: #f8f0e2;
+  --pencil-paper-light: #fdf8ed;
+  --pencil-yellow: #e9c454;
+  --pencil-rust: #a45442;
+  --pencil-hatch: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2090%2090%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%233b3d3d%22%20stroke-linecap%3D%22round%22%20stroke-opacity%3D%22.24%22%3E%0A%3Cpath%20d%3D%22M0%2085%20L64%200%20M16%2090%20L81%202%20M36%2090%20L90%2019%20M56%2090%20L90%2039%20M74%2090%20L90%2063%20M-1%2065%20L50%200%20M0%2048%20L37%200%22%20stroke-width%3D%22.85%22%2F%3E%0A%3Cpath%20d%3D%22M2%2082%20L69%200%20M31%2090%20L85%2010%20M61%2090%20L90%2053%22%20stroke-width%3D%22.45%22%2F%3E%0A%3C%2Fg%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23706550%22%20stroke-width%3D%22.6%22%20stroke-opacity%3D%22.14%22%3E%3Cpath%20d%3D%22M2%2012%20l37%2049%20M25%202%20l48%2065%20M52%203%20l36%2049%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  --pencil-fiber: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22130%22%20height%3D%2292%22%20viewBox%3D%220%200%20130%2092%22%3E%0A%3Cg%20stroke%3D%22%23897862%22%20stroke-linecap%3D%22round%22%20stroke-opacity%3D%22.075%22%20fill%3D%22none%22%3E%0A%3Cpath%20d%3D%22M5%2011%20l11%202%20M33%205%20l19%20-2%20M84%2013%20l13%202%20M109%2042%20l12%20-1%20M19%2067%20l16%20-2%20M63%2081%20l19%201%20M91%2056%20l13%203%22%20stroke-width%3D%22.72%22%2F%3E%0A%3Cpath%20d%3D%22M20%2027%20l6%201%20M70%2029%20l10%20-1%20M100%2083%20l13%200%22%20stroke-width%3D%22.48%22%2F%3E%0A%3C%2Fg%3E%3Cg%20fill%3D%22%238f8068%22%20fill-opacity%3D%22.065%22%3E%3Ccircle%20cx%3D%2213%22%20cy%3D%2238%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2276%22%20cy%3D%2219%22%20r%3D%22.7%22%2F%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%2263%22%20r%3D%221.05%22%2F%3E%3Ccircle%20cx%3D%2253%22%20cy%3D%2252%22%20r%3D%22.85%22%2F%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2287%22%20r%3D%22.72%22%2F%3E%3C%2Fg%3E%0A%3C%2Fsvg%3E");
+  --pencil-blue-shade: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2280%22%20height%3D%2248%22%20viewBox%3D%220%200%2080%2048%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%232f4562%22%20stroke-opacity%3D%22.12%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M-12%2020%20L25%20-3%20M-4%2031%20L43%201%20M9%2038%20L60%201%20M24%2047%20L76%205%20M42%2048%20L83%2022%20M63%2049%20L85%2036%22%20stroke-width%3D%221.3%22%2F%3E%3Cpath%20d%3D%22M-10%2022%20L28%20-2%20M13%2036%20L65%20-1%20M45%2047%20L80%2025%22%20stroke-width%3D%22.7%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  --pencil-yellow-shade: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20220%2034%22%20preserveAspectRatio%3D%22none%22%3E%0A%3Cpath%20d%3D%22M5%2011%20C21%208%2056%2010%2083%207%20S152%208%20214%2010%20L217%2024%20Q163%2027%20122%2029%20T6%2028%20Z%22%20fill%3D%22%23f3db7b%22%20fill-opacity%3D%22.24%22%2F%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e1bb43%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.58%22%3E%0A%3Cpath%20d%3D%22M9%2013%20Q45%209%2073%2011%20T141%2011%20T207%2013%22%20stroke-width%3D%221.4%22%2F%3E%0A%3Cpath%20d%3D%22M7%2016%20Q39%2014%2078%2015%20T143%2015%20T213%2016%22%20stroke-width%3D%221.6%22%2F%3E%0A%3Cpath%20d%3D%22M6%2020%20Q45%2017%2081%2018%20T144%2019%20T214%2019%22%20stroke-width%3D%221.9%22%2F%3E%0A%3Cpath%20d%3D%22M8%2024%20Q41%2021%2081%2023%20T145%2023%20T210%2023%22%20stroke-width%3D%221.5%22%2F%3E%0A%3Cpath%20d%3D%22M14%2027%20Q51%2025%2092%2026%20T170%2026%20T211%2026%22%20stroke-width%3D%22.8%22%2F%3E%0A%3C%2Fg%3E%3Cg%20stroke%3D%22%23cba94a%22%20stroke-width%3D%22.55%22%20fill%3D%22none%22%20stroke-opacity%3D%22.3%22%3E%0A%3Cpath%20d%3D%22M12%2013%20l10%2012%20M28%2011%20l12%2016%20M50%2011%20l13%2016%20M75%2010%20l14%2018%20M97%2010%20l14%2018%20M124%2011%20l14%2016%20M151%2010%20l12%2017%20M180%2011%20l12%2015%20M201%2012%20l10%2011%22%2F%3E%0A%3C%2Fg%3E%3C%2Fsvg%3E");
+  --pencil-graphite-fill: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2286%22%20height%3D%2232%22%20viewBox%3D%220%200%2086%2032%22%3E%3Crect%20width%3D%2286%22%20height%3D%2232%22%20fill%3D%22%232e3031%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23dad3c4%22%20opacity%3D%22.11%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M-4%2022%20L40%20-3%20M12%2034%20L65%20-3%20M39%2034%20L92%200%20M60%2034%20L89%2017%22%20stroke-width%3D%221.3%22%2F%3E%3Cpath%20d%3D%22M3%203%20l19%202%20M45%2018%20l20%20-2%20M72%2028%20l12%20-2%22%20stroke-width%3D%22.9%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%23e5dcc8%22%20fill-opacity%3D%22.09%22%3E%3Ccircle%20cx%3D%227%22%20cy%3D%2215%22%20r%3D%221%22%2F%3E%3Ccircle%20cx%3D%2258%22%20cy%3D%228%22%20r%3D%22.8%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  --sk-border-ctrl: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%20fill%3D%22none%22%3E%3Cg%20stroke%3D%22%23363638%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%3E%0A%3Cpath%20d%3D%22M4%208%20Q28%205%2052%207%20T96%207%20L95%2092%20Q52%2097%205%2094%20L5%208%22%20stroke-width%3D%221.9%22%2F%3E%0A%3Cpath%20d%3D%22M8%2011%20Q50%208%2092%2010%20M92%2011%20Q95%2046%2092%2090%20M90%2092%20Q51%2094%209%2091%20M9%2090%20Q7%2047%208%2010%22%20stroke-width%3D%22.85%22%20stroke-opacity%3D%22.55%22%2F%3E%0A%3Cpath%20d%3D%22M2%2012%20l7%20-5%20M91%206%20l8%205%20M3%2090%20l7%208%20M90%2095%20l7%20-6%22%20stroke-width%3D%22.65%22%20stroke-opacity%3D%22.45%22%2F%3E%0A%3Cpath%20d%3D%22M8%2020%20l7%20-9%20M7%2027%20l14%20-16%20M78%2012%20l13%2013%20M84%2012%20l7%207%20M80%2092%20l11%20-12%20M86%2092%20l5%20-5%22%20stroke-width%3D%22.7%22%20stroke-opacity%3D%22.22%22%2F%3E%0A%3C%2Fg%3E%3C%2Fsvg%3E");
+  --sk-yellow-sweep: var(--pencil-yellow-shade);
+  /* Existing variable names are retained for compatibility, not artistic direction. */
+  --sk-font-marker: 'Kalam', cursive;
+}
+
+/* A graphite headline is a drawn SVG, not Permanent Marker styled with a shadow. */
+.forge-sketch-ui .sketch-hero-center h1.pencil-wordmark {
+  display: block;
+  width: clamp(270px, 39vw, 650px);
+  max-width: 100%;
+  line-height: 1;
+  background: none !important;
+  filter: none !important;
+  -webkit-text-fill-color: initial !important;
+  transform: rotate(-.6deg);
+}
+.forge-sketch-ui .pencil-wordmark-art { width: 100%; height: auto; display: block; overflow: visible; }
+.forge-sketch-ui .sketch-title-lockup { min-width: 0; max-width: 100%; }
+.forge-sketch-ui .sketch-title-ticks { flex-shrink: 0; }
+
+/* Colored-pencil shading replaces the former solid yellow marker strokes. */
+.forge-sketch-ui :is(.sketch-highlight-mark,.sketch-highlight-sweep) { isolation: isolate; }
+.forge-sketch-ui :is(.sketch-highlight-mark,.sketch-highlight-sweep)::before {
+  background-image: var(--pencil-yellow-shade) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  opacity: .94;
+}
+.forge-sketch-ui .sketch-nav-link::before,
+.forge-sketch-ui .sketch-subtool-link::before {
+  background-image: var(--pencil-yellow-shade) !important;
+}
+
+/* Pencil grain behind the letterforms, not across uploaded assets or canvases. */
+.forge-sketch-ui .sketch-welcome-copy h2,
+.forge-sketch-ui .sketch-card-title,
+.forge-sketch-ui .forge-ctk-tool-name {
+  text-shadow: .55px .4px 0 rgba(83,75,65,.3), -.35px -.3px 0 rgba(43,45,45,.14);
+}
+.forge-sketch-ui .sketch-card-title { letter-spacing: -.025em; }
+.forge-sketch-ui .sketch-card-desc {
+  color: var(--pencil-blue);
+  text-shadow: .3px .2px 0 rgba(52,72,99,.12);
+}
+.forge-sketch-ui .sketch-tool-card .sketch-card-art {
+  position: relative;
+  filter: contrast(1.05);
+}
+.forge-sketch-ui .sketch-tool-card .sketch-card-art::after {
+  content: '';
+  position: absolute;
+  inset: 5px 10%;
+  background-image: var(--pencil-fiber);
+  background-size: 130px 92px;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  opacity: .56;
+}
+/* Slightly shaded paper beneath original illustrations, not a rigid flat white tile. */
+.forge-ctk-ui.forge-sketch-ui .sketch-tool-card {
+  background-color: var(--pencil-paper-light) !important;
+  background-image: var(--pencil-fiber),linear-gradient(144deg,#fdf9ef 6%,#f5ead9 100%) !important;
+  background-size: 130px 92px,100% 100% !important;
+}
+
+/* Reused graphite control system applies to all seven real React workrooms. */
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) :is(button,select,input,textarea) {
+  -webkit-tap-highlight-color: transparent;
+  font-variant-numeric: tabular-nums;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) :is(button,select,input:not([type='file']):not([type='range']):not([type='color']),textarea) {
+  border-image-source: var(--sk-border-ctrl) !important;
+  border-radius: 3px !important;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) :is(input:not([type='range']):not([type='color']):not([type='file']):not([type='checkbox']),select,textarea) {
+  background-color: var(--pencil-paper-light) !important;
+  background-image: var(--pencil-fiber),linear-gradient(180deg,#fffaf1,#f6eddf) !important;
+  background-size: 130px 92px,100% 100% !important;
+  color: var(--pencil-graphite) !important;
+  box-shadow: 1px 1.5px 0 rgba(49,47,45,.18), inset 0 0 0 1px rgba(255,252,244,.6) !important;
+  font-family: 'Kalam','Plus Jakarta Sans',sans-serif !important;
+  font-weight: 400 !important;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='number'],
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='url'],
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='email'] {
+  font-family: 'Plus Jakarta Sans',sans-serif !important;
+  font-size: 13px !important;
+  letter-spacing: -.02em;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input::placeholder,
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) textarea::placeholder {
+  color: #706959 !important;
+  opacity: .94;
+}
+/* The native select still owns keyboard navigation and option menus. */
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2020%22%3E%3Cpath%20d%3D%22M3%205%20L12%2014%20L21%204%20M5%205%20L12%2012%20L19%205%22%20fill%3D%22none%22%20stroke%3D%22%232b405c%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"),var(--pencil-fiber),linear-gradient(180deg,#fffaf1,#f6eddf) !important;
+  background-position: right 8px center,left top,left top !important;
+  background-size: 15px 13px,130px 92px,100% 100% !important;
+  background-repeat: no-repeat,repeat,no-repeat !important;
+  padding-right: 27px !important;
+  cursor: pointer;
+}
+/* Paper-and-colored-pencil secondary actions are visibly different from dark graphite primary actions. */
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) button:not(:disabled):not(.forge-v5-primary):not(.logo-primary):not(.pdf-primary):not(.split-primary):not(.primary):not(.adw-primary):not(.selected):not(.active):not([aria-pressed='true']) {
+  background-color: #f5eddf !important;
+  background-image: var(--pencil-blue-shade),var(--pencil-fiber) !important;
+  background-size: 80px 48px,130px 92px !important;
+  background-repeat: repeat,repeat !important;
+  color: var(--pencil-graphite) !important;
+  box-shadow: 1.5px 2px 0 rgba(56,56,55,.17) !important;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) button:not(:disabled):not(.forge-v5-primary):not(.logo-primary):not(.pdf-primary):not(.split-primary):not(.primary):not(.adw-primary):not(.selected):not(.active):not([aria-pressed='true']):hover {
+  background-image: var(--pencil-yellow-shade),var(--pencil-fiber) !important;
+  background-size: 100% 100%,130px 92px !important;
+}
+/* Primary CTA: dense shaded graphite surface rather than sterile flat black.
+   Preserve existing light-on-dark button labels. */
+.forge-ctk-ui.forge-sketch-ui :is(
+ .forge-v5-action.forge-v5-primary,.logo-primary,.pdf-primary,
+ .split-primary,.pdf-drop button:not(:disabled),.split-drop button:not(:disabled),
+ .video-stills .vs-drop button:not(:disabled),.vs-toolbar > button:first-of-type:not(:disabled),
+ .sb-toolbar button:nth-last-child(2):not(.danger):not(:disabled),
+ .link-panel button.primary,.adw-workspace .adw-primary
+) {
+  background-color: #2e3031 !important;
+  background-image: var(--pencil-graphite-fill) !important;
+  background-size: 86px 32px !important;
+  color: #f9f2e5 !important;
+  border-image-source: var(--sk-border-ctrl) !important;
+  box-shadow: 2px 2px 0 rgba(37,39,40,.23) !important;
+}
+/* Make selected presets feel shaded in by a real colored pencil. */
+.forge-ctk-ui.forge-sketch-ui :is(
+ .forge-v5-preset-grid button.selected,.storyboard-tool .sb-modes button.active,
+ .storyboard-tool button[aria-pressed='true'],.adw-filters button[aria-pressed='true']
+) {
+  background-color: #f2e4b9 !important;
+  background-image: var(--pencil-yellow-shade),var(--pencil-fiber) !important;
+  background-size: 100% 100%,130px 92px !important;
+  color: var(--pencil-graphite) !important;
+}
+/* Actual pencil checkbox: retained native input and form state, changed only its skin. */
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='checkbox'] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  display: inline-block;
+  vertical-align: middle;
+  flex: 0 0 18px;
+  width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  margin: 0 5px 0 0;
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2022%2022%22%3E%3Cpath%20d%3D%22M3%204%20Q10%202%2019%204%20L18%2018%20Q10%2020%203%2018%20Z%22%20fill%3D%22%23f9f4e8%22%20stroke%3D%22%23353637%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M5%206%20L16%205%20M17%207%20L16%2016%22%20fill%3D%22none%22%20stroke%3D%22%2355524b%22%20stroke-width%3D%22.55%22%20opacity%3D%22.55%22%2F%3E%3C%2Fsvg%3E") center/100% 100% no-repeat !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='checkbox']:checked {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2022%2022%22%3E%3Cpath%20d%3D%22M3%204%20Q10%202%2019%204%20L18%2018%20Q10%2020%203%2018Z%22%20fill%3D%22%23f4e5a3%22%20stroke%3D%22%23353637%22%20stroke-width%3D%221.5%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23bb9641%22%20stroke-width%3D%22.6%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.55%22%3E%3Cpath%20d%3D%22M5%209%20L14%205%20M5%2013%20L18%206%20M6%2017%20L18%2010%20M11%2018%20L17%2014%22%2F%3E%3C%2Fg%3E%3Cpath%20d%3D%22M5%2011%20l4%205%209%20-11%20M6%2011%20l3.5%204.5%209%20-11.2%22%20fill%3D%22none%22%20stroke%3D%22%2326334b%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") !important;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='checkbox']:disabled {
+  opacity: .48 !important;
+  cursor: not-allowed;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='checkbox']:focus-visible {
+  outline: 2px solid #a35344 !important;
+  outline-offset: 3px !important;
+}
+/* Native slider values are intact; track and thumb rendered as pencil sketch. */
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='range'] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  height: 19px !important;
+  min-height: 19px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='range']::-webkit-slider-runnable-track {
+  height: 7px;
+  border: 0;
+  border-radius: 4px;
+  background: repeating-linear-gradient(171deg,rgba(45,48,51,.84) 0 1px,rgba(55,61,66,.46) 1px 2px,transparent 2px 3px),#e7decf;
+  box-shadow: 0 1px 0 rgba(37,39,40,.24), inset 0 0 0 1px rgba(45,48,51,.48);
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 49% 45% 52% 44%;
+  border: 2px solid #37393c;
+  background: #f7e8b7;
+  box-shadow: inset 1px 1px 0 #fff9ef, 1px 1px 0 rgba(36,36,34,.22);
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='range']::-moz-range-track {
+  height: 7px;
+  border-radius: 4px;
+  background: #c9c0af;
+  border: 1.2px solid #303134;
+}
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) input[type='range']::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border: 2px solid #37393c;
+  border-radius: 45%;
+  background: #f7e8b7;
+}
+/* Workroom headers, panels and upload affordances: layered pencil shading,
+   not flat digital boxes or a border-only effect. */
+.forge-ctk-ui.forge-sketch-ui :is(
+ .forge-v5-head,.pdf-setup,.split-settings,.vs-workbench-side,.sb-controls,
+ .pdf-results-head,.split-results-head,.vs-list-heading,.sb-topline
+) {
+  background-image: var(--pencil-fiber) !important;
+  background-size: 130px 92px !important;
+}
+.forge-ctk-ui.forge-sketch-ui :is(
+ .logo-card,.pdf-doc-card,.pdf-page-card,.split-card,.vs-stack,.sb-frame,
+ .link-panel,.adw-header,.adw-table-wrap
+) {
+  background-color: #f9f2e7 !important;
+  background-image: var(--pencil-hatch),var(--pencil-fiber) !important;
+  background-size: 74px 74px,130px 92px !important;
+  background-repeat: no-repeat,repeat !important;
+  background-position: right bottom,left top !important;
+  box-shadow: 2.5px 3px 0 rgba(48,46,43,.14) !important;
+}
+.forge-ctk-ui.forge-sketch-ui :is(
+ .pdf-drop,.split-drop,.vs-drop,.logo-empty,.pdf-empty,.split-empty,.vs-empty,.adw-empty
+) {
+  background-image: var(--pencil-blue-shade),var(--pencil-fiber) !important;
+  background-size: 80px 48px,130px 92px !important;
+  background-repeat: repeat,repeat !important;
+}
+.forge-ctk-ui.forge-sketch-ui :is(
+ .forge-v5-board-heading h2,.logo-empty h3,.pdf-setup h2,
+ .split-settings h2,.vs-list-heading h2,.adw-header h2
+) {
+  letter-spacing: -.02em !important;
+  text-shadow: .45px .35px 0 rgba(65,59,51,.2);
+}
+.forge-ctk-ui.forge-sketch-ui :is(
+ .pdf-setup h2,.pdf-results-head h2,.split-settings h2,
+ .split-results-head h2,.vs-list-heading h2,.link-panel h2,
+ .adw-header h2,.forge-v5-board-heading h2
+) {
+  background-image: var(--pencil-yellow-shade) !important;
+  background-size: 100% 72% !important;
+}
+/* Compact Logo toolbar: materials change, its fixed working order/geometry does not. */
+.forge-ctk-ui.forge-sketch-ui .forge-v5-control-grid .forge-v5-group-title {
+  color: #2f4562 !important;
+  letter-spacing: .018em !important;
+  font-weight: 700 !important;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-v5-control-grid .forge-v5-dimensions input {
+  min-width: 0 !important;
+  padding: 2px 4px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-v5-control-grid .forge-v5-preset-grid button {
+  font-size: 12px !important;
+  letter-spacing: -.035em !important;
+}
+/* Focus states are drawn in muted red pencil; every control remains keyboard accessible. */
+.forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) :is(button,select,input,textarea):focus-visible {
+  outline: 2px dashed var(--pencil-rust) !important;
+  outline-offset: 2px !important;
+}
+/* Preserve layout at 1366px and avoid displacing the hero in reduced widths. */
+@media (max-width: 1380px) {
+  .forge-sketch-ui .sketch-hero-center h1.pencil-wordmark { width: clamp(245px, 38vw, 520px); }
+}
+@media (max-width: 740px) {
+  .forge-sketch-ui .sketch-hero-center h1.pencil-wordmark { width: min(85vw, 460px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) button {
+    transition: none !important;
+  }
+}
