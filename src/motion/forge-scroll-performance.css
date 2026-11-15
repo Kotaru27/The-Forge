@@ -30,10 +30,11 @@
   pointer-events: none;
 }
 
-/* The earlier implementation permanently requested four or more composited
- * layers in some tools. CSS scroll-linked motion is compositor-eligible and
- * requires NO scroll callbacks, rAF loop, React rerenders or inline style
- * changes on each frame. Unsupported browsers get static artwork. */
+/* The scroll-linked illustrations are deliberately subtle: 32px/14px
+ * of maximum displacement over 480px of native scroll. The previous
+ * 190px/92px movement over 340px visually fought user scrolling and moved
+ * textured drawing layers much farther than needed. Keep the CSS timeline
+ * (no scroll event callbacks or React updates) and a static fallback. */
 .forge-app.forge-sketch-ui .forge-parallax-art :is(
   .forge-parallax-near,
   .forge-parallax-far
@@ -43,22 +44,22 @@
 }
 @keyframes forgePencilParallaxNear {
   from { transform: translate3d(0,0,0); }
-  to { transform: translate3d(0,190px,0); }
+  to { transform: translate3d(0,32px,0); }
 }
 @keyframes forgePencilParallaxFar {
   from { transform: translate3d(0,0,0); }
-  to { transform: translate3d(0,92px,0); }
+  to { transform: translate3d(0,14px,0); }
 }
 @supports (animation-timeline: scroll(nearest block)) {
   .forge-app.forge-sketch-ui .native-tool:not([hidden]) .forge-parallax-art .forge-parallax-near {
     animation: forgePencilParallaxNear 1s linear both;
     animation-timeline: scroll(nearest block);
-    animation-range: 0px 340px;
+    animation-range: 0px 480px;
   }
   .forge-app.forge-sketch-ui .native-tool:not([hidden]) .forge-parallax-art .forge-parallax-far {
     animation: forgePencilParallaxFar 1s linear both;
     animation-timeline: scroll(nearest block);
-    animation-range: 0px 340px;
+    animation-range: 0px 480px;
   }
 }
 
@@ -95,7 +96,10 @@
   clip-path: none !important;
   transition: opacity .16s ease !important;
 }
-.forge-app.forge-sketch-ui .sketch-sidebar-doodle svg {
+.forge-app.forge-sketch-ui .sketch-sidebar-doodle svg,
+.forge-app.forge-sketch-ui .sketch-brand-btn svg {
+  /* The sidebar snaps to its final width; do not animate its child sizes
+   * across layout while the navigation labels are revealing. */
   transition: none !important;
 }
 
