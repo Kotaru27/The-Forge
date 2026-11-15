@@ -194,6 +194,9 @@ export function ForgeHome({ onOpenTool, onReplayIntro }: Props) {
               </svg>
             </span>
             <h1 className="pencil-wordmark" aria-label="THE FORGE"><PencilWordmark /></h1>
+            <svg className="sketch-ongoing-hero-line" viewBox="0 0 330 16" preserveAspectRatio="none" aria-hidden="true">
+              <path pathLength={1} d="M6 9 Q83 4 163 9 T324 7 M32 13 Q178 10 298 12" fill="none" stroke="#6d6354" strokeWidth="1.4" strokeLinecap="round" />
+            </svg>
             <span className="sketch-title-ticks sketch-title-ticks-right" aria-hidden="true">
               <svg viewBox="0 0 28 38" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path pathLength={100} data-pencil-trace="true" d="M22 10 L6 15 M26 20 L8 20 M21 30 L6 25" />
