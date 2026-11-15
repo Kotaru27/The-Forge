@@ -123,7 +123,7 @@ test('Add Assets opens the real image and folder choosers with keyboard dismissa
   await page.keyboard.press('Escape');
   await expect(addAssets).toHaveAttribute('aria-expanded','false');
   await addAssets.click();
-  await page.getByRole('heading', {name:'Storyboard'}).click();
+  await page.getByRole('button', {name:'Compact', exact:true}).click();
   await expect(addAssets).toHaveAttribute('aria-expanded','false');
 });
 
