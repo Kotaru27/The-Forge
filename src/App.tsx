@@ -57,6 +57,8 @@ export default function App() {
   const mainRef = useRef<HTMLElement>(null);
   const routeRef = useRef<Route>(initialTool());
   const openingSequence = useRef(0);
+  const switchSequence = useRef(0);
+  const [switching, setSwitching] = useState<{ id: number; tool: ToolId } | null>(null);
   const [opening, setOpening] = useState<{
     id: number; tool: ToolId; origin: ToolOpenOrigin | null;
   } | null>(null);
@@ -89,8 +91,15 @@ export default function App() {
 
   const openTool = useCallback((tool: Route, origin?: ToolOpenOrigin) => {
     if (tool !== 'home' && !isToolId(tool)) return;
-    const changed = routeRef.current !== tool;
+    const previous = routeRef.current;
+    const changed = previous !== tool;
     routeRef.current = tool;
+    // A route switch paints only the small header marker; the heavy tool
+    // surface remains mounted, fixed and ready for input immediately.
+    setSwitching(changed && previous !== 'home' && tool !== 'home' &&
+      !origin && !reducedMotion()
+      ? { id: ++switchSequence.current, tool }
+      : null);
     // A short, nonblocking visual handoff for genuine tool navigation only.
     // Initial loading, reselecting a tool, direct Home returns and reduced
     // motion all remain immediate and fully visible.
@@ -103,6 +112,14 @@ export default function App() {
     if (tool !== 'home') setIntroPhase('settled');
     if (window.location.hash !== '#/' + tool) history.replaceState(null, '', '#/' + tool);
   }, []);
+
+  useEffect(() => {
+    if (!switching) return;
+    const timeout = window.setTimeout(() => {
+      setSwitching(current => current?.id === switching.id ? null : current);
+    }, 210);
+    return () => window.clearTimeout(timeout);
+  }, [switching]);
 
   useEffect(() => {
     if (!opening) return;
@@ -230,9 +247,10 @@ export default function App() {
 
         <main ref={mainRef} className="main-area sketch-main-area">
           {!isHome && current && (
-            <header className="topbar sketch-topbar">
+            <header className={'topbar sketch-topbar' +
+              (switching?.tool === activeTool ? ' forge-switching-tool' : '')}>
               <div className="forge-ctk-top-leading">
-                <span className="forge-ctk-header-icon" aria-hidden="true">
+                <span key={current.id} className="forge-ctk-header-icon" aria-hidden="true">
                   <ToolGlyph tool={current.id} size={19} />
                 </span>
               </div>
@@ -240,6 +258,8 @@ export default function App() {
                 <span key={current.id} className="sketch-highlight-mark">{current.label}</span>
               </h1>
               <span className="forge-ctk-top-privacy">{"LOCAL PROCESSING"}</span>
+              {switching?.tool === activeTool &&
+                <span key={switching.id} className="forge-route-pencil-stroke" aria-hidden="true" />}
               <span className="sketch-topbar-seam" aria-hidden="true">
                 <SketchDividerLine />
               </span>

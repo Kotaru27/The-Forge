@@ -137,3 +137,82 @@ test('reduced motion preserves native scrolling but removes smooth programmatic 
   await expect(page.locator('.sb-controls')).toHaveCSS('scroll-behavior', 'auto');
   await expect(page.locator('.forge-parallax-art, .forge-parallax-near, .forge-parallax-far')).toHaveCount(0);
 });
+
+test('sidebar quick-switch has header-only interruptible motion and does not scale workrooms', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 860 });
+  await page.goto('#/logo-resizer');
+  await page.evaluate(() => {
+    const main = document.querySelector('.sketch-main-area')!;
+    const globals = window as typeof window & { __routeCueCount?: number };
+    globals.__routeCueCount = 0;
+    new MutationObserver(() => {
+      if (main.querySelector('.forge-switching-tool .forge-route-pencil-stroke'))
+        globals.__routeCueCount!++;
+    }).observe(main, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  });
+  await page.getByRole('button', { name: 'Storyboard', exact: true }).click();
+  await expect(page).toHaveURL(/#\/storyboard$/);
+  await page.getByRole('button', { name: 'PDF to Image', exact: true }).click();
+  await expect(page).toHaveURL(/#\/pdf-to-image$/);
+  await expect.poll(() => page.evaluate(() =>
+    (window as typeof window & { __routeCueCount?: number }).__routeCueCount ?? 0
+  )).toBeGreaterThanOrEqual(2);
+  await expect(page.locator('.forge-app')).not.toHaveClass(/forge-tool-opening/);
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('transform', 'none');
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.forge-route-pencil-stroke')).toHaveCount(0, { timeout: 1000 });
+});
+
+test('sidebar tool-switch cue is disabled for reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('#/logo-resizer');
+  await page.getByRole('button', { name: 'Storyboard', exact: true }).click();
+  await expect(page).toHaveURL(/#\/storyboard$/);
+  await expect(page.locator('.forge-route-pencil-stroke')).toHaveCount(0);
+  await expect(page.locator('.sketch-topbar')).not.toHaveClass(/forge-switching-tool/);
+});
+
+test('Home paper opening stays nonblocking when reopening a populated workroom', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 860 });
+  await page.goto('#/logo-resizer');
+  const sample = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABgAAAAMCAYAAAB4MH11AAAAHUlEQVR4nGP8z8Dwn4GGgImWho9aMGrBqAXDxQIARZACFmekxckAAAAASUVORK5CYII=', 'base64');
+  await page.locator('.logo-workspace input[type="file"]').setInputFiles(
+    Array.from({ length: 24 }, (_, i) => ({
+      name: 'HomeTransition_' + i + '.png', mimeType: 'image/png', buffer: sample,
+    }))
+  );
+  await expect(page.locator('.logo-card')).toHaveCount(24);
+  await page.getByRole('button', { name: 'The Forge home' }).click();
+  await expect(page).toHaveURL(/#\/home$/);
+  await page.evaluate(() => {
+    const data = { frames: [] as number[], stopped: false };
+    (window as typeof window & { __forgeHomeFrames?: typeof data }).__forgeHomeFrames = data;
+    const tick = (time: number) => {
+      if (data.stopped) return;
+      data.frames.push(time);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await page.getByRole('button', { name: 'Open Logo Resizer' }).click();
+  await expect(page.locator('.logo-card')).toHaveCount(24);
+  const tool = page.locator('.native-tool:not([hidden])');
+  await expect(tool).toHaveCSS('transform', 'none');
+  await expect(tool).toHaveCSS('opacity', '1');
+  await page.waitForTimeout(360);
+  const metrics = await page.evaluate(() => {
+    const data = (window as typeof window & { __forgeHomeFrames?: {
+      frames: number[]; stopped: boolean;
+    } }).__forgeHomeFrames!;
+    data.stopped = true;
+    const gaps = data.frames.slice(1).map((n, i) => n - data.frames[i]).sort((a,b) => a-b);
+    return { frames: data.frames.length, p95GapMs: gaps[Math.floor(gaps.length * .95)] ?? null,
+      maxGapMs: gaps.at(-1) ?? null, framesOver33ms: gaps.filter(x => x > 33).length };
+  });
+  expect(metrics.frames).toBeGreaterThan(8);
+  await expect(page.locator('[data-motion="tool-card-to-workspace"]')).toHaveCount(0);
+  await testInfo.attach('home-to-populated-logo-motion.json', {
+    body: Buffer.from(JSON.stringify(metrics, null, 2)), contentType: 'application/json',
+  });
+  console.info('Home -> populated Logo Resizer paper handoff:', metrics);
+});

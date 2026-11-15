@@ -295,6 +295,37 @@ test('switching tools preserves an imported batch and does not trigger navigatio
 });
 
 
+
+test('Focus Mode closes with interruptible exit motion and preserves the gallery', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 860 });
+  await addFiles(page, [sample, { ...sample, name: 'FocusSecond.png' }]);
+  const gallery = page.locator('.logo-gallery');
+  const originalWidth = await gallery.evaluate(el => el.getBoundingClientRect().width);
+  const firstOpen = page.getByRole('button', { name: 'Open Focus Mode for SampleLogo.png' });
+  await firstOpen.click();
+  const focus = page.locator('.logo-detail');
+  await expect(focus).toHaveAttribute('data-exiting', 'false');
+  await page.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(focus).toHaveAttribute('data-exiting', 'true');
+  await expect(focus).toHaveCSS('animation-name', 'forgeFocusExit');
+  // The drawer remains rendered during the exit, then unmounts.
+  await firstOpen.click({ force: true });
+  await expect(focus).toHaveAttribute('data-exiting', 'false');
+  await expect(focus).toHaveCount(1);
+  await page.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(focus).toHaveCount(0, { timeout: 1500 });
+  expect(Math.abs((await gallery.evaluate(el => el.getBoundingClientRect().width)) - originalWidth)).toBeLessThanOrEqual(1);
+});
+
+test('reduced motion closes Focus Mode immediately', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await addFiles(page, [sample]);
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).click();
+  await expect(page.locator('.logo-detail')).toBeVisible();
+  await page.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(page.locator('.logo-detail')).toHaveCount(0);
+});
+
 test('Focus Mode opens as an overlay without shrinking the populated gallery', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 860 });
   await addFiles(page, [sample, { ...sample, name: 'FocusSecond.png' }]);

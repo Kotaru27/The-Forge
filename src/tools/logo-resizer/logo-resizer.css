@@ -330,6 +330,16 @@
   from { opacity: .8; transform: translate3d(22px, 0, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
+/* Keep the panel mounted through exit; a rapid reopen cancels the timer and
+ * returns to the entrance path without resizing or repainting the gallery. */
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-detail[data-exiting="true"] {
+  pointer-events: none;
+  animation: forgeFocusExit .19s cubic-bezier(.3, 0, .8, .3) both;
+}
+@keyframes forgeFocusExit {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to { opacity: 0; transform: translate3d(22px, 0, 0); }
+}
 @media (max-width: 960px) {
   .forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-detail {
     width: min(390px, 90%);

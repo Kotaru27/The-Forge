@@ -193,3 +193,42 @@
   opacity: 1;
 }
 
+
+/* Sidebar quick-switch: the active workroom is never translated, scaled or
+ * cross-faded. Only a tiny graphite-pencil accent and the small title/icon
+ * animate. Each new route remounts the keyed accent, interrupting the prior
+ * transition without holding user input or changing tool state. */
+.forge-app.forge-sketch-ui .sketch-topbar.forge-switching-tool {
+  position: relative;
+}
+.forge-app.forge-sketch-ui .sketch-topbar.forge-switching-tool :is(
+  .forge-ctk-header-icon, .sketch-highlight-mark
+) {
+  animation: forgeRouteHeaderReveal .18s cubic-bezier(.2,.8,.2,1) both;
+}
+.forge-app.forge-sketch-ui .sketch-topbar .forge-route-pencil-stroke {
+  position: absolute;
+  pointer-events: none;
+  left: 50%;
+  bottom: 4px;
+  width: min(250px, 36%);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(80,69,58,.55) 15%, rgba(80,69,58,.55) 85%, transparent);
+  transform-origin: center;
+  animation: forgeRoutePencilSweep .2s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes forgeRouteHeaderReveal {
+  from { opacity: .7; transform: translate3d(0, 4px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes forgeRoutePencilSweep {
+  0% { opacity: 0; transform: scaleX(.15); }
+  45% { opacity: .85; }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .forge-app.forge-sketch-ui .sketch-topbar .forge-route-pencil-stroke { display: none; animation: none; }
+  .forge-app.forge-sketch-ui .sketch-topbar.forge-switching-tool :is(
+    .forge-ctk-header-icon, .sketch-highlight-mark
+  ) { animation: none !important; }
+}

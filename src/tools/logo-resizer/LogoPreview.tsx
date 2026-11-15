@@ -94,12 +94,20 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
     const previewHeight = Math.max(1, Math.round(height * density));
     renderRef.current = () => {
       if (paintedRevisionRef.current === revision) return;
+      // Resizing/decoding a source is asynchronous. Its promise can resolve
+      // alongside dozens of others, which previously burst-painted canvases
+      // in one microtask turn and stole a wheel-scroll frame. Queue the FINAL
+      // canvas paint through the same shared frame/idle budget instead.
       void getLogoPreviewBitmap(asset).then(bitmap => {
         if (revisionRef.current !== revision || paintedRevisionRef.current === revision ||
             !canvas.isConnected) return;
-        drawLogoPreview(canvas, asset, settings,
-          { width: previewWidth, height: previewHeight }, bitmap);
-        paintedRevisionRef.current = revision;
+        requestPreview(canvas, () => {
+          if (revisionRef.current !== revision || paintedRevisionRef.current === revision ||
+              !canvas.isConnected) return;
+          drawLogoPreview(canvas, asset, settings,
+            { width: previewWidth, height: previewHeight }, bitmap);
+          paintedRevisionRef.current = revision;
+        }, inViewRef.current || !gallery);
       });
     };
     const gallery = canvas.closest('.logo-gallery');
