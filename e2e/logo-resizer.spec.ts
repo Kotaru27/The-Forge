@@ -25,9 +25,11 @@ async function createExcel() {
 }
 
 async function addFiles(page: import('@playwright/test').Page, files: { name: string; mimeType: string; buffer: Buffer }[]) {
+  const before = await page.locator('.logo-card').count();
   await page.locator('.logo-workspace input[type="file"]').setInputFiles(files);
-  await expect(page.getByRole('dialog', { name: 'Set logo dimensions' })).toBeVisible();
-  await page.getByRole('dialog', { name: 'Set logo dimensions' }).getByRole('button', { name: 'Apply & process' }).click();
+  await expect(page.getByRole('dialog', { name: 'Set logo dimensions' })).toHaveCount(0);
+  await expect.poll(() => page.locator('.logo-card').count()).toBeGreaterThan(before);
+  await expect(page.locator('.logo-progress')).toHaveCount(0);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -42,6 +44,8 @@ test('four presets, white background, exact output dimensions and matching ZIP f
   const shapes = [[150,150],[200,200],[200,150],[250,250]];
   for (let i = 0; i < names.length; i++) {
     await page.locator('.forge-v5-presets').getByRole('button', { name: names[i] }).click();
+    await expect(page.locator('.logo-preview').first()).toHaveJSProperty('width', shapes[i][0]);
+    await expect(page.locator('.logo-preview').first()).toHaveJSProperty('height', shapes[i][1]);
     const result = await page.locator('.logo-preview').first().evaluate(canvas => {
       const element = canvas as HTMLCanvasElement;
       const corner = element.getContext('2d')!.getImageData(element.width - 1, element.height - 1, 1, 1).data;
@@ -106,6 +110,7 @@ test('SVGs can scale up, JPG download remains white and focus arrows work', asyn
   await page.locator('.forge-v5-presets').getByRole('button', { name: '250 × 250' }).click();
   const svgPreview = page.locator('.logo-card').nth(1).locator('canvas');
   await expect(svgPreview).toHaveCount(1);
+  await expect(svgPreview).toHaveJSProperty('width', 250);
   const center = await svgPreview.evaluate(canvas => {
     const c = canvas as HTMLCanvasElement;
     return [...c.getContext('2d')!.getImageData(125, 125, 1, 1).data].slice(0,3);
@@ -180,6 +185,7 @@ test('preview resizing animation is decorative and export canvas remains exact',
   await expect(frames).toHaveCount(1);
   await page.locator('.forge-v5-presets').getByRole('button', { name: '200 × 150' }).click();
   await expect(frames.first()).toHaveCSS('height', '150px');
+  await expect(page.locator('.logo-card .logo-preview').first()).toHaveJSProperty('height', 150);
   const details = await page.locator('.logo-card .logo-preview').first().evaluate(canvas => {
     const c = canvas as HTMLCanvasElement;
     const corner = c.getContext('2d')!.getImageData(199,149,1,1).data;
@@ -188,4 +194,47 @@ test('preview resizing animation is decorative and export canvas remains exact',
   expect(details).toEqual([200,150,255,255,255]);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(frames.first()).toHaveCSS('transition-duration','0s');
+});
+
+
+test('bulk logo import skips dimension prompts, supports dimensions afterwards and scrolls without jumps', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 840 });
+  const bulk = Array.from({ length: 30 }, (_, index) => ({
+    ...sample,
+    name: `BulkLogo_${String(index + 1).padStart(2, '0')}.png`,
+  }));
+  await addFiles(page, bulk);
+  await expect(page.locator('.logo-card')).toHaveCount(30);
+  await expect(page.getByRole('dialog', { name: 'Set logo dimensions' })).toHaveCount(0);
+  await expect(page.locator('.logo-workspace')).toHaveClass(/logo-bulk-workspace/);
+  const gallery = page.locator('.logo-gallery');
+  await expect(gallery).toHaveCSS('scrollbar-gutter', 'stable');
+  await expect(gallery).toHaveCSS('overscroll-behavior-y', 'contain');
+  await expect(page.locator('.logo-card .logo-preview-frame').first()).toHaveCSS('transition-duration', '0s');
+
+  // The gallery remains the single vertical scroll container even with 30 assets.
+  const scrollData = await gallery.evaluate(el => ({
+    max: el.scrollHeight - el.clientHeight,
+    horizontal: el.scrollWidth - el.clientWidth,
+  }));
+  expect(scrollData.max).toBeGreaterThan(300);
+  expect(scrollData.horizontal).toBeLessThanOrEqual(2);
+  await gallery.evaluate(el => el.scrollTo({ top: el.scrollHeight, behavior: 'instant' }));
+  await expect.poll(() => gallery.evaluate(el => el.scrollTop)).toBeGreaterThan(300);
+
+  await page.locator('.forge-v5-presets').getByRole('button', { name: '250 × 250' }).click();
+  await gallery.evaluate(el => el.scrollTo({ top: 0, behavior: 'instant' }));
+  const firstPreview = page.locator('.logo-card .logo-preview').first();
+  await expect(firstPreview).toHaveJSProperty('width', 250);
+  await expect(firstPreview).toHaveJSProperty('height', 250);
+  await expect(page.locator('.logo-card')).toHaveCount(30);
+});
+
+test('invalid in-progress dimension edit never prevents importing a batch', async ({ page }) => {
+  await page.getByRole('spinbutton', { name: 'Width in pixels' }).fill('');
+  await addFiles(page, [sample, { ...sample, name: 'LaterLogo.png' }]);
+  await expect(page.locator('.logo-card')).toHaveCount(2);
+  await expect(page.locator('.logo-error')).toHaveCount(0);
+  await page.locator('.forge-v5-presets').getByRole('button', { name: '150 × 150' }).click();
+  await expect(page.locator('.forge-v5-current-size')).toContainText('150 × 150');
 });

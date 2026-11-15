@@ -5,10 +5,29 @@ import type { LogoAsset, LogoSettings } from './types';
 type Props = { asset: LogoAsset; settings: LogoSettings; className?: string };
 export const LogoPreview = memo(function LogoPreview({ asset, settings, className = '' }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
+  // Keep the latest render work available to the visibility observer. Bulk
+  // imports must not synchronously resize/draw every offscreen canvas.
+  const drawRef = useRef<() => void>(() => {});
+  const inViewRef = useRef(false);
   useEffect(() => {
-    if (!ref.current) return;
-    drawLogoPreview(ref.current, asset, settings);
+    drawRef.current = () => {
+      if (ref.current) drawLogoPreview(ref.current, asset, settings);
+    };
+    if (inViewRef.current || !ref.current?.closest('.logo-gallery')) drawRef.current();
   }, [asset, settings]);
+  useEffect(() => {
+    const canvas = ref.current;
+    const gallery = canvas?.closest('.logo-gallery');
+    if (!canvas || !gallery || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.some(entry => entry.isIntersecting);
+      // Redraw after scrolling back into view and after any offscreen edits.
+      if (visible && !inViewRef.current) drawRef.current();
+      inViewRef.current = visible;
+    }, { root: gallery, rootMargin: '300px 0px' });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
   // Animate the displayed frame, never the actual canvas pixels used by CTK/Pica exports.
   const focused = className.split(' ').includes('logo-detail-preview');
   const maxSide = focused ? 280 : 250;

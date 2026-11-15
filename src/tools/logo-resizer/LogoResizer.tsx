@@ -58,7 +58,6 @@ export function LogoResizer() {
   const [focused, setFocused] = useState<string | null>(null);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
-  const [pending, setPending] = useState<File[] | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const snapshotRef = useRef<Snapshot | null>(null);
@@ -102,8 +101,8 @@ export function LogoResizer() {
     if (busy) return;
     const candidates = Array.from(files).filter(file => file.size > 0);
     if (!candidates.length) return;
-    setPending(candidates);
-    setError('');
+    // Import immediately. Output dimensions remain editable in the workroom header.
+    void importFiles(candidates);
   }
   function onFileInput(event: ChangeEvent<HTMLInputElement>) {
     if (event.target.files) askToUpload(event.target.files);
@@ -113,16 +112,8 @@ export function LogoResizer() {
     event.preventDefault();
     if (event.dataTransfer.files.length) askToUpload(event.dataTransfer.files);
   }
-  async function importPending() {
-    if (!pending) return;
-    const width = Number(draft.width), height = Number(draft.height);
-    if (!validateLogoDimensions(width, height)) {
-      setError('Enter a width and height between 1 and 8192 pixels.');
-      return;
-    }
-    patchSettings({ width, height });
-    const uploads = pending;
-    setPending(null);
+  async function importFiles(uploads: File[]) {
+    if (busy) return;
     setBusy(true);
     setError('');
     const loaded: LogoAsset[] = [];
@@ -284,7 +275,7 @@ export function LogoResizer() {
   }
 
   return (
-    <section className="logo-workspace forge-logo-v5" aria-label="Logo Resizer">
+    <section className={'logo-workspace forge-logo-v5' + (cards.length > 12 ? ' logo-bulk-workspace' : '')} aria-label="Logo Resizer">
       <input ref={inputRef} type="file" accept="image/*,.pptx,.xlsx,.xlsm" multiple hidden onChange={onFileInput} />
       <div className="forge-v5-head" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
         <div className="forge-v5-intro">
@@ -387,7 +378,7 @@ export function LogoResizer() {
             <div className="logo-empty">
               <div className="forge-v5-drop-icon"><ToolGlyph tool="logo-resizer" size={76} /></div>
               <h3>{"Make room for your logos."}</h3>
-              <p>{"Drop a batch of images, PowerPoint slides, or Excel files here. Confirm the output size, then refine every asset individually."}</p>
+              <p>{"Drop multiple images, PowerPoint slides, or Excel files here. After importing, choose a canvas preset or enter custom dimensions above."}</p>
               <small>PNG · JPG · WEBP · SVG · PPTX · XLSX · XLSM</small>
             </div>
           ) : (
@@ -438,20 +429,6 @@ export function LogoResizer() {
           </div>
         </aside>}
       </div>
-      {pending && <div className="logo-modal-backdrop" role="presentation">
-        <div className="logo-modal" role="dialog" aria-modal="true" aria-label="Set logo dimensions">
-          <h2>Set logo dimensions</h2>
-          <p>Confirm the size before importing {pending.length} file(s).</p>
-          <div className="logo-presets">
-            {LOGO_PRESETS.map(preset => <button type="button" key={preset.label} className={settings.width === preset.width && settings.height === preset.height ? 'selected' : ''} onClick={() => setSize(preset.width, preset.height)}>{preset.label}</button>)}
-          </div>
-          <div className="logo-two-fields">
-            <label>Width (px)<input type="number" min="1" max="8192" value={draft.width} onChange={event => updateDimension('width', event.target.value)} /></label>
-            <label>Height (px)<input type="number" min="1" max="8192" value={draft.height} onChange={event => updateDimension('height', event.target.value)} /></label>
-          </div>
-          <div className="logo-modal-actions"><button type="button" onClick={() => setPending(null)}>Cancel</button><button className="logo-primary" type="button" onClick={() => void importPending()}>Apply &amp; process</button></div>
-        </div>
-      </div>}
       {confirmClear && <div className="logo-modal-backdrop"><div className="logo-modal" role="dialog" aria-modal="true" aria-label="Clear logo workspace"><h2>Clear all logos?</h2><p>Remove all uploaded logos and reset settings? You can undo this with your edits intact.</p><div className="logo-modal-actions"><button type="button" onClick={() => setConfirmClear(false)}>Cancel</button><button type="button" onClick={clearAll}>Clear all</button></div></div></div>}
       {showLinks && <div className="logo-modal-backdrop"><div className="logo-modal logo-link-dialog" role="dialog" aria-modal="true" aria-label="Generate logo links">
         <div className="logo-link-title"><h2>Generate logo links</h2><button type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</button></div>
