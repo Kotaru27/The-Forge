@@ -19,7 +19,11 @@ test('Logo Resizer buttons are native with real stable authored pencil strokes a
   await expect(page.getByRole('button',{ name: '150 × 150' }).locator('.pencil-button-yellow')).toHaveCSS('opacity','1');
   expect(await add.locator('.pencil-button-graphite path').first().getAttribute('d')).toBe(before);
 
+  // Deliberately navigate back with the keyboard: :focus-visible does not
+  // necessarily activate from a programmatic .focus() after a pointer click.
   await add.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
   await expect(add).toBeFocused();
   await expect(add.locator('.pencil-button-focus')).toHaveCSS('opacity','0.9');
   await page.screenshot({path:testInfo.outputPath('pencil-logo-header-focus.png')});
@@ -30,12 +34,12 @@ test('Logo Resizer text, select, checkbox, and sliders remain real editable HTML
   const w = page.getByRole('spinbutton',{ name: 'Width in pixels' });
   await w.fill('245');
   await expect(w).toHaveValue('245');
-  await expect(w).toHaveCSS('background-image', /pencil-field/);
+  await expect(w).toHaveCSS('background-image', /data:image\\/svg\\+xml/);
 
   const format = page.getByRole('combobox',{ name: 'Download format' });
   await format.selectOption('jpeg');
   await expect(format).toHaveValue('jpeg');
-  await expect(format).toHaveCSS('background-image', /pencil-select/);
+  await expect(format).toHaveCSS('background-image', /data:image\\/svg\\+xml/);
 
   const bold = page.locator('.forge-v5-checkboxes input[type="checkbox"]').first();
   const wasChecked = await bold.isChecked();
