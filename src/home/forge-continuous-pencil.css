@@ -40,6 +40,33 @@
   }
 }
 
+/* Removing the intro's handoff class must NOT restart the older one-shot
+   Home animation and temporarily erase captions. Keep the finished page
+   fully drawn; only the separate strokes below are permitted to repeat. */
+.forge-app.forge-home-continuous-draw .sketch-home :is(
+  .sketch-card-desc,
+  .sketch-card-title .sketch-highlight-mark,
+  .sketch-welcome-ink,
+  .sketch-welcome-copy p,
+  .sketch-title-ticks [data-pencil-trace],
+  .sketch-welcome-ticks [data-pencil-trace],
+  .sketch-title-sparks [data-pencil-trace],
+  .sketch-rust-flourish [data-pencil-trace],
+  .sketch-wavy-divider [data-pencil-trace],
+  .sketch-card-border-svg [data-pencil-trace]
+) {
+  animation: none !important;
+  stroke-dashoffset: 0 !important;
+  clip-path: none !important;
+}
+.forge-app.forge-home-continuous-draw .sketch-home :is(
+  .sketch-card-title .sketch-highlight-mark::before,
+  .sketch-subtitle .sketch-highlight-sweep::before
+) {
+  animation: none !important;
+  clip-path: none !important;
+}
+
 /* These are ADDITIONAL hand-pencilled outlines, not replacements for the
    static drawing. Never clear or replay text/controls to fake a loop. */
 .forge-sketch-ui .sketch-ongoing-card-border,
