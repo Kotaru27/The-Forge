@@ -35,7 +35,7 @@ jobs:
       - name: Checkout pinned pencil intro candidate
         uses: actions/checkout@v4
         with:
-          ref: bf8ffdee533c2ad085c70a742b1dd1b1ade1bf94
+          ref: 236adcd49980b937abdc0ed89070628273f0dcb8
           path: intro-candidate
           persist-credentials: false
       - name: Checkout pinned CTK regression oracle for candidate tests
@@ -167,7 +167,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: bf8ffdee533c2ad085c70a742b1dd1b1ade1bf94
+          ref: 236adcd49980b937abdc0ed89070628273f0dcb8
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -191,5 +191,6 @@ jobs:
             forge-intro-live-sketch-start.png
             forge-intro-live-handoff.png
             forge-intro-live-home-complete.png
+            forge-storyboard-import-chooser.png
           if-no-files-found: ignore
           retention-days: 14
