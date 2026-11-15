@@ -1,0 +1,625 @@
+
+/* Forge's exact uploaded graphite-pencil intro. Production Home/components are not
+   replaced by the uploaded HTML's illustrative sample workrooms. */
+.forge-intro-portal {
+  --paper-bg:#f6f2e9;
+  --graphite-6b:#1e1c1a;
+  --graphite-4b:#2e2b28;
+  --graphite-2b:#4a4641;
+  --pencil-blue-guide:#4e86b8;
+  --pencil-sienna-guide:#c46d43;
+  --pencil-carmine:#c83e37;
+  --pencil-ochre:#d89222;
+  --pencil-cobalt:#275894;
+  --pencil-burnt-orange:#cf5c1b;
+  --pencil-emerald:#267347;
+  --speed-mult:1;
+  z-index:1000;
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  isolation:isolate;
+  font-family:"Kalam", "Segoe Print", Georgia,serif;
+}
+.forge-intro-portal::before {
+  content:"";
+  position:absolute;
+  inset:-2%;
+  z-index:-1;
+  background-color:#f6f2e9;
+  background-image:
+    radial-gradient(circle at 50% 45%,rgba(255,252,245,.46) 0%,rgba(218,209,192,.6) 100%),
+    radial-gradient(rgba(74,70,65,.15) 1px,transparent 1px),
+    linear-gradient(to right,rgba(78,134,184,.07) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(78,134,184,.07) 1px,transparent 1px),
+    linear-gradient(to right,rgba(78,134,184,.12) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(78,134,184,.12) 1px,transparent 1px);
+  background-size:100% 100%,24px 24px,24px 24px,96px 96px,96px 96px;
+  transition:opacity .62s cubic-bezier(.22,.8,.2,1);
+}
+.forge-intro-portal.is-handoff {
+  pointer-events:none;
+}
+.forge-intro-portal.is-handoff::before {
+  opacity:0;
+}
+.forge-intro-canvas {
+  width:min(860px,94vw,calc(82vh * 860 / 520));
+  aspect-ratio:860/520;
+  position:relative;
+  pointer-events:none;
+  transform-origin:center center;
+  transition:opacity .42s ease;
+}
+.forge-intro-artwork {
+  display:block;
+  width:100%;
+  height:100%;
+  overflow:visible;
+  pointer-events:none;
+}
+.forge-intro-portal.is-handoff .forge-intro-canvas {
+  opacity:0;
+  transition-delay:.46s;
+}
+.forge-intro-portal.is-handoff #forge-intro-layer-drafting-guides,
+.forge-intro-portal.is-handoff #forge-intro-layer-frame-and-emblem,
+.forge-intro-portal.is-handoff #forge-intro-layer-caption {
+  opacity:0;
+  transition:opacity .28s ease-out;
+}
+.forge-intro-portal.is-handoff #forge-intro-layer-title {
+  transform-box:fill-box;
+  transform-origin:center center;
+  animation:forgeIntroTitleHandoff .82s cubic-bezier(.2,.78,.2,1) both;
+}
+@keyframes forgeIntroTitleHandoff {
+  0% {transform:translate(0,0) scale(1);opacity:1}
+  72% {transform:translate(var(--forge-handoff-x,0px),var(--forge-handoff-y,-200px)) scale(var(--forge-handoff-scale,.65));opacity:1}
+  100% {transform:translate(var(--forge-handoff-x,0px),var(--forge-handoff-y,-200px)) scale(var(--forge-handoff-scale,.65));opacity:0}
+}
+.forge-intro-footer {
+  position:absolute;
+  bottom:clamp(20px,5.8vh,58px);
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:18px;
+  color:#516b83;
+  font:600 11px/1.35 "Plus Jakarta Sans", sans-serif;
+  letter-spacing:.12em;
+  white-space:nowrap;
+  transition:opacity .2s ease;
+}
+.forge-intro-footer .forge-intro-progress {
+  display:inline-block;
+  width:38px;
+  height:2px;
+  background:#a8b9c8;
+  overflow:hidden;
+}
+.forge-intro-footer .forge-intro-progress::after {
+  content:"";
+  display:block;
+  width:100%;
+  height:100%;
+  background:#c46d43;
+  transform:translateX(-100%);
+  animation:forgeIntroProgress 3.45s linear forwards;
+}
+@keyframes forgeIntroProgress {
+  to {transform:translateX(0)}
+}
+.forge-intro-skip {
+  position:absolute;
+  top:clamp(20px,4vw,42px);
+  right:clamp(20px,4vw,48px);
+  padding:7px 10px;
+  border:0;
+  border-bottom:1px dashed #576f83;
+  background:transparent;
+  color:#2e485f;
+  font:700 13px/1.1 "Kalam","Segoe Print",cursive;
+  cursor:pointer;
+}
+.forge-intro-skip:hover {color:#a55343}
+.forge-intro-skip:focus-visible {outline:2px dashed #a55343;outline-offset:4px}
+.forge-intro-portal.is-handoff .forge-intro-footer,
+.forge-intro-portal.is-handoff .forge-intro-skip {opacity:0;pointer-events:none}
+.forge-app.forge-intro-before-home .sketch-header-band,
+.forge-app.forge-intro-before-home .sketch-welcome-row,
+.forge-app.forge-intro-before-home .sketch-home-grid,
+.forge-app.forge-intro-before-home .sketch-empty-state {
+  opacity:0;
+  pointer-events:none;
+}
+.forge-app.forge-intro-handoff .sketch-header-band {
+  animation:forgeHomeHeaderArrival .62s cubic-bezier(.2,.82,.2,1) both;
+}
+.forge-app.forge-intro-handoff .sketch-welcome-row {
+  animation:forgeHomeWelcomeArrival .58s cubic-bezier(.2,.82,.2,1) .13s both;
+}
+.forge-app.forge-intro-handoff .sketch-home-grid .sketch-card-slot {
+  animation:forgeHomeCardArrival .66s cubic-bezier(.17,.8,.22,1) both;
+}
+.forge-app.forge-intro-handoff .sketch-home-grid .sketch-card-slot:nth-child(-n+4) {
+  animation-delay:.23s;
+}
+.forge-app.forge-intro-handoff .sketch-home-grid .sketch-card-slot:nth-child(n+5) {
+  animation-delay:.35s;
+}
+.forge-app.forge-intro-handoff .sketch-home-grid .sketch-card-slot:nth-child(even) {
+  animation-duration:.75s;
+}
+@keyframes forgeHomeHeaderArrival {
+  from {opacity:0;transform:translateY(12px)}
+  to {opacity:1;transform:translateY(0)}
+}
+@keyframes forgeHomeWelcomeArrival {
+  from {opacity:0;transform:translateY(12px)}
+  to {opacity:1;transform:translateY(0)}
+}
+@keyframes forgeHomeCardArrival {
+  from {opacity:0;transform:translateY(16px) rotate(.3deg)}
+  to {opacity:1;transform:translateY(0) rotate(0)}
+}
+.forge-intro-replay {
+  align-self:center;
+  padding:7px 11px;
+  border:0;
+  background:transparent;
+  color:#304762;
+  font:700 13px/1 "Kalam",cursive;
+  text-decoration:underline;
+  text-decoration-style:wavy;
+  text-underline-offset:5px;
+  cursor:pointer;
+}
+.forge-intro-replay:hover {color:#a55343}
+.forge-intro-replay:focus-visible {outline:2px dashed #a55343;outline-offset:4px}
+@media(max-width:600px) {
+  .forge-intro-footer {bottom:18px;font-size:9px}
+  .forge-intro-canvas {width:94vw}
+  .forge-intro-skip {top:15px;right:15px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .forge-intro-portal {display:none!important}
+  .forge-app.forge-intro-before-home :is(.sketch-header-band,.sketch-welcome-row,.sketch-home-grid,.sketch-empty-state) {opacity:1!important;pointer-events:auto!important}
+  .forge-app.forge-intro-handoff * {animation:none!important}
+}
+
+/* Uploaded SVG's precise path/caption drawing choreography (scoped). */
+.forge-intro-artwork .guide-blue {
+      fill: none;
+      stroke: var(--pencil-blue-guide);
+      stroke-width: 1.15;
+      stroke-linecap: round;
+      filter: url(#forge-intro-pencil-2h);
+      opacity: 0.68;
+      stroke-dasharray: 1200;
+      stroke-dashoffset: 1200;
+      animation: forgeIntroSketchDraw calc(0.75s * var(--speed-mult)) cubic-bezier(0.35, 0, 0.25, 1) calc(0.05s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .guide-blue-dashed {
+      fill: none;
+      stroke: var(--pencil-blue-guide);
+      stroke-width: 1;
+      stroke-dasharray: 7 6;
+      filter: url(#forge-intro-pencil-2h);
+      opacity: 0;
+      animation: forgeIntroFadeInGuide calc(0.5s * var(--speed-mult)) ease-out calc(0.15s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .guide-sienna {
+      fill: none;
+      stroke: var(--pencil-sienna-guide);
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      filter: url(#forge-intro-pencil-2h);
+      opacity: 0.65;
+      stroke-dasharray: 900;
+      stroke-dashoffset: 900;
+      animation: forgeIntroSketchDraw calc(0.8s * var(--speed-mult)) cubic-bezier(0.35, 0, 0.25, 1) calc(0.12s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .drafting-note {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 10.5px;
+      fill: var(--pencil-blue-guide);
+      letter-spacing: 0.08em;
+      opacity: 0;
+      animation: forgeIntroFadeInNote calc(0.4s * var(--speed-mult)) ease-out calc(0.35s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .drafting-note-sienna {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 10.5px;
+      fill: var(--pencil-sienna-guide);
+      letter-spacing: 0.08em;
+      opacity: 0;
+      animation: forgeIntroFadeInNote calc(0.4s * var(--speed-mult)) ease-out calc(0.45s * var(--speed-mult)) forwards;
+    }
+
+    /* --------------------------------------------------------------------------
+       STAGE 2: EMBLEM & FRAME SKETCHING (0.4s - 1.6s)
+       Double-pass black graphite border, Anvil + Crossed Pencil/Hammer,
+       diagonal cross-hatching shading, and colored-pencil sparks
+       -------------------------------------------------------------------------- */
+    .forge-intro-artwork .frame-graphite-primary {
+      fill: none;
+      stroke: var(--graphite-6b);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: url(#forge-intro-pencil-6b);
+      stroke-dasharray: 2400;
+      stroke-dashoffset: 2400;
+      animation: forgeIntroSketchDraw calc(1.05s * var(--speed-mult)) cubic-bezier(0.4, 0, 0.2, 1) calc(0.4s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .frame-graphite-oversketch {
+      fill: none;
+      stroke: var(--graphite-4b);
+      stroke-width: 1.35;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.72;
+      filter: url(#forge-intro-pencil-6b);
+      stroke-dasharray: 2400;
+      stroke-dashoffset: 2400;
+      animation: forgeIntroSketchDraw calc(1.15s * var(--speed-mult)) cubic-bezier(0.4, 0, 0.2, 1) calc(0.52s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .emblem-outline-6b {
+      fill: none;
+      stroke: var(--graphite-6b);
+      stroke-width: 2.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: url(#forge-intro-pencil-6b);
+      stroke-dasharray: 800;
+      stroke-dashoffset: 800;
+      animation: forgeIntroSketchDraw calc(0.9s * var(--speed-mult)) cubic-bezier(0.35, 0, 0.25, 1) calc(0.48s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .emblem-oversketch {
+      fill: none;
+      stroke: var(--graphite-2b);
+      stroke-width: 1.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.75;
+      filter: url(#forge-intro-pencil-6b);
+      stroke-dasharray: 800;
+      stroke-dashoffset: 800;
+      animation: forgeIntroSketchDraw calc(0.95s * var(--speed-mult)) ease-out calc(0.6s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .emblem-smudge-fill {
+      fill: rgba(46, 43, 40, 0.08);
+      filter: url(#forge-intro-pencil-hatch);
+      opacity: 0;
+      animation: forgeIntroFadeInSmudge calc(0.5s * var(--speed-mult)) ease-out calc(0.95s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .emblem-hatching {
+      fill: none;
+      stroke: var(--graphite-2b);
+      stroke-width: 1.35;
+      stroke-linecap: round;
+      opacity: 0.68;
+      filter: url(#forge-intro-pencil-hatch);
+      stroke-dasharray: 450;
+      stroke-dashoffset: 450;
+      animation: forgeIntroSketchDraw calc(0.65s * var(--speed-mult)) ease-out calc(0.95s * var(--speed-mult)) forwards;
+    }
+
+    /* Colored Pencil Forge Sparks */
+    .forge-intro-artwork .spark-carmine {
+      fill: none;
+      stroke: var(--pencil-carmine);
+      stroke-width: 2.3;
+      stroke-linecap: round;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      animation: forgeIntroSketchDraw calc(0.45s * var(--speed-mult)) ease-out calc(1.15s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .spark-ochre {
+      fill: none;
+      stroke: var(--pencil-ochre);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      animation: forgeIntroSketchDraw calc(0.45s * var(--speed-mult)) ease-out calc(1.22s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .spark-cobalt {
+      fill: none;
+      stroke: var(--pencil-cobalt);
+      stroke-width: 2;
+      stroke-linecap: round;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      animation: forgeIntroSketchDraw calc(0.45s * var(--speed-mult)) ease-out calc(1.28s * var(--speed-mult)) forwards;
+    }
+
+    /* --------------------------------------------------------------------------
+       STAGE 3: TITLE REVEAL — "The forge" (0.9s - 2.0s)
+       Multi-pass hand-sketched graphite outline + rough charcoal fill +
+       energetic dual-stroke colored pencil underline (Carmine Red + Warm Ochre)
+       -------------------------------------------------------------------------- */
+    /* Primary 6B Graphite Hand-Lettered Paths */
+    .forge-intro-artwork .title-stroke-6b {
+      fill: none;
+      stroke: var(--graphite-6b);
+      stroke-width: 3.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: url(#forge-intro-pencil-6b);
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: forgeIntroSketchDraw calc(0.75s * var(--speed-mult)) cubic-bezier(0.35, 0, 0.25, 1) calc(0.9s * var(--speed-mult)) forwards;
+    }
+
+    /* Second-pass nervous artist oversketch on letters */
+    .forge-intro-artwork .title-stroke-oversketch {
+      fill: none;
+      stroke: var(--graphite-4b);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.65;
+      filter: url(#forge-intro-pencil-2h);
+      transform: translate(1.4px, -1.1px);
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: forgeIntroSketchDraw calc(0.85s * var(--speed-mult)) cubic-bezier(0.35, 0, 0.25, 1) calc(1.05s * var(--speed-mult)) forwards;
+    }
+
+    /* Rough Charcoal Fill + Diagonal Graphite Hatch inside "The forge" */
+    .forge-intro-artwork .title-charcoal-fill {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 74px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      fill: url(#forge-intro-charcoal-hatch-pattern);
+      stroke: var(--graphite-6b);
+      stroke-width: 2.2;
+      stroke-linejoin: round;
+      filter: url(#forge-intro-pencil-6b);
+      opacity: 0;
+      animation: forgeIntroCharcoalReveal calc(0.65s * var(--speed-mult)) ease-out calc(1.18s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .title-charcoal-ghost {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 74px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      fill: none;
+      stroke: var(--graphite-2b);
+      stroke-width: 1.1;
+      opacity: 0;
+      filter: url(#forge-intro-pencil-2h);
+      transform: translate(-1.8px, 1.4px);
+      animation: forgeIntroGhostReveal calc(0.6s * var(--speed-mult)) ease-out calc(1.28s * var(--speed-mult)) forwards;
+    }
+
+    /* Energetic Dual-Stroke Colored Pencil Underline */
+    .forge-intro-artwork .underline-carmine {
+      fill: none;
+      stroke: var(--pencil-carmine);
+      stroke-width: 3.8;
+      stroke-linecap: round;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 520;
+      stroke-dashoffset: 520;
+      animation: forgeIntroSketchDraw calc(0.55s * var(--speed-mult)) cubic-bezier(0.25, 0.8, 0.25, 1) calc(1.42s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .underline-carmine-pass2 {
+      fill: none;
+      stroke: var(--pencil-carmine);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      opacity: 0.75;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 520;
+      stroke-dashoffset: 520;
+      animation: forgeIntroSketchDraw calc(0.5s * var(--speed-mult)) cubic-bezier(0.25, 0.8, 0.25, 1) calc(1.54s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .underline-ochre {
+      fill: none;
+      stroke: var(--pencil-ochre);
+      stroke-width: 3.2;
+      stroke-linecap: round;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 500;
+      stroke-dashoffset: 500;
+      animation: forgeIntroSketchDraw calc(0.55s * var(--speed-mult)) cubic-bezier(0.25, 0.8, 0.25, 1) calc(1.62s * var(--speed-mult)) forwards;
+    }
+
+    /* --------------------------------------------------------------------------
+       STAGE 4: CAPTION SEQUENCE — "Import | Re-Sketch | export" (1.6s - 2.8s)
+       Sequential reveal with Cobalt Blue, Burnt Orange/Ochre, and Emerald Green
+       -------------------------------------------------------------------------- */
+    .forge-intro-artwork .caption-group {
+      opacity: 0;
+      transform: translateY(8px);
+      animation: forgeIntroCaptionStepIn calc(0.42s * var(--speed-mult)) cubic-bezier(0.2, 0.85, 0.25, 1) forwards;
+    }
+
+    .forge-intro-artwork .caption-step-1 { animation-delay: calc(1.62s * var(--speed-mult)); }
+    .forge-intro-artwork .caption-sep-1  { animation-delay: calc(1.88s * var(--speed-mult)); }
+    .forge-intro-artwork .caption-step-2 { animation-delay: calc(1.98s * var(--speed-mult)); }
+    .forge-intro-artwork .caption-sep-2  { animation-delay: calc(2.24s * var(--speed-mult)); }
+    .forge-intro-artwork .caption-step-3 { animation-delay: calc(2.34s * var(--speed-mult)); }
+
+    .forge-intro-artwork .caption-text {
+      font-family: "Bradley Hand", "Segoe Print", "Chalkboard SE", Georgia, serif;
+      font-size: 25px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      fill: var(--graphite-6b);
+      filter: url(#forge-intro-pencil-subtle);
+    }
+
+    .forge-intro-artwork .caption-sublabel {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.75;
+    }
+
+    /* Colored Pencil Highlighter Shadings (Waxy back-and-forth zig-zag) */
+    .forge-intro-artwork .wax-swatch-cobalt {
+      fill: none;
+      stroke: var(--pencil-cobalt);
+      stroke-width: 9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.18;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 420;
+      stroke-dashoffset: 420;
+      animation: forgeIntroSketchDraw calc(0.48s * var(--speed-mult)) ease-out calc(1.72s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .pencil-accent-cobalt {
+      fill: none;
+      stroke: var(--pencil-cobalt);
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 320;
+      stroke-dashoffset: 320;
+      animation: forgeIntroSketchDraw calc(0.48s * var(--speed-mult)) ease-out calc(1.76s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .wax-swatch-orange {
+      fill: none;
+      stroke: var(--pencil-burnt-orange);
+      stroke-width: 9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.19;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 460;
+      stroke-dashoffset: 460;
+      animation: forgeIntroSketchDraw calc(0.5s * var(--speed-mult)) ease-out calc(2.08s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .pencil-accent-orange {
+      fill: none;
+      stroke: var(--pencil-burnt-orange);
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 360;
+      stroke-dashoffset: 360;
+      animation: forgeIntroSketchDraw calc(0.5s * var(--speed-mult)) ease-out calc(2.12s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .wax-swatch-emerald {
+      fill: none;
+      stroke: var(--pencil-emerald);
+      stroke-width: 9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.18;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 420;
+      stroke-dashoffset: 420;
+      animation: forgeIntroSketchDraw calc(0.48s * var(--speed-mult)) ease-out calc(2.42s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .pencil-accent-emerald {
+      fill: none;
+      stroke: var(--pencil-emerald);
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: url(#forge-intro-colored-pencil);
+      stroke-dasharray: 320;
+      stroke-dashoffset: 320;
+      animation: forgeIntroSketchDraw calc(0.48s * var(--speed-mult)) ease-out calc(2.46s * var(--speed-mult)) forwards;
+    }
+
+    .forge-intro-artwork .divider-stroke {
+      fill: none;
+      stroke: var(--graphite-4b);
+      stroke-width: 2.3;
+      stroke-linecap: round;
+      filter: url(#forge-intro-pencil-6b);
+    }
+/* Original intro keyframes, namespaced to avoid altering workroom motion. */
+    @keyframes forgeIntroSketchDraw {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes forgeIntroFadeInGuide {
+      to {
+        opacity: 0.5;
+      }
+    }
+
+    @keyframes forgeIntroFadeInNote {
+      to {
+        opacity: 0.82;
+      }
+    }
+
+    @keyframes forgeIntroFadeInSmudge {
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes forgeIntroCharcoalReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(3px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes forgeIntroGhostReveal {
+      to {
+        opacity: 0.55;
+      }
+    }
+
+    @keyframes forgeIntroCaptionStepIn {
+      0% {
+        opacity: 0;
+        transform: translateY(8px) rotate(-1.2deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+    }
+
+    @keyframes forgeIntroPulseDot {
+      from { opacity: 0.4; transform: scale(0.85); }
+      to   { opacity: 1;   transform: scale(1.15); }
+    }
