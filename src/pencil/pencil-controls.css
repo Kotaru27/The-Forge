@@ -1,0 +1,475 @@
+/* Hand-drawn graphite + colored-pencil control family, V2.
+ * This file deliberately targets ONLY Logo Resizer. The artwork is authored
+ * SVG (pencil pressure passes, hatching, dry pigments), not generic CSS wobble.
+ * All controls remain real native HTML elements and existing logic is untouched.
+ */
+
+/* 1. Physical workbench / typography / drawn note frame */
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 {
+  --logo-paper: #faf4e8;
+  --logo-graphite: #292b2d;
+  --logo-pencil-blue: #304762;
+  --logo-pencil-yellow: #dfb847;
+  --logo-pencil-red: #a45743;
+  color: var(--logo-graphite);
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-command-deck {
+  position: relative;
+  padding: 17px 16px 10px;
+  border-top: 0 !important;
+  background: transparent !important;
+  isolation: isolate;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .pencil-command-deck-drawing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: .86;
+  overflow: visible;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace :is(.forge-v5-control-grid,.forge-v5-deck-foot) {
+  position: relative;
+  z-index: 1;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-title h1 {
+  position: relative;
+  color: var(--logo-graphite) !important;
+  font-family: 'Kalam', cursive !important;
+  font-weight: 700 !important;
+  letter-spacing: -.06em !important;
+  transform: rotate(-.6deg);
+  text-shadow: 1px .4px 0 rgba(52,46,38,.26),-.5px -.4px 0 rgba(47,43,37,.18);
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-title h1::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 2%;
+  width: 96%;
+  height: 4px;
+  background: linear-gradient(171deg,transparent 0 24%,rgba(47,69,98,.7) 29% 36%,transparent 43% 54%,rgba(47,69,98,.58) 61% 69%,transparent 75%);
+  transform: rotate(-1deg);
+  pointer-events: none;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-title h1 span {
+  color: var(--logo-pencil-red) !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-eyebrow {
+  color: var(--logo-pencil-blue) !important;
+  font-family: 'Kalam', cursive !important;
+  font-size: 12px !important;
+  letter-spacing: .02em !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-eyebrow::before {
+  background: var(--logo-pencil-blue) !important;
+  height: 2px;
+  transform: rotate(-5deg);
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-group-title {
+  font-family: 'Kalam', cursive !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: .006em !important;
+  line-height: 1.12 !important;
+  color: var(--logo-pencil-blue) !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-deck-foot {
+  border-top: 1px dashed rgba(49,53,57,.26);
+  margin-top: 3px;
+  color: var(--logo-pencil-blue) !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-current-size,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-current-size small {
+  color: var(--logo-pencil-blue) !important;
+}
+
+/* 2. Actual authored SVG pencil buttons; SVG and working button share geometry. */
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 button.pencil-art-button {
+  position: relative !important;
+  isolation: isolate;
+  box-sizing: border-box;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--logo-graphite) !important;
+  font-family: 'Kalam', cursive !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+  cursor: pointer;
+  transition: transform .16s ease,color .16s ease !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button > .pencil-button-linework {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 1;
+  overflow: visible;
+  filter: none !important;
+  transition: opacity .16s ease,transform .16s ease;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .pencil-button-linework :is(.pencil-button-yellow,.pencil-button-blue),
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .pencil-button-linework .pencil-button-focus {
+  opacity: 0;
+  transition: opacity .17s ease;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button:hover:not(:disabled) {
+  transform: translateY(-1px) rotate(-.25deg);
+  background: transparent !important;
+  color: var(--logo-graphite) !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button:hover:not(:disabled) .pencil-button-blue {
+  opacity: .85;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button:active:not(:disabled) {
+  transform: translateY(1px) rotate(.15deg);
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button:focus-visible {
+  outline: 2px dashed var(--logo-pencil-red) !important;
+  outline-offset: 2px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button:focus-visible .pencil-button-focus {
+  opacity: .9;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button:disabled {
+  opacity: .45 !important;
+  cursor: not-allowed !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button:is(.forge-v5-primary,.logo-primary,.selected,[aria-pressed='true']) {
+  color: #23272a !important;
+  background: transparent !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button:is(.forge-v5-primary,.logo-primary,.selected,[aria-pressed='true']) .pencil-button-yellow {
+  opacity: 1;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button:is(.selected,[aria-pressed='true']) .pencil-button-blue {
+  opacity: .35;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button.pencil-art-variant-1 .pencil-button-linework {
+  transform: rotate(.24deg);
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button.pencil-art-variant-2 .pencil-button-linework {
+  transform: rotate(-.18deg);
+}
+/* Preserve compact control dimensions: underlying native button keeps the click target. */
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-button-stack button.pencil-art-button {
+  width: 100%;
+  height: 36px;
+  min-height: 36px;
+  padding: 0 9px;
+  font-size: 12px !important;
+  line-height: 1;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-preset-grid button.pencil-art-button,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-presets button.pencil-art-button {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-variant-numeric: tabular-nums;
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  letter-spacing: -.02em !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-card-heading button.pencil-art-button {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  font-size: 22px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-modal-actions button.pencil-art-button,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-detail-actions button.pencil-art-button {
+  min-height: 37px;
+  padding: 8px 15px;
+}
+
+/* 3. The field art is a full pencil drawing (multiple pressure passes and hatching).
+   No overlay can intercept the native caret, selection, keyboard or spinbox. */
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 :is(
+  input:not([type='checkbox']):not([type='range']):not([type='color']):not([type='file']),
+  textarea
+) {
+  box-sizing: border-box;
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: #fdf9ed url('./assets/pencil-field.svg') center/100% 100% no-repeat !important;
+  color: #25282c !important;
+  font-family: 'Kalam', cursive !important;
+  font-size: 13px !important;
+  padding: 8px 12px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 input[type='number'] {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 11.5px !important;
+  font-variant-numeric: tabular-nums;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 textarea {
+  line-height: 1.45;
+  background-size: 100% 100% !important;
+  resize: vertical;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 select {
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: #fdf9ed url('./assets/pencil-select.svg') center/100% 100% no-repeat !important;
+  color: #25282c !important;
+  font-family: 'Kalam', cursive !important;
+  font-size: 12px !important;
+  padding: 8px 26px 8px 12px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 :is(input,textarea,select):focus-visible {
+  outline: 2px dashed #a55343 !important;
+  outline-offset: 2px;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 input:disabled,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 select:disabled,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 textarea:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-dimensions input[type='number'] {
+  width: 62px !important;
+  height: 33px;
+  min-height: 33px;
+  padding: 5px 7px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-type-controls input[type='number'] {
+  width: 47px !important;
+  height: 35px;
+  padding: 5px 7px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-swatch {
+  border: 0 !important;
+  background: #fdf8ee url('./assets/pencil-field.svg') center/100% 100% no-repeat !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-swatch input[type='color'] {
+  background: transparent !important;
+  border: 0 !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-card-heading input {
+  background: transparent !important;
+  border: 0 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 3px 5px !important;
+}
+
+/* 4. Pencil-drawn checkboxes and interactive range linework. */
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-checkboxes label {
+  border: 0 !important;
+  border-image: none !important;
+  border-radius: 0 !important;
+  background: #f7ecda url('./assets/pencil-field.svg') center/100% 100% no-repeat !important;
+  color: #292b2d !important;
+  font-family: 'Kalam', cursive !important;
+  font-size: 12px !important;
+  padding: 0 7px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-checkboxes input[type='checkbox'] {
+  flex-shrink: 0;
+  background-size: 100% 100%;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 input[type='range'] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  cursor: pointer;
+  background: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  height: 21px;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 input[type='range']::-webkit-slider-runnable-track {
+  background: url('./assets/pencil-slider-track.svg') center/100% 100% no-repeat !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  height: 9px;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  width: 21px;
+  height: 21px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: url('./assets/pencil-slider-thumb.svg') center/100% 100% no-repeat !important;
+  box-shadow: none !important;
+  margin-top: -6px;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 input[type='range']::-moz-range-track {
+  height: 9px;
+  border: 0;
+  background: url('./assets/pencil-slider-track.svg') center/100% 100% no-repeat;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace.forge-logo-v5 input[type='range']::-moz-range-thumb {
+  width: 21px;
+  height: 21px;
+  border: 0;
+  border-radius: 0;
+  background: url('./assets/pencil-slider-thumb.svg') center/100% 100% no-repeat;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-sliders label span,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-sliders output {
+  color: #314963 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 10px !important;
+}
+
+/* 5. The entire workroom is a paper drafting table, not a dark software dashboard.
+   The exported logo canvas itself is NEVER textured or filtered. */
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-gallery {
+  background: #f5ebdb url('./assets/pencil-paper.svg') repeat !important;
+  background-size: 142px 118px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-board-heading span {
+  font-family: 'Kalam',cursive !important;
+  color: #304762 !important;
+  letter-spacing: .025em;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-board-heading h2 {
+  font-family: 'Kalam',cursive !important;
+  color: #292b2d !important;
+  text-shadow: .7px .5px 0 rgba(50,44,36,.2);
+  font-weight: 700 !important;
+  letter-spacing: -.025em !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-empty {
+  min-height: 350px;
+  border: 3px solid transparent !important;
+  border-image: url('./assets/pencil-field.svg') 16 / 10px / 0 stretch !important;
+  background: #f9f2e7 url('./assets/pencil-paper.svg') repeat !important;
+  color: #304762 !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .pencil-drop-sketch {
+  display: grid;
+  place-items: center;
+  width: min(260px,80%);
+  height: 120px;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .pencil-drop-sketch svg {
+  display: block;
+  width: min(248px,100%) !important;
+  height: 118px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-empty h3 {
+  font-family: 'Kalam',cursive !important;
+  font-size: 28px !important;
+  color: #282b2e !important;
+  font-weight: 700 !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-empty p {
+  font-family: 'Kalam',cursive !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  color: #304762 !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-empty small {
+  color: #5d584e !important;
+  font-family: 'Plus Jakarta Sans',sans-serif !important;
+  font-size: 10px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-card,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-detail,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-modal {
+  background: #fbf5e9 url('./assets/pencil-paper.svg') repeat !important;
+  border: 2px solid transparent !important;
+  border-image: url('./assets/pencil-field.svg') 18 / 8px / 0 stretch !important;
+  border-radius: 0 !important;
+  box-shadow: 2px 3px 0 rgba(55,49,42,.16) !important;
+  color: #292b2d !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-card-heading,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-card-controls {
+  background: transparent !important;
+  border-bottom: 1px dashed rgba(47,69,98,.35) !important;
+  color: #292b2d !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-preview-button {
+  background-color: #eee3ce !important;
+  background-image: url('./assets/pencil-paper.svg') !important;
+  background-size: 142px 118px !important;
+  border-bottom: 1px dashed rgba(52,53,53,.35) !important;
+}
+/* Original preview pixels are untouched. Only its surrounding drawing surface changes. */
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-preview,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-preview-frame canvas {
+  filter: none !important;
+  background: #fff !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-card-heading button.pencil-art-button {
+  color: #a45343 !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-card-controls label,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-detail label {
+  color: #304762 !important;
+  font-family: 'Kalam',cursive !important;
+  font-size: 12.5px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-detail-heading strong {
+  font-family: 'Kalam',cursive !important;
+  font-size: 22px !important;
+  color: #292b2d !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-modal-backdrop {
+  background: rgba(39,36,31,.48) !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-modal h2 {
+  color: #2d3031 !important;
+  font-family: 'Kalam',cursive !important;
+  font-size: 24px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-modal p,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-subtle,
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-modal label {
+  color: #304762 !important;
+  font-family: 'Kalam',cursive !important;
+  font-size: 13px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-link-warning {
+  background: #f4e4c4 !important;
+  border: 1px dashed #ad6750 !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-progress {
+  background: #e1eddd !important;
+  color: #2f465c !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-error {
+  background: #f9e0d7 !important;
+  color: #943a2c !important;
+}
+.forge-ctk-ui.forge-sketch-ui .logo-workspace .logo-undo {
+  background: #f1e6ba !important;
+  color: #292b2d !important;
+}
+/* Empty and large states keep legible/keyboard-accessible controls without movement noise. */
+@media (max-width: 1250px) {
+  .forge-ctk-ui.forge-sketch-ui .logo-workspace .forge-v5-command-deck {
+    padding: 17px 9px 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .forge-ctk-ui.forge-sketch-ui .logo-workspace button.pencil-art-button,
+  .forge-ctk-ui.forge-sketch-ui .logo-workspace .pencil-button-linework,
+  .forge-ctk-ui.forge-sketch-ui .logo-workspace .pencil-button-linework :is(.pencil-button-blue,.pencil-button-yellow) {
+    transition: none !important;
+  }
+}
