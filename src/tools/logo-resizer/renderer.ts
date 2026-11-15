@@ -47,43 +47,55 @@ function paintWhite(context: CanvasRenderingContext2D, settings: LogoSettings) {
   context.imageSmoothingQuality = 'high';
 }
 
-/** Same placement, background, text, and no-raster-upscaling rules as CTK. */
-export function drawLogoPreview(canvas: HTMLCanvasElement, asset: LogoAsset, settings: LogoSettings): void {
-  canvas.width = settings.width;
-  canvas.height = settings.height;
+/** A single decode-quality thumbnail per loaded raster. Offscreen decode and
+ * resizing use createImageBitmap, without changing the Pica export pipeline.
+ * Weak keys keep thumbnails collectible when an asset leaves the workroom. */
+const previewBitmaps = new WeakMap<HTMLImageElement, Promise<ImageBitmap | null>>();
+const PREVIEW_SOURCE_MAX = 512;
+
+export function getLogoPreviewBitmap(asset: LogoAsset): Promise<ImageBitmap | null> {
+  const image = asset.image;
+  if (asset.source.type === 'image/svg+xml' || /\\.svg$/i.test(asset.source.name) ||
+      typeof createImageBitmap !== 'function') return Promise.resolve(null);
+  const longest = Math.max(image.naturalWidth, image.naturalHeight);
+  if (longest <= PREVIEW_SOURCE_MAX) return Promise.resolve(null);
+  const cached = previewBitmaps.get(image);
+  if (cached) return cached;
+  const ratio = PREVIEW_SOURCE_MAX / longest;
+  const bitmap = createImageBitmap(image, {
+    resizeWidth: Math.max(1, Math.round(image.naturalWidth * ratio)),
+    resizeHeight: Math.max(1, Math.round(image.naturalHeight * ratio)),
+    resizeQuality: 'high',
+  }).catch(() => null);
+  previewBitmaps.set(image, bitmap);
+  return bitmap;
+}
+
+/** Thumbnails render at their DISPLAY resolution; exports keep exact requested
+ * dimensions and the existing Pica engine. Geometry/labels are drawn in
+ * original logical coordinates and transformed into the small preview canvas.
+ * SVGs draw directly from the vector image for sharp edges. */
+export function drawLogoPreview(
+  canvas: HTMLCanvasElement,
+  asset: LogoAsset,
+  settings: LogoSettings,
+  preview?: { width: number; height: number },
+  bitmap?: ImageBitmap | null,
+): void {
+  const width = preview?.width ?? settings.width;
+  const height = preview?.height ?? settings.height;
+  canvas.width = width;
+  canvas.height = height;
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Canvas is unavailable');
+  context.setTransform(width / settings.width, 0, 0, height / settings.height, 0, 0);
   paintWhite(context, settings);
   const g = logoGeometry(asset, settings);
-  let imageSource: CanvasImageSource = asset.image;
-  let imageWidth = asset.image.naturalWidth;
-  let imageHeight = asset.image.naturalHeight;
-  // Keep CTK's staged downscaling for small previews.
-  if (!g.isSvg && g.displayWidth > 0 && g.displayHeight > 0 &&
-      g.displayWidth / imageWidth < 0.5 && g.displayHeight / imageHeight < 0.5) {
-    let stage = document.createElement('canvas');
-    stage.width = imageWidth;
-    stage.height = imageHeight;
-    stage.getContext('2d')?.drawImage(asset.image, 0, 0);
-    while (imageWidth * 0.5 > g.displayWidth && imageHeight * 0.5 > g.displayHeight) {
-      const nextWidth = Math.max(1, Math.floor(imageWidth * 0.5));
-      const nextHeight = Math.max(1, Math.floor(imageHeight * 0.5));
-      if (nextWidth >= imageWidth && nextHeight >= imageHeight) break;
-      const next = document.createElement('canvas');
-      next.width = nextWidth;
-      next.height = nextHeight;
-      const nextContext = next.getContext('2d');
-      if (!nextContext) break;
-      nextContext.imageSmoothingEnabled = true;
-      nextContext.imageSmoothingQuality = 'high';
-      nextContext.drawImage(stage, 0, 0, nextWidth, nextHeight);
-      stage = next;
-      imageWidth = nextWidth;
-      imageHeight = nextHeight;
-    }
-    imageSource = stage;
-  }
-  context.drawImage(imageSource, 0, 0, imageWidth, imageHeight, g.x, g.y, g.displayWidth, g.displayHeight);
+  const source = bitmap || asset.image;
+  const sourceWidth = bitmap ? bitmap.width : asset.image.naturalWidth;
+  const sourceHeight = bitmap ? bitmap.height : asset.image.naturalHeight;
+  context.drawImage(source, 0, 0, sourceWidth, sourceHeight,
+    g.x, g.y, g.displayWidth, g.displayHeight);
   drawText(context, asset, settings);
 }
 
