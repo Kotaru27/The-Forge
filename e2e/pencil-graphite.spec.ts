@@ -82,5 +82,5 @@ test('pencil home retains responsive no-overlap layout and search navigation', a
   await page.getByRole('searchbox',{name:'Find a Forge tool'}).fill('ad downloader');
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(1);
   await page.getByRole('button',{name:'Open Ad Downloader'}).click();
-  await expect(page).toHaveURL(/#\/storyboard$/);
+  await expect(page).toHaveURL(/#\/ad-downloader$/);
 });
