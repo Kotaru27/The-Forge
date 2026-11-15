@@ -43,8 +43,12 @@ test('Logo Resizer uses pencil-drawn native controls with functioning values', a
   expect(await slider.inputValue()).not.toBe(initial);
   const button = page.getByRole('button', {name:'Add assets'});
   await expect(button).toBeVisible();
-  const bg = await button.evaluate(el => getComputedStyle(el).backgroundImage);
-  expect(bg).toContain('data:image/svg+xml');
+  // V2 paints authored SVG paths inside a native button rather than a
+  // V1 raster-like CSS background image. This confirms the actual drawing.
+  const art = button.locator('svg.pencil-button-linework');
+  await expect(art).toBeVisible();
+  expect(await art.locator('path').count()).toBeGreaterThan(13);
+  await expect(button).toHaveCSS('background-image', 'none');
   await page.screenshot({ path: testInfo.outputPath('graphite-logo-resizer.png'), fullPage: false });
 });
 
