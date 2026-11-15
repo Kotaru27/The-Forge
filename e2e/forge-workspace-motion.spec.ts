@@ -74,7 +74,7 @@ test('Osmo-inspired two-depth graphite artwork attaches to every active workspac
     await expect(far).toHaveCount(1);
     await expect(near).toHaveCSS('background-image', /data:image\/svg/);
     await expect(far).toHaveCSS('background-image', /data:image\/svg/);
-    await expect(panel.locator('.forge-parallax-art')).toHaveCSS('pointer-events', 'none');
+    await expect(panel.locator(':scope > .forge-parallax-art')).toHaveCSS('pointer-events', 'none');
     await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
   }
   // Inactive, still-mounted workrooms must not keep a scroll listener/animation.
