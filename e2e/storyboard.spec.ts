@@ -81,6 +81,46 @@ test('clear and delete require confirmation; Cancel retains frames',async ({page
   await expect(page.getByLabel('Choose a storyboard').locator('option')).toHaveCount(1);
 });
 
+test('Add Assets exposes both existing image and folder pickers with keyboard dismissal', async ({page}) => {
+  const addAssets = page.getByRole('button', {name:'Add Assets'});
+  const imageInput = page.getByLabel('Choose storyboard assets');
+  const folderInput = page.getByLabel('Choose storyboard folder');
+
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+  await addAssets.click();
+  await expect(addAssets).toHaveAttribute('aria-expanded','true');
+  await expect(page.getByRole('button', {name:'Add Images'})).toBeVisible();
+  await expect(page.getByRole('button', {name:'Add Folder'})).toBeVisible();
+  await expect(folderInput).toHaveAttribute('webkitdirectory','');
+
+  // Intercept only the native picker opening: imported file handling remains
+  // exercised by the real upload and directory-grouping tests below.
+  await page.evaluate(() => {
+    for (const [name, marker] of [
+      ['Choose storyboard assets','pickedImages'],
+      ['Choose storyboard folder','pickedFolder'],
+    ] as const) {
+      const input = document.querySelector<HTMLInputElement>(`input[aria-label="${name}"]`)!;
+      input.click = () => { input.dataset[marker] = 'yes'; };
+    }
+  });
+  await page.getByRole('button', {name:'Add Images'}).click();
+  await expect(imageInput).toHaveAttribute('data-picked-images','yes');
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+
+  await addAssets.click();
+  await page.getByRole('button', {name:'Add Folder'}).click();
+  await expect(folderInput).toHaveAttribute('data-picked-folder','yes');
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+
+  await addAssets.click();
+  await page.keyboard.press('Escape');
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+  await addAssets.click();
+  await page.getByRole('heading', {name:'Storyboard'}).click();
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+});
+
 test('folder import creates one board per subfolder, natural frame order',async ({page})=>{
   const image=(await png(page)).toString('base64');
   await page.evaluate(value=>{
