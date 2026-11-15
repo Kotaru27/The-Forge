@@ -14,6 +14,15 @@ type PencilLetteringProps = {
  * path is decorative and contains NO duplicated text nodes. Typed inputs,
  * filename lists, result text, and other live values never use this component.
  */
+function approximateGlyphAdvance(letter: string): string {
+  // The original Kalam text sets the real layout width. These only size
+  // decorative SVG ink overlays and have zero net inline advance.
+  if (/[iIljtf1!.,:;'|]/.test(letter)) return '.32em';
+  if (/[MWmw@%&]/.test(letter)) return '.89em';
+  if (/[A-Z0-9]/.test(letter)) return '.67em';
+  return '.56em';
+}
+
 export function PencilLettering({ text, className = '' }: PencilLetteringProps) {
   let position = 0;
   const parts = text.split(/(\s+)/);
@@ -31,7 +40,10 @@ export function PencilLettering({ text, className = '' }: PencilLetteringProps) 
             {[...part].map((character, index) => {
               const order = position++;
               const path = PENCIL_GLYPH_PATHS[character];
-              const variables = { '--pencil-letter-index': order } as CSSProperties;
+              const variables = {
+                '--pencil-letter-index': order,
+                '--pencil-glyph-advance': approximateGlyphAdvance(character),
+              } as CSSProperties;
 
               return (
                 <span
