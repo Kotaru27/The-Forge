@@ -56,6 +56,13 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   await expect(ongoing).toHaveCSS('animation-name','forge-home-ongoing-graphite');
   await expect(ongoing).toHaveCSS('animation-iteration-count','infinite');
   await expect(page.getByRole('button', {name:'Open Storyboard'})).toBeVisible();
+  // The intro-to-settled handoff must not restart the old full-line wipe:
+  // it used to blank all seven card descriptions for another frame.
+  const description = page.locator('.sketch-home-grid .sketch-card-desc').first();
+  await expect(description).toContainText(/.+/);
+  await expect(description).toHaveCSS('animation-name','none');
+  await expect(description).toHaveCSS('clip-path','none');
+  await expect(page.locator('.sketch-card-border-svg [data-pencil-trace]').first()).toHaveCSS('animation-name','none');
 
   await page.screenshot({ path: testInfo.outputPath('intro-home-finished.png') });
 
