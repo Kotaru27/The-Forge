@@ -387,6 +387,8 @@ export function SketchCardArt({ tool }: { tool: ToolId }) {
           <circle pathLength={1} cx="178" cy="40" r="7" fill="#faf6ec" />
           {/* Top-right expand arrow */}
           <path pathLength={1} d="M198 25 L216 9 M206 9 L216 9 L216 19" stroke={slate} strokeWidth="1.85" />
+          {/* Quiet pencil retouch belongs to the illustration, never the card border. */}
+          <path className="pencil-ongoing-illustration-detail" pathLength={1} d="M207 7 l7 -4 M212 14 l9 -5" />
         </svg>
       );
 
@@ -417,6 +419,8 @@ export function SketchCardArt({ tool }: { tool: ToolId }) {
             <path pathLength={1} d="M8 45 L22 25 L31 37 L39 29 L50 45" strokeWidth="1.45" />
             <circle pathLength={1} cx="40" cy="18" r="4.2" fill="#fffdf8" />
           </g>
+          {/* Quiet pencil retouch belongs to the illustration, never the card border. */}
+          <path className="pencil-ongoing-illustration-detail" pathLength={1} d="M179 5 l4 -4 M190 14 l7 -5" />
         </svg>
       );
 
@@ -441,6 +445,8 @@ export function SketchCardArt({ tool }: { tool: ToolId }) {
             <circle pathLength={1} cx="28" cy="23" r="6.2" fill="#faf6ec" strokeWidth="2.15" />
             <circle pathLength={1} cx="28" cy="3" r="6.2" fill="#faf6ec" strokeWidth="2.15" />
           </g>
+          {/* Quiet pencil retouch belongs to the illustration, never the card border. */}
+          <path className="pencil-ongoing-illustration-detail" pathLength={1} d="M202 7 l5 -5 M215 17 l7 -4" />
         </svg>
       );
 
@@ -467,6 +473,8 @@ export function SketchCardArt({ tool }: { tool: ToolId }) {
           <path pathLength={1} d="M149 85 L164 62 L175 74 L183 66 L195 85 Z" fill="url(#pencil-shade-dense)" />
           <path pathLength={1} d="M149 85 L164 62 L175 74 L183 66 L195 85" strokeWidth="1.45" />
           <circle pathLength={1} cx="183" cy="54" r="4" fill="#fffdf7" />
+          {/* Quiet pencil retouch belongs to the illustration, never the card border. */}
+          <path className="pencil-ongoing-illustration-detail" pathLength={1} d="M208 8 l4 -5 M221 17 l6 -3" />
         </svg>
       );
 
@@ -499,6 +507,8 @@ export function SketchCardArt({ tool }: { tool: ToolId }) {
             <text x="157" y="74" stroke="none" fill={slate} fontSize="11.5" fontFamily="Kalam, cursive">3.</text>
             <path pathLength={1} d="M171 70 H207 M171 78 H198" stroke={slate} strokeWidth="1.35" opacity="0.75" />
           </g>
+          {/* Quiet pencil retouch belongs to the illustration, never the card border. */}
+          <path className="pencil-ongoing-illustration-detail" pathLength={1} d="M233 14 l8 -4 M235 22 l6 2" />
         </svg>
       );
 
@@ -519,6 +529,8 @@ export function SketchCardArt({ tool }: { tool: ToolId }) {
           {/* Copy icon */}
           <rect pathLength={1} x="205" y="73" width="12" height="14" rx="2" fill="#faf6ec" strokeWidth="1.65" />
           <path pathLength={1} d="M201 82 V70 C201 69, 202 68, 203 68 H213" strokeWidth="1.65" />
+          {/* Quiet pencil retouch belongs to the illustration, never the card border. */}
+          <path className="pencil-ongoing-illustration-detail" pathLength={1} d="M167 13 l5 -8 M182 30 l6 -4" />
         </svg>
       );
 
@@ -545,6 +557,8 @@ export function SketchCardArt({ tool }: { tool: ToolId }) {
           <rect pathLength={1} x="166" y="54" width="52" height="50" rx="10" fill="url(#pencil-shade-light)" />
           <path pathLength={1} d="M192 67 V87 M184 79 L192 88 L200 79" strokeWidth="2.35" />
           <path pathLength={1} d="M180 93 H204" strokeWidth="2.15" />
+          {/* Quiet pencil retouch belongs to the illustration, never the card border. */}
+          <path className="pencil-ongoing-illustration-detail" pathLength={1} d="M230 35 l6 -5 M241 51 l5 -2" />
         </svg>
       );
   }
