@@ -68,7 +68,7 @@ test('renaming a populated board retains its canvas and does not re-render pixel
   expect(await canvas.evaluate(el => (el as HTMLCanvasElement & { retained?: boolean }).retained)).toBe(true);
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Save JPG' }).click();
-  expect((await download).suggestedFilename()).toBe('Storyboard Renamed Without Redraw.jpg');
+  expect((await download).suggestedFilename()).toBe('Storyboard_Renamed_Without_Redraw.jpg');
 });
 
 test('bulk ZIP includes all populated boards without duplicate filenames',async ({page})=>{
