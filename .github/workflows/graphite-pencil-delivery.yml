@@ -1,4 +1,4 @@
-name: Graphite Pencil V2 isolated Pages preview
+name: Graphite Pencil V2 + authentic Pencil Intro isolated Pages previews
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - release/pages-preview
   workflow_dispatch:
 
-# IMPORTANT: This deploys BOTH unchanged main and the design candidate.
-# It does not deploy the candidate over the production root.
+# Production main stays byte-identical; TWO isolated design previews are
+# published without overwriting the production root or each other.
 permissions:
   contents: read
 
@@ -32,12 +32,25 @@ jobs:
           ref: 371feabb3d12f8847fd9c0f3a3bfa476117b6415
           path: candidate
           persist-credentials: false
+      - name: Checkout pinned pencil intro candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 0f3f6e5116b554a4e55530fdb3f45399eb93b6a5
+          path: intro-candidate
+          persist-credentials: false
       - name: Checkout pinned CTK regression oracle for candidate tests
         uses: actions/checkout@v4
         with:
           repository: Kotaru27/CTK
           ref: 617615c0b4370c795ddfd6dc4c300920cd595883
           path: candidate/legacy-source
+          persist-credentials: false
+      - name: Checkout pinned CTK oracle for intro tests
+        uses: actions/checkout@v4
+        with:
+          repository: Kotaru27/CTK
+          ref: 617615c0b4370c795ddfd6dc4c300920cd595883
+          path: intro-candidate/legacy-source
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -75,6 +88,33 @@ jobs:
         env:
           FORGE_BASE_PATH: /The-Forge/graphite-pencil-preview/
 
+      - name: Install independent intro candidate
+        working-directory: intro-candidate
+        run: npm install --no-audit --no-fund
+      - name: Test intro candidate against pinned CTK contracts
+        working-directory: intro-candidate
+        run: npm test
+      - name: Build intro candidate for Chromium regression
+        working-directory: intro-candidate
+        run: npm run build
+        env:
+          FORGE_BASE_PATH: /The-Forge/
+      - name: Run full 95-test intro Chromium suite
+        working-directory: intro-candidate
+        run: npm run test:e2e
+      - name: Archive authentic intro and Home continuation screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-pencil-intro-qa-${{ github.run_id }}
+          path: intro-candidate/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Rebuild intro for its own Pages subpath
+        working-directory: intro-candidate
+        run: npm run build
+        env:
+          FORGE_BASE_PATH: /The-Forge/intro-sketch-preview/
       - name: Build production from unchanged main
         working-directory: main-source
         run: |
@@ -83,16 +123,19 @@ jobs:
         env:
           FORGE_BASE_PATH: /The-Forge/
 
-      - name: Assemble root = main, subpath = candidate
+      - name: Assemble unchanged production plus both isolated previews
         run: |
-          mkdir -p combined-site/graphite-pencil-preview
+          mkdir -p combined-site/graphite-pencil-preview combined-site/intro-sketch-preview
           cp -a main-source/dist/. combined-site/
           cp -a candidate/dist/. combined-site/graphite-pencil-preview/
+          cp -a intro-candidate/dist/. combined-site/intro-sketch-preview/
           test -s combined-site/index.html
           test -s combined-site/graphite-pencil-preview/index.html
-          diff -qr main-source/dist combined-site --exclude graphite-pencil-preview
+          test -s combined-site/intro-sketch-preview/index.html
+          diff -qr main-source/dist combined-site --exclude graphite-pencil-preview --exclude intro-sketch-preview
           grep -q '/The-Forge/assets/' combined-site/index.html
           grep -q '/The-Forge/graphite-pencil-preview/assets/' combined-site/graphite-pencil-preview/index.html
+          grep -q '/The-Forge/intro-sketch-preview/assets/' combined-site/intro-sketch-preview/index.html
           echo 'PRODUCTION ROOT VERIFIED BYTE-FOR-BYTE IDENTICAL TO FRESH main BUILD'
 
       - name: Upload safe combined Pages artifact
@@ -101,12 +144,12 @@ jobs:
           path: combined-site
 
   deploy:
-    name: Publish root plus isolated Graphite Pencil preview
+    name: Publish root plus both isolated design previews
     needs: verify-and-assemble
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.publish.outputs.page_url }}graphite-pencil-preview/
+      url: ${{ steps.publish.outputs.page_url }}intro-sketch-preview/
     permissions:
       contents: read
       pages: write
@@ -118,13 +161,13 @@ jobs:
         uses: actions/deploy-pages@v4
 
   smoke:
-    name: Verify live main and Graphite Pencil URLs
+    name: Verify unchanged production, V2 pencil and intro continuation
     needs: deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 371feabb3d12f8847fd9c0f3a3bfa476117b6415
+          ref: 0f3f6e5116b554a4e55530fdb3f45399eb93b6a5
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -133,6 +176,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Smoke test both live sites in Chromium
         run: node scripts/smoke-pencil-pages.mjs
+      - name: Smoke test new intro and Home continuation on real Pages
+        run: node scripts/smoke-sketch-intro-pages.mjs
       - name: Upload live comparison screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -142,5 +187,9 @@ jobs:
             production-home-smoke.png
             graphite-pencil-home-smoke.png
             graphite-pencil-logo-smoke.png
+            forge-intro-live-production-untouched.png
+            forge-intro-live-sketch-start.png
+            forge-intro-live-handoff.png
+            forge-intro-live-home-complete.png
           if-no-files-found: ignore
           retention-days: 14
