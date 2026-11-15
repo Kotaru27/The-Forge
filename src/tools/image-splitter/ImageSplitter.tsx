@@ -1,4 +1,3 @@
-import { PencilLettering } from '../../home/PencilLettering';
 import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
@@ -145,31 +144,31 @@ export function ImageSplitter() {
 
   return <section className="split-workspace" aria-label="Image Splitter">
     <div className="split-settings">
-      <h2><PencilLettering text="Image Splitter" className="pencil-write-heading" /></h2>
-      <p className="split-muted"><PencilLettering text="Cut images into vertical sections." className="pencil-write-instruction" /></p>
+      <h2>{"Image Splitter"}</h2>
+      <p className="split-muted">{"Cut images into vertical sections."}</p>
       <div className={`split-drop${dragActive ? ' is-dragging' : ''}`}
         onDrop={dropFiles}
         onDragOver={event => { event.preventDefault(); setDragActive(true); }}
         onDragLeave={event => { event.preventDefault(); setDragActive(false); }}>
         <input ref={inputRef} aria-label="Upload images" type="file" accept="image/*" multiple disabled={Boolean(busy)} onChange={selectFiles} />
-        <button type="button" disabled={Boolean(busy)} onClick={() => inputRef.current?.click()}><PencilLettering text="Add Images" className="pencil-write-control" /></button>
-        <span><PencilLettering text="or drop images here" className="pencil-write-instruction" /></span>
+        <button type="button" disabled={Boolean(busy)} onClick={() => inputRef.current?.click()}>{"Add Images"}</button>
+        <span>{"or drop images here"}</span>
       </div>
-      <label className="split-field"><PencilLettering text="Number of columns" className="pencil-write-control" />
+      <label className="split-field">{"Number of columns"}
         <input aria-label="Number of columns" type="number" min={1} max={50} step={1} value={columns} disabled={Boolean(busy)} onChange={event => changeColumns(event.target.value)} />
       </label>
-      <p className="split-muted"><PencilLettering text="1–50 columns · one horizontal row · left to right." className="pencil-write-instruction" /></p>
+      <p className="split-muted">{"1–50 columns · one horizontal row · left to right."}</p>
       <button className="split-secondary" disabled={Boolean(busy) || selectedCount === 0} onClick={() => void process()} type="button">{busy === 'splitting' ? 'Splitting…' : 'Split Images'}</button>
       <button className="split-primary" disabled={Boolean(busy) || !readyForDownload} onClick={() => void download()} type="button">{busy === 'zipping' ? 'Creating ZIP…' : 'Download Zip'}</button>
-      <button className="split-clear" disabled={Boolean(busy) || !items.length} onClick={() => setShowConfirm(true)} type="button"><PencilLettering text="Clear workspace" className="pencil-write-control" /></button>
+      <button className="split-clear" disabled={Boolean(busy) || !items.length} onClick={() => setShowConfirm(true)} type="button">{"Clear workspace"}</button>
       {progress && <p className="split-progress" role="status">{progress}</p>}
       {error && <p className="split-error" role="alert">{error}</p>}
       {undoSnapshot && <div className="split-undo" role="status">Workspace cleared. <button type="button" onClick={undoReset}>Undo reset</button></div>}
     </div>
     <div className="split-results">
-      <div className="split-results-head"><div><h2><PencilLettering text="Your split images" className="pencil-write-heading" /></h2><p className="split-muted">{items.length} image{items.length === 1 ? '' : 's'} · {selectedCount} selected · {items.length ? partsCount : 0} planned exports</p></div></div>
+      <div className="split-results-head"><div><h2>{"Your split images"}</h2><p className="split-muted">{items.length} image{items.length === 1 ? '' : 's'} · {selectedCount} selected · {items.length ? partsCount : 0} planned exports</p></div></div>
       <div className="split-card-grid">
-        {items.length === 0 && <div className="split-empty"><PencilLettering text="No images uploaded" className="pencil-write-instruction" /></div>}
+        {items.length === 0 && <div className="split-empty">{"No images uploaded"}</div>}
         {items.map(item => <article className="split-card" key={item.id}>
           <div className="split-image-stage"><div className="split-image-wrap">
             <img src={item.url} alt={`Preview ${item.file.name}`} />
@@ -183,7 +182,7 @@ export function ImageSplitter() {
       </div>
     </div>
     {showConfirm && <div className="split-dialog-backdrop" role="presentation"><div className="split-dialog" role="dialog" aria-modal="true" aria-label="Reset Image Splitter">
-      <h2><PencilLettering text="Reset splitter?" className="pencil-write-heading" /></h2><p><PencilLettering text="This removes the images and resets the number of columns. You can undo this action." className="pencil-write-instruction" /></p>
+      <h2>{"Reset splitter?"}</h2><p>{"This removes the images and resets the number of columns. You can undo this action."}</p>
       <div className="split-dialog-actions"><button type="button" onClick={() => setShowConfirm(false)}>Cancel</button><button type="button" className="split-primary" onClick={confirmReset}>Reset</button></div>
     </div></div>}
   </section>;
