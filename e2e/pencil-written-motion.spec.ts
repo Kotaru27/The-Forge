@@ -40,6 +40,10 @@ test('all seven workrooms handwrite static headings, instructions and control na
 
 test('existing interactive controls keep their values and semantics without re-handwriting on change', async ({page}) => {
   await page.goto('#/logo-resizer');
+  // The inline handwriting spans must preserve exact control names, not
+  // produce "A d d a s s e t s" in Chromium's accessibility tree.
+  await expect(page.getByRole('button', {name:'Add assets', exact:true})).toHaveCount(1);
+  await expect(page.getByRole('button', {name:'Generate links', exact:true})).toHaveCount(1);
   const label = page.locator('.forge-v5-group-title .pencil-glyph-stroke').first();
   await expect(label).toHaveCSS('animation-name', /forgePencilContour/);
   const size = page.getByRole('spinbutton', {name:'Width in pixels'});
@@ -50,6 +54,8 @@ test('existing interactive controls keep their values and semantics without re-h
   await expect(page.locator('.logo-workspace')).toBeVisible();
 
   await page.goto('#/storyboard');
+  await expect(page.getByRole('button', {name:'Add Assets', exact:true})).toHaveCount(1);
+  await expect(page.getByRole('tab', {name:'Grid Board', exact:true})).toHaveCount(1);
   const boardName = page.getByRole('textbox', {name:'Board Name'});
   await boardName.fill('Illustrated pitch');
   await expect(boardName).toHaveValue('Illustrated pitch');
