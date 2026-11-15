@@ -1,0 +1,114 @@
+import { expect, test } from '@playwright/test';
+
+const nativePanels = [
+  ['logo-resizer', '.logo-gallery'],
+  ['pdf-to-image', '.pdf-list'],
+  ['image-splitter', '.split-card-grid'],
+  ['video-stills', '.vs-stacks'],
+  ['storyboard', '.sb-controls'],
+  ['link-generator', '.link-generator'],
+  ['ad-downloader', '.adw-workspace'],
+] as const;
+
+test('every workroom keeps native scrolling, only one passive pencil decoration and no perpetual JS-driven transforms', async ({ page }) => {
+  await page.setViewportSize({ width: 1496, height: 880 });
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+
+  for (const [route, selector] of nativePanels) {
+    await page.goto('#/' + route);
+    const tool = page.locator('.native-tool:not([hidden])');
+    await expect(tool).toBeVisible();
+    const panel = tool.locator(selector).first();
+    await expect(panel).toBeVisible();
+    const artwork = panel.locator(':scope > .forge-parallax-art');
+    await expect(artwork).toHaveCount(1);
+    await expect(artwork).toHaveCSS('pointer-events', 'none');
+    await expect(artwork).toHaveCSS('overflow', 'clip');
+    await expect(tool.locator('.forge-parallax-art')).toHaveCount(1);
+    await expect(page.locator('.native-tool[hidden] .forge-parallax-art')).toHaveCount(0);
+    await expect(artwork.locator('.forge-parallax-near')).not.toHaveAttribute('style', /transform/);
+    await expect(artwork.locator('.forge-parallax-far')).not.toHaveAttribute('style', /transform/);
+
+    // Verify the actual scroll container is still browser-driven.
+    // A synthetic empty-state spacer tests scrolling without importing media
+    // or changing any processing engine, preset, image or canvas.
+    const before = await panel.evaluate(el => ({
+      width: el.scrollWidth,
+      viewport: el.clientWidth,
+      height: el.scrollHeight,
+      visible: el.clientHeight,
+    }));
+    await panel.evaluate(el => {
+      const filler = document.createElement('div');
+      filler.dataset.performanceFixture = 'true';
+      filler.style.cssText = 'display:block;min-height:1600px;width:1px;pointer-events:none';
+      el.appendChild(filler);
+      el.scrollTop = 190;
+    });
+    await expect.poll(() => panel.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
+    await expect(artwork).toHaveCSS('pointer-events', 'none');
+    // No unusual horizontal overflow is introduced by the parallax portal.
+    const after = await panel.evaluate(el => ({
+      width: el.scrollWidth,
+      viewport: el.clientWidth,
+      height: el.scrollHeight,
+      visible: el.clientHeight,
+    }));
+    expect(after.width).toBeLessThanOrEqual(Math.max(before.width, before.viewport) + 3);
+    expect(after.height).toBeGreaterThan(before.height);
+    // Responsive result grids may increase their own height when data is
+    // inserted. Preserve usable scrolling instead of imposing fixed geometry.
+    expect(after.visible).toBeGreaterThan(70);
+  }
+  expect(errors).toEqual([]);
+});
+
+test('sidebar expands without layout-property animations and focus remains usable', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 850 });
+  await page.goto('#/storyboard');
+  const rail = page.locator('.sketch-sidebar');
+  await expect(rail).toBeVisible();
+  await expect(rail).toHaveCSS('transition-property', 'none');
+
+  const before = await rail.evaluate(el => el.getBoundingClientRect().width);
+  await rail.hover({ position: { x: 18, y: 140 } });
+  await expect.poll(() => rail.evaluate(el => Math.round(el.getBoundingClientRect().width))).toBeGreaterThan(Math.round(before) + 60);
+  const label = page.locator('.sketch-subtool-label').first();
+  await expect(label).toHaveCSS('clip-path', 'none');
+  const highlight = await page.locator('.sketch-subtool-link').first().evaluate(el => {
+    const before = getComputedStyle(el, '::before');
+    return { clip: before.clipPath, transition: before.transitionProperty };
+  });
+  expect(highlight.clip).toBe('none');
+  expect(highlight.transition).toBe('transform');
+  await expect(page.getByRole('button', { name: 'Home', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Home', exact: true }).click();
+  await expect(page).toHaveURL(/#\/home$/);
+  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
+});
+
+test('populated workroom motion does not scale the whole tool surface', async ({ page }) => {
+  await page.setViewportSize({ width: 1470, height: 880 });
+  await page.goto('#/home');
+  await page.getByRole('button', { name: 'Open Logo Resizer' }).click();
+  await expect(page.locator('.forge-app')).toHaveClass(/forge-tool-opening/);
+  const workspace = page.locator('.native-tool:not([hidden])');
+  await expect(workspace).toHaveCSS('animation-name', 'none');
+  await expect(workspace).toHaveCSS('transform', 'none');
+  await expect(workspace).toHaveCSS('opacity', '1');
+  await expect(page.locator('[data-motion="tool-card-to-workspace"]')).toHaveCSS('pointer-events', 'none');
+  await expect(page.getByRole('spinbutton', { name: 'Width in pixels' })).toBeVisible();
+  await expect(page.locator('[data-motion="tool-card-to-workspace"]')).toHaveCount(0);
+});
+
+test('reduced-motion and compact workspaces never allocate scrolling animation surfaces', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('#/storyboard');
+  await expect(page.getByRole('button', { name: 'Add Assets' })).toBeVisible();
+  await expect(page.locator('.sb-controls .forge-parallax-art')).toBeHidden();
+  await expect(page.locator('.sb-controls .forge-parallax-near')).toHaveCSS('animation-name', 'none');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.setViewportSize({ width: 880, height: 760 });
+  await expect(page.locator('.sb-controls .forge-parallax-art')).toBeHidden();
+});
