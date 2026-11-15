@@ -77,55 +77,55 @@ export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: numbe
   const paths: Record<Destination, ReactNode> = {
     home: (
       <>
-        <path d="m3 10 9-7 9 7v10H3z" />
-        <path d="M9 20v-7h6v7" />
+        <path pathLength={1} d="m3 10 9-7 9 7v10H3z" />
+        <path pathLength={1} d="M9 20v-7h6v7" />
       </>
     ),
     'logo-resizer': (
       <>
-        <rect x="4" y="4" width="12" height="12" rx="2" />
-        <path d="M9 9h11v11H9" />
-        <path d="m13 7 3-3m-3 0h3v3" />
+        <rect pathLength={1} x="4" y="4" width="12" height="12" rx="2" />
+        <path pathLength={1} d="M9 9h11v11H9" />
+        <path pathLength={1} d="m13 7 3-3m-3 0h3v3" />
       </>
     ),
     'pdf-to-image': (
       <>
-        <path d="M6 3h9l4 4v14H6z" />
-        <path d="M15 3v5h4" />
-        <circle cx="11" cy="12" r="1.3" />
-        <path d="m8 18 3-3 2 2 2-2 2 3" />
+        <path pathLength={1} d="M6 3h9l4 4v14H6z" />
+        <path pathLength={1} d="M15 3v5h4" />
+        <circle pathLength={1} cx="11" cy="12" r="1.3" />
+        <path pathLength={1} d="m8 18 3-3 2 2 2-2 2 3" />
       </>
     ),
     'image-splitter': (
       <>
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
+        <rect pathLength={1} x="3" y="3" width="18" height="18" rx="2" />
+        <path pathLength={1} d="M9 3v18M15 3v18M3 9h18M3 15h18" />
       </>
     ),
     'video-stills': (
       <>
-        <rect x="3" y="5" width="18" height="14" rx="2" />
-        <path d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4" />
-        <path d="m10 9 5 3-5 3z" />
+        <rect pathLength={1} x="3" y="5" width="18" height="14" rx="2" />
+        <path pathLength={1} d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4" />
+        <path pathLength={1} d="m10 9 5 3-5 3z" />
       </>
     ),
     storyboard: (
       <>
-        <rect x="3" y="4" width="18" height="16" rx="2" />
-        <path d="M3 9h18M10 9v11M3 15h7M10 15h11" />
+        <rect pathLength={1} x="3" y="4" width="18" height="16" rx="2" />
+        <path pathLength={1} d="M3 9h18M10 9v11M3 15h7M10 15h11" />
       </>
     ),
     'link-generator': (
       <>
-        <path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10 5.93" />
-        <path d="M14 11a5 5 0 0 0-7.07 0l-2.12 2.12a5 5 0 0 0 7.07 7.07L14 18.07" />
+        <path pathLength={1} d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10 5.93" />
+        <path pathLength={1} d="M14 11a5 5 0 0 0-7.07 0l-2.12 2.12a5 5 0 0 0 7.07 7.07L14 18.07" />
       </>
     ),
     'ad-downloader': (
       <>
-        <path d="M12 3v13m-5-5 5 5 5-5" />
-        <path d="M4 16v4h16v-4" />
-        <path d="M6 4h3M15 4h3" />
+        <path pathLength={1} d="M12 3v13m-5-5 5 5 5-5" />
+        <path pathLength={1} d="M4 16v4h16v-4" />
+        <path pathLength={1} d="M6 4h3M15 4h3" />
       </>
     ),
   };
