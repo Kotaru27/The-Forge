@@ -123,7 +123,7 @@
 }
 /* Paper-and-colored-pencil secondary actions are visibly different from dark graphite primary actions. */
 .forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) button:not(:disabled):not(.forge-v5-primary):not(.logo-primary):not(.pdf-primary):not(.split-primary):not(.primary):not(.adw-primary):not(.selected):not(.active):not([aria-pressed='true']) {
-  background-color: #f5eddf !important;
+  background-color: #f8f1e2 !important;
   background-image: var(--pencil-blue-shade),var(--pencil-fiber) !important;
   background-size: 80px 48px,130px 92px !important;
   background-repeat: repeat,repeat !important;
@@ -297,7 +297,15 @@
   .forge-sketch-ui .sketch-hero-center h1.pencil-wordmark { width: clamp(245px, 38vw, 520px); }
 }
 @media (max-width: 740px) {
-  .forge-sketch-ui .sketch-hero-center h1.pencil-wordmark { width: min(85vw, 460px); }
+  /* Narrow Home must never inherit the desktop hero wordmark width. */
+  .forge-sketch-ui .sketch-title-ticks { display: none !important; }
+  .forge-sketch-ui .sketch-hero-center { min-width: 0; max-width: 100%; }
+  .forge-sketch-ui .sketch-title-lockup { width: 100%; justify-content: center; }
+  .forge-sketch-ui .sketch-hero-center h1.pencil-wordmark {
+    width: min(80vw, 330px);
+    min-width: 0;
+    max-width: 100%;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .forge-ctk-ui.forge-sketch-ui :is(.logo-workspace,.pdf-workspace,.split-workspace,.video-stills,.storyboard-tool,.link-generator,.adw-workspace) button {
