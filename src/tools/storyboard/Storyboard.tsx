@@ -103,11 +103,13 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
   const [previewSize, setPreviewSize] = useState('');
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [progress, setProgress] = useState('');
+  const [assetMenuOpen, setAssetMenuOpen] = useState(false);
   const boardPreview = useRef<HTMLDivElement>(null);
   const fitPreview = useRef<HTMLCanvasElement>(null);
   const fitFileInput = useRef<HTMLInputElement>(null);
   const folderInput = useRef<HTMLInputElement>(null);
   const imagesInput = useRef<HTMLInputElement>(null);
+  const assetMenuRef = useRef<HTMLDivElement>(null);
   const urls = useRef(new Set<string>());
   const lastBoardCanvas = useRef<HTMLCanvasElement | null>(null);
   const lastFitCanvas = useRef<HTMLCanvasElement | null>(null);
@@ -135,6 +137,24 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
       urls.current.clear();
     };
   }, []);
+
+  useEffect(() => {
+    if (!assetMenuOpen) return;
+    const closeOnPointer = (event: PointerEvent) => {
+      if (event.target instanceof Node && !assetMenuRef.current?.contains(event.target)) {
+        setAssetMenuOpen(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setAssetMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOnPointer);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnPointer);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [assetMenuOpen]);
 
   const active = boards.find(board => board.id === activeId) || boards[0];
   const other = boards.filter(board => board.images.length);
@@ -398,11 +418,25 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
       <div className="sb-topline">
         <div role="tablist" aria-label="Storyboard modes" className="sb-modes">
           {([['story','Grid Board'],['fit','Fit to Platform']] as const).map(([key,label]) =>
-            <button key={key} role="tab" aria-selected={mode === key} className={mode === key ? 'active' : ''} type="button" onClick={() => setMode(key)}>{label}</button>)}
+            <button key={key} role="tab" aria-selected={mode === key} className={mode === key ? 'active' : ''} type="button" onClick={() => { setAssetMenuOpen(false); setMode(key); }}>{label}</button>)}
         </div>
         <div className="sb-toolbar">
           {mode === 'story' && <>
-            <button type="button" onClick={() => imagesInput.current?.click()}>Add Assets</button>
+            <div className="sb-asset-actions" ref={assetMenuRef}>
+              <button
+                type="button"
+                disabled={!!busy}
+                aria-expanded={assetMenuOpen}
+                aria-controls={assetMenuOpen ? 'storyboard-asset-options' : undefined}
+                onClick={() => setAssetMenuOpen(open => !open)}
+              >Add Assets</button>
+              {assetMenuOpen && (
+                <div className="sb-asset-menu" id="storyboard-asset-options" role="group" aria-label="Choose assets to add">
+                  <button type="button" onClick={() => { setAssetMenuOpen(false); imagesInput.current?.click(); }}>Add Images</button>
+                  <button type="button" onClick={() => { setAssetMenuOpen(false); folderInput.current?.click(); }}>Add Folder</button>
+                </div>
+              )}
+            </div>
             <label className="sb-board-name-inline">
               <span>Board Name</span>
               <input value={active?.name || ''} aria-label="Board Name" onChange={event => renameBoard(event.target.value)} maxLength={80} />
