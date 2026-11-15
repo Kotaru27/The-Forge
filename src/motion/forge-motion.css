@@ -116,13 +116,13 @@
   .adw-table-wrap,
   .link-filename-preview,
   .logo-detail
-).forge-parallax-art .forge-parallax-near { opacity: .12 !important; }
+) .forge-parallax-art .forge-parallax-near { opacity: .12 !important; }
 .forge-app.forge-sketch-ui :is(
   .sb-stage,
   .adw-table-wrap,
   .link-filename-preview,
   .logo-detail
-).forge-parallax-art .forge-parallax-far { opacity: .08 !important; }
+) .forge-parallax-art .forge-parallax-far { opacity: .08 !important; }
 
 .forge-app.forge-sketch-ui .native-tool:not([hidden]) .forge-parallax-disabled .forge-parallax-near,
 .forge-app.forge-sketch-ui .native-tool:not([hidden]) .forge-parallax-disabled .forge-parallax-far {
