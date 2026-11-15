@@ -52,12 +52,17 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   await expect(introTitle.locator('g[filter]').first()).toHaveCSS('filter', 'none');
   const border = page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first();
   await expect(border).toHaveAttribute('pathLength', '1');
-  await expect(border).toHaveCSS('animation-name', 'forgeIntroActualCardStroke');
+  await expect(border).toHaveCSS('animation-name', 'none'); // Paper borders are NEVER traced.
   const pencilGeometry = page.locator('.sketch-home-grid .sketch-card-art > svg path').first();
   await expect(pencilGeometry).toHaveAttribute('pathLength','1');
   await expect(pencilGeometry).toHaveCSS('animation-name', /forgePencilTraceRealPath/);
   await expect(page.locator('.sketch-home-grid .sketch-card-art > svg').first()).toHaveCSS('clip-path','none');
-  await expect(page.locator('.sketch-home-grid .pencil-written-glyph').first()).toHaveCSS('animation-name','forgePencilHandwriteLetter');
+  const written = page.locator('.sketch-home-grid .pencil-written-glyph').first();
+  await expect(written).toHaveCSS('animation-name', 'none');
+  await expect(written.locator('.pencil-glyph-stroke')).toHaveCSS('animation-name', /forgePencilContour/);
+  await expect(written.locator('.pencil-glyph-vector')).toHaveCSS('animation-name', 'forgePencilVectorYield');
+  await expect(page.locator('.sketch-home-grid .pencil-written-word').first()).toBeVisible();
+  await expect(page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first()).toHaveCSS('stroke-dashoffset', '0');
 
   await page.waitForTimeout(570);
   await page.screenshot({ path: testInfo.outputPath('intro-home-handoff.png') });
@@ -73,9 +78,13 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   await page.waitForTimeout(300);
   expect((await highlightState(subtitleHighlight)).name).toBe('none');
   expect((await highlightState(cardHighlight)).name).toBe('none');
-  const ongoing = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
+  const oldBorderLoop = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
+  await expect(oldBorderLoop).toHaveCSS('animation-name', 'none');
+  await expect(oldBorderLoop).toBeHidden();
+  const ongoing = page.locator('.sketch-card-art .pencil-ongoing-illustration-detail').first();
   await expect(ongoing).toHaveCSS('animation-name','forge-home-ongoing-graphite');
   await expect(ongoing).toHaveCSS('animation-iteration-count','infinite');
+  await expect(page.locator('.sketch-card-art .pencil-ongoing-illustration-detail')).toHaveCount(7);
   await expect(page.getByRole('button', {name:'Open Storyboard'})).toBeVisible();
   // The intro-to-settled handoff must not restart the old full-line wipe:
   // it used to blank all seven card descriptions for another frame.
@@ -84,6 +93,11 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   await expect(description).toHaveCSS('animation-name','none');
   await expect(description).toHaveCSS('clip-path','none');
   await expect(page.locator('.sketch-card-border-svg [data-pencil-trace]').first()).toHaveCSS('animation-name','none');
+  // SVG contours remain attached to every phrase; native letters are fully
+  // visible after the one-shot writing finishes, with no line-wide clipping.
+  await expect(page.locator('.sketch-home-grid .pencil-glyph-face').first()).toHaveCSS('opacity','1');
+  await expect(page.locator('.sketch-home-grid .pencil-glyph-stroke').first()).toHaveCSS('animation-name','none');
+  await expect(page.locator('.sketch-home-grid .pencil-written-glyph').first()).toHaveCSS('clip-path','none');
 
   await page.screenshot({ path: testInfo.outputPath('intro-home-finished.png') });
 
