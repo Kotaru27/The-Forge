@@ -34,12 +34,12 @@ test('Logo Resizer text, select, checkbox, and sliders remain real editable HTML
   const w = page.getByRole('spinbutton',{ name: 'Width in pixels' });
   await w.fill('245');
   await expect(w).toHaveValue('245');
-  await expect(w).toHaveCSS('background-image', /data:image\\/svg\\+xml/);
+  await expect(w).toHaveCSS('background-image', new RegExp('data:image/svg'));
 
   const format = page.getByRole('combobox',{ name: 'Download format' });
   await format.selectOption('jpeg');
   await expect(format).toHaveValue('jpeg');
-  await expect(format).toHaveCSS('background-image', /data:image\\/svg\\+xml/);
+  await expect(format).toHaveCSS('background-image', new RegExp('data:image/svg'));
 
   const bold = page.locator('.forge-v5-checkboxes input[type="checkbox"]').first();
   const wasChecked = await bold.isChecked();
