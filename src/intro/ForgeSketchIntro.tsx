@@ -8,13 +8,14 @@ const HANDOFF_DURATION_MS = 2680;
 type Props = {
   onHandoff: () => void;
   onFinish: () => void;
+  onSkip: () => void;
 };
 
-export function ForgeSketchIntro({ onHandoff, onFinish }: Props) {
+export function ForgeSketchIntro({ onHandoff, onFinish, onSkip }: Props) {
   const [handoff, setHandoff] = useState(false);
   const wordmarkRef = useRef<HTMLDivElement>(null);
-  const callbacksRef = useRef({ onHandoff, onFinish });
-  callbacksRef.current = { onHandoff, onFinish };
+  const callbacksRef = useRef({ onHandoff, onFinish, onSkip });
+  callbacksRef.current = { onHandoff, onFinish, onSkip };
 
   useEffect(() => {
     const t1 = window.setTimeout(() => {
@@ -66,7 +67,7 @@ export function ForgeSketchIntro({ onHandoff, onFinish }: Props) {
         <span className="forge-intro-progress" />
         <span>PENCIL / GRAPHITE / COLOR</span>
       </div>
-      <button type="button" className="forge-intro-skip" onClick={() => callbacksRef.current.onFinish()}>
+      <button type="button" className="forge-intro-skip" onClick={() => callbacksRef.current.onSkip()}>
         Skip intro ↗
       </button>
     </section>
