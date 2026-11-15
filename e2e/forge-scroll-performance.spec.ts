@@ -64,6 +64,8 @@ test('sidebar expands within fixed rail and focus remains usable', async ({ page
   const rail = page.locator('.sketch-sidebar');
   await expect(rail).toBeVisible();
   await expect(rail).toHaveCSS('transition-property', 'width');
+  // A changing min-width used to jump straight to 210px and clamp width's transition.
+  await expect(rail).toHaveCSS('min-width', '0px');
 
   const before = await rail.evaluate(el => el.getBoundingClientRect().width);
   await rail.hover({ position: { x: 18, y: 140 } });
@@ -95,6 +97,7 @@ test('sidebar opens smoothly without moving the workroom or losing hover', async
   const before = await main.evaluate(el => el.getBoundingClientRect().left);
   await expect(rail).toHaveCSS('width', '76px');
   await expect(sidebar).toHaveCSS('transition-property', 'width');
+  await expect(sidebar).toHaveCSS('min-width', '0px');
 
   await sidebar.hover({ position: { x: 22, y: 170 } });
   await expect.poll(() => sidebar.evaluate(el => Math.round(el.getBoundingClientRect().width))).toBe(210);
