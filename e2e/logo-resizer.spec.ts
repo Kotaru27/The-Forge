@@ -238,3 +238,58 @@ test('invalid in-progress dimension edit never prevents importing a batch', asyn
   await page.locator('.forge-v5-presets').getByRole('button', { name: '150 × 150' }).click();
   await expect(page.locator('.forge-v5-current-size')).toContainText('150 × 150');
 });
+
+
+test('scrolling away and back does not repaint an unchanged logo canvas', async ({ page }) => {
+  await page.setViewportSize({ width: 1400, height: 820 });
+  const batch = Array.from({ length: 26 }, (_, index) => ({
+    ...sample, name: `Scroll_${String(index + 1).padStart(2, '0')}.png`,
+  }));
+  await addFiles(page, batch);
+  await expect(page.locator('.logo-card')).toHaveCount(26);
+  const gallery = page.locator('.logo-gallery');
+  const preview = page.locator('.logo-card .logo-preview').first();
+  await expect(preview).toHaveJSProperty('width', 200);
+  await preview.evaluate(element => {
+    const canvas = element as HTMLCanvasElement & {
+      observedResets?: number;
+      resetObserver?: MutationObserver;
+    };
+    canvas.observedResets = 0;
+    canvas.resetObserver = new MutationObserver(records => {
+      canvas.observedResets! += records.length;
+    });
+    canvas.resetObserver.observe(canvas, {
+      attributes: true,
+      attributeFilter: ['width', 'height'],
+    });
+  });
+  await gallery.evaluate(element => element.scrollTo({ top: element.scrollHeight, behavior: 'instant' }));
+  await expect.poll(() => gallery.evaluate(element => element.scrollTop)).toBeGreaterThan(300);
+  await gallery.evaluate(element => element.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(preview).toBeInViewport();
+  await page.evaluate(() => new Promise<void>(resolve =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  ));
+  expect(await preview.evaluate(element =>
+    (element as HTMLCanvasElement & { observedResets?: number }).observedResets
+  )).toBe(0);
+
+  // A settings change must still invalidate and redraw the currently visible preview.
+  await page.locator('.forge-v5-presets').getByRole('button', { name: '250 × 250' }).click();
+  await expect(preview).toHaveJSProperty('width', 250);
+  await expect.poll(() => preview.evaluate(element =>
+    (element as HTMLCanvasElement & { observedResets?: number }).observedResets ?? 0
+  )).toBeGreaterThan(0);
+});
+
+test('switching tools preserves an imported batch and does not trigger navigation-opening overlays', async ({ page }) => {
+  await addFiles(page, [sample, { ...sample, name: 'ScrollBack.png' }]);
+  await expect(page.locator('.logo-card')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Video Stills', exact: true }).click();
+  await expect(page).toHaveURL(/#\/video-stills$/);
+  await expect(page.locator('.forge-app')).not.toHaveClass(/forge-tool-opening/);
+  await page.getByRole('button', { name: 'Logo Resizer', exact: true }).click();
+  await expect(page.locator('.logo-card')).toHaveCount(2);
+  await expect(page.locator('.logo-preview').first()).toHaveJSProperty('width', 200);
+});
