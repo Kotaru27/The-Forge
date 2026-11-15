@@ -5,25 +5,63 @@ import type { LogoAsset, LogoSettings } from './types';
 type Props = { asset: LogoAsset; settings: LogoSettings; className?: string };
 export const LogoPreview = memo(function LogoPreview({ asset, settings, className = '' }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
-  // Keep the latest render work available to the visibility observer. Bulk
-  // imports must not synchronously resize/draw every offscreen canvas.
   const drawRef = useRef<() => void>(() => {});
   const inViewRef = useRef(false);
+  const revisionRef = useRef(0);
+  const paintedRevisionRef = useRef(0);
+  const idleRef = useRef<number | null>(null);
+
+  // Visibility is a rendering boundary, not a request to redraw on every
+  // scroll-out/scroll-in cycle. Each asset/settings revision is painted once.
   useEffect(() => {
+    const revision = ++revisionRef.current;
     drawRef.current = () => {
-      if (ref.current) drawLogoPreview(ref.current, asset, settings);
+      const canvas = ref.current;
+      if (!canvas || paintedRevisionRef.current === revision) return;
+      drawLogoPreview(canvas, asset, settings);
+      paintedRevisionRef.current = revision;
     };
-    if (inViewRef.current || !ref.current?.closest('.logo-gallery')) drawRef.current();
+
+    const gallery = ref.current?.closest('.logo-gallery');
+    if (!gallery || inViewRef.current) {
+      drawRef.current();
+    } else if (ref.current?.closest('.native-tool:not([hidden])') &&
+               typeof window.requestIdleCallback === 'function') {
+      // Prewarm offscreen thumbnails only when the browser has spare frame
+      // time, so the first visit during wheel scrolling is usually cached.
+      const prewarm = (deadline: IdleDeadline) => {
+        idleRef.current = null;
+        if (paintedRevisionRef.current === revision || inViewRef.current) return;
+        if (deadline.timeRemaining() < 5) {
+          idleRef.current = window.requestIdleCallback(prewarm);
+          return;
+        }
+        drawRef.current();
+      };
+      idleRef.current = window.requestIdleCallback(prewarm);
+    }
+    return () => {
+      if (idleRef.current !== null) {
+        window.cancelIdleCallback(idleRef.current);
+        idleRef.current = null;
+      }
+    };
   }, [asset, settings]);
+
   useEffect(() => {
     const canvas = ref.current;
     const gallery = canvas?.closest('.logo-gallery');
     if (!canvas || !gallery || typeof IntersectionObserver === 'undefined') return;
     const observer = new IntersectionObserver(entries => {
       const visible = entries.some(entry => entry.isIntersecting);
-      // Redraw after scrolling back into view and after any offscreen edits.
-      if (visible && !inViewRef.current) drawRef.current();
       inViewRef.current = visible;
+      if (visible) {
+        if (idleRef.current !== null) {
+          window.cancelIdleCallback(idleRef.current);
+          idleRef.current = null;
+        }
+        drawRef.current();
+      }
     }, { root: gallery, rootMargin: '300px 0px' });
     observer.observe(canvas);
     return () => observer.disconnect();
