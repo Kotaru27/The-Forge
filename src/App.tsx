@@ -155,7 +155,7 @@ export default function App() {
                 </span>
               </div>
               <h1 className="forge-ctk-tool-name">
-                <span className="sketch-highlight-mark">{current.label}</span>
+                <span key={current.id} className="sketch-highlight-mark">{current.label}</span>
               </h1>
               <span className="forge-ctk-top-privacy">LOCAL PROCESSING</span>
               <span className="sketch-topbar-seam" aria-hidden="true">
