@@ -23,7 +23,7 @@ import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
 
 type Route = ToolId | 'home';
-type IntroPhase = 'pending' | 'handoff' | 'settled';
+type IntroPhase = 'pending' | 'handoff' | 'finishing' | 'settled';
 
 // First root visit sketches once per tab; deep links are never delayed.
 const INTRO_SESSION_KEY = 'forge-pencil-intro-played-v2';
@@ -46,6 +46,12 @@ export default function App() {
   const [introRun, setIntroRun] = useState(0);
   const finishIntro = useCallback(() => {
     try { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); } catch { /* Storage is optional. */ }
+    // Only a completed handoff may finish writing. Skip and direct routes
+    // always show the fully drawn interface without animation.
+    setIntroPhase(phase => phase === 'handoff' ? 'finishing' : 'settled');
+  }, []);
+  const skipIntro = useCallback(() => {
+    try { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); } catch { /* Storage is optional. */ }
     setIntroPhase('settled');
   }, []);
   const handoffIntro = useCallback(() => setIntroPhase('handoff'), []);
@@ -54,6 +60,14 @@ export default function App() {
     setIntroRun(previous => previous + 1);
     setIntroPhase('pending');
   }, []);
+
+  useEffect(() => {
+    if (introPhase !== 'finishing') return;
+    // Allow the longest Home description to finish handwriting once.
+    // This timer does not run while working in any tool or revisiting Home.
+    const timeout = window.setTimeout(() => setIntroPhase('settled'), 2200);
+    return () => window.clearTimeout(timeout);
+  }, [introPhase]);
 
   const openTool = useCallback((tool: Route) => {
     if (tool !== 'home' && !isToolId(tool)) return;
@@ -91,7 +105,8 @@ export default function App() {
         (isHome ? ' forge-ctk-home-route forge-sketch-home-route' : '') +
         (isHome && introPhase === 'pending' ? ' forge-intro-before-home' : '') +
         (isHome && introPhase === 'handoff' ? ' forge-intro-handoff' : '') +
-        (isHome && introPhase === 'settled' ? ' forge-home-continuous-draw' : '')
+        (isHome && introPhase === 'finishing' ? ' forge-home-finishing' : '') +
+        (isHome && introPhase === 'settled' ? ' forge-home-resting' : '')
       }
     >
       <SketchSvgDefs />
@@ -192,7 +207,11 @@ export default function App() {
           )}
 
           <div className="native-tool" hidden={!isHome}>
-            <ForgeHome onOpenTool={openTool} onReplayIntro={replayIntro} />
+            <ForgeHome
+              onOpenTool={openTool}
+              onReplayIntro={replayIntro}
+              animateWriting={isHome && (introPhase === 'handoff' || introPhase === 'finishing')}
+            />
           </div>
           <div className="native-tool" hidden={activeTool !== 'link-generator'}>
             <LinkGenerator />
@@ -217,8 +236,8 @@ export default function App() {
           </div>
         </main>
       </div>
-      {isHome && introPhase !== 'settled' && (
-        <ForgeSketchIntro key={introRun} onHandoff={handoffIntro} onFinish={finishIntro} />
+      {isHome && (introPhase === 'pending' || introPhase === 'handoff') && (
+        <ForgeSketchIntro key={introRun} onHandoff={handoffIntro} onFinish={finishIntro} onSkip={skipIntro} />
       )}
     </div>
   );
