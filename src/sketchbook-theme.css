@@ -2230,6 +2230,27 @@
   stroke: #171d22;
 }
 
+/* When the notebook rail expands, write its labels instead of fading
+   text in. Keep the existing accessible width and scroll behavior. */
+.forge-sketch-ui :is(
+  .sketch-nav-label,
+  .sketch-subtool-label,
+  .sketch-brand-word,
+  .sketch-sidebar-tagline
+) {
+  opacity: 1;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 240ms steps(13, end), max-width 200ms ease, max-height 200ms ease !important;
+}
+.forge-sketch-ui .sketch-sidebar:is(:hover, :has(:focus-visible)) :is(
+  .sketch-nav-label,
+  .sketch-subtool-label,
+  .sketch-brand-word,
+  .sketch-sidebar-tagline
+) {
+  clip-path: inset(0 0 0 0);
+}
+
 /* Workroom section titles are written directly on the paper when
    a route becomes visible; the stage, canvas and controls do not fly in. */
 .forge-sketch-ui .native-tool:not([hidden]) :is(
