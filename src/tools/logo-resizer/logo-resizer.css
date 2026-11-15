@@ -172,7 +172,7 @@
 
 /* Asset board and adaptive image cards */
 .forge-logo-v5 .logo-body{flex:1;min-height:0;overflow:hidden;display:flex}
-.forge-logo-v5 .logo-gallery{flex:1;min-width:0;overflow:auto;background-color:#0c110d;background-image:radial-gradient(circle at top left,#22302538,transparent 42%);padding:20px 28px 60px}
+.forge-logo-v5 .logo-gallery{flex:1;min-width:0;overflow:auto;scrollbar-gutter:stable;overscroll-behavior-y:contain;background-color:#0c110d;background-image:radial-gradient(circle at top left,#22302538,transparent 42%);padding:20px 28px 60px}
 .forge-v5-board-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:19px}
 .forge-v5-board-heading>div>span{color:#819481;font:10px Consolas,monospace;letter-spacing:.12em}
 .forge-v5-board-heading h2{font-size:24px;letter-spacing:-.055em;font-weight:650;margin:5px 0 0;color:#f3f6ee}
@@ -191,6 +191,12 @@
 .forge-logo-v5 .logo-grid{grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:16px;align-items:start}
 .forge-logo-v5 .logo-card{min-width:0;background:#151c16;border:1px solid #364437;border-radius:3px;overflow:hidden}
 .forge-logo-v5 .logo-card:hover{border-color:#688267}
+/* Isolate card repaint work when many canvases occupy a scrollable gallery. */
+.forge-logo-v5 .logo-card{contain:layout paint}
+/* A dozen simultaneous width/height animations would force repeated grid
+ * layout during a bulk resize. Small imports retain the existing motion. */
+.forge-logo-v5.logo-bulk-workspace .logo-card .logo-preview-frame{transition:none}
+
 .forge-logo-v5 .logo-card-heading{min-height:46px;padding:0 11px;gap:9px;background:#151d16;border-bottom-color:#304032}
 .forge-v5-card-index{color:#d9fb79;font:10px Consolas,monospace}
 .forge-logo-v5 .logo-card-heading input{color:#e8f0e5;font:650 12px 'Segoe UI',Arial,sans-serif!important}
