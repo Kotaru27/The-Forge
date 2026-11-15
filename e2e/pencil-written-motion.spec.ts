@@ -25,7 +25,7 @@ test('all seven workrooms handwrite static headings, instructions and control na
     await expect(strokes).toHaveCSS('animation-name', /forgePencilContour/);
     await expect(strokes).toHaveCSS('stroke-dasharray', /[0-9]/);
     await expect(ink).toHaveCSS('animation-name','forgePencilOriginalLetter');
-    await expect(page.getByText(heading, {exact: true}).first()).toBeVisible();
+    await expect(tool.locator('.pencil-written-text').filter({ hasText: heading }).first()).toHaveText(heading);
     await expect(page.getByRole('button', {name: target, exact: route !== 'link-generator'}).first()).toBeVisible();
     // Text is never line-clipped or missing after the finite writing pass.
     await page.waitForTimeout(1000);
