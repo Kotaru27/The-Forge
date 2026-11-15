@@ -1,4 +1,4 @@
-name: Graphite Pencil isolated preview via approved release branch
+name: Graphite Pencil V2 isolated Pages preview
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
       - name: Checkout isolated Graphite Pencil branch
         uses: actions/checkout@v4
         with:
-          ref: design/forge-graphite-pencil-v1-20261115
+          ref: 371feabb3d12f8847fd9c0f3a3bfa476117b6415
           path: candidate
           persist-credentials: false
       - name: Checkout pinned CTK regression oracle for candidate tests
@@ -124,7 +124,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: design/forge-graphite-pencil-v1-20261115
+          ref: 371feabb3d12f8847fd9c0f3a3bfa476117b6415
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -141,5 +141,6 @@ jobs:
           path: |
             production-home-smoke.png
             graphite-pencil-home-smoke.png
+            graphite-pencil-logo-smoke.png
           if-no-files-found: ignore
           retention-days: 14
