@@ -22,7 +22,13 @@ export function PencilWordmark({ idPrefix = 'forge', pencilWriting = false }: { 
         <text x="2" y="2" textLength="625" lengthAdjust="spacingAndGlyphs" fontSize="100" fontWeight="700" fontFamily="Kalam, cursive" fontStyle="italic" fill="#68635b" opacity=".27">THE FORGE</text>
         <text x="0" y="0" textLength="625" lengthAdjust="spacingAndGlyphs" fontSize="100" fontWeight="700" fontFamily="Kalam, cursive" fontStyle="italic" fill={`url(#${idPrefix}-graphite-grain)`} stroke="#26272a" strokeWidth=".75" paintOrder="stroke">{pencilWriting
           ? [...'THE FORGE'].map((character, index) => (
-            <tspan key={index} className="pencil-writing-glyph" style={{ '--glyph-index': index } as CSSProperties}>{character}</tspan>
+            character === ' '
+              ? <tspan key={index}> </tspan>
+              : <tspan
+                  key={index}
+                  className="pencil-writing-glyph"
+                  style={{ '--glyph-index': index > 3 ? index - 1 : index } as CSSProperties}
+                >{character}</tspan>
           ))
           : 'THE FORGE'}</text>
       </g>
