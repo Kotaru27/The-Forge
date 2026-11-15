@@ -74,7 +74,7 @@ test('Ink & Paper Home has no overlapping or clipped cards on narrow and short s
     }
 
     if ([1536, 1366, 768, 390].includes(width)) {
-      await page.screenshot({path: testInfo.outputPath('ink-home-responsive-' + width + '.png')});
+      await page.screenshot({ animations: 'disabled',path: testInfo.outputPath('ink-home-responsive-' + width + '.png')});
     }
   }
 });

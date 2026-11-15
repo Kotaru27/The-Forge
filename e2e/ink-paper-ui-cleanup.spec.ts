@@ -84,3 +84,20 @@ test('Ink & Paper secondary text is dark and legible in all seven workspaces', a
   await page.goto('#/ad-downloader');
   await expect(page.locator('.adw-empty span').first()).toHaveCSS('color', 'rgb(47, 69, 98)');
 });
+
+test('graphite lines and lettering draw in place, with reduced-motion fallback', async ({page}) => {
+  await page.goto('#/home');
+  const pencilPath = page.locator('.sketch-card-border-svg [data-pencil-trace]').first();
+  const title = page.locator('.sketch-hero-center h1');
+  await expect(pencilPath).toHaveAttribute('pathLength','100');
+  await expect(pencilPath).toHaveCSS('animation-name','sketch-pencil-trace');
+  await expect(title).toHaveCSS('animation-name','sketch-pencil-lettering');
+  await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('transform','none');
+
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(pencilPath).toHaveCSS('animation-name','none');
+  await expect(title).toHaveCSS('animation-name','none');
+
+  await page.goto('#/storyboard');
+  await expect(page.getByRole('button', {name:'Add Assets'})).toBeVisible();
+});

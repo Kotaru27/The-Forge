@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import JSZip from 'jszip';
 
 async function png(page: Page, color = '#e63b3b'): Promise<Buffer> {
@@ -79,6 +80,51 @@ test('clear and delete require confirmation; Cancel retains frames',async ({page
   await page.getByRole('button',{name:'Delete selected storyboard'}).click();
   await page.getByRole('button',{name:'Confirm'}).click();
   await expect(page.getByLabel('Choose a storyboard').locator('option')).toHaveCount(1);
+});
+
+test('Add Assets opens the real image and folder choosers with keyboard dismissal', async ({page}, testInfo) => {
+  const addAssets = page.getByRole('button', {name:'Add Assets'});
+  const folderInput = page.getByLabel('Choose storyboard folder');
+
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+  await addAssets.click();
+  await expect(addAssets).toHaveAttribute('aria-expanded','true');
+  await expect(page.getByRole('button', {name:'Add Images'})).toBeVisible();
+  await expect(page.getByRole('button', {name:'Add Folder'})).toBeVisible();
+  await expect(folderInput).toHaveAttribute('webkitdirectory','');
+
+  const [imagePicker] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.getByRole('button', {name:'Add Images'}).click(),
+  ]);
+  expect(imagePicker.isMultiple()).toBe(true);
+  await imagePicker.setFiles({name:'from-picker.png',mimeType:'image/png',buffer:await png(page)});
+  await expect(page.locator('.sb-frame')).toHaveCount(1);
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+
+  await addAssets.click();
+  const [folderPicker] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.getByRole('button', {name:'Add Folder'}).click(),
+  ]);
+  expect(folderPicker.isMultiple()).toBe(true);
+  expect(await (await folderPicker.element()).getAttribute('webkitdirectory')).toBe('');
+  // Chromium's webkitdirectory chooser requires a real directory, not [].
+  // A sample image also exercises the existing folder import path end-to-end.
+  const selectedFolder = testInfo.outputPath('selected-storyboard-folder');
+  await mkdir(selectedFolder, {recursive:true});
+  await writeFile(join(selectedFolder,'folder_frame.png'),await png(page,'#316bb5'));
+  await folderPicker.setFiles(selectedFolder);
+  await expect(page.getByLabel('Choose a storyboard').locator('option')).toHaveCount(2);
+  await expect(page.locator('.sb-frame')).toHaveCount(1);
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+
+  await addAssets.click();
+  await page.keyboard.press('Escape');
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
+  await addAssets.click();
+  await page.getByRole('button', {name:'Compact', exact:true}).click();
+  await expect(addAssets).toHaveAttribute('aria-expanded','false');
 });
 
 test('folder import creates one board per subfolder, natural frame order',async ({page})=>{

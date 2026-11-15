@@ -2094,9 +2094,208 @@
   }
 }
 
+
+/* =========================================================
+ * PENCIL MOTION — graphite lines are traced, handwriting
+ * appears in short left-to-right pencil passes, and colored
+ * pencil shading follows. No scaling, floating or page fades.
+ * Static geometry and all controls remain in their final place.
+ * ========================================================= */
+@keyframes sketch-pencil-trace {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes sketch-pencil-lettering {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes sketch-pencil-shading {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* The paths carry an authored pathLength=100 so dash positions
+   trace real SVG contours, not a rectangular wipe over artwork. */
+.forge-sketch-ui .sketch-page-frame-svg [data-pencil-trace] {
+  stroke-dasharray: 100;
+  animation: sketch-pencil-trace 920ms linear both;
+}
+.forge-sketch-ui .sketch-page-frame-svg [data-pencil-trace]:last-child {
+  animation-delay: 170ms;
+}
+.forge-sketch-ui .sketch-wavy-divider [data-pencil-trace] {
+  stroke-dasharray: 100;
+  animation: sketch-pencil-trace 470ms linear both;
+}
+.forge-sketch-ui .sketch-wavy-divider [data-pencil-trace]:last-child {
+  animation-delay: 90ms;
+}
+
+/* Hand-lettering never shifts its layout: it is uncovered in
+   small writing strokes, followed by the yellow pencil fill. */
+.forge-sketch-ui .sketch-hero-center h1 {
+  animation: sketch-pencil-lettering 660ms steps(24, end) both;
+}
+.forge-sketch-ui .sketch-welcome-ink {
+  display: inline-block;
+  animation: sketch-pencil-lettering 550ms steps(22, end) 260ms both;
+}
+.forge-sketch-ui .sketch-welcome-copy p {
+  animation: sketch-pencil-lettering 400ms steps(15, end) 540ms both;
+}
+.forge-sketch-ui .sketch-highlight-sweep::before {
+  animation: sketch-pencil-shading 390ms steps(18, end) 680ms both;
+}
+.forge-sketch-ui .topbar .sketch-highlight-mark {
+  animation: sketch-pencil-lettering 420ms steps(17, end) both;
+}
+.forge-sketch-ui .topbar .sketch-highlight-mark::before {
+  animation: sketch-pencil-shading 300ms steps(13, end) 420ms both;
+}
+
+/* Card borders are literally hand-traced. Stagger the penwork
+   slightly without moving cards or obscuring their click targets. */
+.sketch-card-slot { --sk-card-pencil-delay: 0ms; }
+.sketch-card-slot:nth-child(2) { --sk-card-pencil-delay: 65ms; }
+.sketch-card-slot:nth-child(3) { --sk-card-pencil-delay: 130ms; }
+.sketch-card-slot:nth-child(4) { --sk-card-pencil-delay: 195ms; }
+.sketch-card-slot:nth-child(5) { --sk-card-pencil-delay: 260ms; }
+.sketch-card-slot:nth-child(6) { --sk-card-pencil-delay: 325ms; }
+.sketch-card-slot:nth-child(7) { --sk-card-pencil-delay: 390ms; }
+.forge-sketch-ui .sketch-card-border-svg [data-pencil-trace] {
+  stroke-dasharray: 100;
+  animation: sketch-pencil-trace 590ms linear both;
+  animation-delay: var(--sk-card-pencil-delay);
+}
+.forge-sketch-ui .sketch-card-border-svg [data-pencil-trace]:last-child {
+  animation-delay: calc(var(--sk-card-pencil-delay) + 105ms);
+}
+.forge-sketch-ui .sketch-card-title .sketch-highlight-mark {
+  animation: sketch-pencil-lettering 480ms steps(20, end) both;
+  animation-delay: calc(var(--sk-card-pencil-delay) + 160ms);
+}
+.forge-sketch-ui .sketch-card-title .sketch-highlight-mark::before {
+  animation: sketch-pencil-shading 340ms steps(14, end) both;
+  animation-delay: calc(var(--sk-card-pencil-delay) + 630ms);
+}
+.forge-sketch-ui .sketch-card-desc {
+  animation: sketch-pencil-lettering 420ms steps(20, end) both;
+  animation-delay: calc(var(--sk-card-pencil-delay) + 420ms);
+}
+.forge-sketch-ui .sketch-title-ticks [data-pencil-trace],
+.forge-sketch-ui .sketch-title-sparks [data-pencil-trace],
+.forge-sketch-ui .sketch-welcome-ticks [data-pencil-trace],
+.forge-sketch-ui .sketch-rust-flourish [data-pencil-trace] {
+  stroke-dasharray: 100;
+  animation: sketch-pencil-trace 390ms linear both;
+}
+.forge-sketch-ui .sketch-title-sparks [data-pencil-trace],
+.forge-sketch-ui .sketch-rust-flourish [data-pencil-trace] {
+  animation-delay: var(--sk-card-pencil-delay, 0ms);
+}
+
+/* Typing a search must not repeatedly redraw cards. */
+.forge-sketch-ui .sketch-home-grid.is-filtered :is(
+  .sketch-card-border-svg [data-pencil-trace],
+  .sketch-card-title .sketch-highlight-mark,
+  .sketch-card-desc,
+  .sketch-title-sparks [data-pencil-trace],
+  .sketch-rust-flourish [data-pencil-trace]
+),
+.forge-sketch-ui .sketch-home-grid.is-filtered .sketch-card-title .sketch-highlight-mark::before {
+  animation: none !important;
+  stroke-dashoffset: 0;
+  clip-path: none;
+}
+
+/* Yellow colored-pencil navigation marks are drawn on the paper;
+   no scaling/highlight fade on hover or when switching tools. */
+.forge-sketch-ui .sketch-nav-link::before,
+.forge-sketch-ui .sketch-subtool-link::before {
+  transform: rotate(-0.6deg) !important;
+  opacity: 1 !important;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 180ms steps(12, end) !important;
+}
+.forge-sketch-ui .sketch-nav-link:is(:hover, .is-active)::before,
+.forge-sketch-ui .sketch-subtool-link:is(:hover, .is-active)::before {
+  clip-path: inset(0 0 0 0);
+}
+.forge-sketch-ui .sketch-brand-btn:hover,
+.forge-sketch-ui .sketch-tool-card:hover {
+  transform: none !important;
+}
+/* Preserve the tactile response through graphite emphasis instead. */
+.forge-sketch-ui .sketch-tool-card:hover .sketch-card-border-svg [data-pencil-trace] {
+  stroke: #171d22;
+}
+
+/* When the notebook rail expands, write its labels instead of fading
+   text in. Keep the existing accessible width and scroll behavior. */
+.forge-sketch-ui :is(
+  .sketch-nav-label,
+  .sketch-subtool-label,
+  .sketch-brand-word,
+  .sketch-sidebar-tagline
+) {
+  opacity: 1;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 240ms steps(13, end), max-width 200ms ease, max-height 200ms ease !important;
+}
+.forge-sketch-ui .sketch-sidebar:is(:hover, :has(:focus-visible)) :is(
+  .sketch-nav-label,
+  .sketch-subtool-label,
+  .sketch-brand-word,
+  .sketch-sidebar-tagline
+) {
+  clip-path: inset(0 0 0 0);
+}
+
+/* Workroom section titles are written directly on the paper when
+   a route becomes visible; the stage, canvas and controls do not fly in. */
+.forge-sketch-ui .native-tool:not([hidden]) :is(
+  .sb-section-head strong,
+  .pdf-section-title,
+  .split-section-title,
+  .vs-list-heading strong,
+  .link-panel-heading h2,
+  .adw-header h2,
+  .logo-workspace h2
+) {
+  animation: sketch-pencil-lettering 380ms steps(17, end) both;
+}
+
+/* The Storyboard picker is a small, stationary pencil-bordered note. */
+.forge-sketch-ui .storyboard-tool .sb-asset-menu {
+  border: 4px solid transparent;
+  border-image: var(--sk-border-ctrl) 12 stretch;
+  border-radius: 0;
+  background: #f8f0e1;
+  background-image: var(--sk-paper-grain);
+  color: var(--sk-ink);
+  box-shadow: 2px 3px 0 rgba(43, 45, 48, 0.12);
+}
+.forge-sketch-ui .storyboard-tool .sb-asset-menu button {
+  color: var(--sk-ink) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid #c7b79b !important;
+  border-radius: 0 !important;
+}
+.forge-sketch-ui .storyboard-tool .sb-asset-menu button:last-child {
+  border-bottom: 0 !important;
+}
+.forge-sketch-ui .storyboard-tool .sb-asset-menu button:is(:hover, :focus-visible) {
+  background: #f3db7b !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .forge-app.forge-sketch-ui * {
+  .forge-app.forge-sketch-ui *,
+  .forge-app.forge-sketch-ui *::before,
+  .forge-app.forge-sketch-ui *::after {
     transition-duration: 0s !important;
-    animation-duration: 0s !important;
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+    clip-path: none !important;
   }
 }

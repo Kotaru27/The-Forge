@@ -17,7 +17,7 @@ test('Home is the landing page and every workbench card launches a real tool', a
   await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
   await expect(page.locator('.forge-home-card')).toHaveCount(7);
   await expect(page.locator('.sidebar')).toHaveCount(0);
-  await page.screenshot({ path: testInfo.outputPath('home-desktop.png') });
+  await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('home-desktop.png') });
   await page.getByRole('button', { name: 'Open PDF to Image' }).click();
   await expect(page).toHaveURL(/#\/pdf-to-image$/);
   await expect(page.getByRole('region', { name: 'PDF to Image' })).toBeVisible();
@@ -47,7 +47,7 @@ for (const [id, label, selector] of workbenches) {
     expect(geometry.width).toBeGreaterThan(500);
     expect(geometry.height).toBeGreaterThan(350);
     expect(geometry.right).toBeLessThanOrEqual(1442);
-    await page.screenshot({ path: testInfo.outputPath(id + '-desktop.png') });
+    await page.screenshot({ animations: 'disabled', path: testInfo.outputPath(id + '-desktop.png') });
     if (id === 'video-stills') {
       const side = workspace.locator('.vs-workbench-side');
       const gallery = workspace.locator('.vs-content');
@@ -66,5 +66,5 @@ test('approved Logo Resizer V5 retains its own styling and processing UI', async
   await expect(page.locator('.forge-v5-shell')).toBeVisible();
   await expect(page.locator('.forge-collection-shell')).toHaveCount(0);
   await expect(page.getByRole('region', { name: 'Logo Resizer' })).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('logo-approved-v5.png') });
+  await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('logo-approved-v5.png') });
 });

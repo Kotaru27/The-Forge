@@ -44,6 +44,8 @@ export function SketchPageFrameBorder() {
       aria-hidden="true"
     >
       <path
+        pathLength={100}
+        data-pencil-trace="true"
         d="M5 7 Q460 3 930 6 T1394 5 Q1397 440 1395 874 Q940 877 470 874 T5 875 Q2 440 5 7 Z"
         stroke="#26282c"
         strokeWidth="2.6"
@@ -51,6 +53,8 @@ export function SketchPageFrameBorder() {
         strokeLinejoin="round"
         />
       <path
+        pathLength={100}
+        data-pencil-trace="true"
         d="M9 10 Q480 6 950 9 T1390 8 M1391 12 Q1393 440 1391 870 M1388 871 Q920 873 450 870 T9 871"
         stroke="#26282c"
         strokeWidth="1.05"
@@ -151,6 +155,8 @@ export function SketchCardBorder({ spiral = false }: { spiral?: boolean }) {
 
       {/* Rough hand-drawn outer ink pass with tiny sketchy corner overshoots */}
       <path
+        pathLength={100}
+        data-pencil-trace="true"
         d={
           spiral
             ? 'M16 10 Q154 6 296 11 M293 7 Q297 114 293 217 M297 214 Q154 218 15 214 M18 217 Q14 114 18 7'
@@ -163,6 +169,8 @@ export function SketchCardBorder({ spiral = false }: { spiral?: boolean }) {
         />
       {/* Faint offset double-ink pass around edges */}
       <path
+        pathLength={100}
+        data-pencil-trace="true"
         d={
           spiral
             ? 'M20 12.5 Q156 9 291 12.5 Q294 116 291 212 Q156 215 19 212'
@@ -187,8 +195,8 @@ export function SketchDividerLine({ compact = false }: { compact?: boolean }) {
       fill="none"
       aria-hidden="true"
     >
-      <path d="M2 5 Q150 2 300 5.5 T600 4.5 T898 5.2" stroke="#2c2e32" strokeWidth="1.5" strokeOpacity="0.72" />
-      <path d="M12 6.6 Q240 8.5 460 5.4 T888 6.5" stroke="#2c2e32" strokeWidth="0.75" strokeOpacity="0.4" />
+      <path pathLength={100} data-pencil-trace="true" d="M2 5 Q150 2 300 5.5 T600 4.5 T898 5.2" stroke="#2c2e32" strokeWidth="1.5" strokeOpacity="0.72" />
+      <path pathLength={100} data-pencil-trace="true" d="M12 6.6 Q240 8.5 460 5.4 T888 6.5" stroke="#2c2e32" strokeWidth="0.75" strokeOpacity="0.4" />
     </svg>
   );
 }

@@ -1,6 +1,6 @@
 .storyboard-tool{display:flex;flex-direction:column;min-width:0;min-height:0;flex:1;color:#f0f0f0;background:#000;font-family:Inter,'Segoe UI',Arial,sans-serif;font-size:13px}
 .storyboard-tool *{box-sizing:border-box}
-.sb-topline{border-bottom:1px solid #222;min-height:54px;padding:8px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sb-topline{position:relative;z-index:12;overflow:visible;border-bottom:1px solid #222;min-height:54px;padding:8px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .sb-modes,.sb-toolbar,.sb-section-head,.sb-project-switch,.sb-view-choice,.sb-project-row,.sb-dialog-actions{display:flex;align-items:center;gap:8px}
 .storyboard-tool button,.storyboard-tool select,.storyboard-tool input,.storyboard-tool textarea{font:inherit;color:#ededed;background:#0b0b0b;border:1px solid #333;border-radius:4px;padding:9px 11px;min-width:0}
 .storyboard-tool button{cursor:pointer;white-space:nowrap}
@@ -9,6 +9,10 @@
 .storyboard-tool button:focus-visible,.storyboard-tool input:focus-visible,.storyboard-tool select:focus-visible,.storyboard-tool textarea:focus-visible{outline:2px solid #bbb;outline-offset:2px}
 .storyboard-tool .sb-modes button.active{background:#ededed;color:#050505;border-color:#ededed}
 .storyboard-tool button.danger{color:#ffb3b3;border-color:#603434}
+/* The existing image and directory inputs share one explicit, keyboard-accessible chooser. */
+.sb-asset-actions{position:relative;z-index:13;flex:0 0 auto}
+.sb-asset-menu{position:absolute;left:0;top:calc(100% + 7px);z-index:25;display:flex;flex-direction:column;align-items:stretch;gap:5px;min-width:190px;padding:8px;border:1px solid #666;border-radius:4px;background:#121212}
+.sb-asset-menu button{display:block;width:100%;text-align:left}
 .sb-feedback{display:flex;flex-wrap:wrap;gap:16px;align-items:center;min-height:0;padding:0 18px;color:#bdbdbd;font-size:12px}
 .sb-feedback:not(:empty){padding-block:6px;border-bottom:1px solid #191919}
 .sb-error{color:#ffacac!important}
