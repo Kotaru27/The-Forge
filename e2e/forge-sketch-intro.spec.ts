@@ -62,7 +62,7 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
   await expect(written.locator('.pencil-glyph-stroke')).toHaveCSS('animation-name', /forgePencilContour/);
   await expect(written.locator('.pencil-glyph-vector')).toHaveCSS('animation-name', 'forgePencilVectorYield');
   await expect(page.locator('.sketch-home-grid .pencil-written-word').first()).toBeVisible();
-  await expect(page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first()).toHaveCSS('stroke-dashoffset', '0');
+  await expect(page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first()).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
 
   await page.waitForTimeout(570);
   await page.screenshot({ path: testInfo.outputPath('intro-home-handoff.png') });
