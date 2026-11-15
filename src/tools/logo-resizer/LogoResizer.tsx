@@ -56,6 +56,8 @@ export function LogoResizer() {
   const cardsRef = useRef(cards);
   cardsRef.current = cards;
   const [focused, setFocused] = useState<string | null>(null);
+  const [focusExiting, setFocusExiting] = useState(false);
+  const focusExitTimer = useRef<number | null>(null);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
   const [confirmClear, setConfirmClear] = useState(false);
@@ -77,6 +79,7 @@ export function LogoResizer() {
       cardsRef.current.forEach(asset => URL.revokeObjectURL(asset.url));
       snapshotRef.current?.cards.forEach(asset => URL.revokeObjectURL(asset.url));
       if (snapshotTimer.current) window.clearTimeout(snapshotTimer.current);
+      if (focusExitTimer.current !== null) window.clearTimeout(focusExitTimer.current);
     };
   }, []);
 
@@ -181,12 +184,39 @@ export function LogoResizer() {
       setProgress('');
     }
   }
+  function openFocus(id: string) {
+    if (focusExitTimer.current !== null) window.clearTimeout(focusExitTimer.current);
+    focusExitTimer.current = null;
+    setFocusExiting(false);
+    setFocused(id);
+  }
+  function closeFocus() {
+    if (!focused || focusExitTimer.current !== null) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setFocused(null);
+      setFocusExiting(false);
+      return;
+    }
+    setFocusExiting(true);
+    focusExitTimer.current = window.setTimeout(() => {
+      focusExitTimer.current = null;
+      setFocused(null);
+      setFocusExiting(false);
+    }, 190);
+  }
   function removeAsset(asset: LogoAsset) {
     setCards(previous => previous.filter(item => item.id !== asset.id));
     URL.revokeObjectURL(asset.url);
     if (focused === asset.id) {
       const index = cards.findIndex(item => item.id === asset.id);
-      setFocused(cards.filter(item => item.id !== asset.id)[Math.min(index, cards.length - 2)]?.id || null);
+      const next = cards.filter(item => item.id !== asset.id)[Math.min(index, cards.length - 2)]?.id;
+      if (next) openFocus(next);
+      else {
+        if (focusExitTimer.current !== null) window.clearTimeout(focusExitTimer.current);
+        focusExitTimer.current = null;
+        setFocusExiting(false);
+        setFocused(null);
+      }
     }
   }
   function expireUndo() {
@@ -203,6 +233,9 @@ export function LogoResizer() {
     snapshotRef.current = saved;
     setSnapshot(saved);
     setCards([]);
+    if (focusExitTimer.current !== null) window.clearTimeout(focusExitTimer.current);
+    focusExitTimer.current = null;
+    setFocusExiting(false);
     setFocused(null);
     setConfirmClear(false);
     setSettings({ ...DEFAULT_LOGO_SETTINGS });
@@ -223,7 +256,7 @@ export function LogoResizer() {
   function navigateFocus(direction: number) {
     if (!focused || !cards.length) return;
     const index = cards.findIndex(asset => asset.id === focused);
-    setFocused(cards[(index + direction + cards.length) % cards.length].id);
+    openFocus(cards[(index + direction + cards.length) % cards.length].id);
   }
   useEffect(() => {
     if (!focused) return;
@@ -231,14 +264,14 @@ export function LogoResizer() {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         if (event.key !== 'Escape') return;
       }
-      if (event.key === 'Escape') setFocused(null);
+      if (event.key === 'Escape') closeFocus();
       if (event.key === 'ArrowLeft') { event.preventDefault(); navigateFocus(-1); }
       if (event.key === 'ArrowRight') { event.preventDefault(); navigateFocus(1); }
     };
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
     // Focus navigation must follow the currently visible list.
-  }, [focused, cards]);
+  }, [focused, cards, focusExiting]);
 
   const detail = cards.find(asset => asset.id === focused) ?? null;
   const updateLabel = (asset: LogoAsset, value: string) => {
@@ -389,7 +422,7 @@ export function LogoResizer() {
                     <input aria-label={`Filename for ${asset.source.name}`} value={asset.filename} onChange={event => patchCard(asset.id, { filename: sanitizeLogoFilename(event.target.value) })} placeholder="Untitled" />
                     <button type="button" title="Remove logo" aria-label={`Remove ${asset.source.name}`} onClick={() => removeAsset(asset)} disabled={busy}>×</button>
                   </div>
-                  <button className="logo-preview-button" type="button" onClick={() => setFocused(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
+                  <button className="logo-preview-button" type="button" onClick={() => openFocus(asset.id)} aria-label={`Open Focus Mode for ${asset.source.name}`}>
                     <LogoPreview asset={asset} settings={settings} />
                     <span className="forge-v5-card-size">{settings.width} × {settings.height} PX</span>
                   </button>
@@ -405,13 +438,13 @@ export function LogoResizer() {
             </div>
           )}
         </main>
-        {detail && <aside className="logo-detail" aria-label="Focus Mode">
+        {detail && <aside className="logo-detail" aria-label="Focus Mode" data-exiting={focusExiting}>
           <div className="logo-detail-heading">
             <strong>{"Focus Mode"}</strong>
             <div className="logo-detail-buttons">
               <button type="button" aria-label="Previous logo" onClick={() => navigateFocus(-1)}>←</button>
               <button type="button" aria-label="Next logo" onClick={() => navigateFocus(1)}>→</button>
-              <button type="button" aria-label="Close Focus Mode" onClick={() => setFocused(null)}>×</button>
+              <button type="button" aria-label="Close Focus Mode" onClick={closeFocus}>×</button>
             </div>
           </div>
           <p className="logo-subtle">{cards.findIndex(asset => asset.id === detail.id) + 1} of {cards.length}</p>
