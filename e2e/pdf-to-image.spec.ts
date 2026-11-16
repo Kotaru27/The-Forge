@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import JSZip from 'jszip';
 import { readFile } from 'node:fs/promises';
 import { createPdf } from './helpers/pdf-fixture';
@@ -26,7 +27,7 @@ async function waitDone(page: Page, count: number) {
 }
 
 test.beforeEach(async ({page}) => {
-  await page.goto('#/pdf-to-image');
+  await openForgeRoute(page, 'pdf-to-image');
   await expect(page.getByRole('region',{name:'PDF to Image'})).toBeVisible();
 });
 
