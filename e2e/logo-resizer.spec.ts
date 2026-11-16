@@ -186,12 +186,13 @@ test('preview resizing animation is decorative and export canvas remains exact',
   await page.locator('.forge-v5-presets').getByRole('button', { name: '200 × 150' }).click();
   await expect(frames.first()).toHaveCSS('height', '150px');
   await expect(page.locator('.logo-card .logo-preview').first()).toHaveJSProperty('height', 150);
-  const details = await page.locator('.logo-card .logo-preview').first().evaluate(canvas => {
+  // Preview painting is queued asynchronously to avoid blocking wheel input.
+  // Assert the exact completed pixels, not an intermediate blank canvas.
+  await expect.poll(() => page.locator('.logo-card .logo-preview').first().evaluate(canvas => {
     const c = canvas as HTMLCanvasElement;
     const corner = c.getContext('2d')!.getImageData(199,149,1,1).data;
     return [c.width,c.height,corner[0],corner[1],corner[2]];
-  });
-  expect(details).toEqual([200,150,255,255,255]);
+  })).toEqual([200,150,255,255,255]);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(frames.first()).toHaveCSS('transition-duration','0s');
 });
