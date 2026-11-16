@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 const workbenches = [
   ['pdf-to-image', 'PDF to Image', '.pdf-workspace'],
@@ -12,7 +13,7 @@ const workbenches = [
 test('Home is the landing page and every workbench card launches a real tool', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', err => errors.push(err.message));
-  await page.goto('./');
+  await openForgeRoute(page, 'home');
   await expect(page).toHaveURL(/#\/home$/);
   await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
   await expect(page.locator('.forge-home-card')).toHaveCount(7);
@@ -35,7 +36,7 @@ for (const [id, label, selector] of workbenches) {
   test(label + ' has the redesigned workspace and retains its controls', async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('#/' + id);
+    await openForgeRoute(page, id);
     const workspace = page.locator(selector);
     await expect(workspace).toBeVisible();
     await expect(page.locator('.forge-collection-shell')).toBeVisible();
@@ -62,7 +63,7 @@ for (const [id, label, selector] of workbenches) {
 }
 
 test('approved Logo Resizer V5 retains its own styling and processing UI', async ({ page }, testInfo) => {
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   await expect(page.locator('.forge-v5-shell')).toBeVisible();
   await expect(page.locator('.forge-collection-shell')).toHaveCount(0);
   await expect(page.getByRole('region', { name: 'Logo Resizer' })).toBeVisible();
