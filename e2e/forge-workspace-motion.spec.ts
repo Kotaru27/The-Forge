@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 const panelMap = [
   ['logo-resizer', '.logo-gallery'],
@@ -12,7 +13,7 @@ const panelMap = [
 
 test('Home card opens a tool with one nonblocking paper FLIP instead of retyping the UI', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1536, height: 900 });
-  await page.goto('#/home');
+  await openForgeRoute(page, 'home');
   await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
   await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
 
@@ -46,7 +47,7 @@ test('Home card opens a tool with one nonblocking paper FLIP instead of retyping
 });
 
 test('normal sidebar tool switching is immediate and never mounts a Home-card clone', async ({ page }) => {
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
   await expect(page.getByRole('button', { name: 'Add Assets' })).toBeVisible();
   await page.getByRole('button', { name: 'Video Stills', exact: true }).click();
   await expect(page).toHaveURL(/#\/video-stills$/);
@@ -64,7 +65,7 @@ test('all seven tool workrooms are parallax-free and retain native smooth scroll
   page.on('pageerror', error => errors.push(error.message));
 
   for (const [route, selector] of panelMap) {
-    await page.goto('#/' + route);
+    await openForgeRoute(page, route);
     const panel = page.locator('.native-tool:not([hidden]) ' + selector).first();
     await expect(panel).toBeVisible();
     await expect(panel).toHaveCSS('scroll-behavior', 'smooth');
@@ -75,7 +76,7 @@ test('all seven tool workrooms are parallax-free and retain native smooth scroll
 });
 
 test('native scrolling responds without moving or overlaying tool content', async ({ page }) => {
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   const panel = page.locator('.logo-gallery');
   await expect(panel).toHaveCSS('overflow-y', 'auto');
   await panel.evaluate(el => {
@@ -95,7 +96,7 @@ test('native scrolling responds without moving or overlaying tool content', asyn
 
 test('reduced-motion preference disables FLIP and scroll animation without changing navigation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('#/home');
+  await openForgeRoute(page, 'home');
   await page.getByRole('button', { name: 'Open PDF to Image' }).click();
   await expect(page).toHaveURL(/#\/pdf-to-image$/);
   await expect(page.locator('[data-motion="tool-card-to-workspace"]')).toHaveCount(0);
