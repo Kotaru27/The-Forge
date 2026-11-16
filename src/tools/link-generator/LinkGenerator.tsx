@@ -135,15 +135,9 @@ export function LinkGenerator() {
         </div>
       </section>
 
-      <section className="link-panel link-review-panel link-outputs" aria-label="Filename sequence and generated links">
-        {/* Output controls remain visible; redundant “Review & generate” heading removed. */}
+      <section className="link-panel link-review-panel link-outputs" aria-label="Generated links">
+        {/* The editable filename list is the single source of truth. */}
         <div className="link-panel-body">
-          <div className="link-subheading link-preview-heading"><h3>{"Filename order"}</h3><span>{listMode === 'manual' ? 'CURRENT LIST ORDER' : 'NATURAL A–Z'}</span></div>
-          <div className="link-filename-preview" aria-label="Current filename sequence">
-            {names.length === 0 ? <p className="link-preview-empty">{"Selected filenames will appear here in sequence."}</p> : (
-              <ol>{names.slice(0, 80).map((name, index) => <li key={index} style={{ animationDelay: String(Math.min(index, 12) * 18) + 'ms' }}><span className="link-preview-index">{String(index + 1).padStart(2, '0')}</span><span className="link-preview-name" title={name}>{name}</span><span className="link-preview-ext">{name.match(/\.([a-z0-9]+)$/i)?.[1]?.toUpperCase() || 'FILE'}</span></li>)}{names.length > 80 && <li className="link-preview-more">+{names.length - 80} more files in the editable list</li>}</ol>
-            )}
-          </div>
           <div className="link-outputs-header"><h3>{"Generated outputs"}</h3><span>{output.exposure || output.storyboard ? 'READY TO COPY' : 'AWAITING INPUT'}</span></div>
           <div className="link-output-block"><div className="output-heading"><label htmlFor="link-exposure">{"Ad Exposure"}</label><button type="button" onClick={() => void copy('exposure')} disabled={!output.exposure}>{copied === 'exposure' ? 'Copied' : 'Copy'}</button></div><textarea id="link-exposure" readOnly value={output.exposure} rows={8} placeholder="Generated URLs will appear here" /></div>
           <div className="link-output-block"><div className="output-heading"><label htmlFor="link-storyboard">{"Storyboard Code"}</label><button type="button" onClick={() => void copy('storyboard')} disabled={!output.storyboard}>{copied === 'storyboard' ? 'Copied' : 'Copy'}</button></div><textarea id="link-storyboard" readOnly value={output.storyboard} rows={8} placeholder="Generated HTML will appear here" /></div>

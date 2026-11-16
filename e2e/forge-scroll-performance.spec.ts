@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 const nativePanels = [
   ['logo-resizer', '.logo-gallery'],
@@ -16,7 +17,7 @@ test('every workroom scrolls natively without parallax layers or wheel intercept
   page.on('pageerror', error => errors.push(error.message));
 
   for (const [route, selector] of nativePanels) {
-    await page.goto('#/' + route);
+    await openForgeRoute(page, route);
     const tool = page.locator('.native-tool:not([hidden])');
     await expect(tool).toBeVisible();
     const panel = tool.locator(selector).first();
@@ -60,7 +61,7 @@ test('every workroom scrolls natively without parallax layers or wheel intercept
 
 test('sidebar expands within fixed rail and focus remains usable', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 850 });
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
   const rail = page.locator('.sketch-sidebar');
   await expect(rail).toBeVisible();
   await expect(rail).toHaveCSS('transition-property', 'width');
@@ -89,7 +90,7 @@ test('sidebar expands within fixed rail and focus remains usable', async ({ page
 
 test('sidebar opens smoothly without moving the workroom or losing hover', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 850 });
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   const sidebar = page.locator('.sketch-sidebar');
   const rail = page.locator('.sketch-sidebar-rail');
   const main = page.locator('.sketch-main-area');
@@ -118,7 +119,7 @@ test('sidebar opens smoothly without moving the workroom or losing hover', async
 
 test('populated workroom motion does not scale the whole tool surface', async ({ page }) => {
   await page.setViewportSize({ width: 1470, height: 880 });
-  await page.goto('#/home');
+  await openForgeRoute(page, 'home');
   await page.getByRole('button', { name: 'Open Logo Resizer' }).click();
   await expect(page.locator('.forge-app')).toHaveClass(/forge-tool-opening/);
   const workspace = page.locator('.native-tool:not([hidden])');
@@ -132,7 +133,7 @@ test('populated workroom motion does not scale the whole tool surface', async ({
 
 test('reduced motion preserves native scrolling but removes smooth programmatic transitions', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
   await expect(page.getByRole('button', { name: 'Add Assets' })).toBeVisible();
   await expect(page.locator('.sb-controls')).toHaveCSS('scroll-behavior', 'auto');
   await expect(page.locator('.forge-parallax-art, .forge-parallax-near, .forge-parallax-far')).toHaveCount(0);
@@ -140,7 +141,7 @@ test('reduced motion preserves native scrolling but removes smooth programmatic 
 
 test('sidebar quick-switch has header-only interruptible motion and does not scale workrooms', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 860 });
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   await page.evaluate(() => {
     const main = document.querySelector('.sketch-main-area')!;
     const globals = window as typeof window & { __routeCueCount?: number };
@@ -165,7 +166,7 @@ test('sidebar quick-switch has header-only interruptible motion and does not sca
 
 test('sidebar tool-switch cue is disabled for reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   await page.getByRole('button', { name: 'Storyboard', exact: true }).click();
   await expect(page).toHaveURL(/#\/storyboard$/);
   await expect(page.locator('.forge-route-pencil-stroke')).toHaveCount(0);
@@ -174,7 +175,7 @@ test('sidebar tool-switch cue is disabled for reduced motion', async ({ page }) 
 
 test('Home paper opening stays nonblocking when reopening a populated workroom', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 860 });
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   const sample = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABgAAAAMCAYAAAB4MH11AAAAHUlEQVR4nGP8z8Dwn4GGgImWho9aMGrBqAXDxQIARZACFmekxckAAAAASUVORK5CYII=', 'base64');
   await page.locator('.logo-workspace input[type="file"]').setInputFiles(
     Array.from({ length: 24 }, (_, i) => ({

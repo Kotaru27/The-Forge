@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import JSZip from 'jszip';
@@ -31,7 +32,7 @@ async function assertStoryboardOpened(page: import('@playwright/test').Page) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('#/video-stills');
+  await openForgeRoute(page, 'video-stills');
   await expect(page.getByRole('heading', { name: 'Video Stills' })).toBeVisible();
 });
 

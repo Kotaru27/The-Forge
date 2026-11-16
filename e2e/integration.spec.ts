@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 const released = [
   ['logo-resizer', 'Logo Resizer'],
@@ -21,7 +22,7 @@ test('seven native tools and Home navigate without loading the legacy compressor
   page.on('request', request => {
     if (/\/(?:legacy|compressor)\//.test(new URL(request.url()).pathname)) legacyRequests.push(request.url());
   });
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   await expect(nav(page).getByRole('button')).toHaveCount(8);
   await expect(nav(page).getByRole('button', { name: 'Video Compressor' })).toHaveCount(0);
 
@@ -35,8 +36,8 @@ test('seven native tools and Home navigate without loading the legacy compressor
   expect(legacyRequests).toEqual([]);
 });
 
-test('direct Storyboard links work and compressor/invalid links open Home', async ({ page }) => {
-  await page.goto('#/storyboard');
+test('Storyboard in-app routing works and compressor/invalid links open Home', async ({ page }) => {
+  await openForgeRoute(page, 'storyboard');
   await expect(page.getByRole('heading', { name: 'Storyboard', level: 1 })).toBeVisible();
   await expect(nav(page).getByRole('button', { name: 'Storyboard' })).toHaveAttribute('aria-current', 'page');
   await page.evaluate(() => { window.location.hash = '#/video-compressor'; });
@@ -45,6 +46,8 @@ test('direct Storyboard links work and compressor/invalid links open Home', asyn
   await page.evaluate(() => { window.location.hash = '#/not-a-tool'; });
   await expect(page).toHaveURL(/#\/home$/);
   await page.reload();
+  await expect(page.getByRole('dialog', { name: 'The Forge opening pencil sketch' })).toBeVisible();
+  await page.getByRole('button', { name: /Skip intro/ }).click();
   // CTK's full-width Home intentionally replaces the tool rail with seven
   // actionable workbench cards. Verify the rail returns upon opening a tool.
   await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
@@ -57,7 +60,7 @@ test('direct Storyboard links work and compressor/invalid links open Home', asyn
 });
 
 test('Link Generator keeps entered data and output when switching to another tool', async ({ page }) => {
-  await page.goto('#/link-generator');
+  await openForgeRoute(page, 'link-generator');
   await page.getByLabel('Folder / Path').fill('Campaign/Launch');
   await page.getByLabel('Filenames').fill('first.jpg\nsecond.mp4');
   await page.getByLabel('Server').selectOption('s3');
@@ -76,7 +79,7 @@ test('Link Generator keeps entered data and output when switching to another too
 });
 
 test('Image Splitter retains uploaded assets and settings across navigation', async ({ page }) => {
-  await page.goto('#/image-splitter');
+  await openForgeRoute(page, 'image-splitter');
   const encoded = await page.evaluate(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 9;
@@ -101,7 +104,7 @@ test('Image Splitter retains uploaded assets and settings across navigation', as
 });
 
 test('preview serves the same /The-Forge/ asset paths GitHub Pages uses', async ({ page, request }) => {
-  await page.goto('#/link-generator');
+  await openForgeRoute(page, 'link-generator');
   await expect(page.getByRole('heading', { name: 'Link Generator', level: 1 })).toBeVisible();
   expect(new URL(page.url()).pathname).toBe('/The-Forge/');
   const modulePath = await page.locator('script[type="module"][src]').first().getAttribute('src');

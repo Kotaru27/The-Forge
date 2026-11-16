@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 /** Screenshot regression: Home cards and their descriptions must stay in their own rows. */
 test('Ink & Paper Home has no overlapping or clipped cards on narrow and short screens', async ({ page }, testInfo) => {
-  await page.goto('#/home');
+  await openForgeRoute(page, 'home');
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
 
   const sizes = [
@@ -80,7 +81,7 @@ test('Ink & Paper Home has no overlapping or clipped cards on narrow and short s
 });
 
 test('filtered Home cards remain usable in narrow viewports', async ({page}) => {
-  await page.goto('#/home');
+  await openForgeRoute(page, 'home');
   for (const width of [1024, 640, 390]) {
     await page.setViewportSize({width, height: 700});
     const input = page.getByRole('searchbox', {name: 'Find a Forge tool'});
@@ -103,7 +104,7 @@ test('filtered Home cards remain usable in narrow viewports', async ({page}) => 
 
 test('Home scrolls natively with no handwriting or looping illustration work', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 600 });
-  await page.goto('#/home');
+  await openForgeRoute(page, 'home');
   const home = page.locator('.sketch-home');
   const detail = page.locator('.sketch-card-art .pencil-ongoing-illustration-detail').first();
   await expect(detail).toHaveCSS('animation-name', 'none');

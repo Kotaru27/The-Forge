@@ -37,25 +37,23 @@ const StableAdDownloader = memo(AdDownloader);
 type Route = ToolId | 'home';
 type IntroPhase = 'pending' | 'handoff' | 'finishing' | 'settled';
 
-// First root visit sketches once per tab; deep links are never delayed.
-const INTRO_SESSION_KEY = 'forge-pencil-intro-played-v2';
+// Every document load starts at Home with a fresh pencil intro. Neither
+// refreshes nor bookmarked tool hashes bypass it; same-document tool
+// navigation still uses the hash without replaying the intro.
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 function initialIntroPhase(): IntroPhase {
-  if (window.location.hash || reducedMotion()) return 'settled';
-  try { return sessionStorage.getItem(INTRO_SESSION_KEY) ? 'settled' : 'pending'; }
-  catch { return 'pending'; }
+  return reducedMotion() ? 'settled' : 'pending';
 }
-
-function initialTool(): Route {
+function routeFromHash(): Route {
   const saved = window.location.hash.replace(/^#\/?/, '');
   return saved === 'home' ? 'home' : isToolId(saved) ? saved : 'home';
 }
 
 export default function App() {
-  const [activeTool, setActiveTool] = useState<Route>(initialTool);
+  const [activeTool, setActiveTool] = useState<Route>('home');
   const storyboardRef = useRef<StoryboardRef>(null);
   const mainRef = useRef<HTMLElement>(null);
-  const routeRef = useRef<Route>(initialTool());
+  const routeRef = useRef<Route>('home');
   const openingSequence = useRef(0);
   const switchSequence = useRef(0);
   const [switching, setSwitching] = useState<{ id: number; tool: ToolId } | null>(null);
@@ -65,13 +63,11 @@ export default function App() {
   const [introPhase, setIntroPhase] = useState<IntroPhase>(initialIntroPhase);
   const [introRun, setIntroRun] = useState(0);
   const finishIntro = useCallback(() => {
-    try { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); } catch { /* Storage is optional. */ }
-    // Only a completed handoff may finish writing. Skip and direct routes
-    // always show the fully drawn interface without animation.
+    // Only the completed intro handoff triggers Home's final handwriting.
+    // Skip and in-app route navigation settle Home immediately.
     setIntroPhase(phase => phase === 'handoff' ? 'finishing' : 'settled');
   }, []);
   const skipIntro = useCallback(() => {
-    try { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); } catch { /* Storage is optional. */ }
     setIntroPhase('settled');
   }, []);
   const handoffIntro = useCallback(() => setIntroPhase('handoff'), []);
@@ -131,8 +127,10 @@ export default function App() {
   }, [opening]);
 
   useEffect(() => {
-    openTool(initialTool());
-    function onHashChange() { openTool(initialTool()); }
+    // A fresh browser document always enters Home, even if the URL came
+    // from a bookmarked tool or a reload while working in a tool.
+    openTool('home');
+    function onHashChange() { openTool(routeFromHash()); }
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, [openTool]);

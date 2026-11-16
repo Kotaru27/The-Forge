@@ -40,7 +40,13 @@ try {
   // Newly published Pages content can take a short time to reach the CDN.
   for (let attempt = 1; attempt <= 5; attempt++) {
     try {
+      // A fresh document (including a bookmarked tool URL) must start at Home
+      // with the pencil intro. Skip it before verifying the seven tool routes.
       await page.goto(new URL('#/logo-resizer', site).href, { waitUntil: 'domcontentloaded', timeout: 25_000 });
+      await expect(page).toHaveURL(/#\/home$/);
+      await expect(page.getByRole('dialog', { name: 'The Forge opening pencil sketch' })).toBeVisible();
+      await page.getByRole('button', { name: /Skip intro/ }).click();
+      await page.getByRole('button', { name: 'Open Logo Resizer' }).click();
       await expect(page.getByRole('navigation', { name: 'Select a tool' }).getByRole('button')).toHaveCount(8, { timeout: 10_000 });
       ready = true;
       break;

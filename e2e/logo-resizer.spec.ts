@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import JSZip from 'jszip';
 import { readFile } from 'node:fs/promises';
 
@@ -33,7 +34,7 @@ async function addFiles(page: import('@playwright/test').Page, files: { name: st
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   await expect(page.getByRole('region', { name: 'Logo Resizer' })).toBeVisible();
 });
 

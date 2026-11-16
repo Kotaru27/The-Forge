@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import JSZip from 'jszip';
 import { createPdf } from './helpers/pdf-fixture';
 import { readFile } from 'node:fs/promises';
@@ -10,7 +11,7 @@ const redSvg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="36" h
 const relNs = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
 
 async function uploadLogoOffice(page: import('@playwright/test').Page, name: string, mimeType: string, bytes: Buffer) {
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   await expect(page.getByRole('region', { name: 'Logo Resizer' })).toBeVisible();
   await page.locator('.logo-workspace input[type="file"]').setInputFiles({ name, mimeType, buffer: bytes });
   // Import begins immediately; output size is selected afterwards in the header.
@@ -87,7 +88,7 @@ test('XLSM unanchored media is deduplicated by bytes, including SVG assets', asy
 });
 
 test('rotated PDF page still exports 2x resolution in rotated orientation', async ({ page }) => {
-  await page.goto('#/pdf-to-image');
+  await openForgeRoute(page, 'pdf-to-image');
   await page.getByLabel('Upload PDF files').setInputFiles({
     name: 'rotated.pdf', mimeType: 'application/pdf', buffer: rotatedVectorPdf(),
   });
@@ -102,7 +103,7 @@ test('rotated PDF page still exports 2x resolution in rotated orientation', asyn
 });
 
 test('PDF with massive page dimensions fails without allocating an enormous canvas', async ({ page }) => {
-  await page.goto('#/pdf-to-image');
+  await openForgeRoute(page, 'pdf-to-image');
   await page.getByLabel('Upload PDF files').setInputFiles({
     name: 'oversized-page.pdf',
     mimeType: 'application/pdf',

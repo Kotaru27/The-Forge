@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 const workrooms = [
   ['logo-resizer', '.logo-workspace'],
@@ -13,7 +14,7 @@ const workrooms = [
 test('Ink & Paper Home artwork, seven cards and tool finder remain interactive', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('./');
+  await openForgeRoute(page, 'home');
 
   await expect(page.locator('.sketch-notebook-frame')).toHaveCSS('background-color', 'rgb(243, 236, 221)');
   await expect(page.locator('.forge-sketch-ui')).toHaveCSS('color', 'rgb(31, 35, 40)');
@@ -41,7 +42,7 @@ for (const [tool, selector] of workrooms) {
   test('Ink & Paper workroom shell: ' + tool, async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto('#/' + tool);
+    await openForgeRoute(page, tool);
     await expect(page.locator('.forge-ctk-ui')).toBeVisible();
     await expect(page.locator('.topbar.sketch-topbar')).toHaveCSS('background-color', 'rgba(244, 236, 220, 0.72)');
     await expect(page.locator('.forge-ctk-tool-name')).toBeVisible();
@@ -56,7 +57,7 @@ for (const [tool, selector] of workrooms) {
 test('Every Ink & Paper workroom uses accessible illustrated navigation and centered header', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   for (const [tool] of workrooms) {
-    await page.goto('#/' + tool);
+    await openForgeRoute(page, tool);
     const sidebar = page.locator('.sidebar');
     const nav = page.getByRole('navigation', { name: 'Select a tool' });
     const selected = nav.locator('.sketch-subtool-link[aria-current="page"]');
@@ -79,7 +80,7 @@ test('Every Ink & Paper workroom uses accessible illustrated navigation and cent
 });
 
 test('Ink & Paper Logo Resizer keeps input actions and accessible control contrast', async ({ page }) => {
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   await expect(page.locator('.logo-empty .forge-v5-drop-icon svg')).toHaveCount(1);
   await expect(page.locator('.logo-empty .forge-v5-drop-icon svg')).toHaveCSS('color','rgb(31, 35, 40)');
   await expect(page.getByRole('button', { name: /Choose files/ })).toHaveCount(0);
@@ -92,7 +93,7 @@ test('Ink & Paper Logo Resizer keeps input actions and accessible control contra
 });
 
 test('Ink & Paper Image Splitter drop zone retains contrast and action', async ({ page }) => {
-  await page.goto('#/image-splitter');
+  await openForgeRoute(page, 'image-splitter');
   await expect(page.locator('.split-drop')).toHaveCSS('background-color','rgba(247, 241, 227, 0.85)');
   await expect(page.locator('.split-drop > span')).toHaveCSS('color','rgb(47, 69, 98)');
   await expect(page.getByRole('button',{name:'Add Images'})).toHaveCSS('background-color','rgb(248, 241, 226)');
@@ -101,7 +102,7 @@ test('Ink & Paper Image Splitter drop zone retains contrast and action', async (
 
 test('Ink & Paper sidebar never scrolls sideways while all eight destinations remain reachable', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   const nav = page.getByRole('navigation', { name: 'Select a tool' });
   await expect(nav.getByRole('button')).toHaveCount(8);
   await expect(nav).toHaveCSS('overflow-x', 'hidden');

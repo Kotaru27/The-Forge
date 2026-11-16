@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 test('Link Generator hides the redundant review title without losing outputs', async ({ page }) => {
-  await page.goto('#/link-generator');
+  await openForgeRoute(page, 'link-generator');
   await expect(page.getByText('Review & generate', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Filename order' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Filename order' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Generated outputs' })).toBeVisible();
 
   await page.getByLabel('Folder / Path').fill('Campaign');
@@ -15,7 +16,7 @@ test('Link Generator hides the redundant review title without losing outputs', a
 
 test('Storyboard places Board Name next to Add Assets and hides advanced UI only', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
 
   const toolbar = page.locator('.sb-toolbar');
   const addAssets = toolbar.getByRole('button', { name: 'Add Assets' });
@@ -44,7 +45,7 @@ test('Storyboard places Board Name next to Add Assets and hides advanced UI only
 });
 
 test('Fit to Platform hides typography controls while retaining upload and statement', async ({ page }) => {
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
   await page.getByRole('tab', { name: 'Fit to Platform' }).click();
   await expect(page.getByText('Image and typography', { exact: true })).toBeHidden();
   await expect(page.locator('select[aria-label="Fit image mode"]')).toBeHidden();
@@ -65,7 +66,7 @@ test('Ink & Paper secondary text is dark and legible in all seven workspaces', a
   ] as const;
 
   for (const [route, selector] of samples) {
-    await page.goto('#/' + route);
+    await openForgeRoute(page, route);
     const target = page.locator(selector).first();
     await expect(target, route).toBeVisible();
     const actual = await target.evaluate(el => {
@@ -81,12 +82,12 @@ test('Ink & Paper secondary text is dark and legible in all seven workspaces', a
     expect(actual.fontFamily, route).toContain('Kalam');
   }
 
-  await page.goto('#/ad-downloader');
+  await openForgeRoute(page, 'ad-downloader');
   await expect(page.locator('.adw-empty span').first()).toHaveCSS('color', 'rgb(47, 69, 98)');
 });
 
 test('graphite lines and lettering draw in place, with reduced-motion fallback', async ({page}) => {
-  await page.goto('#/home');
+  await openForgeRoute(page, 'home');
   const pencilPath = page.locator('.sketch-card-border-svg [data-pencil-trace]').first();
   const title = page.locator('.sketch-hero-center h1');
   await expect(pencilPath).toHaveAttribute('pathLength','1');
@@ -107,6 +108,6 @@ test('graphite lines and lettering draw in place, with reduced-motion fallback',
   await expect(title).toHaveCSS('animation-name','none');
   await expect(ongoing).toHaveCSS('animation-name','none');
 
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
   await expect(page.getByRole('button', {name:'Add Assets'})).toBeVisible();
 });

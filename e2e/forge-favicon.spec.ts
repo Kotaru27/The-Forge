@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 test('The Forge browser tab displays its dedicated sketched F/anvil icon on every route', async ({ page }) => {
   for (const route of ['home', 'logo-resizer', 'storyboard']) {
-    await page.goto('#/' + route);
+    await openForgeRoute(page, route);
     await expect(page).toHaveTitle('The Forge');
     const favicon = page.locator('head link[rel="icon"]');
     await expect(favicon).toHaveAttribute('type', 'image/png');

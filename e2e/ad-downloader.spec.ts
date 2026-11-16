@@ -1,4 +1,5 @@
 import {test,expect,type Page} from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import {readFile} from 'node:fs/promises';
@@ -29,7 +30,7 @@ async function folder(page:Page) {
 }
 test.beforeEach(async ({page})=>{
   await folder(page);
-  await page.goto('#/ad-downloader');
+  await openForgeRoute(page, 'ad-downloader');
   await expect(app(page)).toBeVisible();
 });
 test('Excel cannot be uploaded before selecting an approved folder',async({page})=>{
@@ -151,6 +152,9 @@ test('SharePoint action menu stays inside the scrollable table near top and bott
     const summary=row.locator('details summary');
     await summary.scrollIntoViewIfNeeded();
     await summary.click();
+    // details.onToggle sets the menu direction asynchronously. Read geometry
+    // only after that placement decision has completed (no weaker bounds).
+    await expect(row.locator('details')).toHaveAttribute('data-menu-direction', /^(above|below)$/);
     const rects=await row.locator('.adw-more').evaluate(menu=>{
       const bounds=menu.getBoundingClientRect();
       const view=menu.closest('.adw-table-wrap')!.getBoundingClientRect();

@@ -111,8 +111,11 @@ test('uploaded pencil drawing completes and continues into the actual seven-card
 
   await page.screenshot({ path: testInfo.outputPath('intro-home-finished.png') });
 
-  // A direct second visit to root in this tab does not replay the animation.
+  // A second document load must replay the intro even within this tab.
   await page.goto('./');
+  await expect(intro).toBeVisible();
+  await expect(intro).toHaveAttribute('data-intro-stage', 'drawing');
+  await page.getByRole('button', { name: /Skip intro/ }).click();
   await expect(intro).toHaveCount(0);
 });
 
@@ -127,11 +130,12 @@ test('intro skip and user-triggered replay never change tool routing', async ({ 
   await page.getByRole('button', { name: /Replay pencil sketch intro/ }).click();
   await expect(intro).toBeVisible();
 
-  // Hash navigation remains available throughout; direct route bypasses intro.
+  // Same-document hash navigation remains available throughout and cancels
+  // the in-progress intro without replaying it on later Home visits.
   await page.evaluate(() => { window.location.hash = '#/logo-resizer'; });
   await expect(intro).toHaveCount(0);
   await expect(page.locator('.logo-workspace')).toBeVisible();
-  await page.goto('#/home');
+  await page.evaluate(() => { window.location.hash = '#/home'; });
   await expect(intro).toHaveCount(0);
   await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
   // Existing search matches card description text as well as tool names.
@@ -142,15 +146,61 @@ test('intro skip and user-triggered replay never change tool routing', async ({ 
   await expect(page).toHaveURL(/#\/ad-downloader$/);
 });
 
-test('deep links and reduced-motion preferences show settled Home without animation', async ({ page }) => {
-  await page.goto('#/home');
+test('a bookmarked tool URL always starts a new document with the Home intro', async ({ page }) => {
+  await page.goto('#/storyboard');
+  const intro = page.getByRole('dialog', { name: 'The Forge opening pencil sketch' });
+  await expect(page).toHaveURL(/#\/home$/);
+  await expect(intro).toBeVisible();
+  await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
+  await page.getByRole('button', { name: /Skip intro/ }).click();
+  await expect(intro).toHaveCount(0);
+  await page.evaluate(() => { window.location.hash = '#/storyboard'; });
+  await expect(page.getByRole('heading', { name: 'Storyboard', level: 1 })).toBeVisible();
+
+  // A browser refresh from the tool loses only the visible route and returns
+  // to Home with a newly drawn intro, not to the bookmarked tool.
+  await page.reload();
+  await expect(page).toHaveURL(/#\/home$/);
+  await expect(intro).toBeVisible();
+});
+
+test('refresh from every tool returns Home and restarts the pencil sketch', async ({ page }) => {
+  await page.goto('./');
+  const intro = page.getByRole('dialog', { name: 'The Forge opening pencil sketch' });
+  await expect(intro).toBeVisible();
+  await page.getByRole('button', { name: /Skip intro/ }).click();
+
+  for (const [route, title] of [
+    ['logo-resizer', 'Logo Resizer'],
+    ['image-splitter', 'Image Splitter'],
+    ['pdf-to-image', 'PDF to Image'],
+    ['video-stills', 'Video Stills'],
+    ['storyboard', 'Storyboard'],
+    ['link-generator', 'Link Generator'],
+    ['ad-downloader', 'Ad Downloader'],
+  ] as const) {
+    await page.evaluate(target => { window.location.hash = '#/' + target; }, route);
+    await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible();
+    await expect(intro).toHaveCount(0);
+    await page.reload();
+    await expect(page).toHaveURL(/#\/home$/);
+    await expect(intro).toBeVisible();
+    await expect(intro).toHaveAttribute('data-intro-stage', 'drawing');
+    await page.getByRole('button', { name: /Skip intro/ }).click();
+  }
+  await page.reload();
+  await expect(intro).toBeVisible();
+});
+
+test('reduced-motion preferences start at settled Home without replaying animation', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('#/video-stills');
+  await expect(page).toHaveURL(/#\/home$/);
   await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
   await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
   await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
-
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
+  await page.reload();
   await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
-  await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
+  await expect(page).toHaveURL(/#\/home$/);
 });
