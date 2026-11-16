@@ -4,7 +4,7 @@ import { openForgeRoute } from './helpers/forge-route';
 test('Link Generator hides the redundant review title without losing outputs', async ({ page }) => {
   await openForgeRoute(page, 'link-generator');
   await expect(page.getByText('Review & generate', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Filename order' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Filename order' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Generated outputs' })).toBeVisible();
 
   await page.getByLabel('Folder / Path').fill('Campaign');
