@@ -186,12 +186,13 @@ test('preview resizing animation is decorative and export canvas remains exact',
   await page.locator('.forge-v5-presets').getByRole('button', { name: '200 × 150' }).click();
   await expect(frames.first()).toHaveCSS('height', '150px');
   await expect(page.locator('.logo-card .logo-preview').first()).toHaveJSProperty('height', 150);
-  const details = await page.locator('.logo-card .logo-preview').first().evaluate(canvas => {
+  // Preview painting is queued asynchronously to avoid blocking wheel input.
+  // Assert the exact completed pixels, not an intermediate blank canvas.
+  await expect.poll(() => page.locator('.logo-card .logo-preview').first().evaluate(canvas => {
     const c = canvas as HTMLCanvasElement;
     const corner = c.getContext('2d')!.getImageData(199,149,1,1).data;
     return [c.width,c.height,corner[0],corner[1],corner[2]];
-  });
-  expect(details).toEqual([200,150,255,255,255]);
+  })).toEqual([200,150,255,255,255]);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(frames.first()).toHaveCSS('transition-duration','0s');
 });
@@ -326,23 +327,157 @@ test('reduced motion closes Focus Mode immediately', async ({ page }) => {
   await expect(page.locator('.logo-detail')).toHaveCount(0);
 });
 
-test('Focus Mode opens as an overlay without shrinking the populated gallery', async ({ page }) => {
+test('Focus Mode reserves a full-height lane and resizes both header and logo grid', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 860 });
   await addFiles(page, [sample, { ...sample, name: 'FocusSecond.png' }]);
   const gallery = page.locator('.logo-gallery');
+  const header = page.locator('.forge-v5-head');
   const before = await gallery.evaluate(el => el.getBoundingClientRect().width);
+  const beforeHeader = await header.evaluate(el => el.getBoundingClientRect().width);
   await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
   const focus = page.getByLabel('Focus Mode', { exact: true });
   await expect(focus).toBeVisible();
-  await expect(focus).toHaveCSS('position', 'absolute');
   await expect(focus).toHaveCSS('animation-name', 'forgeFocusEnter');
   const after = await gallery.evaluate(el => el.getBoundingClientRect().width);
-  expect(Math.abs(after - before)).toBeLessThanOrEqual(1);
+  const afterHeader = await header.evaluate(el => el.getBoundingClientRect().width);
+  expect(after).toBeLessThan(before - 250);
+  expect(afterHeader).toBeLessThan(beforeHeader - 250);
+  const layout = await page.evaluate(() => {
+    const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
+    const host = rect('.logo-workspace');
+    const drawer = rect('.logo-detail');
+    const galleryRect = rect('.logo-gallery');
+    const headerRect = rect('.forge-v5-head');
+    return {
+      topError: Math.abs(drawer.top - host.top),
+      bottomError: Math.abs(drawer.bottom - host.bottom),
+      overlap: Math.max(galleryRect.right, headerRect.right) - drawer.left,
+    };
+  });
+  expect(layout.topError).toBeLessThanOrEqual(2);
+  expect(layout.bottomError).toBeLessThanOrEqual(2);
+  expect(layout.overlap).toBeLessThanOrEqual(2);
   await focus.getByRole('button', { name: 'Next logo' }).click();
   await expect(focus.getByLabel('Filename')).toHaveValue(/FocusSecond|SampleLogo/);
   await focus.getByRole('button', { name: 'Close Focus Mode' }).click();
   await expect(focus).toHaveCount(0);
   expect(Math.abs((await gallery.evaluate(el => el.getBoundingClientRect().width)) - before)).toBeLessThanOrEqual(1);
+  expect(Math.abs((await header.evaluate(el => el.getBoundingClientRect().width)) - beforeHeader)).toBeLessThanOrEqual(1);
+});
+
+test('44-logo Focus Mode adapts row count, wraps all controls, and keeps inspector fully accessible', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1750, height: 870 });
+  await addFiles(page, Array.from({ length: 44 }, (_, index) => ({
+    ...sample, name: 'FocusBatch_' + String(index + 1).padStart(2, '0') + '.png',
+  })));
+  await expect(page.locator('.logo-card')).toHaveCount(44);
+  const firstRowCount = async () => page.locator('.logo-card').evaluateAll(cards => {
+    const firstTop = cards[0].getBoundingClientRect().top;
+    return cards.filter(el => Math.abs(el.getBoundingClientRect().top - firstTop) < 2).length;
+  });
+  const columnsBefore = await firstRowCount();
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
+  const focus = page.getByLabel('Focus Mode', { exact: true });
+  await expect(focus).toBeVisible();
+  expect(await firstRowCount()).toBeLessThan(columnsBefore);
+  for (const viewport of [
+    { width: 1750, height: 870 },
+    { width: 1440, height: 900 },
+    { width: 1200, height: 800 },
+    { width: 1024, height: 768 },
+    { width: 919, height: 413 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const geometry = await page.evaluate(() => {
+      const bounds = (selector: string) => document.querySelector<HTMLElement>(selector)!.getBoundingClientRect();
+      const host = bounds('.logo-workspace');
+      const header = document.querySelector<HTMLElement>('.forge-v5-head')!;
+      const gallery = document.querySelector<HTMLElement>('.logo-gallery')!;
+      const drawer = document.querySelector<HTMLElement>('.logo-detail')!;
+      const focus = drawer.getBoundingClientRect();
+      const galleryBounds = gallery.getBoundingClientRect();
+      const headBounds = header.getBoundingClientRect();
+      return {
+        headerOverflow: header.scrollWidth - header.clientWidth,
+        groupCount: document.querySelectorAll('.forge-v5-control-grid > .forge-v5-group').length,
+        drawerTopError: Math.abs(focus.top - host.top),
+        drawerBottomError: Math.abs(focus.bottom - host.bottom),
+        galleryOverlap: galleryBounds.right - focus.left,
+        headerOverlap: headBounds.right - focus.left,
+        galleryHeight: gallery.clientHeight,
+        drawerHeight: drawer.clientHeight,
+        drawerScrollRange: drawer.scrollHeight - drawer.clientHeight,
+        horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    expect(geometry.groupCount, 'all controls at ' + viewport.width).toBe(8);
+    expect(geometry.drawerTopError, 'full-height top at ' + viewport.width).toBeLessThanOrEqual(2);
+    expect(geometry.drawerBottomError, 'full-height bottom at ' + viewport.width).toBeLessThanOrEqual(2);
+    expect(geometry.galleryOverlap, 'no logo overlay at ' + viewport.width).toBeLessThanOrEqual(2);
+    expect(geometry.headerOverlap, 'no header overlay at ' + viewport.width).toBeLessThanOrEqual(2);
+    expect(geometry.galleryHeight, 'usable logo gallery at ' + viewport.width).toBeGreaterThan(75);
+    expect(geometry.headerOverflow, 'no header horizontal scroll at ' + viewport.width).toBeLessThanOrEqual(2);
+    expect(geometry.horizontalOverflow, 'no document overflow at ' + viewport.width).toBeLessThanOrEqual(2);
+    if (viewport.height < 500) expect(geometry.drawerScrollRange).toBeGreaterThan(50);
+    if (viewport.width === 1440 || viewport.width === 919) {
+      await page.screenshot({ path: testInfo.outputPath('logo-focus-' + viewport.width + '.png') });
+    }
+    if (viewport.width === 1440) {
+      // Measure genuine wheel input with the populated inspector open.
+      // Animation-frame timing is diagnostic: CI is not the user's laptop.
+      const gallery = page.locator('.logo-gallery');
+      await gallery.evaluate(el => { el.scrollTop = 0; });
+      await gallery.hover({ position: { x: 18, y: 90 } });
+      await gallery.evaluate(() => {
+        const global = window as Window & {
+          __focusWheel?: { active: boolean; times: number[] };
+        };
+        global.__focusWheel = { active: true, times: [] };
+        function tick(time: number) {
+          if (!global.__focusWheel?.active) return;
+          global.__focusWheel.times.push(time);
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+      for (let i = 0; i < 12; i++) {
+        await page.mouse.wheel(0, 440);
+        await page.waitForTimeout(24);
+      }
+      const scroll = await gallery.evaluate(el => {
+        const global = window as Window & {
+          __focusWheel?: { active: boolean; times: number[] };
+        };
+        const probe = global.__focusWheel!;
+        probe.active = false;
+        const gaps = probe.times.slice(1)
+          .map((t, index) => t - probe.times[index]).sort((a, b) => a - b);
+        return {
+          scrollTop: Math.round(el.scrollTop),
+          frameCount: probe.times.length,
+          p95GapMs: gaps[Math.floor(gaps.length * .95)] ?? null,
+          galleryTransform: getComputedStyle(el).transform,
+          headerTop: document.querySelector('.forge-v5-head')!.getBoundingClientRect().top,
+          inspectorTop: document.querySelector('.logo-detail')!.getBoundingClientRect().top,
+          hostTop: document.querySelector('.logo-workspace')!.getBoundingClientRect().top,
+        };
+      });
+      expect(scroll.scrollTop, 'real wheel scroll with Focus Mode open').toBeGreaterThan(350);
+      expect(scroll.frameCount).toBeGreaterThan(8);
+      expect(scroll.galleryTransform).toBe('none');
+      expect(Math.abs(scroll.inspectorTop - scroll.hostTop)).toBeLessThanOrEqual(2);
+      console.info('44-logo Focus Mode wheel profile (CI hardware only):', scroll);
+      await testInfo.attach('44-logo-focus-wheel.json', {
+        body: Buffer.from(JSON.stringify(scroll, null, 2)),
+        contentType: 'application/json',
+      });
+    }
+  }
+  await focus.evaluate(el => { el.scrollTop = el.scrollHeight; });
+  await expect(focus.getByRole('button', { name: 'Save image' })).toBeInViewport();
+  await expect(focus.getByRole('button', { name: 'Delete' })).toBeInViewport();
+  await focus.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(focus).toHaveCount(0);
 });
 
 

@@ -485,7 +485,7 @@ export const Storyboard = forwardRef<StoryboardRef>(function Storyboard(_props, 
             </div></details>
             <div className="sb-section-head"><strong>{"Added Assets"} ({active?.images.length || 0})</strong></div>
             <div className="sb-asset-list">{active?.images.map((frame, i) => <div className="sb-frame" key={frame.id}>
-              <img src={frame.url || (frame.image as HTMLImageElement).src} alt="" />
+              <img src={frame.url || (frame.image as HTMLImageElement).src} alt="" loading="lazy" decoding="async" />
               <span title={frame.name}>{String(i+1).padStart(2,'0')} · {frame.name}</span>
               <button type="button" aria-label={'Move up ' + frame.name} disabled={i === 0} onClick={() => moveFrame(i,-1)}>↑</button>
               <button type="button" aria-label={'Move down ' + frame.name} disabled={i === active.images.length - 1} onClick={() => moveFrame(i,1)}>↓</button>

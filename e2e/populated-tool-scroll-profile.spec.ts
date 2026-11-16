@@ -50,6 +50,31 @@ async function wheelProfile(page: Page, selector: string) {
     requestAnimationFrame(tick);
     return { startTop, maxScroll: el.scrollHeight - el.clientHeight };
   });
+  // Query geometry only on an invalid scroll surface; expensive inspection
+  // must not contaminate the animation-frame timing of successful samples.
+  if (start.maxScroll <= 100) {
+    const chain = await panel.evaluate(el => {
+      const output = [];
+      for (let node: HTMLElement | null = el as HTMLElement; node; node = node.parentElement) {
+        const style = getComputedStyle(node);
+        output.push({
+          className: node.className,
+          clientHeight: node.clientHeight,
+          scrollHeight: node.scrollHeight,
+          clientWidth: node.clientWidth,
+          scrollWidth: node.scrollWidth,
+          overflowY: style.overflowY,
+          gridColumns: style.gridTemplateColumns.slice(0, 220),
+          firstCardHeight: node.querySelector('.split-card')?.getBoundingClientRect().height,
+        });
+        if (node.classList.contains('native-tool')) break;
+      }
+      return output;
+    });
+    console.info('Missing populated scroll surface:', selector, JSON.stringify(chain));
+  }
+  expect(start.maxScroll, selector + ': populated target must actually scroll')
+    .toBeGreaterThan(100);
   // Do not dispatch synthetic DOM wheel events: use real Playwright browser input.
   for (let i = 0; i < 16; i++) {
     await page.mouse.wheel(0, 340);
@@ -103,10 +128,14 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
   report.storyboard = await wheelProfile(page, '.sb-asset-list');
 
   await page.goto('#/image-splitter');
-  await page.getByLabel('Upload images').setInputFiles(Array.from({ length: 14 }, (_, i) => ({
+  await page.getByLabel('Upload images').setInputFiles(Array.from({ length: 24 }, (_, i) => ({
     name: 'Split_' + i + '.png', mimeType: 'image/png', buffer: frame,
   })));
-  await expect(page.locator('.split-card')).toHaveCount(14);
+  await expect(page.locator('.split-card')).toHaveCount(24);
+  const firstSplitCardHeight = await page.locator('.split-card').first()
+    .evaluate(el => Math.round(el.getBoundingClientRect().height));
+  expect(firstSplitCardHeight, 'Image Splitter previews must not collapse inside the grid')
+    .toBeGreaterThan(300);
   report['image-splitter'] = await wheelProfile(page, '.split-card-grid');
 
   await page.goto('#/pdf-to-image');
@@ -116,13 +145,17 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
   await expect(page.locator('.pdf-doc-card')).toHaveCount(18, { timeout: 60000 });
   report['pdf-to-image'] = await wheelProfile(page, '.pdf-list');
 
+  // Video Stills owns a scrollable collection grid, not the outer workspace.
+  // A shorter laptop viewport makes six populated collections scroll naturally.
+  await page.setViewportSize({ width: 820, height: 560 });
   await page.goto('#/video-stills');
   const video = await readFile(path.resolve('e2e/fixtures/stills.webm'));
-  await page.getByLabel('Choose video files').setInputFiles(Array.from({ length: 3 }, (_, i) => ({
+  await page.getByLabel('Choose video files').setInputFiles(Array.from({ length: 6 }, (_, i) => ({
     name: 'Clip_' + i + '.webm', mimeType: 'video/webm', buffer: video,
   })));
-  await expect(page.getByRole('button', { name: /Inspect stills from/ })).toHaveCount(3, { timeout: 60000 });
-  report['video-stills'] = await wheelProfile(page, '.video-stills');
+  await expect(page.locator('.vs-stack')).toHaveCount(6, { timeout: 60000 });
+  report['video-stills'] = await wheelProfile(page, '.vs-stacks');
+  await page.setViewportSize({ width: 1440, height: 860 });
 
   await page.goto('#/link-generator');
   await page.getByLabel('Filenames').fill(

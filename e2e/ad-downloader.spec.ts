@@ -125,3 +125,45 @@ test('Ink & Paper queue places completed downloads after ready rows with readabl
   expect(order[2]).toContain('AD1_Photo');
   await expect(prepared.getByRole('button',{name:'Download again'})).toBeVisible();
 });
+
+
+test('SharePoint action menu stays inside the scrollable table near top and bottom',async({page})=>{
+  await page.setViewportSize({width:1100,height:700});
+  const workbook=XLSX.utils.book_new();
+  const sheet=XLSX.utils.aoa_to_sheet([
+    ['Ad No','URL','Type'],
+    ...Array.from({length:28},(_,index)=>[index+1,'Clip '+(index+1),'TVC']),
+  ]);
+  for(let index=0;index<28;index++) {
+    sheet['B'+(index+2)].l={Target:'https://tenant.sharepoint.com/sites/Team/Shared%20Documents/Video'+index+'.mp4'};
+  }
+  XLSX.utils.book_append_sheet(workbook,sheet,'Campaign');
+  await app(page).getByRole('button',{name:'Choose Auto-name folder'}).click();
+  await app(page).getByLabel('Upload Excel workbook').setInputFiles({
+    name:'sharepoint-batch.xlsx',
+    mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    buffer:Buffer.from(XLSX.write(workbook,{type:'buffer',bookType:'xlsx'})),
+  });
+  const rows=app(page).locator('.adw-table tbody tr[data-stage="ready"]');
+  await expect(rows).toHaveCount(28);
+  const wrap=app(page).locator('.adw-table-wrap');
+  const menuFits=async(row:ReturnType<typeof rows.first>)=>{
+    const summary=row.locator('details summary');
+    await summary.scrollIntoViewIfNeeded();
+    await summary.click();
+    const rects=await row.locator('.adw-more').evaluate(menu=>{
+      const bounds=menu.getBoundingClientRect();
+      const view=menu.closest('.adw-table-wrap')!.getBoundingClientRect();
+      return {top:bounds.top,bottom:bounds.bottom,left:bounds.left,right:bounds.right,
+        clipTop:view.top,clipBottom:view.bottom,clipLeft:view.left,clipRight:view.right};
+    });
+    expect(rects.top,'menu must not hide above the table').toBeGreaterThanOrEqual(rects.clipTop-1);
+    expect(rects.bottom,'menu must not hide below the table').toBeLessThanOrEqual(rects.clipBottom+1);
+    expect(rects.left,'menu must not hide to the left').toBeGreaterThanOrEqual(rects.clipLeft-1);
+    expect(rects.right,'menu must not hide to the right').toBeLessThanOrEqual(rects.clipRight+1);
+  };
+  expect(await wrap.evaluate(el=>el.scrollHeight-el.clientHeight)).toBeGreaterThan(300);
+  await menuFits(rows.first());
+  await rows.first().locator('details summary').click();
+  await menuFits(rows.last());
+});

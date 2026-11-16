@@ -311,20 +311,107 @@
  .forge-logo-v5 .logo-preview-frame,.forge-logo-v5 button{transition:none!important}
 }
 
-/* Focus Mode overlays the gallery rather than taking a flex column and
- * reflowing every thumbnail whenever it opens. Preserve right-side editing
- * and keyboard navigation with a short compositor-only entrance. */
-.forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-body {
+/* Focus Mode reserves a genuine full-height right lane. This single
+ * padding change gives the header and existing native-scrolling gallery the
+ * same remaining width, so 44+ cards reflow once without an overlay or
+ * scroll-linked resize animation. The inspector remains mounted on exit. */
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open {
+  --forge-focus-width: clamp(285px, 29%, 390px);
   position: relative;
+  padding-right: var(--forge-focus-width);
+  min-width: 0;
+  overflow: hidden;
 }
-.forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-detail {
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-body {
+  position: static;
+  min-height: 0;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-gallery {
+  min-width: 0;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail {
   position: absolute;
   inset: 0 0 0 auto;
-  width: min(390px, 36vw);
+  width: var(--forge-focus-width);
   min-width: 0;
   height: 100%;
+  max-height: 100%;
   flex: none;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
   animation: forgeFocusEnter .19s cubic-bezier(.22, .8, .2, 1) both;
+}
+
+/* Header wrapping responds to its ACTUAL width after the inspector opens;
+ * viewport-only breakpoints cannot account for an adjacent focus lane.
+ * All eight original groups and their workflows remain in the same order. */
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .forge-v5-head {
+  container: forge-focus-header / inline-size;
+  max-height: min(260px, 43dvh);
+  min-height: 0;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  padding: 9px 13px 7px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .forge-v5-control-grid {
+  min-width: 0 !important;
+  gap: 8px 10px !important;
+}
+@container forge-focus-header (max-width: 1180px) {
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .forge-v5-control-grid {
+    grid-template-columns: 125px 140px 86px 82px minmax(170px, 1fr) 145px !important;
+    grid-template-areas:
+      "import presets custom format typography typography"
+      "options options position position position export" !important;
+  }
+}
+@container forge-focus-header (max-width: 820px) {
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .forge-v5-control-grid {
+    grid-template-columns: 125px 140px minmax(120px, 1fr) 145px !important;
+    grid-template-areas:
+      "import presets typography typography"
+      "custom format options export"
+      "position position position position" !important;
+  }
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .forge-v5-sliders {
+    max-width: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+@container forge-focus-header (max-width: 610px) {
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .forge-v5-control-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "import presets"
+      "custom format"
+      "typography typography"
+      "options options"
+      "position position"
+      "export export" !important;
+  }
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .forge-v5-type-controls {
+    flex-wrap: wrap;
+  }
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .forge-v5-sliders label {
+    flex: 1 1 180px;
+    max-width: none;
+  }
+}
+/* Under 700px there is insufficient space for a 285px inspector AND a
+ * legible asset card. Keep the inspector full height and accessible; its
+ * narrow-screen presentation intentionally overlays the mobile workboard. */
+@media (max-width: 700px) {
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open {
+    padding-right: 0;
+  }
+  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail {
+    width: min(390px, 100%);
+  }
 }
 @keyframes forgeFocusEnter {
   from { opacity: .8; transform: translate3d(22px, 0, 0); }
@@ -339,11 +426,6 @@
 @keyframes forgeFocusExit {
   from { opacity: 1; transform: translate3d(0, 0, 0); }
   to { opacity: 0; transform: translate3d(22px, 0, 0); }
-}
-@media (max-width: 960px) {
-  .forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-detail {
-    width: min(390px, 90%);
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .forge-ctk-ui.forge-sketch-ui .forge-logo-v5 .logo-detail {

@@ -220,7 +220,23 @@ export function AdDownloader() {
             <td><div className="adw-row-actions">
               <button type="button" disabled={entry.inProgress} onClick={()=>downloadRow(entry)}>{entry.inProgress?'Preparing…':entry.downloaded||entry.requested?'Download again':'Download'}</button>
               <button type="button" onClick={()=>void copy(entry.displayName,entry.displayName)}>Copy</button>
-              {isSharePoint(entry.url) && <details><summary>More</summary><div className="adw-more">
+              {isSharePoint(entry.url) && <details onToggle={event => {
+                const details = event.currentTarget;
+                if (!details.open) {
+                  details.removeAttribute('data-menu-direction');
+                  return;
+                }
+                const viewport = details.closest<HTMLElement>('.adw-table-wrap');
+                const summary = details.querySelector<HTMLElement>('summary');
+                const menu = details.querySelector<HTMLElement>('.adw-more');
+                if (!viewport || !summary || !menu) return;
+                const bounds = viewport.getBoundingClientRect();
+                const trigger = summary.getBoundingClientRect();
+                const needed = menu.offsetHeight + 8;
+                const below = bounds.bottom - trigger.bottom;
+                const above = trigger.top - bounds.top;
+                details.dataset.menuDirection = below < needed && above > below ? 'above' : 'below';
+              }}><summary>More</summary><div className="adw-more">
                 <button type="button" onClick={()=>void fixName(entry)}>Fix downloaded name</button>
                 {entry.requested||entry.downloaded?<button type="button" onClick={()=>saveNamedCopy(entry)}>Save named copy</button>:null}
               </div></details>}
