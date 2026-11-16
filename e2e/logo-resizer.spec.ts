@@ -421,6 +421,56 @@ test('44-logo Focus Mode adapts row count, wraps all controls, and keeps inspect
     if (viewport.width === 1440 || viewport.width === 919) {
       await page.screenshot({ path: testInfo.outputPath('logo-focus-' + viewport.width + '.png') });
     }
+    if (viewport.width === 1440) {
+      // Measure genuine wheel input with the populated inspector open.
+      // Animation-frame timing is diagnostic: CI is not the user's laptop.
+      const gallery = page.locator('.logo-gallery');
+      await gallery.evaluate(el => { el.scrollTop = 0; });
+      await gallery.hover({ position: { x: 18, y: 90 } });
+      await gallery.evaluate(() => {
+        const global = window as Window & {
+          __focusWheel?: { active: boolean; times: number[] };
+        };
+        global.__focusWheel = { active: true, times: [] };
+        function tick(time: number) {
+          if (!global.__focusWheel?.active) return;
+          global.__focusWheel.times.push(time);
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+      for (let i = 0; i < 12; i++) {
+        await page.mouse.wheel(0, 440);
+        await page.waitForTimeout(24);
+      }
+      const scroll = await gallery.evaluate(el => {
+        const global = window as Window & {
+          __focusWheel?: { active: boolean; times: number[] };
+        };
+        const probe = global.__focusWheel!;
+        probe.active = false;
+        const gaps = probe.times.slice(1)
+          .map((t, index) => t - probe.times[index]).sort((a, b) => a - b);
+        return {
+          scrollTop: Math.round(el.scrollTop),
+          frameCount: probe.times.length,
+          p95GapMs: gaps[Math.floor(gaps.length * .95)] ?? null,
+          galleryTransform: getComputedStyle(el).transform,
+          headerTop: document.querySelector('.forge-v5-head')!.getBoundingClientRect().top,
+          inspectorTop: document.querySelector('.logo-detail')!.getBoundingClientRect().top,
+          hostTop: document.querySelector('.logo-workspace')!.getBoundingClientRect().top,
+        };
+      });
+      expect(scroll.scrollTop, 'real wheel scroll with Focus Mode open').toBeGreaterThan(350);
+      expect(scroll.frameCount).toBeGreaterThan(8);
+      expect(scroll.galleryTransform).toBe('none');
+      expect(Math.abs(scroll.inspectorTop - scroll.hostTop)).toBeLessThanOrEqual(2);
+      console.info('44-logo Focus Mode wheel profile (CI hardware only):', scroll);
+      await testInfo.attach('44-logo-focus-wheel.json', {
+        body: Buffer.from(JSON.stringify(scroll, null, 2)),
+        contentType: 'application/json',
+      });
+    }
   }
   await focus.evaluate(el => { el.scrollTop = el.scrollHeight; });
   await expect(focus.getByRole('button', { name: 'Save image' })).toBeInViewport();
