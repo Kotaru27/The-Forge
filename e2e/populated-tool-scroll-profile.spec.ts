@@ -133,6 +133,10 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
     name: 'Split_' + i + '.png', mimeType: 'image/png', buffer: frame,
   })));
   await expect(page.locator('.split-card')).toHaveCount(24);
+  const firstSplitCardHeight = await page.locator('.split-card').first()
+    .evaluate(el => Math.round(el.getBoundingClientRect().height));
+  expect(firstSplitCardHeight, 'Image Splitter previews must not collapse inside the grid')
+    .toBeGreaterThan(300);
   report['image-splitter'] = await wheelProfile(page, '.split-card-grid');
 
   await page.goto('#/pdf-to-image');
