@@ -232,3 +232,104 @@
     .forge-ctk-header-icon, .sketch-highlight-mark
   ) { animation: none !important; }
 }
+
+
+/* 2026-11-16 — responsive scroll geometry.
+ * Keep the hand-drawn materials and tool logic intact. Constrain each scroll
+ * surface instead of forcing the entire page taller than the browser window. */
+.forge-app.forge-sketch-ui,
+.forge-app.forge-sketch-ui .sketch-notebook-frame,
+.forge-app.forge-sketch-ui .sketch-main-area,
+.forge-app.forge-sketch-ui .native-tool {
+  min-height: 0;
+}
+
+/* The legacy eight-column !important declaration was overriding all of the
+ * Logo Resizer's smaller-window layouts. Restore deliberate row grouping,
+ * retaining every existing button, preset and control in its original order.
+ * Wide desktop layouts keep the approved single-row control header. */
+@media (max-width: 1200px) {
+  .forge-app.forge-sketch-ui .forge-v5-control-grid {
+    min-width: 0 !important;
+    grid-template-columns: 130px 145px 85px 90px minmax(160px, 1fr) 150px !important;
+    grid-template-areas:
+      "import presets custom format typography typography"
+      "options options position position position export" !important;
+    gap: 9px 10px !important;
+  }
+  .forge-app.forge-sketch-ui .forge-v5-sliders {
+    max-width: none;
+  }
+}
+@media (max-width: 980px) {
+  .forge-app.forge-sketch-ui .forge-v5-control-grid {
+    grid-template-columns: 130px 145px minmax(120px, 1fr) 150px !important;
+    grid-template-areas:
+      "import presets custom format"
+      "typography typography options export"
+      "position position position position" !important;
+  }
+}
+@media (max-width: 700px) {
+  .forge-app.forge-sketch-ui .forge-v5-control-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "import presets"
+      "custom format"
+      "typography typography"
+      "options options"
+      "position position"
+      "export export" !important;
+    gap: 10px !important;
+  }
+  .forge-app.forge-sketch-ui .forge-v5-position .forge-v5-sliders label {
+    flex: 1 1 180px;
+    max-width: none;
+  }
+}
+
+/* Short landscape windows must retain a usable asset board. The control
+ * deck scrolls independently only when the browser has insufficient height. */
+@media (max-height: 560px) {
+  .forge-app.forge-sketch-ui .forge-v5-head {
+    max-height: min(205px, 45dvh);
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+  .forge-app.forge-sketch-ui .sketch-sidebar-footer {
+    display: none;
+  }
+}
+
+/* Keep single-card tracks within a narrowed main panel. The old minimums
+ * could exceed the available width after sidebar and workspace padding. */
+.forge-app.forge-sketch-ui .forge-logo-v5 .logo-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 285px), 1fr));
+}
+.forge-app.forge-sketch-ui .pdf-list {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 205px), 1fr));
+}
+.forge-app.forge-sketch-ui .split-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 235px), 1fr));
+}
+.forge-app.forge-sketch-ui .vs-stacks {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 285px), 1fr));
+}
+
+/* A viewport-height subtraction of 325px made Storyboard almost disappear in
+ * a 413px-tall window. Keep it scrollable if the surrounding toolbar wraps. */
+.forge-app.forge-sketch-ui .storyboard-tool .sb-canvas canvas {
+  max-height: max(120px, calc(100dvh - 190px)) !important;
+}
+
+/* Short windows need actual dialog space inside the fixed viewport rather
+ * than a dialog plus large outer padding that extends beyond the edges. */
+@media (max-height: 560px) {
+  .forge-app.forge-sketch-ui :is(.pdf-detail-backdrop, .vs-overlay) {
+    padding: 12px !important;
+  }
+  .forge-app.forge-sketch-ui :is(.pdf-detail, .vs-modal) {
+    height: min(790px, calc(100dvh - 24px)) !important;
+    max-height: calc(100dvh - 24px) !important;
+  }
+}

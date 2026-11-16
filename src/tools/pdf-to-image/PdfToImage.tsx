@@ -319,7 +319,7 @@ export function PdfToImage() {
         {documents.map(doc => <button type="button" key={doc.id} className="pdf-doc-card"
           aria-label={`Inspect PDF ${doc.name}`} onClick={() => setDetailId(doc.id)}>
           <div className="pdf-doc-thumb">
-            {doc.pages.length ? <img src={doc.pages[0].url} alt={`First page of ${doc.name}`} /> : <span>PDF</span>}
+            {doc.pages.length ? <img src={doc.pages[0].url} alt={`First page of ${doc.name}`} loading="lazy" decoding="async" /> : <span>PDF</span>}
           </div>
           <div className="pdf-doc-details">
             <strong title={doc.name}>{doc.name}</strong>
@@ -349,7 +349,7 @@ export function PdfToImage() {
         <div className="pdf-page-grid">
           {active.pages.length === 0 && <p className="pdf-muted">No converted pages yet.</p>}
           {active.pages.map(page => <article className="pdf-page-card" key={page.num}>
-            <div className="pdf-page-preview"><img src={page.url} alt={`Page ${page.num}`} /></div>
+            <div className="pdf-page-preview"><img src={page.url} alt={`Page ${page.num}`} loading="lazy" decoding="async" /></div>
             <div className="pdf-page-foot">
               <label><input type="checkbox" checked={page.checked}
                 aria-label={`Select page ${page.num}`}

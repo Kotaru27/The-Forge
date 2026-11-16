@@ -171,7 +171,7 @@ export function ImageSplitter() {
         {items.length === 0 && <div className="split-empty">{"No images uploaded"}</div>}
         {items.map(item => <article className="split-card" key={item.id}>
           <div className="split-image-stage"><div className="split-image-wrap">
-            <img src={item.url} alt={`Preview ${item.file.name}`} />
+            <img src={item.url} alt={`Preview ${item.file.name}`} loading="lazy" decoding="async" />
             <div className="split-grid-overlay" aria-hidden="true" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
               {Array.from({ length: columns }, (_, index) => <span key={index} />)}
             </div>

@@ -269,7 +269,7 @@ export function VideoStills({ onTransfer }: Props) {
             <div className="vs-frame-list" aria-label="Extracted still frames">
               {current.frames.map((frame, index) => <div className={'vs-frame-row' + (index === activeFrame ? ' is-current' : '')} key={frame.num}>
                 <button type="button" onClick={() => setActiveFrame(index)} aria-label={`Preview ${frame.type === 'storyboard' ? 'contact sheet' : `frame ${frame.num}`}`} aria-current={index === activeFrame}>
-                  <img src={frame.url} alt="" /><span>{frame.type === 'storyboard' ? 'Contact sheet' : `#${frame.num}`}</span>
+                  <img src={frame.url} alt="" loading="lazy" decoding="async" /><span>{frame.type === 'storyboard' ? 'Contact sheet' : `#${frame.num}`}</span>
                 </button>
                 <input type="checkbox" checked={frame.checked} onChange={event => toggleFrame(current.id, index, event.target.checked)} aria-label={`Select ${frame.type === 'storyboard' ? 'contact sheet' : `frame ${frame.num}`}`} />
               </div>)}
