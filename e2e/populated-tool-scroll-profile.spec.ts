@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as XLSX from 'xlsx';
@@ -111,7 +112,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
   await page.setViewportSize({ width: 1440, height: 860 });
   const report: Record<string, unknown> = {};
 
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   const image = await png(page);
   await page.locator('.logo-workspace input[type="file"]').setInputFiles(Array.from({ length: 30 }, (_, i) => ({
     name: 'Logo_' + i + '.png', mimeType: 'image/png', buffer: image,
@@ -119,7 +120,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
   await expect(page.locator('.logo-card')).toHaveCount(30);
   report['logo-resizer'] = await wheelProfile(page, '.logo-gallery');
 
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
   const frame = await png(page, 900, 500);
   await page.getByLabel('Choose storyboard assets').setInputFiles(Array.from({ length: 10 }, (_, i) => ({
     name: 'Frame_' + i + '.png', mimeType: 'image/png', buffer: frame,
@@ -127,7 +128,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
   await expect(page.locator('.sb-frame')).toHaveCount(10);
   report.storyboard = await wheelProfile(page, '.sb-asset-list');
 
-  await page.goto('#/image-splitter');
+  await openForgeRoute(page, 'image-splitter');
   await page.getByLabel('Upload images').setInputFiles(Array.from({ length: 24 }, (_, i) => ({
     name: 'Split_' + i + '.png', mimeType: 'image/png', buffer: frame,
   })));
@@ -138,7 +139,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
     .toBeGreaterThan(300);
   report['image-splitter'] = await wheelProfile(page, '.split-card-grid');
 
-  await page.goto('#/pdf-to-image');
+  await openForgeRoute(page, 'pdf-to-image');
   await page.getByLabel('Upload PDF files').setInputFiles(Array.from({ length: 18 }, (_, i) => ({
     name: 'Report_' + i + '.pdf', mimeType: 'application/pdf', buffer: createPdf(1, 'blue'),
   })));
@@ -148,7 +149,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
   // Video Stills owns a scrollable collection grid, not the outer workspace.
   // A shorter laptop viewport makes six populated collections scroll naturally.
   await page.setViewportSize({ width: 820, height: 560 });
-  await page.goto('#/video-stills');
+  await openForgeRoute(page, 'video-stills');
   const video = await readFile(path.resolve('e2e/fixtures/stills.webm'));
   await page.getByLabel('Choose video files').setInputFiles(Array.from({ length: 6 }, (_, i) => ({
     name: 'Clip_' + i + '.webm', mimeType: 'video/webm', buffer: video,
@@ -157,7 +158,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
   report['video-stills'] = await wheelProfile(page, '.vs-stacks');
   await page.setViewportSize({ width: 1440, height: 860 });
 
-  await page.goto('#/link-generator');
+  await openForgeRoute(page, 'link-generator');
   await page.getByLabel('Filenames').fill(
     Array.from({ length: 100 }, (_, i) => 'Advertisement_' + i + '.jpg').join('\n')
   );
@@ -170,7 +171,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
       async *entries() {},
     }) });
   });
-  await page.goto('#/ad-downloader');
+  await openForgeRoute(page, 'ad-downloader');
   // Hash-only SPA navigation does not rerun addInitScript. A real reload
   // ensures the permitted folder fixture is installed before the tool mounts.
   await page.reload();
