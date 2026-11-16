@@ -495,7 +495,12 @@ test('large custom export size does not allocate a full-resolution thumbnail can
   expect(size.height).toBeLessThan(800);
   await page.getByRole('button', { name: /Open Focus Mode for/ }).click();
   const detail = page.locator('.logo-detail-preview canvas');
-  await expect(detail).toHaveJSProperty('width', 280);
+  // The Focus Mode inspector now renders a 320px logical preview rather than
+  // the old 280px one. The real downloaded image still uses the requested size.
+  await expect.poll(() => detail.evaluate(canvas => {
+    const c = canvas as HTMLCanvasElement;
+    return Math.round(c.width / Math.min(2, window.devicePixelRatio || 1));
+  })).toBe(320);
   await page.getByRole('button', { name: 'Close Focus Mode' }).click();
 
   // Preview dimensions must never alter the downloaded image resolution.
@@ -589,6 +594,13 @@ test('Focus Mode has compact controls, an enlarged undistorted preview and full-
   await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
   const panel = page.getByLabel('Focus Mode', { exact: true });
   await expect(panel).toBeVisible();
+  // Canvas initially has the browser default 300x150 intrinsic size until
+  // the async preview paint finishes. Wait for the finished square preview.
+  await expect.poll(() => panel.locator('.logo-detail-preview canvas').evaluate(canvas => {
+    const c = canvas as HTMLCanvasElement;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    return [Math.round(c.width / dpr), Math.round(c.height / dpr)];
+  })).toEqual([320, 320]);
   const geometry = await panel.evaluate(el => {
     const frame = el.querySelector<HTMLElement>('.logo-detail-preview')!;
     const canvas = el.querySelector<HTMLCanvasElement>('.logo-detail-preview canvas')!;
