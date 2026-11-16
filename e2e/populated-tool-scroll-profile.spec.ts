@@ -163,7 +163,7 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
     Array.from({ length: 100 }, (_, i) => 'Advertisement_' + i + '.jpg').join('\n')
   );
   await page.getByRole('button', { name: 'Generate', exact: true }).click();
-  report['link-generator'] = await wheelProfile(page, '.link-filename-preview');
+  report['link-generator'] = await wheelProfile(page, '.link-generator');
 
   await page.addInitScript(() => {
     Object.defineProperty(window, 'showDirectoryPicker', { configurable: true, value: async () => ({
@@ -173,8 +173,12 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
   });
   await openForgeRoute(page, 'ad-downloader');
   // Hash-only SPA navigation does not rerun addInitScript. A real reload
-  // ensures the permitted folder fixture is installed before the tool mounts.
+  // installs the permitted folder fixture, then normal in-app navigation
+  // enters Ad Downloader (refresh now intentionally starts at Home).
   await page.reload();
+  await expect(page).toHaveURL(/#\/home$/);
+  await page.evaluate(() => { window.location.hash = '#/ad-downloader'; });
+  await expect(page.getByRole('heading', { name: 'Ad Downloader', level: 1 })).toBeVisible();
   const book = XLSX.utils.book_new();
   const sheet = XLSX.utils.aoa_to_sheet([
     ['Ad No', 'URL', 'Type'],
