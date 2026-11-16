@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 const workrooms = [
   { route: 'logo-resizer', label: 'Logo Resizer', target: 'Add assets', panel: '.forge-v5-head' },
@@ -13,7 +14,7 @@ const workrooms = [
 test('all seven tools open with fully visible static pencil typography and native controls', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 940 });
   for (const { route, label, target, panel } of workrooms) {
-    await page.goto('#/' + route);
+    await openForgeRoute(page, route);
     const tool = page.locator('.native-tool:not([hidden])');
     await expect(tool).toBeVisible();
     await expect(page.getByRole('heading', { name: label, level: 1 })).toBeVisible();
@@ -40,7 +41,7 @@ test('all seven tools open with fully visible static pencil typography and nativ
 });
 
 test('repeated tool switching, inputs and Storyboard tabs never mount handwriting', async ({ page }) => {
-  await page.goto('#/logo-resizer');
+  await openForgeRoute(page, 'logo-resizer');
   await expect(page.getByRole('button', { name: 'Add assets', exact: true })).toHaveCount(1);
   await expect(page.getByRole('button', { name: 'Generate links', exact: true })).toHaveCount(1);
   const width = page.getByRole('spinbutton', { name: 'Width in pixels' });
@@ -48,7 +49,7 @@ test('repeated tool switching, inputs and Storyboard tabs never mount handwritin
   await expect(width).toHaveValue('250');
   await page.getByRole('button', { name: 'Generate links' }).click();
 
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
   await expect(page.getByRole('button', { name: 'Add Assets', exact: true })).toHaveCount(1);
   await expect(page.getByRole('tab', { name: 'Grid Board', exact: true })).toHaveCount(1);
   const boardName = page.getByRole('textbox', { name: 'Board Name' });
@@ -57,7 +58,7 @@ test('repeated tool switching, inputs and Storyboard tabs never mount handwritin
   await page.getByRole('tab', { name: 'Fit to Platform' }).click();
   await expect(page.getByRole('button', { name: 'Upload Image' })).toBeVisible();
 
-  await page.goto('#/home');
+  await openForgeRoute(page, 'home');
   await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
   await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
   await page.getByRole('button', { name: 'Open Ad Downloader' }).click();
@@ -69,7 +70,7 @@ test('repeated tool switching, inputs and Storyboard tabs never mount handwritin
 });
 
 test('direct Home and reduced motion are completely drawn and never loop', async ({ page }) => {
-  await page.goto('#/home');
+  await openForgeRoute(page, 'home');
   await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
   await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
