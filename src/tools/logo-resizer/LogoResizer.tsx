@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import JSZip from 'jszip';
 import { downloadBlob } from '../../utils/download';
-import { LogoPreview } from './LogoPreview';
+import { LogoPreview, noteLogoGalleryScroll } from './LogoPreview';
 import { LogoResizerIcon } from './LogoResizerIcon';
 import { ToolGlyph } from '../../home/ForgeHome';
 import { logoToBlob } from './renderer';
@@ -405,7 +405,7 @@ export function LogoResizer() {
       {error && <div className="logo-error" role="alert">{error}</div>}
       {snapshot && <div className="logo-undo" role="status">Workspace cleared. <button type="button" onClick={undoClear}>Undo with all edits</button> <button type="button" onClick={expireUndo} aria-label="Dismiss undo">Dismiss</button></div>}
       <div className="logo-body">
-        <main className="logo-gallery" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
+        <main className="logo-gallery" onScroll={noteLogoGalleryScroll} onDragOver={event => event.preventDefault()} onDrop={onDrop}>
           <div className="forge-v5-board-heading"><div><span>01 — CANVAS / ASSET BOARD</span><h2>{cards.length ? cards.length + (cards.length === 1 ? " logo in your workboard" : " logos in your workboard") : "Your workboard is empty"}</h2></div></div>
           {!cards.length ? (
             <div className="logo-empty">

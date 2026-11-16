@@ -86,7 +86,10 @@ test('native scrolling responds without moving or overlaying tool content', asyn
     el.appendChild(spacer);
     el.scrollTo({ top: 220, behavior: 'instant' });
   });
-  await expect.poll(() => panel.evaluate(el => Math.round(el.scrollTop))).toBe(220);
+  // Chromium may apply a tiny (+/- 2px) scroll anchoring adjustment after
+  // injecting the synthetic spacer. Check actual position, not exact rounding.
+  await expect.poll(() => panel.evaluate(el => Math.abs(el.scrollTop - 220)))
+    .toBeLessThanOrEqual(3);
   await expect(page.locator('.forge-parallax-art')).toHaveCount(0);
 });
 

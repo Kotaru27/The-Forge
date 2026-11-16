@@ -6,14 +6,40 @@ type Props = { asset: LogoAsset; settings: LogoSettings; className?: string };
 type PreviewJob = { run: () => void; visible: boolean };
 
 // One shared scheduler: visible previews start one per animation frame; offscreen
-// work is submitted only in browser idle time. No scroll listeners or React
-// state updates are involved in scheduling.
+// work is submitted only in browser idle time. Gallery scrolling updates
+// one module-local timestamp, never React state or wheel behavior.
 const queued = new Map<HTMLCanvasElement, PreviewJob>();
 let visibleFrame = 0;
 let idleTask = 0;
 
+// Do not place canvas painting inside the frame budget while the user is
+// actively wheel/trackpad scrolling through a populated gallery. Resume after
+// a short quiet period; unchanged canvases stay cached and immediately visible.
+const SCROLL_QUIET_MS = 120;
+let lastGalleryScrollAt = Number.NEGATIVE_INFINITY;
+let resumeTask = 0;
+
+export function noteLogoGalleryScroll() {
+  lastGalleryScrollAt = window.performance.now();
+}
+function galleryIsScrolling() {
+  return window.performance.now() - lastGalleryScrollAt < SCROLL_QUIET_MS;
+}
+function scheduleAfterScroll() {
+  if (resumeTask || !queued.size) return;
+  const remaining = Math.max(16, SCROLL_QUIET_MS - (window.performance.now() - lastGalleryScrollAt));
+  resumeTask = window.setTimeout(() => {
+    resumeTask = 0;
+    ensureScheduled();
+  }, remaining);
+}
+
 function nextVisible() {
   visibleFrame = 0;
+  if (galleryIsScrolling()) {
+    scheduleAfterScroll();
+    return;
+  }
   for (const [canvas, job] of queued) {
     if (!job.visible) continue;
     queued.delete(canvas);
@@ -24,6 +50,10 @@ function nextVisible() {
 }
 function nextIdle(deadline?: IdleDeadline) {
   idleTask = 0;
+  if (galleryIsScrolling()) {
+    scheduleAfterScroll();
+    return;
+  }
   if (deadline && deadline.timeRemaining() < 5) {
     ensureScheduled();
     return;
@@ -37,10 +67,15 @@ function nextIdle(deadline?: IdleDeadline) {
   ensureScheduled();
 }
 function ensureScheduled() {
-  if (!visibleFrame && [...queued.values()].some(job => job.visible)) {
+  if (galleryIsScrolling()) {
+    scheduleAfterScroll();
+    return;
+  }
+  const jobs = [...queued.values()];
+  if (!visibleFrame && jobs.some(job => job.visible)) {
     visibleFrame = window.requestAnimationFrame(nextVisible);
   }
-  if (!idleTask && [...queued.values()].some(job => !job.visible)) {
+  if (!idleTask && jobs.some(job => !job.visible)) {
     idleTask = typeof window.requestIdleCallback === 'function'
       ? window.requestIdleCallback(nextIdle)
       : window.setTimeout(() => nextIdle(), 90);
