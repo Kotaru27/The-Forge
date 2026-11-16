@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,7 +13,7 @@ test('local ad folder imports in ascending order and feeds unchanged link output
     }
     writeFileSync(join(directory, 'Sub', 'nested.jpg'), 'test fixture');
 
-    await page.goto('#/link-generator');
+    await openForgeRoute(page, 'link-generator');
     const [chooser] = await Promise.all([
       page.waitForEvent('filechooser'),
       page.getByRole('button', { name: /Browse folder/ }).click(),
