@@ -308,7 +308,7 @@ export function LogoResizer() {
   }
 
   return (
-    <section className={'logo-workspace forge-logo-v5' + (cards.length > 12 ? ' logo-bulk-workspace' : '')} aria-label="Logo Resizer">
+    <section className={'logo-workspace forge-logo-v5' + (cards.length > 12 ? ' logo-bulk-workspace' : '') + (detail ? ' logo-focus-open' : '')} aria-label="Logo Resizer">
       <input ref={inputRef} type="file" accept="image/*,.pptx,.xlsx,.xlsm" multiple hidden onChange={onFileInput} />
       <div className="forge-v5-head" onDragOver={event => event.preventDefault()} onDrop={onDrop}>
         <div className="forge-v5-intro">
