@@ -48,31 +48,30 @@ async function wheelProfile(page: Page, selector: string) {
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
-    const chain = [];
-    for (let node: HTMLElement | null = el as HTMLElement; node; node = node.parentElement) {
-      const style = getComputedStyle(node);
-      chain.push({
-        className: node.className,
-        clientHeight: node.clientHeight,
-        scrollHeight: node.scrollHeight,
-        clientWidth: node.clientWidth,
-        scrollWidth: node.scrollWidth,
-        display: style.display,
-        overflowY: style.overflowY,
-        overflowX: style.overflowX,
-        gridColumns: style.gridTemplateColumns.slice(0, 220),
-        rowGap: style.rowGap,
-        firstCard: node.querySelector('.split-card')?.getBoundingClientRect().toJSON(),
-        lastCard: [...node.querySelectorAll('.split-card')].at(-1)?.getBoundingClientRect().toJSON(),
-      });
-      if (node.classList.contains('native-tool')) break;
-    }
-    return { startTop, maxScroll: el.scrollHeight - el.clientHeight, chain };
+    return { startTop, maxScroll: el.scrollHeight - el.clientHeight };
   });
-  // The previous benchmark incorrectly called non-scrolling panels smooth.
-  // A real populated panel must have scrollable content before frame sampling.
+  // Query geometry only on an invalid scroll surface; expensive inspection
+  // must not contaminate the animation-frame timing of successful samples.
   if (start.maxScroll <= 100) {
-    console.info('Missing populated scroll surface:', selector, JSON.stringify(start.chain));
+    const chain = await panel.evaluate(el => {
+      const output = [];
+      for (let node: HTMLElement | null = el as HTMLElement; node; node = node.parentElement) {
+        const style = getComputedStyle(node);
+        output.push({
+          className: node.className,
+          clientHeight: node.clientHeight,
+          scrollHeight: node.scrollHeight,
+          clientWidth: node.clientWidth,
+          scrollWidth: node.scrollWidth,
+          overflowY: style.overflowY,
+          gridColumns: style.gridTemplateColumns.slice(0, 220),
+          firstCardHeight: node.querySelector('.split-card')?.getBoundingClientRect().height,
+        });
+        if (node.classList.contains('native-tool')) break;
+      }
+      return output;
+    });
+    console.info('Missing populated scroll surface:', selector, JSON.stringify(chain));
   }
   expect(start.maxScroll, selector + ': populated target must actually scroll')
     .toBeGreaterThan(100);
