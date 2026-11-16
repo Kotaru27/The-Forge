@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import JSZip from 'jszip';
 import { readFile } from 'node:fs/promises';
 
@@ -36,7 +37,7 @@ function pngSize(bytes: Buffer): [number, number] {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('#/image-splitter');
+  await openForgeRoute(page, 'image-splitter');
   await expect(page.getByRole('region', { name: 'Image Splitter' })).toBeVisible();
 });
 
