@@ -1,4 +1,5 @@
 import {test,expect,type Page} from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import {readFile} from 'node:fs/promises';
@@ -29,7 +30,7 @@ async function folder(page:Page) {
 }
 test.beforeEach(async ({page})=>{
   await folder(page);
-  await page.goto('#/ad-downloader');
+  await openForgeRoute(page, 'ad-downloader');
   await expect(app(page)).toBeVisible();
 });
 test('Excel cannot be uploaded before selecting an approved folder',async({page})=>{
