@@ -38,4 +38,10 @@
 .adw-row-actions summary::-webkit-details-marker{display:none}
 .adw-row-actions details[open] summary{border-color:#777}
 .adw-more{display:flex;flex-direction:column;gap:6px;position:absolute;right:0;top:100%;z-index:5;background:#151515;border:1px solid #555;padding:9px;min-width:172px;box-shadow:0 8px 22px #000}
+/* Keep SharePoint row actions within the table's clipped scroll viewport.
+ * Placement is UI-only and follows the available space when Details opens. */
+.adw-row-actions details[data-menu-direction="above"] .adw-more {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
 @media(max-width:1080px){.adw-workspace{padding:16px}.adw-table .adw-name{min-width:170px}.adw-filters button:nth-last-child(2){margin-left:0}}
