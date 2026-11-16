@@ -311,8 +311,15 @@
 .forge-app.forge-sketch-ui .pdf-list {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 205px), 1fr));
 }
+/* Image Splitter's overflow-clipped cards contribute zero automatic row
+ * minimums to a constrained grid. Explicit max-content tracks restore the
+ * existing 250px preview + metadata height and make large batches scroll. */
 .forge-app.forge-sketch-ui .split-card-grid {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 235px), 1fr));
+  grid-auto-rows: max-content;
+}
+.forge-app.forge-sketch-ui .split-card-grid .split-card {
+  min-height: 325px;
 }
 .forge-app.forge-sketch-ui .vs-stacks {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 285px), 1fr));
