@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import JSZip from 'jszip';
@@ -24,7 +25,7 @@ async function downloaded(page: Page, name: string, click: () => Promise<void>):
 const tool=(page: Page)=>page.getByRole('region',{name:'Storyboard'});
 
 test.beforeEach(async ({page})=>{
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
   await expect(page.getByRole('heading',{name:'Storyboard'})).toBeVisible();
   await expect(page.getByRole('tab',{name:'Grid Board'})).toHaveAttribute('aria-selected','true');
 });
