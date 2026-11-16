@@ -152,6 +152,9 @@ test('SharePoint action menu stays inside the scrollable table near top and bott
     const summary=row.locator('details summary');
     await summary.scrollIntoViewIfNeeded();
     await summary.click();
+    // details.onToggle sets the menu direction asynchronously. Read geometry
+    // only after that placement decision has completed (no weaker bounds).
+    await expect(row.locator('details')).toHaveAttribute('data-menu-direction', /^(above|below)$/);
     const rects=await row.locator('.adw-more').evaluate(menu=>{
       const bounds=menu.getBoundingClientRect();
       const view=menu.closest('.adw-table-wrap')!.getBoundingClientRect();
