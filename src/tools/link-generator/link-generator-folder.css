@@ -55,6 +55,8 @@
 .forge-collection-shell .link-generator-folder .link-preview-ext{font:9px Consolas,monospace;border:1px solid #425444;background:#243027;color:#bbccb9;padding:4px 7px;border-radius:4px}
 .forge-collection-shell .link-generator-folder .link-filename-preview li.link-preview-more{font-size:11px;color:#98ae98}
 .forge-collection-shell .link-generator-folder .link-outputs-header{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #354039;margin-top:20px;padding-top:21px;margin-bottom:12px}
+/* The filename-order preview is gone; outputs begin at the top of the review panel. */
+.forge-collection-shell .link-generator-folder .link-review-panel .link-outputs-header{margin-top:0;padding-top:0;border-top:0}
 .forge-collection-shell .link-generator-folder .link-output-block + .link-output-block{margin-top:17px}
 .forge-collection-shell .link-generator-folder .output-heading{margin:0 0 8px;display:flex;align-items:center;justify-content:space-between}
 .forge-collection-shell .link-generator-folder .output-heading label{font-size:12px;color:#e6eee1}
