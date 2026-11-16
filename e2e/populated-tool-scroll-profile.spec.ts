@@ -55,7 +55,15 @@ async function wheelProfile(page: Page, selector: string) {
         className: node.className,
         clientHeight: node.clientHeight,
         scrollHeight: node.scrollHeight,
+        clientWidth: node.clientWidth,
+        scrollWidth: node.scrollWidth,
+        display: style.display,
         overflowY: style.overflowY,
+        overflowX: style.overflowX,
+        gridColumns: style.gridTemplateColumns.slice(0, 220),
+        rowGap: style.rowGap,
+        firstCard: node.querySelector('.split-card')?.getBoundingClientRect().toJSON(),
+        lastCard: [...node.querySelectorAll('.split-card')].at(-1)?.getBoundingClientRect().toJSON(),
       });
       if (node.classList.contains('native-tool')) break;
     }
