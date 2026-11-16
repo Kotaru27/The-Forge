@@ -495,7 +495,12 @@ test('large custom export size does not allocate a full-resolution thumbnail can
   expect(size.height).toBeLessThan(800);
   await page.getByRole('button', { name: /Open Focus Mode for/ }).click();
   const detail = page.locator('.logo-detail-preview canvas');
-  await expect(detail).toHaveJSProperty('width', 280);
+  // The Focus Mode inspector now renders a 320px logical preview rather than
+  // the old 280px one. The real downloaded image still uses the requested size.
+  await expect.poll(() => detail.evaluate(canvas => {
+    const c = canvas as HTMLCanvasElement;
+    return Math.round(c.width / Math.min(2, window.devicePixelRatio || 1));
+  })).toBe(320);
   await page.getByRole('button', { name: 'Close Focus Mode' }).click();
 
   // Preview dimensions must never alter the downloaded image resolution.
@@ -580,4 +585,56 @@ test('record a populated logo gallery wheel-scroll frame sample', async ({ page 
     contentType: 'application/json',
   });
   console.info('Populated Logo Resizer wheel-scroll sample (CI runner only):', metrics);
+});
+
+
+test('Focus Mode has compact controls, an enlarged undistorted preview and full-height scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await addFiles(page, [sample, { ...sample, name: 'SecondFocus.png' }]);
+  await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
+  const panel = page.getByLabel('Focus Mode', { exact: true });
+  await expect(panel).toBeVisible();
+  // Canvas initially has the browser default 300x150 intrinsic size until
+  // the async preview paint finishes. Wait for the finished square preview.
+  await expect.poll(() => panel.locator('.logo-detail-preview canvas').evaluate(canvas => {
+    const c = canvas as HTMLCanvasElement;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    return [Math.round(c.width / dpr), Math.round(c.height / dpr)];
+  })).toEqual([320, 320]);
+  const geometry = await panel.evaluate(el => {
+    const frame = el.querySelector<HTMLElement>('.logo-detail-preview')!;
+    const canvas = el.querySelector<HTMLCanvasElement>('.logo-detail-preview canvas')!;
+    const filename = el.querySelector<HTMLInputElement>('input:not([type="range"])')!;
+    const label = el.querySelector<HTMLTextAreaElement>('textarea')!;
+    const buttons = [...el.querySelectorAll<HTMLButtonElement>('.logo-detail-buttons button')];
+    const bounds = (node: HTMLElement) => node.getBoundingClientRect();
+    const host = el.closest<HTMLElement>('.logo-workspace')!;
+    return {
+      hostHeight: bounds(host).height,
+      panelHeight: bounds(el).height,
+      frameWidth: bounds(frame).width,
+      canvasWidth: bounds(canvas).width,
+      canvasHeight: bounds(canvas).height,
+      canvasLogicalWidth: canvas.width / Math.min(2, window.devicePixelRatio || 1),
+      filenameHeight: bounds(filename).height,
+      labelHeight: bounds(label).height,
+      navHeights: buttons.map(button => bounds(button).height),
+      panelScrollHeight: el.scrollHeight,
+      panelClientHeight: el.clientHeight,
+    };
+  });
+  expect(Math.abs(geometry.panelHeight - geometry.hostHeight)).toBeLessThanOrEqual(2);
+  expect(geometry.frameWidth).toBeGreaterThan(270);
+  expect(geometry.canvasWidth).toBeGreaterThan(270);
+  expect(Math.abs(geometry.canvasWidth - geometry.canvasHeight)).toBeLessThanOrEqual(2);
+  expect(geometry.filenameHeight).toBeLessThanOrEqual(44);
+  expect(geometry.labelHeight).toBeLessThanOrEqual(85);
+  expect(Math.max(...geometry.navHeights)).toBeLessThanOrEqual(40);
+  await page.setViewportSize({ width: 919, height: 413 });
+  await expect(panel).toBeVisible();
+  await panel.evaluate(el => { el.scrollTop = el.scrollHeight; });
+  await expect(panel.getByRole('button', { name: 'Save image' })).toBeInViewport();
+  await expect(panel.getByRole('button', { name: 'Delete' })).toBeInViewport();
+  await panel.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(panel).toHaveCount(0);
 });

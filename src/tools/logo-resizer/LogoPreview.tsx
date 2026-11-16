@@ -100,8 +100,12 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
   const previousSizeRef = useRef<{ width: number; height: number } | null>(null);
 
   const focused = className.split(' ').includes('logo-detail-preview');
-  const maxSide = focused ? 280 : 250;
-  const scale = Math.min(1, maxSide / Math.max(settings.width, settings.height));
+  // Only the inspector receives an enlarged, high-DPI canvas preview.
+  // Thumbnail sizes and the real image-export renderer stay unchanged.
+  const maxSide = focused ? 320 : 250;
+  const scale = focused
+    ? Math.min(1.6, maxSide / Math.max(settings.width, settings.height))
+    : Math.min(1, maxSide / Math.max(settings.width, settings.height));
   const width = Math.max(1, Math.round(settings.width * scale));
   const height = Math.max(1, Math.round(settings.height * scale));
 
@@ -185,7 +189,8 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
     };
   }, []);
 
-  return <span ref={frameRef} className={'logo-preview-frame ' + className} style={{ width, height }}>
+  return <span ref={frameRef} className={'logo-preview-frame ' + className}
+    style={focused ? { width, height: 'auto', aspectRatio: `${width} / ${height}` } : { width, height }}>
     <canvas aria-label={'Preview of ' + (asset.filename || asset.source.name)}
       className="logo-preview" ref={ref} />
   </span>;

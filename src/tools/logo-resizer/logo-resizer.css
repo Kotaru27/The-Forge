@@ -432,3 +432,89 @@
     animation: none !important;
   }
 }
+
+
+/* Focus inspector visual density — the 2026-11-16 reference exposed tall
+ * controls and a tiny artwork preview inside a full-height sidebar.
+ * This is a purely visual pass: preserve the paper/pencil materials, exact
+ * image export, control values, and independent inspector scrolling. */
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail {
+  padding: 16px 17px 18px;
+  gap: 10px;
+  align-content: start;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail-heading {
+  padding-bottom: 10px;
+  gap: 8px;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail-heading strong {
+  font-size: 21px;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail-buttons {
+  gap: 5px;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail-buttons button {
+  width: 35px;
+  min-width: 35px;
+  height: 35px;
+  min-height: 35px;
+  padding: 0 !important;
+  display: grid;
+  place-items: center;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail > .logo-subtle {
+  margin: 0;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail .logo-detail-preview {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  height: auto !important;
+  margin: 3px auto 8px;
+  flex: 0 1 auto;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail-preview .logo-preview {
+  display: block;
+  width: 100%;
+  height: auto !important;
+  max-width: 100%;
+  max-height: none;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail > label {
+  gap: 5px;
+  font-size: 12px;
+  line-height: 1.25;
+  min-width: 0;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail > label > input:not([type="range"]) {
+  height: 39px;
+  min-height: 39px;
+  padding: 6px 9px !important;
+  font-size: 13px !important;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail > label > textarea {
+  height: 68px;
+  min-height: 68px !important;
+  padding: 8px 9px !important;
+  font-size: 13px !important;
+  line-height: 1.45;
+  resize: vertical;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail > label > input[type="range"] {
+  min-height: 20px;
+  height: 20px;
+  margin: 1px 0 3px;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail > button {
+  min-height: 39px;
+  padding: 7px 10px;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail-actions {
+  gap: 8px;
+  margin-top: 4px;
+}
+.forge-ctk-ui.forge-sketch-ui .forge-logo-v5.logo-focus-open .logo-detail-actions button {
+  min-height: 39px;
+  padding: 8px 10px;
+}
