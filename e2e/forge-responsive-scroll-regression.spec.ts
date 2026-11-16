@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
 const routes = [
   'logo-resizer', 'pdf-to-image', 'image-splitter', 'video-stills',
@@ -11,7 +12,7 @@ const routes = [
 test('every workroom fits compact landscape windows without document overflow', async ({ page }) => {
   await page.setViewportSize({ width: 919, height: 413 });
   for (const route of routes) {
-    await page.goto('#/' + route);
+    await openForgeRoute(page, route);
     const geometry = await page.evaluate(() => {
       const app = document.querySelector<HTMLElement>('.forge-app')!;
       const main = document.querySelector<HTMLElement>('.sketch-main-area')!;
@@ -33,7 +34,7 @@ test('every workroom fits compact landscape windows without document overflow', 
 test('Logo Resizer restores all eight control groups without sideways page or header overflow', async ({ page }) => {
   for (const width of [1200, 1024, 919, 700, 390]) {
     await page.setViewportSize({ width, height: width === 919 ? 413 : 780 });
-    await page.goto('#/logo-resizer');
+    await openForgeRoute(page, 'logo-resizer');
     const groups = page.locator('.forge-v5-control-grid > .forge-v5-group');
     await expect(groups).toHaveCount(8);
     const geometry = await page.evaluate(() => {
@@ -59,7 +60,7 @@ test('Logo Resizer restores all eight control groups without sideways page or he
 
 test('Storyboard preview region remains usable in a short desktop window', async ({ page }) => {
   await page.setViewportSize({ width: 919, height: 413 });
-  await page.goto('#/storyboard');
+  await openForgeRoute(page, 'storyboard');
   await expect(page.getByRole('button', { name: 'Add Assets' })).toBeVisible();
   const stage = page.locator('.sb-stage').first();
   await expect(stage).toBeVisible();
