@@ -676,11 +676,13 @@ test('logo link dialog shows two side-by-side name boxes and always adds zoomIma
   html = await dialog.getByLabel('Generated HTML').inputValue();
   expect((html.match(/<script/g) || []).length).toBe(4);
   const onRows = html.split('\n');
-  expect(onRows).toHaveLength(6);
-  expect(onRows[1]).toContain('ISDDefault.js');
-  expect(onRows[2]).toContain('$(this).tolunaZoom');
-  expect(onRows[4]).toContain('ISDDefault.js');
-  expect(onRows[5]).toContain('$(this).tolunaZoom');
+  expect(onRows).toHaveLength(2);
+  for (const row of onRows) {
+    expect(row).toMatch(/^<center><img /);
+    expect(row).toContain('</span><script src="//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js"></script><script> $(document).on("ready"');
+    expect(row).toContain('$(this).tolunaZoom');
+    expect(row.endsWith('</script>')).toBeTruthy();
+  }
   expect(html).toContain('$(this).tolunaZoom');
   expect((html.match(/class="zoomImage"/g) || []).length).toBe(2);
 
