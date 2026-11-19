@@ -747,3 +747,13 @@ html, body, #root { background: #000; }
   color: #c6c6cb !important;
   border-color: #303034 !important;
 }
+
+.forge-amoled-ui .forge-workroom-loading {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 30px;
+  background: #000;
+  color: #a8a8ad;
+  font: 12px Inter, 'Segoe UI', Arial, sans-serif;
+}
