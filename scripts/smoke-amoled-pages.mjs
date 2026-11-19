@@ -114,10 +114,11 @@ try {
 
   // The new Logo Resizer link generator must work on actual published Pages.
   await nav.getByRole('button', { name: 'Logo Resizer', exact: true }).click();
-  await page.locator('.logo-workspace input[type="file"]').setInputFiles({
-    name: 'Coca_Cola.png', mimeType: 'image/png', buffer: Buffer.from(base64, 'base64'),
-  });
-  await expect(page.locator('.logo-card')).toHaveCount(1);
+  await page.locator('.logo-workspace input[type="file"]').setInputFiles([
+    { name: 'Coca_Cola.png', mimeType: 'image/png', buffer: Buffer.from(base64, 'base64') },
+    { name: 'Pepsi.png', mimeType: 'image/png', buffer: Buffer.from(base64, 'base64') },
+  ]);
+  await expect(page.locator('.logo-card')).toHaveCount(2);
   // The sidebar expands while the pointer is on its navigation buttons.
   // Return the pointer to the workroom before selecting header controls.
   await page.mouse.move(1050, 650);
@@ -141,7 +142,14 @@ try {
   assert.ok(zoomHtml.includes('<span style="display:none;">Public Display</span>'));
   assert.ok(zoomHtml.includes('//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js'));
   assert.ok(zoomHtml.includes('$(this).tolunaZoom'));
-  assert.equal((zoomHtml.match(/<script/g) || []).length, 2);
+  assert.equal((zoomHtml.match(/<script/g) || []).length, 4);
+  const logoRows = zoomHtml.split('\n');
+  assert.equal(logoRows.length, 6, 'Each link must be immediately followed by two script tags');
+  for (let i = 0; i < logoRows.length; i += 3) {
+    assert.ok(logoRows[i].includes('class="zoomImage"'));
+    assert.ok(logoRows[i + 1].includes('ISDDefault.js'));
+    assert.ok(logoRows[i + 2].includes('$(this).tolunaZoom'));
+  }
   await page.screenshot({ path: 'forge-amoled-logo-links-live.png' });
 
   assert.deepEqual(jsErrors, [], 'Live AMOLED preview reported script errors');

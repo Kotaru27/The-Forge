@@ -29,7 +29,7 @@ jobs:
       - name: Checkout exactly the reviewed AMOLED implementation
         uses: actions/checkout@v4
         with:
-          ref: f647659874dcadf5d155d207c6af8cf1b670815e
+          ref: b86cc67283ddf044271c4f09d6c973e5d65bb89d
           path: candidate
           persist-credentials: false
 
@@ -64,7 +64,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           node --input-type=module <<'NODE'
-          const response = await fetch('https://api.github.com/repos/Kotaru27/The-Forge/actions/runs/44545269208', {
+          const response = await fetch('https://api.github.com/repos/Kotaru27/The-Forge/actions/runs/44546297355', {
             headers: {
               Accept: 'application/vnd.github+json',
               Authorization: 'Bearer ' + process.env.GH_TOKEN,
@@ -73,7 +73,7 @@ jobs:
           });
           if (!response.ok) throw Error('Cannot validate prior CI: HTTP ' + response.status);
           const run = await response.json();
-          const approved = 'f647659874dcadf5d155d207c6af8cf1b670815e';
+          const approved = 'b86cc67283ddf044271c4f09d6c973e5d65bb89d';
           if (run.head_sha !== approved || run.status !== 'completed' || run.conclusion !== 'success') {
             throw Error('The pinned AMOLED revision does not have a successful complete CI run.');
           }
