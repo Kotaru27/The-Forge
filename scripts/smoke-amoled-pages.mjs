@@ -144,11 +144,13 @@ try {
   assert.ok(zoomHtml.includes('$(this).tolunaZoom'));
   assert.equal((zoomHtml.match(/<script/g) || []).length, 4);
   const logoRows = zoomHtml.split('\n');
-  assert.equal(logoRows.length, 6, 'Each link must be immediately followed by two script tags');
-  for (let i = 0; i < logoRows.length; i += 3) {
-    assert.ok(logoRows[i].includes('class="zoomImage"'));
-    assert.ok(logoRows[i + 1].includes('ISDDefault.js'));
-    assert.ok(logoRows[i + 2].includes('$(this).tolunaZoom'));
+  assert.equal(logoRows.length, 2, 'Each image, hidden span and both scripts must occupy one line');
+  for (const row of logoRows) {
+    assert.ok(row.startsWith('<center><img '));
+    assert.ok(row.includes('class="zoomImage"'));
+    assert.ok(row.includes('</span><script src="//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js"></script><script> $(document).on("ready"'));
+    assert.ok(row.includes('$(this).tolunaZoom'));
+    assert.ok(row.endsWith('</script>'));
   }
   await page.screenshot({ path: 'forge-amoled-logo-links-live.png' });
 
