@@ -75,30 +75,34 @@ html, body, #root { background: #000; }
   overflow: hidden;
 }
 .forge-amoled-ui .sketch-sidebar-rail {
+  position: relative;
+  z-index: 20;
   flex: 0 0 78px;
   width: 78px;
   min-width: 78px;
-  overflow: hidden;
+  overflow: visible;
   background: #050505;
   border-right: 1px solid #242424;
 }
-.forge-amoled-ui .sketch-sidebar-rail:hover,
-.forge-amoled-ui .sketch-sidebar-rail:focus-within {
-  flex-basis: 210px;
-  width: 210px;
-  min-width: 210px;
-}
 .forge-amoled-ui .sidebar.sketch-sidebar {
+  position: absolute;
+  inset: 0 auto 0 0;
   display: flex;
   flex-direction: column;
-  width: 100% !important;
-  min-width: 0 !important;
-  flex: 1 1 auto !important;
+  width: 78px !important;
+  min-width: 78px !important;
+  flex: 0 0 auto !important;
   height: 100%;
   overflow: hidden;
   align-items: stretch !important;
   background: #050505 !important;
   border: 0 !important;
+  border-right: 1px solid #252525 !important;
+}
+.forge-amoled-ui .sketch-sidebar-rail:hover .sidebar.sketch-sidebar,
+.forge-amoled-ui .sketch-sidebar-rail:focus-within .sidebar.sketch-sidebar {
+  width: 210px !important;
+  min-width: 210px !important;
 }
 .forge-amoled-ui .brand.sketch-brand {
   display: flex;
