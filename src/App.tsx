@@ -8,7 +8,6 @@ import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
 import { ForgeHome, ToolGlyph } from './home/ForgeHome';
 import { isToolId, tools, type ToolId } from './tools';
-import './workroom-system.css';
 
 // Preserve the mounted workrooms and their local state during route changes.
 const StableForgeHome = memo(ForgeHome);
