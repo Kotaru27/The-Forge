@@ -92,7 +92,7 @@ test('blank middle brand row does not shift display names to another logo', () =
   assert.match(rows[2], /Coca_Cola\.png" class="zoomImage" alt="Last"/);
 });
 
-test('zoom script is opt-in, exactly once, after all image links', () => {
+test('zoom scripts are opt-in after every individual image link', () => {
   const opts = {
     brands: ['A', 'B'], filenames: ['A', 'B'], folder: '', server: 's3', format: 'png',
   };
@@ -100,8 +100,15 @@ test('zoom script is opt-in, exactly once, after all image links', () => {
   const on = generateLogoLinks({ ...opts, includeEnlargement: true });
   assert.ok(!off.includes('<script'));
   assert.equal((on.match(/class="zoomImage"/g) || []).length, 2);
-  assert.equal((on.match(/<script/g) || []).length, 2);
-  assert.ok(on.lastIndexOf('<script') > on.lastIndexOf('</span>'));
+  assert.equal((on.match(/<script/g) || []).length, 4);
+  const rows = on.split('\n');
+  // Each link is immediately followed by its own external + initialization script.
+  assert.equal(rows.length, 6);
+  for (let offset = 0; offset < rows.length; offset += 3) {
+    assert.match(rows[offset], /class="zoomImage"/);
+    assert.match(rows[offset + 1], /^<script src="\/\/dcqhpema7gk9a.cloudfront.net\/IND\/HTML5\/ISDDefault.js"><\/script>$/);
+    assert.match(rows[offset + 2], /^<script> \$\(document\).on\("ready"/);
+  }
   assert.ok(on.includes('//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js'));
   assert.ok(on.includes('$(this).tolunaZoom({url : $(this).prop("src"), icon: false});'));
 });
@@ -110,4 +117,25 @@ test('both lists blank with no uploaded logos is rejected', () => {
   assert.throws(() => generateLogoLinks({
     brands: [''], altNames: ['Display Only'], filenames: [], server: 's3', folder: '', format: 'png',
   }), /Upload logos or enter at least one brand name/);
+});
+
+test('four logos emit eight script tags, with one full script pair after every link', () => {
+  const html = generateLogoLinks({
+    brands: ['1', '2', '3', '4'],
+    altNames: ['11', '22', '33', '44'],
+    filenames: ['1', '2', '3', '4'],
+    folder: 'cvbcxvb', server: 's3', format: 'png', includeEnlargement: true,
+  });
+  const rows = html.split('\n');
+  assert.equal(rows.length, 12);
+  assert.equal((html.match(/class="zoomImage"/g) || []).length, 4);
+  assert.equal((html.match(/<script/g) || []).length, 8);
+  for (let i = 0; i < 4; i++) {
+    const index = i * 3;
+    assert.ok(rows[index].includes('/cvbcxvb/' + (i + 1) + '.png" class="zoomImage" alt="' + ((i + 1) * 11) + '"'));
+    assert.ok(rows[index].includes('<span style="display:none;">' + ((i + 1) * 11) + '</span>'));
+    assert.equal(rows[index + 1], '<script src="//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js"></script>');
+    assert.ok(rows[index + 2].startsWith('<script> $(document).on("ready"'));
+    assert.ok(rows[index + 2].includes('$(this).tolunaZoom({url : $(this).prop("src"), icon: false});'));
+  }
 });

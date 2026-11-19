@@ -132,8 +132,9 @@ export function generateLogoLinks(input: LogoLinkInput): string {
     const fallbackName = filenameDisplayName(filename);
     const displayName = input.altNames?.[index]?.trim() || fallbackName;
     const url = `${baseUrl}${folderPath}${filename}`;
-    return [`<center><img src="${escapeHtml(url)}" class="zoomImage" alt="${escapeHtml(displayName)}" style="max-width:100%" align ="center"></center><span style="display:none;">${escapeHtml(displayName)}</span>`];
+    const imageLink = `<center><img src="${escapeHtml(url)}" class="zoomImage" alt="${escapeHtml(displayName)}" style="max-width:100%" align ="center"></center><span style="display:none;">${escapeHtml(displayName)}</span>`;
+    return [imageLink + (input.includeEnlargement ? '\n' + LOGO_ENLARGEMENT_SCRIPTS : '')];
   });
   if (!html.length) throw new Error('No logo names available to generate links');
-  return html.join('\n') + (input.includeEnlargement ? '\n' + LOGO_ENLARGEMENT_SCRIPTS : '');
+  return html.join('\n');
 }
