@@ -71,11 +71,19 @@ function ensureScheduled() {
     scheduleAfterScroll();
     return;
   }
-  const jobs = [...queued.values()];
-  if (!visibleFrame && jobs.some(job => job.visible)) {
+  // Avoid allocating a fresh array of every preview job during each
+  // frame/idle scheduling pass in large 50–200-logo workrooms.
+  let hasVisible = false;
+  let hasIdle = false;
+  for (const job of queued.values()) {
+    if (job.visible) hasVisible = true;
+    else hasIdle = true;
+    if (hasVisible && hasIdle) break;
+  }
+  if (!visibleFrame && hasVisible) {
     visibleFrame = window.requestAnimationFrame(nextVisible);
   }
-  if (!idleTask && jobs.some(job => !job.visible)) {
+  if (!idleTask && hasIdle) {
     idleTask = typeof window.requestIdleCallback === 'function'
       ? window.requestIdleCallback(nextIdle)
       : window.setTimeout(() => nextIdle(), 90);
