@@ -1,9 +1,6 @@
 name: Graphite Pencil V2 + authentic Pencil Intro isolated Pages previews
 
 on:
-  push:
-    branches:
-      - release/pages-preview
   workflow_dispatch:
 
 # Production main stays byte-identical; TWO isolated design previews are
