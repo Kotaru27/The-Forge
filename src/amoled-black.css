@@ -272,7 +272,7 @@ html, body, #root { background: #000; }
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 32px clamp(22px, 3.6vw, 62px) 45px;
+  padding: 26px clamp(22px, 3.6vw, 62px) 38px;
   background: #000;
   color: #f2f2f3;
 }
@@ -287,8 +287,8 @@ html, body, #root { background: #000; }
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 160px;
-  padding: 0 0 18px;
+  min-height: 132px;
+  padding: 0 0 15px;
   border-bottom: 1px solid #252525;
 }
 .forge-amoled-ui .sketch-hero-center {
@@ -301,23 +301,23 @@ html, body, #root { background: #000; }
   margin: 0;
   font-family: inherit;
   font-weight: 770;
-  font-size: clamp(42px, 5.2vw, 78px);
+  font-size: clamp(43px, 4.6vw, 70px);
   line-height: 1;
   letter-spacing: -.075em;
   color: #f2f2f3;
 }
 .forge-amoled-ui .sketch-subtitle {
   margin: 14px 0 0;
-  font-size: 12px;
-  letter-spacing: .035em;
-  color: #96969e;
+  font-size: 13px;
+  letter-spacing: .015em;
+  color: #aaaab0;
 }
 .forge-amoled-ui .sketch-welcome-row {
   display: flex;
   justify-content: space-between;
   align-items: end;
   gap: 18px;
-  padding: 25px 0 22px;
+  padding: 22px 0 19px;
 }
 .forge-amoled-ui .sketch-welcome-copy h2 {
   margin: 0;
@@ -328,7 +328,7 @@ html, body, #root { background: #000; }
 .forge-amoled-ui .sketch-welcome-copy p {
   margin: 5px 0 0;
   color: #909097;
-  font-size: 12px;
+  font-size: 13px;
 }
 .forge-amoled-ui .sketch-welcome-controls { display: flex; gap: 8px; align-items: center; }
 .forge-amoled-ui .sketch-search-field {
@@ -352,7 +352,7 @@ html, body, #root { background: #000; }
   outline: none;
   background: transparent;
   color: #f5f5f5;
-  font: 12px Inter, 'Segoe UI', Arial, sans-serif;
+  font: 13px Inter, 'Segoe UI', Arial, sans-serif;
 }
 .forge-amoled-ui .sketch-search-field:focus-within { border-color: #a0a0a5; }
 .forge-amoled-ui .sketch-search-input:focus-visible { outline: none !important; }
@@ -369,7 +369,7 @@ html, body, #root { background: #000; }
 .forge-amoled-ui .sketch-home-grid {
   display: grid !important;
   grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
-  gap: 17px !important;
+  gap: 16px !important;
   padding: 0;
 }
 .forge-amoled-ui .sketch-home-grid > :is(
@@ -390,11 +390,11 @@ html, body, #root { background: #000; }
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 25px;
+  gap: 16px;
   width: 100%;
   min-width: 0;
-  min-height: 282px;
-  padding: 22px !important;
+  min-height: 222px;
+  padding: 20px !important;
   border: 1px solid #2a2a2a !important;
   border-radius: 10px !important;
   background: #0c0c0c !important;
@@ -412,8 +412,8 @@ html, body, #root { background: #000; }
 .forge-amoled-ui .sketch-card-art {
   display: grid;
   place-items: center;
-  width: 69px;
-  height: 69px;
+  width: 56px;
+  height: 56px;
   flex: 0 0 auto;
   border: 1px solid #303030;
   border-radius: 10px;
@@ -426,24 +426,24 @@ html, body, #root { background: #000; }
   align-items: flex-start;
   width: 100%;
   min-width: 0;
-  gap: 7px;
+  gap: 6px;
 }
 .forge-amoled-ui .sketch-card-title {
   color: #f3f3f4;
   font-family: inherit;
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 670;
   letter-spacing: -.035em;
 }
 .forge-amoled-ui .sketch-card-desc {
-  font: 12px/1.5 Inter, 'Segoe UI', Arial, sans-serif;
-  color: #a6a6ac;
+  font: 13px/1.5 Inter, 'Segoe UI', Arial, sans-serif;
+  color: #b6b6bd;
   text-align: left;
 }
 .forge-amoled-ui .sketch-card-meta {
-  margin-top: 8px;
-  font-size: 10px;
-  color: #85858c;
+  margin-top: 5px;
+  font-size: 11px;
+  color: #96969e;
 }
 .forge-amoled-ui .sketch-empty-state {
   width: min(1420px, 100%);
@@ -716,7 +716,7 @@ html, body, #root { background: #000; }
 }
 
 @media (min-width: 1201px) {
- .forge-amoled-ui .sketch-tool-card { min-height: 282px !important; }
+ .forge-amoled-ui .sketch-tool-card { min-height: 222px !important; }
 }
 
 /* Keep queue rows distinct while retaining the original ready/prepared order. */
@@ -756,4 +756,276 @@ html, body, #root { background: #000; }
   background: #000;
   color: #a8a8ad;
   font: 12px Inter, 'Segoe UI', Arial, sans-serif;
+}
+
+
+/* The Forge refinement: one intentional grayscale UI, consistent controls,
+ * stronger scan hierarchy, and responsive header geometry. No tool logic
+ * changes, new surfaces, animation or transition effects. */
+.forge-app.forge-amoled-ui {
+  --forge-control-bg: #141416;
+  --forge-control-border: #3b3b40;
+  --forge-control-hover: #252528;
+  --forge-control-focus: #d3d3d8;
+  --forge-label: #bdbdc3;
+  --forge-secondary: #a1a1aa;
+  --forge-radius: 7px;
+}
+.forge-amoled-ui .sketch-card-art svg {
+  width: 33px;
+  height: 33px;
+}
+.forge-amoled-ui .sketch-card-art {
+  background: #111113;
+  border-color: #323236;
+}
+.forge-amoled-ui .sketch-tool-card {
+  overflow: hidden;
+}
+.forge-amoled-ui .sketch-card-body {
+  margin-top: auto;
+}
+.forge-amoled-ui .sketch-search-field {
+  border-color: var(--forge-control-border);
+  background: var(--forge-control-bg);
+}
+.forge-amoled-ui .sketch-search-input::placeholder {
+  color: var(--forge-secondary);
+}
+.forge-amoled-ui :is(
+  .pdf-workspace, .split-workspace, .video-stills, .storyboard-tool,
+  .adw-workspace, .link-generator, .logo-workspace
+) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]), select, textarea) {
+  border-radius: var(--forge-radius) !important;
+  border-color: var(--forge-control-border) !important;
+  background: var(--forge-control-bg) !important;
+}
+.forge-amoled-ui :is(
+  .pdf-workspace, .split-workspace, .video-stills, .storyboard-tool,
+  .adw-workspace, .link-generator, .logo-workspace
+) :is(input, select, textarea):focus-visible {
+  outline-color: var(--forge-control-focus) !important;
+}
+.forge-amoled-ui .native-tool button:not(.logo-preview-button):not(.sketch-subtool-link) {
+  border-radius: var(--forge-radius);
+}
+.forge-amoled-ui :is(.pdf-field, .split-field, .sb-controls label, .link-panel label, .adw-controls label) {
+  line-height: 1.45;
+}
+.forge-amoled-ui :is(.pdf-muted, .split-muted, .logo-subtle, .vs-status, .link-hint) {
+  line-height: 1.5;
+}
+
+/* Logo header: preserve the same groups, order, options and single header
+ * region. The inherited CTK eight-column rule squeezed checkbox labels
+ * and sliders below legible sizes at standard desktop widths. */
+.forge-app.forge-amoled-ui .forge-v5-head {
+  padding: 15px clamp(15px, 1.8vw, 28px) 10px !important;
+  max-width: 100%;
+}
+.forge-amoled-ui .forge-v5-group {
+  min-width: 0;
+  gap: 8px;
+}
+.forge-amoled-ui .forge-v5-group-title {
+  font-size: 11px;
+  font-weight: 690;
+  line-height: 1.3;
+  color: var(--forge-label);
+  letter-spacing: .055em;
+  white-space: nowrap;
+}
+.forge-amoled-ui .forge-v5-subnote,
+.forge-amoled-ui .forge-v5-deck-foot {
+  color: var(--forge-secondary);
+  font-size: 11px;
+}
+.forge-amoled-ui .forge-v5-deck-foot { padding-top: 10px; }
+.forge-amoled-ui .forge-logo-v5 .forge-v5-action {
+  font-size: 12px;
+  font-weight: 630;
+  min-height: 38px;
+  height: 38px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-preset-grid button {
+  height: 37px;
+  min-height: 37px;
+  font-size: 11px;
+}
+.forge-amoled-ui .forge-v5-button-stack {
+  grid-template-rows: repeat(2, 38px);
+  gap: 6px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-dimensions {
+  grid-template-rows: repeat(2, 37px);
+  gap: 6px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-dimensions input {
+  width: 68px;
+  height: 37px;
+  min-height: 37px;
+  font-size: 12px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-group select,
+.forge-amoled-ui .forge-logo-v5 .forge-v5-type-controls input[type=number] {
+  min-height: 38px;
+  height: 38px;
+  font-size: 12px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-type-controls {
+  gap: 8px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-typography select {
+  width: 126px;
+  max-width: 126px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-type-controls input[type=number] {
+  width: 60px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-swatch {
+  height: 38px;
+  width: 38px;
+  flex-basis: 38px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-checkboxes {
+  gap: 7px;
+}
+.forge-amoled-ui .logo-workspace .forge-v5-checkboxes label {
+  font-size: 12px !important;
+  font-weight: 560 !important;
+  color: var(--forge-label) !important;
+  white-space: nowrap;
+  padding: 0 4px;
+  gap: 7px;
+  min-height: 38px;
+}
+.forge-amoled-ui .forge-v5-checkboxes input[type=checkbox] {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-sliders {
+  max-width: none;
+  gap: 8px 16px;
+}
+.forge-amoled-ui .forge-logo-v5 .forge-v5-sliders label {
+  display: grid;
+  grid-template-columns: 72px minmax(82px, 1fr) 48px;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  max-width: none;
+  height: 38px;
+  min-height: 38px;
+  font-size: 11px;
+}
+.forge-amoled-ui .forge-v5-sliders label span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .015em;
+}
+.forge-amoled-ui .forge-v5-sliders output { color: #bdbdc3; font-variant-numeric: tabular-nums; }
+.forge-amoled-ui .logo-link-names-grid textarea { font-size: 13px; line-height: 1.5; }
+.forge-amoled-ui .logo-link-dialog { border-radius: 10px !important; }
+.forge-amoled-ui .logo-link-dialog .logo-link-zoom-toggle {
+  align-items: center;
+  font-size: 12px;
+}
+.forge-amoled-ui .logo-card-controls label { font-size: 12px; line-height: 1.4; }
+.forge-amoled-ui .logo-card-heading { min-height: 44px; }
+
+/* Wide desktops keep the compact eight-group single-row header. */
+@media (min-width: 1601px) {
+  .forge-app.forge-amoled-ui .forge-v5-control-grid {
+    min-width: 0 !important;
+    grid-template-columns: 142px 162px 96px 95px minmax(215px,1.25fr) 126px minmax(250px,1.15fr) 151px !important;
+    grid-template-areas: "import presets custom format typography options position export" !important;
+    column-gap: clamp(8px, .8vw, 15px) !important;
+    row-gap: 10px !important;
+  }
+  .forge-amoled-ui .forge-v5-sliders { flex-direction: column; }
+}
+/* Mid-size desktops keep a SINGLE header, with the same control ordering
+ * distributed over two aligned tracks rather than horizontal clipping. */
+@media (min-width: 1101px) and (max-width: 1600px) {
+  .forge-app.forge-amoled-ui .forge-v5-head {
+    overflow-x: hidden !important;
+  }
+  .forge-app.forge-amoled-ui .forge-v5-control-grid {
+    display: grid !important;
+    min-width: 0 !important;
+    grid-template-columns: 140px 164px 101px 100px minmax(175px,1fr) 166px !important;
+    grid-template-areas:
+      "import presets custom format typography typography"
+      "options options position position position export" !important;
+    gap: 12px 14px !important;
+    align-items: start;
+  }
+  .forge-amoled-ui .forge-v5-options .forge-v5-checkboxes {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  .forge-amoled-ui .forge-v5-position .forge-v5-sliders {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .forge-amoled-ui .forge-v5-position .forge-v5-sliders label {
+    flex: 1 1 240px;
+  }
+}
+@media (min-width: 801px) and (max-width: 1100px) {
+  .forge-app.forge-amoled-ui .forge-v5-head {
+    overflow-x: hidden !important;
+    max-height: min(350px, 50dvh);
+    overflow-y: auto !important;
+  }
+  .forge-app.forge-amoled-ui .forge-v5-control-grid {
+    min-width: 0 !important;
+    grid-template-columns: 136px 164px minmax(145px, 1fr) 160px !important;
+    grid-template-areas:
+      "import presets custom format"
+      "typography typography options export"
+      "position position position position" !important;
+    gap: 11px 14px !important;
+  }
+  .forge-amoled-ui .forge-v5-position .forge-v5-sliders {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .forge-amoled-ui .forge-v5-position .forge-v5-sliders label {
+    flex: 1 1 220px;
+  }
+}
+@media (max-width: 800px) {
+  .forge-app.forge-amoled-ui .forge-v5-head {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    max-height: min(380px, 49dvh);
+  }
+  .forge-app.forge-amoled-ui .forge-v5-control-grid {
+    min-width: 0 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "import presets"
+      "custom format"
+      "typography typography"
+      "options options"
+      "position position"
+      "export export" !important;
+    gap: 10px 12px !important;
+  }
+  .forge-amoled-ui .forge-logo-v5 .forge-v5-typography select {
+    max-width: min(126px, 42vw);
+  }
+  .forge-amoled-ui .forge-v5-position .forge-v5-sliders {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+  .forge-amoled-ui .forge-v5-position .forge-v5-sliders label {
+    width: 100%;
+  }
 }
