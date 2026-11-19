@@ -112,6 +112,35 @@ try {
   assert.equal(file.suggestedFilename(), 'split_images.zip');
   assert.ok(await file.path(), 'No ZIP was downloaded');
 
+  // The new Logo Resizer link generator must work on actual published Pages.
+  await nav.getByRole('button', { name: 'Logo Resizer', exact: true }).click();
+  await page.locator('.logo-workspace input[type="file"]').setInputFiles({
+    name: 'Coca_Cola.png', mimeType: 'image/png', buffer: Buffer.from(base64, 'base64'),
+  });
+  await expect(page.locator('.logo-card')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Generate links' }).click();
+  const logoLinks = page.getByRole('dialog', { name: 'Generate logo links' });
+  const brandNames = logoLinks.getByLabel('Brand names (one per line)');
+  const altNames = logoLinks.getByLabel('Display none / Alt names (one per line)');
+  const zoom = logoLinks.getByRole('checkbox', { name: /Include enlargement script/ });
+  await expect(brandNames).toBeVisible();
+  await expect(altNames).toBeVisible();
+  await expect(zoom).not.toBeChecked();
+  await logoLinks.getByRole('button', { name: 'Generate', exact: true }).click();
+  await expect(logoLinks.getByLabel('Generated HTML')).toHaveValue(
+    /Coca_Cola\.png" class="zoomImage" alt="Coca Cola"/
+  );
+  await altNames.fill('Public Display');
+  await zoom.check();
+  await logoLinks.getByRole('button', { name: 'Generate', exact: true }).click();
+  const zoomHtml = await logoLinks.getByLabel('Generated HTML').inputValue();
+  assert.ok(zoomHtml.includes('class="zoomImage" alt="Public Display"'));
+  assert.ok(zoomHtml.includes('<span style="display:none;">Public Display</span>'));
+  assert.ok(zoomHtml.includes('//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js'));
+  assert.ok(zoomHtml.includes('$(this).tolunaZoom'));
+  assert.equal((zoomHtml.match(/<script/g) || []).length, 2);
+  await page.screenshot({ path: 'forge-amoled-logo-links-live.png' });
+
   assert.deepEqual(jsErrors, [], 'Live AMOLED preview reported script errors');
   assert.deepEqual(badAssets, [], 'Live AMOLED preview had missing assets');
   console.log('AMOLED LIVE PAGES SMOKE PASSED:', preview.href,
