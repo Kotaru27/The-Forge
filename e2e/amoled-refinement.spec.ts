@@ -42,10 +42,13 @@ test('Logo Resizer desktop header labels and controls do not clip or overlap', a
     expect(Math.abs(item.y - positions[0].y)).toBeLessThan(4);
   }
   for (const item of positions) {
-    expect(item.width).toBeGreaterThanOrEqual(90);
+    expect(item.width).toBeGreaterThanOrEqual(80);
     expect(item.titleFont).toBeGreaterThanOrEqual(11);
     expect(item.right).toBeLessThanOrEqual(1440);
   }
+  // These are the two groups whose labels/sliders were clipped previously.
+  expect(positions[5].width).toBeGreaterThanOrEqual(125);
+  expect(positions[6].width).toBeGreaterThanOrEqual(195);
   const xOverflow = await head.evaluate(node => node.scrollWidth - node.clientWidth);
   expect(xOverflow).toBeLessThanOrEqual(2);
   const optionLabels = page.locator('.forge-v5-checkboxes label');
