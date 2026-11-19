@@ -686,3 +686,14 @@ test('logo link dialog shows two side-by-side name boxes and always adds zoomIma
   expect(html.split('\n')[1]).toContain('alt="Coca Cola"');
   expect(html).not.toContain('<script');
 });
+
+
+test('sidebar click releases header controls without losing keyboard focus expansion', async ({ page }) => {
+  const nav = page.getByRole('navigation', { name: 'Select a tool' });
+  await nav.getByRole('button', { name: 'Image Splitter', exact: true }).click();
+  await nav.getByRole('button', { name: 'Logo Resizer', exact: true }).click();
+  await page.mouse.move(1050, 650);
+  await expect(page.locator('.sidebar.sketch-sidebar')).toHaveCSS('width', '78px');
+  await page.getByRole('button', { name: 'Generate links' }).click({ timeout: 8_000 });
+  await expect(page.getByRole('dialog', { name: 'Generate logo links' })).toBeVisible();
+});
