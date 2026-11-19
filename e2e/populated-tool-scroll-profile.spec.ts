@@ -163,7 +163,9 @@ test('profile actual wheel scrolling across all seven populated tools', async ({
     Array.from({ length: 100 }, (_, i) => 'Advertisement_' + i + '.jpg').join('\n')
   );
   await page.getByRole('button', { name: 'Generate', exact: true }).click();
-  report['link-generator'] = await wheelProfile(page, '.link-generator');
+  // The compact outer panel fits at this viewport. The 100-line filename editor
+  // is the naturally scrollable surface; do not inflate the workroom to force overflow.
+  report['link-generator'] = await wheelProfile(page, '#link-filenames');
 
   await page.addInitScript(() => {
     Object.defineProperty(window, 'showDirectoryPicker', { configurable: true, value: async () => ({

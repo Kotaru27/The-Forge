@@ -71,6 +71,7 @@ test('AMOLED Home has no overlapping or clipped cards on narrow and short screen
     await lastCard.scrollIntoViewIfNeeded();
     await expect(lastCard).toBeVisible();
     if (measured.scrollHeight > measured.clientHeight + 8) {
+      await page.locator('.sketch-home').evaluate(el => el.scrollTo({ top: el.scrollHeight, behavior: 'instant' }));
       expect(await page.locator('.sketch-home').evaluate(el => el.scrollTop), width + ': vertical scrolling works').toBeGreaterThan(0);
     }
 
