@@ -723,3 +723,27 @@ html, body, #root { background: #000; }
 .forge-amoled-ui .adw-table tbody tr { background: #0c0c0c !important; }
 .forge-amoled-ui .adw-table tbody tr[data-stage="prepared"] { background: #151515 !important; }
 .forge-amoled-ui .adw-table tbody td { color: #dedee0 !important; }
+
+/* Neutralize CTK's stage-specific white/cream rows and queue separator. */
+.forge-app.forge-amoled-ui .adw-workspace .adw-table tbody tr[data-stage='ready'] {
+  background: #0c0c0c !important;
+}
+.forge-app.forge-amoled-ui .adw-workspace .adw-table tbody tr[data-stage='requested'] {
+  background: #131313 !important;
+}
+.forge-app.forge-amoled-ui .adw-workspace .adw-table tbody tr[data-stage='prepared'] {
+  background: #151515 !important;
+}
+.forge-app.forge-amoled-ui .adw-workspace .adw-table tbody tr[data-stage]:hover {
+  background: #202020 !important;
+}
+.forge-app.forge-amoled-ui .adw-workspace .adw-table tr.adw-queue-divider td {
+  background: #1c1c1c !important;
+  border-color: #38383b !important;
+  color: #e0e0e2 !important;
+}
+.forge-app.forge-amoled-ui .adw-workspace .adw-table th {
+  background: #121212 !important;
+  color: #c6c6cb !important;
+  border-color: #303034 !important;
+}
