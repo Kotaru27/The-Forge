@@ -76,8 +76,7 @@ function escapeHtml(value: string): string {
 }
 
 /** Logo image classes are always present; the external zoom scripts are opt-in. */
-export const LOGO_ENLARGEMENT_SCRIPTS = `<script src="//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js"></script>
-<script> $(document).on("ready", function(){$(".zoomImage").each(function(index){$(this).prop({id: "zoomImage" + index});$(this).tolunaZoom({url : $(this).prop("src"), icon: false}); }); }); </script>`;
+export const LOGO_ENLARGEMENT_SCRIPTS = `<script src="//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js"></script><script> $(document).on("ready", function(){$(".zoomImage").each(function(index){$(this).prop({id: "zoomImage" + index});$(this).tolunaZoom({url : $(this).prop("src"), icon: false}); }); }); </script>`;
 
 function filenameDisplayName(filename: string): string {
   return filename.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
