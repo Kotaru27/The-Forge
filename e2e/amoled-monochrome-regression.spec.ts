@@ -45,6 +45,8 @@ test('all eight Home/workroom surfaces render in a neutral monochrome palette', 
   const issues: string[] = [];
   for (const route of routes) {
     await openForgeRoute(page, route);
+    if (route === 'ad-downloader') await expect(page.locator('.adw-workspace')).toBeVisible();
+    if (route === 'pdf-to-image') await expect(page.locator('.pdf-workspace')).toBeVisible();
     const host = page.locator('.forge-amoled-ui');
     await expect(host, route).toBeVisible();
     await expect(page.locator('.sketch-main-area')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
@@ -54,7 +56,7 @@ test('all eight Home/workroom surfaces render in a neutral monochrome palette', 
       issues.push(route + ': ' + JSON.stringify(leaks.slice(0, 35)));
     }
     await page.screenshot({ path: testInfo.outputPath('amoled-pure-' + route + '.png'), animations: 'disabled' });
-    if (['home','logo-resizer','link-generator','storyboard','ad-downloader'].includes(route)) {
+    if (routes.includes(route)) {
       const capture = await page.screenshot({ type: 'jpeg', quality: 31, animations: 'disabled' });
       console.info('AMOLED_CAPTURE_' + route + '=' + capture.toString('base64'));
     }
@@ -66,6 +68,8 @@ test('hover and keyboard focus states do not restore old green palettes', async 
   const issues: string[] = [];
   for (const route of routes) {
     await openForgeRoute(page, route);
+    if (route === 'ad-downloader') await expect(page.locator('.adw-workspace')).toBeVisible();
+    if (route === 'pdf-to-image') await expect(page.locator('.pdf-workspace')).toBeVisible();
     const first = page.locator('.native-tool:not([hidden]) button:visible').first();
     if (await first.count()) {
       await first.hover();
@@ -86,4 +90,41 @@ test('hover and keyboard focus states do not restore old green palettes', async 
     }
   }
   expect(issues, 'Interactive states contain old colors').toEqual([]);
+});
+
+test('populated logo, split, storyboard and link output states stay monochrome', async ({ page }) => {
+  test.setTimeout(90_000);
+  const base64 = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 360;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw Error('Canvas unsupported');
+    ctx.fillStyle = '#888888';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  const image = { name: 'TestImage.png', mimeType: 'image/png', buffer: Buffer.from(base64, 'base64') };
+
+  await openForgeRoute(page, 'logo-resizer');
+  await page.locator('.logo-workspace input[type="file"]').setInputFiles(image);
+  await expect(page.locator('.logo-card')).toHaveCount(1);
+  expect(await paletteLeaks(page), 'populated Logo Resizer').toEqual([]);
+
+  await openForgeRoute(page, 'image-splitter');
+  await page.getByLabel('Upload images').setInputFiles(image);
+  await expect(page.locator('.split-card')).toHaveCount(1);
+  expect(await paletteLeaks(page), 'populated Image Splitter').toEqual([]);
+
+  await openForgeRoute(page, 'storyboard');
+  await page.getByLabel('Choose storyboard assets').setInputFiles(image);
+  await expect(page.locator('.sb-frame')).toHaveCount(1);
+  expect(await paletteLeaks(page), 'populated Storyboard').toEqual([]);
+
+  await openForgeRoute(page, 'link-generator');
+  await page.getByLabel('Folder / Path').fill('Neutral');
+  await page.getByLabel('Filenames').fill('TestImage.png');
+  await page.getByRole('button', { name: 'Generate', exact: true }).click();
+  await expect(page.locator('#link-exposure')).toHaveValue(/TestImage.png/);
+  expect(await paletteLeaks(page), 'generated Link Generator output').toEqual([]);
 });
