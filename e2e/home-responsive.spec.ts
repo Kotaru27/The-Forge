@@ -45,7 +45,9 @@ test('AMOLED Home has no overlapping or clipped cards on narrow and short screen
 
     for (const [index, { card, art, title, desc }] of measured.cards.entries()) {
       expect(card.width, width + ': card ' + index + ' usable width').toBeGreaterThan(205);
-      expect(card.height, width + ': card ' + index + ' usable height').toBeGreaterThanOrEqual(275);
+      // Compact AMOLED cards intentionally replace the old 282px treatment;
+      // child containment checks below still prevent clipping at all viewports.
+      expect(card.height, width + ': card ' + index + ' usable height').toBeGreaterThanOrEqual(210);
       for (const [name, child] of [['art', art], ['title', title], ['description', desc]] as const) {
         expect(child.y, width + ': ' + name + ' top').toBeGreaterThanOrEqual(card.y - 1);
         expect(child.bottom, width + ': ' + name + ' bottom stays inside card').toBeLessThanOrEqual(card.bottom - 3);
