@@ -947,9 +947,46 @@ html, body, #root { background: #000; }
   }
   .forge-amoled-ui .forge-v5-sliders { flex-direction: column; }
 }
-/* Mid-size desktops keep a SINGLE header, with the same control ordering
- * distributed over two aligned tracks rather than horizontal clipping. */
-@media (min-width: 1101px) and (max-width: 1600px) {
+/* Standard desktops keep all eight groups in one readable row.
+ * Fixed parts are sized to their contents; the positioning track flexes. */
+@media (min-width: 1361px) and (max-width: 1600px) {
+  .forge-app.forge-amoled-ui .forge-v5-head {
+    overflow-x: hidden !important;
+  }
+  .forge-app.forge-amoled-ui .forge-v5-control-grid {
+    min-width: 0 !important;
+    grid-template-columns: 128px 150px 84px 86px 213px 137px minmax(196px, 1fr) 144px !important;
+    grid-template-areas: "import presets custom format typography options position export" !important;
+    gap: 8px 6px !important;
+    align-items: start;
+  }
+  .forge-amoled-ui .forge-v5-typography .forge-v5-type-controls {
+    gap: 5px;
+  }
+  .forge-amoled-ui .forge-v5-typography select { width: 114px; max-width: 114px; }
+  .forge-amoled-ui .forge-v5-type-controls input[type=number] { width: 52px; }
+  .forge-amoled-ui .forge-v5-typography .forge-v5-swatch { width: 34px; flex-basis: 34px; }
+  .forge-amoled-ui .forge-v5-options .forge-v5-checkboxes {
+    display: grid;
+    grid-template-rows: repeat(2, 38px);
+    gap: 5px;
+  }
+  .forge-amoled-ui .forge-v5-position .forge-v5-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  .forge-amoled-ui .forge-v5-position .forge-v5-sliders label {
+    flex: 0 0 38px;
+    width: 100%;
+    grid-template-columns: 55px minmax(48px, 1fr) 38px;
+    gap: 5px;
+  }
+}
+/* Compact desktops keep a SINGLE header, wrapping its groups instead of
+ * squeezing labels or creating horizontal scrolling. */
+@media (min-width: 1101px) and (max-width: 1360px) {
   .forge-app.forge-amoled-ui .forge-v5-head {
     overflow-x: hidden !important;
   }

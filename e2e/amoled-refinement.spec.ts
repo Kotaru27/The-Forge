@@ -37,8 +37,10 @@ test('Logo Resizer desktop header labels and controls do not clip or overlap', a
       width: rect.width, titleFont: label ? parseFloat(getComputedStyle(label).fontSize) : 0,
     };
   }));
-  expect(positions[5].y).toBeGreaterThan(positions[0].y + 40);
-  expect(Math.abs(positions[5].y - positions[7].y)).toBeLessThan(4);
+  // All eight groups must fit on one row at a normal 1440px desktop width.
+  for (const item of positions) {
+    expect(Math.abs(item.y - positions[0].y)).toBeLessThan(4);
+  }
   for (const item of positions) {
     expect(item.width).toBeGreaterThanOrEqual(90);
     expect(item.titleFont).toBeGreaterThanOrEqual(11);
