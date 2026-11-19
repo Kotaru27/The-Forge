@@ -120,7 +120,7 @@ export function generateLogoLinks(input: LogoLinkInput): string {
   }
 
   const folder = input.folder.trim().replace(/^\/+|\/+$/g, '');
-  const folderPath = folder ? `\${folder}/` : '';
+  const folderPath = folder ? `${folder}/` : '';
   const baseUrl = LOGO_SERVERS[input.server];
   const ext = outputExtension(input.format);
   const html = brands.flatMap((brand, index) => {
@@ -128,11 +128,11 @@ export function generateLogoLinks(input: LogoLinkInput): string {
     if (!brand && matchedIndex === null) return [];
     const filename = matchedIndex !== null
       ? fileNames[matchedIndex]
-      : `\${sanitizeLogoFilename(brand.substring(0, 30).replace(/-/g, '_'))}.\${ext}`;
+      : `${sanitizeLogoFilename(brand.substring(0, 30).replace(/-/g, '_'))}.${ext}`;
     const fallbackName = filenameDisplayName(filename);
     const displayName = input.altNames?.[index]?.trim() || fallbackName;
-    const url = `\${baseUrl}\${folderPath}\${filename}`;
-    return [`<center><img src="\${escapeHtml(url)}" class="zoomImage" alt="\${escapeHtml(displayName)}" style="max-width:100%" align ="center"></center><span style="display:none;">\${escapeHtml(displayName)}</span>`];
+    const url = `${baseUrl}${folderPath}${filename}`;
+    return [`<center><img src="${escapeHtml(url)}" class="zoomImage" alt="${escapeHtml(displayName)}" style="max-width:100%" align ="center"></center><span style="display:none;">${escapeHtml(displayName)}</span>`];
   });
   if (!html.length) throw new Error('No logo names available to generate links');
   return html.join('\n') + (input.includeEnlargement ? '\n' + LOGO_ENLARGEMENT_SCRIPTS : '');
