@@ -56,8 +56,6 @@ export function LogoResizer() {
   const cardsRef = useRef(cards);
   cardsRef.current = cards;
   const [focused, setFocused] = useState<string | null>(null);
-  const [focusExiting, setFocusExiting] = useState(false);
-  const focusExitTimer = useRef<number | null>(null);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
   const [confirmClear, setConfirmClear] = useState(false);
@@ -79,7 +77,6 @@ export function LogoResizer() {
       cardsRef.current.forEach(asset => URL.revokeObjectURL(asset.url));
       snapshotRef.current?.cards.forEach(asset => URL.revokeObjectURL(asset.url));
       if (snapshotTimer.current) window.clearTimeout(snapshotTimer.current);
-      if (focusExitTimer.current !== null) window.clearTimeout(focusExitTimer.current);
     };
   }, []);
 
@@ -185,24 +182,10 @@ export function LogoResizer() {
     }
   }
   function openFocus(id: string) {
-    if (focusExitTimer.current !== null) window.clearTimeout(focusExitTimer.current);
-    focusExitTimer.current = null;
-    setFocusExiting(false);
     setFocused(id);
   }
   function closeFocus() {
-    if (!focused || focusExitTimer.current !== null) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setFocused(null);
-      setFocusExiting(false);
-      return;
-    }
-    setFocusExiting(true);
-    focusExitTimer.current = window.setTimeout(() => {
-      focusExitTimer.current = null;
-      setFocused(null);
-      setFocusExiting(false);
-    }, 190);
+    setFocused(null);
   }
   function removeAsset(asset: LogoAsset) {
     setCards(previous => previous.filter(item => item.id !== asset.id));
@@ -211,12 +194,7 @@ export function LogoResizer() {
       const index = cards.findIndex(item => item.id === asset.id);
       const next = cards.filter(item => item.id !== asset.id)[Math.min(index, cards.length - 2)]?.id;
       if (next) openFocus(next);
-      else {
-        if (focusExitTimer.current !== null) window.clearTimeout(focusExitTimer.current);
-        focusExitTimer.current = null;
-        setFocusExiting(false);
-        setFocused(null);
-      }
+      else setFocused(null);
     }
   }
   function expireUndo() {
@@ -233,9 +211,6 @@ export function LogoResizer() {
     snapshotRef.current = saved;
     setSnapshot(saved);
     setCards([]);
-    if (focusExitTimer.current !== null) window.clearTimeout(focusExitTimer.current);
-    focusExitTimer.current = null;
-    setFocusExiting(false);
     setFocused(null);
     setConfirmClear(false);
     setSettings({ ...DEFAULT_LOGO_SETTINGS });
@@ -271,7 +246,7 @@ export function LogoResizer() {
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
     // Focus navigation must follow the currently visible list.
-  }, [focused, cards, focusExiting]);
+  }, [focused, cards]);
 
   const detail = cards.find(asset => asset.id === focused) ?? null;
   const updateLabel = (asset: LogoAsset, value: string) => {
@@ -438,7 +413,7 @@ export function LogoResizer() {
             </div>
           )}
         </main>
-        {detail && <aside className="logo-detail" aria-label="Focus Mode" data-exiting={focusExiting}>
+        {detail && <aside className="logo-detail" aria-label="Focus Mode">
           <div className="logo-detail-heading">
             <strong>{"Focus Mode"}</strong>
             <div className="logo-detail-buttons">

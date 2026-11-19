@@ -298,25 +298,23 @@ test('switching tools preserves an imported batch and does not trigger navigatio
 
 
 
-test('Focus Mode closes without visible exit motion and preserves the gallery', async ({ page }) => {
+test('Focus Mode closes immediately and preserves the gallery', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 860 });
   await addFiles(page, [sample, { ...sample, name: 'FocusSecond.png' }]);
   const gallery = page.locator('.logo-gallery');
   const originalWidth = await gallery.evaluate(el => el.getBoundingClientRect().width);
-  const firstOpen = page.getByRole('button', { name: 'Open Focus Mode for SampleLogo.png' });
-  await firstOpen.click();
+  await page.getByRole('button', { name: 'Open Focus Mode for SampleLogo.png' }).click();
   const focus = page.locator('.logo-detail');
-  await expect(focus).toHaveAttribute('data-exiting', 'false');
-  await page.getByRole('button', { name: 'Close Focus Mode' }).click();
-  await expect(focus).toHaveAttribute('data-exiting', 'true');
+  await expect(focus).toBeVisible();
   await expect(focus).toHaveCSS('animation-name', 'none');
-  // The drawer remains rendered during the exit, then unmounts.
-  await firstOpen.click({ force: true });
-  await expect(focus).toHaveAttribute('data-exiting', 'false');
-  await expect(focus).toHaveCount(1);
   await page.getByRole('button', { name: 'Close Focus Mode' }).click();
-  await expect(focus).toHaveCount(0, { timeout: 1500 });
+  await expect(focus).toHaveCount(0);
   expect(Math.abs((await gallery.evaluate(el => el.getBoundingClientRect().width)) - originalWidth)).toBeLessThanOrEqual(1);
+  // Rapid reopening works without a pending exit timer.
+  await page.getByRole('button', { name: 'Open Focus Mode for SampleLogo.png' }).click();
+  await expect(focus).toBeVisible();
+  await focus.getByRole('button', { name: 'Close Focus Mode' }).click();
+  await expect(focus).toHaveCount(0);
 });
 
 test('reduced motion closes Focus Mode immediately', async ({ page }) => {
