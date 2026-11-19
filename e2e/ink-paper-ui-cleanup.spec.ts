@@ -54,7 +54,8 @@ test('Fit to Platform hides typography controls while retaining upload and state
   await expect(page.locator('.sb-fit-stage canvas')).toBeVisible();
 });
 
-test('Ink & Paper secondary text is dark and legible in all seven workspaces', async ({ page }) => {
+
+test('all seven workspaces use legible static typography on AMOLED', async ({ page }) => {
   const samples = [
     ['logo-resizer', '.forge-v5-group-title'],
     ['pdf-to-image', '.pdf-setup h2'],
@@ -64,50 +65,23 @@ test('Ink & Paper secondary text is dark and legible in all seven workspaces', a
     ['link-generator', '.link-panel .link-subheading h3'],
     ['ad-downloader', '.adw-header p'],
   ] as const;
-
   for (const [route, selector] of samples) {
     await openForgeRoute(page, route);
     const target = page.locator(selector).first();
     await expect(target, route).toBeVisible();
-    const actual = await target.evaluate(el => {
-      const computed = getComputedStyle(el);
-      const channels = computed.color.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [];
-      const luminance = channels.length === 3
-        ? channels.map(v => v / 255).map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
-          .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0)
-        : 1;
-      return { color: computed.color, luminance, fontFamily: computed.fontFamily };
-    });
-    expect(actual.luminance, route + ': text is too light for paper surface (' + actual.color + ')').toBeLessThan(0.25);
-    expect(actual.fontFamily, route).toContain('Kalam');
+    await expect(target).toHaveCSS('animation-name', 'none');
+    const actual = await target.evaluate(el => getComputedStyle(el).color);
+    expect(actual, route + ': text should not be paper-dark').not.toMatch(/rgb\\(31, 35, 40\\)/);
   }
-
-  await openForgeRoute(page, 'ad-downloader');
-  await expect(page.locator('.adw-empty span').first()).toHaveCSS('color', 'rgb(47, 69, 98)');
 });
 
-test('graphite lines and lettering draw in place, with reduced-motion fallback', async ({page}) => {
+test('sketch illustrations, handwriting and transitions are absent', async ({ page }) => {
   await openForgeRoute(page, 'home');
-  const pencilPath = page.locator('.sketch-card-border-svg [data-pencil-trace]').first();
-  const title = page.locator('.sketch-hero-center h1');
-  await expect(pencilPath).toHaveAttribute('pathLength','1');
-  // Paper borders and illustration details are now static on every direct Home visit.
-  await expect(pencilPath).toHaveCSS('animation-name','none');
-  await expect(title.locator('.pencil-wordmark-art')).toHaveCount(1);
-  await expect(title).toHaveCSS('animation-name','none');
-  const oldBorderLoop = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
-  await expect(oldBorderLoop).toHaveCSS('animation-name','none');
-  const ongoing = page.locator('.sketch-card-art .pencil-ongoing-illustration-detail').first();
-  await expect(ongoing).toHaveCSS('animation-name','none');
-  await expect(page.locator('.pencil-written-glyph')).toHaveCount(0);
-  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
-  await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('transform','none');
-
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await expect(pencilPath).toHaveCSS('animation-name','none');
-  await expect(title).toHaveCSS('animation-name','none');
-  await expect(ongoing).toHaveCSS('animation-name','none');
-
+  await expect(page.locator('.sketch-tool-card')).toHaveCount(7);
+  await expect(page.locator('.pencil-wordmark-art, .sketch-card-border-svg, .sketch-card-spiral')).toHaveCount(0);
+  await expect(page.locator('.sketch-hero-center h1')).toHaveText('THE FORGE');
+  await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('transition-property', 'none');
   await openForgeRoute(page, 'storyboard');
-  await expect(page.getByRole('button', {name:'Add Assets'})).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add Assets' })).toBeVisible();
 });

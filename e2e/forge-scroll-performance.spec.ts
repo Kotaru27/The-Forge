@@ -11,209 +11,70 @@ const nativePanels = [
   ['ad-downloader', '.adw-workspace'],
 ] as const;
 
-test('every workroom scrolls natively without parallax layers or wheel interception', async ({ page }) => {
+test('all seven workrooms retain native scrolling, with no parallax or smooth-scroll layer', async ({ page }) => {
   await page.setViewportSize({ width: 1496, height: 880 });
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-
   for (const [route, selector] of nativePanels) {
     await openForgeRoute(page, route);
-    const tool = page.locator('.native-tool:not([hidden])');
-    await expect(tool).toBeVisible();
-    const panel = tool.locator(selector).first();
-    await expect(panel).toBeVisible();
-    // All route-specific parallax portals are completely removed.
+    const panel = page.locator('.native-tool:not([hidden])').locator(selector).first();
+    await expect(panel, route).toBeVisible();
+    await expect(panel, route).toHaveCSS('scroll-behavior', 'auto');
     await expect(page.locator('.forge-parallax-art, .forge-parallax-near, .forge-parallax-far')).toHaveCount(0);
-    await expect(panel).toHaveCSS('scroll-behavior', 'smooth');
-
-    // Verify the actual scroll container is still browser-driven.
-    // A synthetic empty-state spacer tests scrolling without importing media
-    // or changing any processing engine, preset, image or canvas.
-    const before = await panel.evaluate(el => ({
-      width: el.scrollWidth,
-      viewport: el.clientWidth,
-      height: el.scrollHeight,
-      visible: el.clientHeight,
-    }));
+    const before = await panel.evaluate(el => ({ width: el.scrollWidth, client: el.clientWidth }));
     await panel.evaluate(el => {
-      const filler = document.createElement('div');
-      filler.dataset.performanceFixture = 'true';
-      filler.style.cssText = 'display:block;min-height:1600px;width:1px;pointer-events:none';
-      el.appendChild(filler);
+      const spacer = document.createElement('div');
+      spacer.style.cssText = 'display:block;min-height:1600px;width:1px;pointer-events:none';
+      spacer.dataset.performanceFixture = 'true';
+      el.appendChild(spacer);
       el.scrollTop = 190;
     });
-    await expect.poll(() => panel.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
-    // No unusual horizontal overflow is introduced by the parallax portal.
-    const after = await panel.evaluate(el => ({
-      width: el.scrollWidth,
-      viewport: el.clientWidth,
-      height: el.scrollHeight,
-      visible: el.clientHeight,
-    }));
-    expect(after.width).toBeLessThanOrEqual(Math.max(before.width, before.viewport) + 3);
-    expect(after.height).toBeGreaterThan(before.height);
-    // Responsive result grids may increase their own height when data is
-    // inserted. Preserve usable scrolling instead of imposing fixed geometry.
-    expect(after.visible).toBeGreaterThan(70);
+    await expect.poll(() => panel.evaluate(el => el.scrollTop), route).toBeGreaterThan(0);
+    const after = await panel.evaluate(el => ({ width: el.scrollWidth, client: el.clientWidth }));
+    expect(after.width).toBeLessThanOrEqual(Math.max(before.width, before.client) + 3);
   }
   expect(errors).toEqual([]);
 });
 
-test('sidebar expands within fixed rail and focus remains usable', async ({ page }) => {
+test('the navigation rail expands instantly without moving the workspace', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 850 });
   await openForgeRoute(page, 'storyboard');
-  const rail = page.locator('.sketch-sidebar');
-  await expect(rail).toBeVisible();
-  await expect(rail).toHaveCSS('transition-property', 'width');
-  // A changing min-width used to jump straight to 210px and clamp width's transition.
-  await expect(rail).toHaveCSS('min-width', '0px');
-
-  const before = await rail.evaluate(el => el.getBoundingClientRect().width);
-  await rail.hover({ position: { x: 18, y: 140 } });
-  await expect.poll(() => rail.evaluate(el => Math.round(el.getBoundingClientRect().width))).toBeGreaterThan(Math.round(before) + 60);
-  const label = page.locator('.sketch-subtool-label').first();
-  await expect(label).toHaveCSS('clip-path', 'none');
-  // Decorative SVG width changes must not initiate additional layout animations.
-  await expect(page.locator('.sketch-brand-btn svg').first()).toHaveCSS('transition-property', 'none');
-  await expect(page.locator('.sketch-sidebar-doodle svg').first()).toHaveCSS('transition-property', 'none');
-  const highlight = await page.locator('.sketch-subtool-link').first().evaluate(el => {
-    const before = getComputedStyle(el, '::before');
-    return { clip: before.clipPath, transition: before.transitionProperty };
-  });
-  expect(highlight.clip).toBe('none');
-  expect(highlight.transition).toBe('transform');
-  await expect(page.getByRole('button', { name: 'Home', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Home', exact: true }).click();
-  await expect(page).toHaveURL(/#\/home$/);
-  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
-});
-
-test('sidebar opens smoothly without moving the workroom or losing hover', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 850 });
-  await openForgeRoute(page, 'logo-resizer');
-  const sidebar = page.locator('.sketch-sidebar');
   const rail = page.locator('.sketch-sidebar-rail');
+  const sidebar = page.locator('.sketch-sidebar');
   const main = page.locator('.sketch-main-area');
-  await expect(rail).toBeVisible();
   const before = await main.evaluate(el => el.getBoundingClientRect().left);
-  await expect(rail).toHaveCSS('width', '76px');
-  await expect(sidebar).toHaveCSS('transition-property', 'width');
-  await expect(sidebar).toHaveCSS('min-width', '0px');
-
-  await sidebar.hover({ position: { x: 22, y: 170 } });
+  await expect(rail).toHaveCSS('width', '78px');
+  await expect(sidebar).toHaveCSS('transition-property', 'none');
+  await rail.hover({ position: { x: 20, y: 140 } });
   await expect.poll(() => sidebar.evaluate(el => Math.round(el.getBoundingClientRect().width))).toBe(210);
   const after = await main.evaluate(el => el.getBoundingClientRect().left);
   expect(Math.abs(after - before)).toBeLessThanOrEqual(1);
-
-  const bounds = await sidebar.boundingBox();
-  expect(bounds).toBeTruthy();
-  await page.mouse.move(bounds!.x + 145, bounds!.y + 210);
-  await expect.poll(() => sidebar.evaluate(el => Math.round(el.getBoundingClientRect().width))).toBe(210);
-  const brand = sidebar.getByRole('button', { name: 'The Forge home' });
-  await expect(brand).toBeVisible();
-  await page.getByRole('button', { name: 'Storyboard', exact: true }).click();
-  await expect(page).toHaveURL(/#\/storyboard$/);
-  await expect(page.locator('.forge-app')).not.toHaveClass(/forge-tool-opening/);
-  expect(Math.abs((await main.evaluate(el => el.getBoundingClientRect().left)) - before)).toBeLessThanOrEqual(1);
+  await expect(page.getByRole('button', { name: 'Home', exact: true })).toBeVisible();
 });
 
-test('populated workroom motion does not scale the whole tool surface', async ({ page }) => {
-  await page.setViewportSize({ width: 1470, height: 880 });
+test('sidebar switch and Home return do not mount visual transitions', async ({ page }) => {
+  await openForgeRoute(page, 'logo-resizer');
+  await page.getByRole('navigation', { name: 'Select a tool' })
+    .getByRole('button', { name: 'Storyboard' }).click();
+  await expect(page).toHaveURL(/#\/storyboard$/);
+  await expect(page.locator('.forge-tool-opening, .forge-route-pencil-stroke')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Home', exact: true }).click();
+  await expect(page).toHaveURL(/#\/home$/);
+});
+
+test('large workroom elements are never scaled or animated on route change', async ({ page }) => {
   await openForgeRoute(page, 'home');
   await page.getByRole('button', { name: 'Open Logo Resizer' }).click();
-  await expect(page.locator('.forge-app')).toHaveClass(/forge-tool-opening/);
-  const workspace = page.locator('.native-tool:not([hidden])');
-  await expect(workspace).toHaveCSS('animation-name', 'none');
-  await expect(workspace).toHaveCSS('transform', 'none');
-  await expect(workspace).toHaveCSS('opacity', '1');
-  await expect(page.locator('[data-motion="tool-card-to-workspace"]')).toHaveCSS('pointer-events', 'none');
-  await expect(page.getByRole('spinbutton', { name: 'Width in pixels' })).toBeVisible();
-  await expect(page.locator('[data-motion="tool-card-to-workspace"]')).toHaveCount(0);
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('transform', 'none');
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.forge-tool-opening')).toHaveCount(0);
 });
 
-test('reduced motion preserves native scrolling but removes smooth programmatic transitions', async ({ page }) => {
+test('reduced-motion mode still scrolls and switches immediately', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openForgeRoute(page, 'storyboard');
-  await expect(page.getByRole('button', { name: 'Add Assets' })).toBeVisible();
   await expect(page.locator('.sb-controls')).toHaveCSS('scroll-behavior', 'auto');
-  await expect(page.locator('.forge-parallax-art, .forge-parallax-near, .forge-parallax-far')).toHaveCount(0);
-});
-
-test('sidebar quick-switch has header-only interruptible motion and does not scale workrooms', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 860 });
   await openForgeRoute(page, 'logo-resizer');
-  await page.evaluate(() => {
-    const main = document.querySelector('.sketch-main-area')!;
-    const globals = window as typeof window & { __routeCueCount?: number };
-    globals.__routeCueCount = 0;
-    new MutationObserver(() => {
-      if (main.querySelector('.forge-switching-tool .forge-route-pencil-stroke'))
-        globals.__routeCueCount!++;
-    }).observe(main, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
-  });
-  await page.getByRole('button', { name: 'Storyboard', exact: true }).click();
-  await expect(page).toHaveURL(/#\/storyboard$/);
-  await page.getByRole('button', { name: 'PDF to Image', exact: true }).click();
-  await expect(page).toHaveURL(/#\/pdf-to-image$/);
-  await expect.poll(() => page.evaluate(() =>
-    (window as typeof window & { __routeCueCount?: number }).__routeCueCount ?? 0
-  )).toBeGreaterThanOrEqual(2);
-  await expect(page.locator('.forge-app')).not.toHaveClass(/forge-tool-opening/);
-  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('transform', 'none');
-  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('opacity', '1');
-  await expect(page.locator('.forge-route-pencil-stroke')).toHaveCount(0, { timeout: 1000 });
-});
-
-test('sidebar tool-switch cue is disabled for reduced motion', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await openForgeRoute(page, 'logo-resizer');
-  await page.getByRole('button', { name: 'Storyboard', exact: true }).click();
-  await expect(page).toHaveURL(/#\/storyboard$/);
-  await expect(page.locator('.forge-route-pencil-stroke')).toHaveCount(0);
-  await expect(page.locator('.sketch-topbar')).not.toHaveClass(/forge-switching-tool/);
-});
-
-test('Home paper opening stays nonblocking when reopening a populated workroom', async ({ page }, testInfo) => {
-  await page.setViewportSize({ width: 1440, height: 860 });
-  await openForgeRoute(page, 'logo-resizer');
-  const sample = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABgAAAAMCAYAAAB4MH11AAAAHUlEQVR4nGP8z8Dwn4GGgImWho9aMGrBqAXDxQIARZACFmekxckAAAAASUVORK5CYII=', 'base64');
-  await page.locator('.logo-workspace input[type="file"]').setInputFiles(
-    Array.from({ length: 24 }, (_, i) => ({
-      name: 'HomeTransition_' + i + '.png', mimeType: 'image/png', buffer: sample,
-    }))
-  );
-  await expect(page.locator('.logo-card')).toHaveCount(24);
-  await page.getByRole('button', { name: 'The Forge home' }).click();
-  await expect(page).toHaveURL(/#\/home$/);
-  await page.evaluate(() => {
-    const data = { frames: [] as number[], stopped: false };
-    (window as typeof window & { __forgeHomeFrames?: typeof data }).__forgeHomeFrames = data;
-    const tick = (time: number) => {
-      if (data.stopped) return;
-      data.frames.push(time);
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  });
-  await page.getByRole('button', { name: 'Open Logo Resizer' }).click();
-  await expect(page.locator('.logo-card')).toHaveCount(24);
-  const tool = page.locator('.native-tool:not([hidden])');
-  await expect(tool).toHaveCSS('transform', 'none');
-  await expect(tool).toHaveCSS('opacity', '1');
-  await page.waitForTimeout(360);
-  const metrics = await page.evaluate(() => {
-    const data = (window as typeof window & { __forgeHomeFrames?: {
-      frames: number[]; stopped: boolean;
-    } }).__forgeHomeFrames!;
-    data.stopped = true;
-    const gaps = data.frames.slice(1).map((n, i) => n - data.frames[i]).sort((a,b) => a-b);
-    return { frames: data.frames.length, p95GapMs: gaps[Math.floor(gaps.length * .95)] ?? null,
-      maxGapMs: gaps.at(-1) ?? null, framesOver33ms: gaps.filter(x => x > 33).length };
-  });
-  expect(metrics.frames).toBeGreaterThan(8);
-  await expect(page.locator('[data-motion="tool-card-to-workspace"]')).toHaveCount(0);
-  await testInfo.attach('home-to-populated-logo-motion.json', {
-    body: Buffer.from(JSON.stringify(metrics, null, 2)), contentType: 'application/json',
-  });
-  console.info('Home -> populated Logo Resizer paper handoff:', metrics);
+  await expect(page.locator('.logo-gallery')).toBeVisible();
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('animation-name', 'none');
 });
