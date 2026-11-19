@@ -65,6 +65,8 @@ export function LogoResizer() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [showLinks, setShowLinks] = useState(false);
   const [brands, setBrands] = useState('');
+  const [altNames, setAltNames] = useState('');
+  const [includeEnlargement, setIncludeEnlargement] = useState(false);
   const [server, setServer] = useState<LogoServer>('s3');
   const [folder, setFolder] = useState('');
   const [links, setLinks] = useState('');
@@ -259,20 +261,25 @@ export function LogoResizer() {
   function openLinkDialog() {
     setLinks('');
     setBrands('');
+    setAltNames('');
+    setIncludeEnlargement(false);
     setLinkMessage(`${cards.length} logos loaded.`);
     setShowLinks(true);
   }
   function makeLinks(forceEmpty = false) {
-    if (!brands.trim()) { setLinkMessage('Please enter at least one brand name.'); return; }
+    if (!brands.trim() && !cards.length) { setLinkMessage('Upload logos or enter at least one brand name.'); return; }
     if (!cards.length && !forceEmpty) { setConfirmNoLogos(true); return; }
     try {
       const text = generateLogoLinks({
         brands: brands.split(/\r?\n/),
+        altNames: altNames.split(/\r?\n/),
+        includeEnlargement,
         filenames: cards.map(asset => asset.filename),
         folder, server, format: settings.format,
       });
       setLinks(text);
-      setLinkMessage(`Generated ${brands.split(/\r?\n/).filter(item => item.trim()).length} links.`);
+      const count = brands.trim() ? brands.split(/\r?\n/).filter(item => item.trim()).length : cards.length;
+      setLinkMessage(`Generated ${count} links.`);
       setConfirmNoLogos(false);
     } catch (cause) { setLinkMessage(cause instanceof Error ? cause.message : String(cause)); }
   }
@@ -441,11 +448,15 @@ export function LogoResizer() {
       {showLinks && <div className="logo-modal-backdrop"><div className="logo-modal logo-link-dialog" role="dialog" aria-modal="true" aria-label="Generate logo links">
         <div className="logo-link-title"><h2>Generate logo links</h2><button type="button" aria-label="Close links" onClick={() => setShowLinks(false)}>×</button></div>
         <div className="logo-two-fields"><label>Server<select value={server} onChange={event => setServer(event.target.value as LogoServer)}><option value="s3">S3 Media</option><option value="aldi">Aldi Media</option></select></label><label>Folder path<input value={folder} onChange={event => setFolder(event.target.value)} placeholder="logos/2026/summer" /></label></div>
-        <label>Brand names (one per line)<textarea rows={7} value={brands} onChange={event => setBrands(event.target.value)} placeholder="Brand A&#10;Brand B" /></label>
+        <div className="logo-link-names-grid">
+          <label>Brand names (one per line)<textarea rows={7} value={brands} onChange={event => setBrands(event.target.value)} placeholder="Coca Cola&#10;Pepsi" /><small>Optional — used to match and order uploaded logos.</small></label>
+          <label>Display none / Alt names (one per line)<textarea rows={7} value={altNames} onChange={event => setAltNames(event.target.value)} placeholder="Coca-Cola Original&#10;Pepsi Max" /><small>Optional — each line sets both hidden text and image alt. Blank rows use the matched filename.</small></label>
+        </div>
+        <label className="logo-link-zoom-toggle"><input type="checkbox" checked={includeEnlargement} onChange={event => setIncludeEnlargement(event.target.checked)} /><span>Include enlargement script</span><small>The zoomImage class is included even when this is off.</small></label>
         <label>Generated HTML<textarea rows={7} value={links} readOnly /></label>
         <p className="logo-subtle" role="status">{linkMessage}</p>
         <div className="logo-modal-actions"><button type="button" onClick={() => setShowLinks(false)}>Close</button><button type="button" onClick={() => makeLinks()}>Generate</button><button className="logo-primary" type="button" onClick={() => void copyLinks()}>Copy HTML</button></div>
-        {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded"><p>No logos are uploaded. Generate links using the brand names as filenames?</p><button type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</button><button type="button" onClick={() => makeLinks(true)}>Proceed anyway</button></div>}
+        {confirmNoLogos && <div className="logo-link-warning" role="alertdialog" aria-label="No logos uploaded"><p>No logos are uploaded. Generate links using the provided brand names as filenames?</p><button type="button" onClick={() => setConfirmNoLogos(false)}>Cancel</button><button type="button" onClick={() => makeLinks(true)}>Proceed anyway</button></div>}
       </div></div>}
     </section>
   );

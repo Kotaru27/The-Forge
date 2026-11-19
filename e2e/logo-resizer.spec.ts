@@ -637,3 +637,71 @@ test('Focus Mode has compact controls, an enlarged undistorted preview and full-
   await panel.getByRole('button', { name: 'Close Focus Mode' }).click();
   await expect(panel).toHaveCount(0);
 });
+
+
+test('logo link dialog shows two side-by-side name boxes and always adds zoomImage', async ({ page }) => {
+  await addFiles(page, [{ ...sample, name: 'Coca_Cola.png' }, { ...sample, name: 'Pepsi.png' }]);
+  await page.getByRole('button', { name: 'Generate links' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Generate logo links' });
+  const brands = dialog.getByLabel('Brand names (one per line)');
+  const alts = dialog.getByLabel('Display none / Alt names (one per line)');
+  const zoom = dialog.getByRole('checkbox', { name: /Include enlargement script/ });
+  await expect(brands).toBeVisible();
+  await expect(alts).toBeVisible();
+  await expect(zoom).not.toBeChecked();
+  const b = await brands.boundingBox();
+  const a = await alts.boundingBox();
+  expect(b && a && Math.abs(b.y - a.y) < 5 && a.x > b.x + 50).toBeTruthy();
+
+  // Both empty -> uploaded filenames used, with class and alt but no script.
+  await dialog.getByRole('button', { name: 'Generate', exact: true }).click();
+  let html = await dialog.getByLabel('Generated HTML').inputValue();
+  expect(html).toContain('Coca_Cola.png" class="zoomImage" alt="Coca Cola"');
+  expect(html).toContain('Pepsi.png" class="zoomImage" alt="Pepsi"');
+  expect(html).not.toContain('<script');
+
+  // Independent metadata follows explicitly matched brand order.
+  await brands.fill('Pepsi\nCoca Cola');
+  await alts.fill('Pepsi MAX\nCoca-Cola Original');
+  await dialog.getByRole('button', { name: 'Generate', exact: true }).click();
+  html = await dialog.getByLabel('Generated HTML').inputValue();
+  const rows = html.split('\n');
+  expect(rows[0]).toContain('Pepsi.png" class="zoomImage" alt="Pepsi MAX"');
+  expect(rows[1]).toContain('Coca_Cola.png" class="zoomImage" alt="Coca-Cola Original"');
+  expect(rows[1]).toContain('<span style="display:none;">Coca-Cola Original</span>');
+
+  // Switch on only affects the provided scripts, not img class/metadata.
+  await zoom.check();
+  await dialog.getByRole('button', { name: 'Generate', exact: true }).click();
+  html = await dialog.getByLabel('Generated HTML').inputValue();
+  expect((html.match(/<script/g) || []).length).toBe(4);
+  const onRows = html.split('\n');
+  expect(onRows).toHaveLength(2);
+  for (const row of onRows) {
+    expect(row).toMatch(/^<center><img /);
+    expect(row).toContain('</span><script src="//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js"></script><script> $(document).on("ready"');
+    expect(row).toContain('$(this).tolunaZoom');
+    expect(row.endsWith('</script>')).toBeTruthy();
+  }
+  expect(html).toContain('$(this).tolunaZoom');
+  expect((html.match(/class="zoomImage"/g) || []).length).toBe(2);
+
+  await zoom.uncheck();
+  await alts.fill('Only first\n');
+  await dialog.getByRole('button', { name: 'Generate', exact: true }).click();
+  html = await dialog.getByLabel('Generated HTML').inputValue();
+  expect(html.split('\n')[0]).toContain('alt="Only first"');
+  expect(html.split('\n')[1]).toContain('alt="Coca Cola"');
+  expect(html).not.toContain('<script');
+});
+
+
+test('sidebar click releases header controls without losing keyboard focus expansion', async ({ page }) => {
+  const nav = page.getByRole('navigation', { name: 'Select a tool' });
+  await nav.getByRole('button', { name: 'Image Splitter', exact: true }).click();
+  await nav.getByRole('button', { name: 'Logo Resizer', exact: true }).click();
+  await page.mouse.move(1050, 650);
+  await expect(page.locator('.sidebar.sketch-sidebar')).toHaveCSS('width', '78px');
+  await page.getByRole('button', { name: 'Generate links' }).click({ timeout: 8_000 });
+  await expect(page.getByRole('dialog', { name: 'Generate logo links' })).toBeVisible();
+});

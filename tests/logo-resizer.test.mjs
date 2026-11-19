@@ -42,9 +42,9 @@ test('logo link output retains the existing HTML template and handles unmatched 
     server: 's3', folder: '/logos/fall/', format: 'png',
   });
   assert.equal(html, [
-    '<center><img src="https://s3media-ml-eu.surveycenter.com/logos/fall/Coca-Cola.png" style="max-width:100%" align ="center"></center><span style="display:none;">Coca Cola</span>',
-    '<center><img src="https://s3media-ml-eu.surveycenter.com/logos/fall/Pepsi.png" style="max-width:100%" align ="center"></center><span style="display:none;">Pepsi</span>',
-    '<center><img src="https://s3media-ml-eu.surveycenter.com/logos/fall/Third.png" style="max-width:100%" align ="center"></center><span style="display:none;">Third</span>',
+    '<center><img src="https://s3media-ml-eu.surveycenter.com/logos/fall/Coca-Cola.png" class="zoomImage" alt="Coca Cola" style="max-width:100%" align ="center"></center><span style="display:none;">Coca Cola</span>',
+    '<center><img src="https://s3media-ml-eu.surveycenter.com/logos/fall/Pepsi.png" class="zoomImage" alt="Pepsi" style="max-width:100%" align ="center"></center><span style="display:none;">Pepsi</span>',
+    '<center><img src="https://s3media-ml-eu.surveycenter.com/logos/fall/Third.png" class="zoomImage" alt="Third" style="max-width:100%" align ="center"></center><span style="display:none;">Third</span>',
   ].join('\n'));
 });
 test('logo links are safe against HTML injection, and match names actually used in ZIP', () => {
@@ -55,4 +55,88 @@ test('logo links are safe against HTML injection, and match names actually used 
   assert.ok(!html.includes('onload="alert(1)"'));
   assert.ok(html.includes('s3media') === false);
   assert.ok(html.includes('A_2.jpg'));
+});
+
+
+test('optional brand list follows uploaded filename order and sets alt plus hidden text', () => {
+  const html = generateLogoLinks({
+    brands: [''], filenames: ['Coca_Cola', 'Pepsi'], server: 's3', folder: 'logos', format: 'png',
+  });
+  assert.equal((html.match(/class="zoomImage"/g) || []).length, 2);
+  assert.ok(html.includes('Coca_Cola.png" class="zoomImage" alt="Coca Cola"'));
+  assert.ok(html.includes('<span style="display:none;">Pepsi</span>'));
+  assert.ok(!html.includes('<script'));
+});
+
+test('independent alt rows remain aligned through brand matching and blank metadata', () => {
+  const html = generateLogoLinks({
+    brands: ['Pepsi', 'Coca Cola', 'Third'], altNames: ['Pepsi MAX', '', 'Third & "Special"'],
+    filenames: ['Coca_Cola', 'Pepsi'], folder: 'campaign', server: 'aldi', format: 'jpeg',
+  });
+  const lines = html.split('\n');
+  assert.match(lines[0], /Pepsi\.jpg" class="zoomImage" alt="Pepsi MAX"/);
+  assert.match(lines[1], /Coca_Cola\.jpg" class="zoomImage" alt="Coca Cola"/);
+  assert.match(lines[2], /Third\.jpg" class="zoomImage" alt="Third &amp; &quot;Special&quot;"/);
+  assert.ok(lines[2].includes('<span style="display:none;">Third &amp; &quot;Special&quot;</span>'));
+});
+
+test('blank middle brand row does not shift display names to another logo', () => {
+  const html = generateLogoLinks({
+    brands: ['Pepsi', '', 'Coca Cola'], altNames: ['First', 'Middle', 'Last'],
+    filenames: ['Pepsi', 'Sprite', 'Coca_Cola'], folder: '', server: 's3', format: 'png',
+  });
+  const rows = html.split('\n');
+  assert.equal(rows.length, 3);
+  assert.match(rows[0], /Pepsi\.png" class="zoomImage" alt="First"/);
+  assert.match(rows[1], /Sprite\.png" class="zoomImage" alt="Middle"/);
+  assert.match(rows[2], /Coca_Cola\.png" class="zoomImage" alt="Last"/);
+});
+
+test('zoom scripts are opt-in after every individual image link', () => {
+  const opts = {
+    brands: ['A', 'B'], filenames: ['A', 'B'], folder: '', server: 's3', format: 'png',
+  };
+  const off = generateLogoLinks(opts);
+  const on = generateLogoLinks({ ...opts, includeEnlargement: true });
+  assert.ok(!off.includes('<script'));
+  assert.equal((on.match(/class="zoomImage"/g) || []).length, 2);
+  assert.equal((on.match(/<script/g) || []).length, 4);
+  const rows = on.split('\n');
+  // Each logo, hidden label and both scripts form exactly one output line.
+  assert.equal(rows.length, 2);
+  for (const row of rows) {
+    assert.match(row, /^<center><img /);
+    assert.match(row, /class="zoomImage"/);
+    assert.match(row, /<\/span><script src="\/\/dcqhpema7gk9a.cloudfront.net\/IND\/HTML5\/ISDDefault.js"><\/script><script> \$\(document\).on\("ready"/);
+    assert.ok(row.endsWith('</script>'));
+  }
+  assert.ok(on.includes('//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js'));
+  assert.ok(on.includes('$(this).tolunaZoom({url : $(this).prop("src"), icon: false});'));
+});
+
+test('both lists blank with no uploaded logos is rejected', () => {
+  assert.throws(() => generateLogoLinks({
+    brands: [''], altNames: ['Display Only'], filenames: [], server: 's3', folder: '', format: 'png',
+  }), /Upload logos or enter at least one brand name/);
+});
+
+test('four logos emit eight script tags, with one full script pair after every link', () => {
+  const html = generateLogoLinks({
+    brands: ['1', '2', '3', '4'],
+    altNames: ['11', '22', '33', '44'],
+    filenames: ['1', '2', '3', '4'],
+    folder: 'cvbcxvb', server: 's3', format: 'png', includeEnlargement: true,
+  });
+  const rows = html.split('\n');
+  assert.equal(rows.length, 4);
+  assert.equal((html.match(/class="zoomImage"/g) || []).length, 4);
+  assert.equal((html.match(/<script/g) || []).length, 8);
+  for (let i = 0; i < 4; i++) {
+    const row = rows[i];
+    const name = String((i + 1) * 11);
+    const imageAndSpan = '<center><img src="https://s3media-ml-eu.surveycenter.com/cvbcxvb/' + (i + 1) + '.png" class="zoomImage" alt="' + name + '" style="max-width:100%" align ="center"></center><span style="display:none;">' + name + '</span>';
+    const scripts = '<script src="//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js"></script><script> $(document).on("ready", function(){$(".zoomImage").each(function(index){$(this).prop({id: "zoomImage" + index});$(this).tolunaZoom({url : $(this).prop("src"), icon: false}); }); }); </script>';
+    assert.equal(row, imageAndSpan + scripts);
+    assert.ok(!row.includes('\n'));
+  }
 });

@@ -3,6 +3,8 @@ import { outputExtension, sanitizeLogoFilename, uniqueExportNames, type LogoForm
 
 export interface LogoLinkInput {
   brands: string[];
+  altNames?: string[];
+  includeEnlargement?: boolean;
   filenames: string[];
   folder: string;
   server: LogoServer;
@@ -73,20 +75,65 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-/** Keeps the legacy HTML template and server URLs. Duplicates are resolved to actual ZIP filenames. */
+/** Logo image classes are always present; the external zoom scripts are opt-in. */
+export const LOGO_ENLARGEMENT_SCRIPTS = `<script src="//dcqhpema7gk9a.cloudfront.net/IND/HTML5/ISDDefault.js"></script><script> $(document).on("ready", function(){$(".zoomImage").each(function(index){$(this).prop({id: "zoomImage" + index});$(this).tolunaZoom({url : $(this).prop("src"), icon: false}); }); }); </script>`;
+
+function filenameDisplayName(filename: string): string {
+  return filename.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Keep the existing nearest-name matching, server URLs and ZIP filename rules.
+ * Brand rows control matching/order; alt-name rows control <span> and alt only.
+ * Blank alt rows fall back to the *matched file*, not an unrelated brand row.
+ */
 export function generateLogoLinks(input: LogoLinkInput): string {
-  const brands = input.brands.map(s => s.trim()).filter(Boolean);
-  if (!brands.length) throw new Error('Please provide at least one brand name');
+  const brandLines = input.brands.map(name => String(name).trim());
+  while (brandLines.length && !brandLines[brandLines.length - 1]) brandLines.pop();
+  const hasBrands = brandLines.some(Boolean);
   const fileNames = uniqueExportNames(input.filenames.map(filename => ({ filename })), outputExtension(input.format));
-  const mapping = matchLogoNames(brands, input.filenames);
+  const brands = hasBrands ? brandLines : fileNames.map(filenameDisplayName);
+  if (!brands.length) throw new Error('Upload logos or enter at least one brand name');
+
+  const mapping: (number | null)[] = Array(brands.length).fill(null);
+  if (hasBrands) {
+    const namedRows = brands.map((name, index) => ({ name, index })).filter(row => row.name);
+    const matched = matchLogoNames(namedRows.map(row => row.name), input.filenames);
+    const used = new Set<number>();
+    namedRows.forEach((row, index) => {
+      mapping[row.index] = matched[index];
+      if (matched[index] !== null) used.add(matched[index]!);
+    });
+    // Preserve blank rows so the separate alt-name textarea does not drift.
+    brands.forEach((brand, index) => {
+      if (brand) return;
+      const aligned = index < fileNames.length && !used.has(index) ? index : -1;
+      const available = aligned >= 0 ? aligned : fileNames.findIndex((_, i) => !used.has(i));
+      if (available !== -1) {
+        mapping[index] = available;
+        used.add(available);
+      }
+    });
+  } else {
+    fileNames.forEach((_, index) => { mapping[index] = index; });
+  }
+
   const folder = input.folder.trim().replace(/^\/+|\/+$/g, '');
   const folderPath = folder ? `${folder}/` : '';
   const baseUrl = LOGO_SERVERS[input.server];
   const ext = outputExtension(input.format);
-  return brands.map((brand, index) => {
-    const match = mapping[index];
-    const name = match !== null ? fileNames[match] : `${sanitizeLogoFilename(brand.substring(0, 30).replace(/-/g, '_'))}.${ext}`;
-    const url = `${baseUrl}${folderPath}${name}`;
-    return `<center><img src="${escapeHtml(url)}" style="max-width:100%" align ="center"></center><span style="display:none;">${escapeHtml(brand)}</span>`;
-  }).join('\n');
+  const html = brands.flatMap((brand, index) => {
+    const matchedIndex = mapping[index];
+    if (!brand && matchedIndex === null) return [];
+    const filename = matchedIndex !== null
+      ? fileNames[matchedIndex]
+      : `${sanitizeLogoFilename(brand.substring(0, 30).replace(/-/g, '_'))}.${ext}`;
+    const fallbackName = filenameDisplayName(filename);
+    const displayName = input.altNames?.[index]?.trim() || fallbackName;
+    const url = `${baseUrl}${folderPath}${filename}`;
+    const imageLink = `<center><img src="${escapeHtml(url)}" class="zoomImage" alt="${escapeHtml(displayName)}" style="max-width:100%" align ="center"></center><span style="display:none;">${escapeHtml(displayName)}</span>`;
+    return [imageLink + (input.includeEnlargement ? LOGO_ENLARGEMENT_SCRIPTS : '')];
+  });
+  if (!html.length) throw new Error('No logo names available to generate links');
+  return html.join('\n');
 }

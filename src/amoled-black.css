@@ -100,7 +100,7 @@ html, body, #root { background: #000; }
   border-right: 1px solid #252525 !important;
 }
 .forge-amoled-ui .sketch-sidebar-rail:hover .sidebar.sketch-sidebar,
-.forge-amoled-ui .sketch-sidebar-rail:focus-within .sidebar.sketch-sidebar {
+.forge-amoled-ui .sketch-sidebar-rail:has(:focus-visible) .sidebar.sketch-sidebar {
   width: 210px !important;
   min-width: 210px !important;
 }
@@ -195,7 +195,7 @@ html, body, #root { background: #000; }
   white-space: nowrap;
   font-weight: 550;
 }
-.forge-amoled-ui .sketch-sidebar-rail:not(:hover):not(:focus-within)
+.forge-amoled-ui .sketch-sidebar-rail:not(:hover):not(:has(:focus-visible))
   :is(.sketch-brand-word, .sketch-nav-label, .sketch-subtool-label) {
   display: none;
 }
