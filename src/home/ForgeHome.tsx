@@ -1,32 +1,10 @@
 import { useState, type ReactNode } from 'react';
-import { PencilWordmark } from './PencilWordmark';
-import { PencilLettering } from './PencilLettering';
 import type { ToolId } from '../tools';
-import type { ToolOpenOrigin } from '../motion/ToolOpenTransition';
 import { tools } from '../tools';
-import {
-  ChecklistArrow,
-  ForgeKilnArt,
-  GearsDoodle,
-  MountainDoodle,
-  SketchCardArt,
-  SketchCardBorder,
-  SketchCheckboxIcon,
-  SketchDividerLine,
-  SketchSpiralRingSvg,
-  SketchWavingHand,
-} from './SketchIllustrations';
 
 type Destination = ToolId | 'home';
 
-// Decorative marks from the supplied reference; no new checklist functionality.
-const DECORATIVE_MARKS = [
-  { id: 'prepare', label: 'Prepare', done: true },
-  { id: 'process', label: 'Process', done: true },
-  { id: 'create', label: 'Create', done: true },
-  { id: 'ship', label: 'Ship', done: false },
-] as const;
-
+// Tool names, descriptions and ordering are preserved from the working Home.
 const toolNotes: Record<ToolId, { description: string; cardCopy: string; category: string; detail: string }> = {
   'logo-resizer': {
     description: 'Build a consistent library of logos, precisely sized and ready to ship.',
@@ -147,104 +125,44 @@ export function ToolGlyph({ tool, size = 24 }: { tool: Destination; size?: numbe
   );
 }
 
-type Props = {
-  onOpenTool: (tool: ToolId, origin?: ToolOpenOrigin) => void;
-  onReplayIntro?: () => void;
-  animateWriting: boolean;
-};
+type Props = { onOpenTool: (tool: ToolId) => void };
 
-export function ForgeHome({ onOpenTool, onReplayIntro, animateWriting }: Props) {
+// No intro, motion libraries, drawing loops or search-time animation.
+export function ForgeHome({ onOpenTool }: Props) {
   const [search, setSearch] = useState('');
-  const term = search.trim().toLocaleLowerCase();
-  const visibleIds = tools.filter(tool =>
-    !term || [tool.label, toolNotes[tool.id].category, toolNotes[tool.id].description]
-      .some(value => value.toLocaleLowerCase().includes(term))
-  ).map(tool => tool.id);
-
-  const visibleTools = visibleIds
-    .map((id) => tools.find((tool) => tool.id === id))
-    .filter((t): t is (typeof tools)[number] => Boolean(t));
-
-  const isFilteredView = search.trim().length > 0;
+  const query = search.trim().toLocaleLowerCase();
+  const visibleTools = tools.filter(tool => !query ||
+    [tool.label, toolNotes[tool.id].category, toolNotes[tool.id].description]
+      .some(value => value.toLocaleLowerCase().includes(query))
+  );
 
   return (
-    <section className="forge-home sketch-home" aria-label="The Forge home">
+    <section className="forge-home sketch-home forge-amoled-home" aria-label="The Forge home">
       <header className="sketch-header-band">
-        <div className="sketch-checklist-wrap" aria-hidden="true">
-          <ul className="sketch-checklist">
-            {DECORATIVE_MARKS.map((item) => (
-              <li key={item.id}>
-                <span className={'sketch-check-btn' + (item.done ? ' is-done' : '')}>
-                  <span className="sketch-checkbox-box" aria-hidden="true">
-                    <SketchCheckboxIcon checked={item.done} />
-                  </span>
-                  <span><PencilLettering text={item.label}  enabled={animateWriting} /></span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <span className="sketch-checklist-arrow" aria-hidden="true">
-            <ChecklistArrow />
-          </span>
-        </div>
-
         <div className="sketch-hero-center">
           <div className="sketch-title-lockup">
-            <span className="sketch-title-ticks sketch-title-ticks-left" aria-hidden="true">
-              <svg viewBox="0 0 28 38" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path pathLength={100} data-pencil-trace="true" d="M6 10 L22 15 M2 20 L20 20 M7 30 L22 25" />
-              </svg>
-            </span>
-            <h1 className="pencil-wordmark" aria-label="THE FORGE"><PencilWordmark /></h1>
-            <svg className="sketch-ongoing-hero-line" viewBox="0 0 330 16" preserveAspectRatio="none" aria-hidden="true">
-              <path pathLength={1} d="M6 9 Q83 4 163 9 T324 7 M32 13 Q178 10 298 12" fill="none" stroke="#6d6354" strokeWidth="1.4" strokeLinecap="round" />
-            </svg>
-            <span className="sketch-title-ticks sketch-title-ticks-right" aria-hidden="true">
-              <svg viewBox="0 0 28 38" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path pathLength={100} data-pencil-trace="true" d="M22 10 L6 15 M26 20 L8 20 M21 30 L6 25" />
-              </svg>
-            </span>
+            <h1>THE FORGE</h1>
           </div>
-          <p className="sketch-subtitle">
-            <span className="sketch-subtitle-rule" aria-hidden="true" />
-            <span className="sketch-highlight-sweep"><PencilLettering text="A creative production toolkit"  enabled={animateWriting} /></span>
-            <span className="sketch-subtitle-rule" aria-hidden="true" />
-          </p>
-        </div>
-
-        <div className="sketch-header-kiln" aria-hidden="true">
-          <ForgeKilnArt />
+          <p className="sketch-subtitle">A creative production toolkit</p>
         </div>
       </header>
-      <SketchDividerLine />
 
       <div className="sketch-welcome-row">
         <div className="sketch-welcome-copy">
-          <h2>
-            <span className="sketch-welcome-ink"><PencilLettering text="Welcome to The Forge"  enabled={animateWriting} /></span>{' '}
-            <span className="sketch-wave-mark" aria-hidden="true">
-              <SketchWavingHand />
-            </span>
-          </h2>
-          <p><PencilLettering text="Pick a tool and get to work."  enabled={animateWriting} /></p>
-          <span className="sketch-welcome-ticks" aria-hidden="true">
-            <svg viewBox="0 0 24 22" fill="none" stroke="#b85337" strokeWidth="1.7" strokeLinecap="round">
-              <path pathLength={100} data-pencil-trace="true" d="M4 6 L16 2 M6 13 L20 11 M4 19 L15 20" />
-            </svg>
-          </span>
+          <h2>Choose a workspace</h2>
+          <p>Seven dedicated tools. One focused workspace.</p>
         </div>
-
         <div className="sketch-welcome-controls">
-          {onReplayIntro && <button type="button" className="forge-intro-replay" onClick={onReplayIntro} aria-label="Replay pencil sketch intro">↻ Replay sketch</button>}
-          {isFilteredView && (
+          {query && (
             <button type="button" className="sketch-reset-view" onClick={() => setSearch('')}>
               Show all tools
             </button>
           )}
           <label className="sketch-search-field">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <circle cx="10.5" cy="10.5" r="6.5" />
-              <path d="m15.5 15.5 5 5" />
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none"
+              stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <circle cx="10.5" cy="10.5" r="6.5"/>
+              <path d="m15.5 15.5 5 5"/>
             </svg>
             <input
               type="search"
@@ -252,11 +170,8 @@ export function ForgeHome({ onOpenTool, onReplayIntro, animateWriting }: Props) 
               aria-label="Find a Forge tool"
               placeholder="Find a tool..."
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={event => setSearch(event.target.value)}
             />
-            <svg className="sketch-search-underline" viewBox="0 0 220 8" preserveAspectRatio="none" fill="none" aria-hidden="true">
-              <path pathLength={100} data-pencil-trace="true" d="M2 4 Q65 2 125 4.5 T218 3.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
           </label>
         </div>
       </div>
@@ -264,96 +179,36 @@ export function ForgeHome({ onOpenTool, onReplayIntro, animateWriting }: Props) 
       {visibleTools.length === 0 ? (
         <div className="sketch-empty-state" role="status">
           <h3>No matching tools</h3>
-          <p>Try another search term or view all seven tools.</p>
-          <button
-            type="button"
-            className="sketch-empty-btn"
-            onClick={() => setSearch('')}
-          >
+          <p>Try another search term.</p>
+          <button type="button" className="sketch-empty-btn" onClick={() => setSearch('')}>
             View all 7 tools
           </button>
         </div>
       ) : (
-        <div
-          className={'forge-home-grid sketch-home-grid' + (isFilteredView ? ' is-filtered' : '')}
-          aria-label="Available tools"
-        >
-          {visibleTools.map((tool) => {
-            const info = toolNotes[tool.id];
-            const hasTopLeftTape = tool.id === 'logo-resizer';
-            const hasTopRightTape = tool.id === 'ad-downloader';
-            const isSpiralCard = tool.id === 'storyboard';
-            const hasRustUnderline = tool.id === 'ad-downloader';
-            const hasTitleSparks = tool.id === 'storyboard';
-
-            return (
-              <div
-                key={tool.id}
-                className={`sketch-card-slot sketch-slot-${tool.id}`}
+        <div className={'forge-home-grid sketch-home-grid' + (query ? ' is-filtered' : '')}
+             aria-label="Available tools">
+          {visibleTools.map(tool => (
+            <div key={tool.id} className={'sketch-card-slot sketch-slot-' + tool.id}>
+              <button
+                type="button"
+                className={'forge-home-card sketch-tool-card sketch-card-' + tool.id}
+                data-workbench={tool.id}
+                onClick={() => onOpenTool(tool.id)}
+                aria-label={'Open ' + tool.label}
               >
-                {hasTopLeftTape && <span className="sketch-tape sketch-tape-tl" aria-hidden="true" />}
-                {hasTopRightTape && <span className="sketch-tape sketch-tape-tr" aria-hidden="true" />}
-                {isSpiralCard && (
-                  <span className="sketch-card-spiral" aria-hidden="true">
-                    {Array.from({ length: 8 }).map((_, idx) => (
-                      <SketchSpiralRingSvg key={idx} compact />
-                    ))}
-                  </span>
-                )}
-
-                <button
-                  type="button"
-                  className={`forge-home-card sketch-tool-card sketch-card-${tool.id}`}
-                  data-workbench={tool.id}
-                  onClick={(event) => {
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    onOpenTool(tool.id, {
-                      x: rect.x,
-                      y: rect.y,
-                      width: rect.width,
-                      height: rect.height,
-                    });
-                  }}
-                  aria-label={`Open ${tool.label}`}
-                >
-                  <SketchCardBorder spiral={isSpiralCard} />
-                  <span className="sketch-card-art" aria-hidden="true">
-                    <SketchCardArt tool={tool.id} />
-                  </span>
-
-                  <span className="sketch-card-body">
-                    <strong className="sketch-card-title">
-                      {hasTitleSparks && (
-                        <svg className="sketch-title-sparks" viewBox="0 0 22 22" fill="none" stroke="#b85337" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
-                          <path pathLength={100} data-pencil-trace="true" d="M18 4 L6 8 M18 11 L4 11 M18 18 L6 14" />
-                        </svg>
-                      )}
-                      <span className="sketch-highlight-mark"><PencilLettering text={tool.label}  enabled={animateWriting} /></span>
-                    </strong>
-                    <span className="sketch-card-desc"><PencilLettering text={info.cardCopy}  enabled={animateWriting} /></span>
-                    <svg className="sketch-ongoing-card-underline" viewBox="0 0 182 14" preserveAspectRatio="none" aria-hidden="true">
-                      <path pathLength={1} d="M5 8 Q44 4 90 8 T177 7 M18 11 Q81 9 152 11" fill="none" stroke="#695e50" strokeWidth="1.35" strokeLinecap="round" />
-                    </svg>
-                  </span>
-
-                  {hasRustUnderline && (
-                    <svg className="sketch-rust-flourish" viewBox="0 0 90 12" fill="none" stroke="#b85337" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-                      <path pathLength={100} data-pencil-trace="true" d="M4 8 Q46 3 86 5 M18 11 Q54 7 78 8" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            );
-          })}
+                <span className="sketch-card-art" aria-hidden="true">
+                  <ToolGlyph tool={tool.id} size={48}/>
+                </span>
+                <span className="sketch-card-body">
+                  <strong className="sketch-card-title">{tool.label}</strong>
+                  <span className="sketch-card-desc">{toolNotes[tool.id].cardCopy}</span>
+                  <span className="sketch-card-meta">{toolNotes[tool.id].detail}</span>
+                </span>
+              </button>
+            </div>
+          ))}
         </div>
       )}
-
-      <div className="sketch-bottom-mountains" aria-hidden="true">
-        <MountainDoodle />
-      </div>
-      <div className="sketch-bottom-gears" aria-hidden="true">
-        <GearsDoodle />
-      </div>
     </section>
   );
 }
