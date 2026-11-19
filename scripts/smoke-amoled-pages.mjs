@@ -118,6 +118,9 @@ try {
     name: 'Coca_Cola.png', mimeType: 'image/png', buffer: Buffer.from(base64, 'base64'),
   });
   await expect(page.locator('.logo-card')).toHaveCount(1);
+  // The sidebar expands while the pointer is on its navigation buttons.
+  // Return the pointer to the workroom before selecting header controls.
+  await page.mouse.move(1050, 650);
   await page.getByRole('button', { name: 'Generate links' }).click();
   const logoLinks = page.getByRole('dialog', { name: 'Generate logo links' });
   const brandNames = logoLinks.getByLabel('Brand names (one per line)');
