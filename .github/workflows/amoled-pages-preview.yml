@@ -29,7 +29,7 @@ jobs:
       - name: Checkout exactly the reviewed AMOLED implementation
         uses: actions/checkout@v4
         with:
-          ref: e744f5b9d958001957c03b2e66d05adc7031d54d
+          ref: 07e05cedacbf55ed1414833f57359220431519c8
           path: candidate
           persist-credentials: false
 
@@ -64,7 +64,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           node --input-type=module <<'NODE'
-          const response = await fetch('https://api.github.com/repos/Kotaru27/The-Forge/actions/runs/44548569496', {
+          const response = await fetch('https://api.github.com/repos/Kotaru27/The-Forge/actions/runs/44562375827', {
             headers: {
               Accept: 'application/vnd.github+json',
               Authorization: 'Bearer ' + process.env.GH_TOKEN,
@@ -73,11 +73,11 @@ jobs:
           });
           if (!response.ok) throw Error('Cannot validate prior CI: HTTP ' + response.status);
           const run = await response.json();
-          const approved = 'e744f5b9d958001957c03b2e66d05adc7031d54d';
+          const approved = '07e05cedacbf55ed1414833f57359220431519c8';
           if (run.head_sha !== approved || run.status !== 'completed' || run.conclusion !== 'success') {
             throw Error('The pinned AMOLED revision does not have a successful complete CI run.');
           }
-          console.log('Verified pinned commit and 125-test Chromium suite:', run.html_url);
+          console.log('Verified pinned commit and 128-test Chromium suite:', run.html_url);
           NODE
 
       - name: Build isolated AMOLED subpath

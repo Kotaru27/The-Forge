@@ -62,6 +62,15 @@ try {
   await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
   await expect(page.locator('.sketch-notebook-frame')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
   await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('transition-property', 'none');
+  const homeCards = await page.locator('.sketch-tool-card').evaluateAll(cards => cards.map(card => {
+    const r = card.getBoundingClientRect();
+    return { y: r.y, height: r.height };
+  }));
+  assert.equal(homeCards.length, 7);
+  assert.ok(homeCards.every(card => card.height >= 210 && card.height <= 250),
+    'Refined Home cards must fit their content without oversized whitespace');
+  assert.ok(homeCards.slice(0, 4).every(card => Math.abs(card.y - homeCards[0].y) < 2));
+  assert.ok(homeCards.slice(4).every(card => Math.abs(card.y - homeCards[4].y) < 2));
   await page.screenshot({ path: 'forge-amoled-home-live.png' });
 
   const scriptSources = await page.locator('script[type="module"][src]').evaluateAll(elements =>
@@ -75,6 +84,19 @@ try {
   }
 
   await page.getByRole('button', { name: 'Open Logo Resizer' }).click();
+  const groupLayout = await page.locator('.forge-v5-control-grid > .forge-v5-group')
+    .evaluateAll(groups => groups.map(group => ({
+      y: group.getBoundingClientRect().y,
+      fontSize: Number.parseFloat(getComputedStyle(group.querySelector('.forge-v5-group-title')).fontSize)
+    })));
+  assert.equal(groupLayout.length, 8);
+  assert.ok(groupLayout.every(group => Math.abs(group.y - groupLayout[0].y) < 4),
+    'Logo header must preserve the desktop one-row controls');
+  assert.ok(groupLayout.every(group => group.fontSize >= 11),
+    'Logo header labels are smaller than the refined minimum');
+  const logoHeaderOverflow = await page.locator('.forge-v5-head')
+    .evaluate(el => el.scrollWidth - el.clientWidth);
+  assert.ok(logoHeaderOverflow <= 2, 'Logo header must not scroll horizontally');
   const nav = page.getByRole('navigation', { name: 'Select a tool' });
   await expect(nav.getByRole('button')).toHaveCount(8);
   await page.screenshot({ path: 'forge-amoled-logo-live.png' });
