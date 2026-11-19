@@ -100,7 +100,7 @@ test('SharePoint remains a native request and cannot enter browser ZIP',async({p
   await expect(nativeRow.getByRole('button',{name:'Save named copy'})).toBeVisible();
 });
 
-test('Ink & Paper queue places completed downloads after ready rows with readable ink text',async({page})=>{
+test('AMOLED queue places completed downloads after ready rows with readable light text',async({page})=>{
   await page.route('**/asset-photo',route=>route.fulfill({
     status:200,body:Buffer.from([255,216,255,224,1,2,3]),
     headers:{'content-type':'image/jpeg','access-control-allow-origin':'*'}
@@ -112,14 +112,14 @@ test('Ink & Paper queue places completed downloads after ready rows with readabl
     buffer:fixture()
   });
   const ready=app(page).getByRole('row',{name:/AD1_Photo/});
-  await expect(ready).toHaveCSS('background-color','rgb(255, 255, 255)');
+  await expect(ready).toHaveCSS('background-color','rgb(12, 12, 12)');
   const pending=page.waitForEvent('download');
   await ready.getByRole('button',{name:'Download',exact:true}).click();
   await pending;
   const prepared=app(page).locator('.adw-table tbody tr[data-stage="prepared"]');
   await expect(prepared).toHaveCount(1);
-  await expect(prepared).toHaveCSS('background-color','rgb(237, 244, 235)');
-  await expect(prepared.locator('.adw-name')).toHaveCSS('color','rgb(31, 35, 40)');
+  await expect(prepared).toHaveCSS('background-color','rgb(21, 21, 21)');
+  await expect(prepared.locator('.adw-name')).toHaveCSS('color','rgb(232, 232, 234)');
   const order=await app(page).locator('.adw-table tbody tr').allTextContents();
   expect(order[0]).toContain('AD2_Broken');
   expect(order[1]).toContain('Prepared or verified downloads');

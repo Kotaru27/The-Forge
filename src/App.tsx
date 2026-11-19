@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { VideoStills } from './tools/video-stills/VideoStills';
 import { Storyboard } from './tools/storyboard/Storyboard';
 import type { StoryboardRef } from './tools/storyboard/engine';
@@ -6,131 +6,51 @@ import type { TransferGroup, TransferResult } from './tools/video-stills/engine'
 import { LinkGenerator } from './tools/link-generator/LinkGenerator';
 import { LogoResizer } from './tools/logo-resizer/LogoResizer';
 import { ImageSplitter } from './tools/image-splitter/ImageSplitter';
-import { PdfToImage } from './tools/pdf-to-image/PdfToImage';
-import { AdDownloader } from './tools/ad-downloader/AdDownloader';
 import { ForgeHome, ToolGlyph } from './home/ForgeHome';
-import { ForgeSketchIntro } from './intro/ForgeSketchIntro';
-import { ToolOpenTransition, type ToolOpenOrigin } from './motion/ToolOpenTransition';
-import {
-  AnvilMark,
-  MountainDoodle,
-  SketchDividerLine,
-  SketchPageFrameBorder,
-  SketchSpiralRingSvg,
-  SketchSvgDefs,
-  SketchVerticalDivider,
-} from './home/SketchIllustrations';
 import { isToolId, tools, type ToolId } from './tools';
 import './workroom-system.css';
 
-// Route changes must not re-render heavy, still-mounted hidden workrooms.
-// React.memo preserves each tool's local state and existing callback/ref API.
+// Preserve the mounted workrooms and their local state during route changes.
 const StableForgeHome = memo(ForgeHome);
 const StableLinkGenerator = memo(LinkGenerator);
 const StableLogoResizer = memo(LogoResizer);
 const StableImageSplitter = memo(ImageSplitter);
-const StablePdfToImage = memo(PdfToImage);
+const StablePdfToImage = lazy(() => import('./tools/pdf-to-image/PdfToImage')
+  .then(module => ({ default: memo(module.PdfToImage) })));
 const StableVideoStills = memo(VideoStills);
 const StableStoryboard = memo(Storyboard);
-const StableAdDownloader = memo(AdDownloader);
+const StableAdDownloader = lazy(() => import('./tools/ad-downloader/AdDownloader')
+  .then(module => ({ default: memo(module.AdDownloader) })));
 
 type Route = ToolId | 'home';
-type IntroPhase = 'pending' | 'handoff' | 'finishing' | 'settled';
 
-// Every document load starts at Home with a fresh pencil intro. Neither
-// refreshes nor bookmarked tool hashes bypass it; same-document tool
-// navigation still uses the hash without replaying the intro.
-const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-function initialIntroPhase(): IntroPhase {
-  return reducedMotion() ? 'settled' : 'pending';
-}
 function routeFromHash(): Route {
   const saved = window.location.hash.replace(/^#\/?/, '');
   return saved === 'home' ? 'home' : isToolId(saved) ? saved : 'home';
 }
 
 export default function App() {
+  // Fresh page loads still open Home; same-document switching is immediate.
   const [activeTool, setActiveTool] = useState<Route>('home');
+  // Heavy PDF and Excel engines load on first use, then remain mounted with state intact.
+  const [visited, setVisited] = useState<ReadonlySet<ToolId>>(() => new Set());
   const storyboardRef = useRef<StoryboardRef>(null);
-  const mainRef = useRef<HTMLElement>(null);
-  const routeRef = useRef<Route>('home');
-  const openingSequence = useRef(0);
-  const switchSequence = useRef(0);
-  const [switching, setSwitching] = useState<{ id: number; tool: ToolId } | null>(null);
-  const [opening, setOpening] = useState<{
-    id: number; tool: ToolId; origin: ToolOpenOrigin | null;
-  } | null>(null);
-  const [introPhase, setIntroPhase] = useState<IntroPhase>(initialIntroPhase);
-  const [introRun, setIntroRun] = useState(0);
-  const finishIntro = useCallback(() => {
-    // Only the completed intro handoff triggers Home's final handwriting.
-    // Skip and in-app route navigation settle Home immediately.
-    setIntroPhase(phase => phase === 'handoff' ? 'finishing' : 'settled');
-  }, []);
-  const skipIntro = useCallback(() => {
-    setIntroPhase('settled');
-  }, []);
-  const handoffIntro = useCallback(() => setIntroPhase('handoff'), []);
-  const replayIntro = useCallback(() => {
-    if (reducedMotion()) return;
-    setIntroRun(previous => previous + 1);
-    setIntroPhase('pending');
-  }, []);
 
-  useEffect(() => {
-    if (introPhase !== 'finishing') return;
-    // Allow the longest Home description to finish handwriting once.
-    // This timer does not run while working in any tool or revisiting Home.
-    const timeout = window.setTimeout(() => setIntroPhase('settled'), 2200);
-    return () => window.clearTimeout(timeout);
-  }, [introPhase]);
-
-  const openTool = useCallback((tool: Route, origin?: ToolOpenOrigin) => {
+  const openTool = useCallback((tool: Route) => {
     if (tool !== 'home' && !isToolId(tool)) return;
-    const previous = routeRef.current;
-    const changed = previous !== tool;
-    routeRef.current = tool;
-    // A route switch paints only the small header marker; the heavy tool
-    // surface remains mounted, fixed and ready for input immediately.
-    setSwitching(changed && previous !== 'home' && tool !== 'home' &&
-      !origin && !reducedMotion()
-      ? { id: ++switchSequence.current, tool }
-      : null);
-    // A short, nonblocking visual handoff for genuine tool navigation only.
-    // Initial loading, reselecting a tool, direct Home returns and reduced
-    // motion all remain immediate and fully visible.
-    if (changed && tool !== 'home' && origin && !reducedMotion()) {
-      setOpening({ id: ++openingSequence.current, tool, origin: origin ?? null });
-    } else {
-      setOpening(null);
-    }
     setActiveTool(tool);
-    if (tool !== 'home') setIntroPhase('settled');
-    if (window.location.hash !== '#/' + tool) history.replaceState(null, '', '#/' + tool);
+    if (tool !== 'home' && (tool === 'pdf-to-image' || tool === 'ad-downloader')) {
+      setVisited(previous => previous.has(tool)
+        ? previous : new Set([...previous, tool]));
+    }
+    if (window.location.hash !== '#/' + tool) {
+      history.replaceState(null, '', '#/' + tool);
+    }
   }, []);
 
   useEffect(() => {
-    if (!switching) return;
-    const timeout = window.setTimeout(() => {
-      setSwitching(current => current?.id === switching.id ? null : current);
-    }, 210);
-    return () => window.clearTimeout(timeout);
-  }, [switching]);
-
-  useEffect(() => {
-    if (!opening) return;
-    // Also clears when the tab is backgrounded and animationend never fires.
-    const timeout = window.setTimeout(() => {
-      setOpening(current => current?.id === opening.id ? null : current);
-    }, 380);
-    return () => window.clearTimeout(timeout);
-  }, [opening]);
-
-  useEffect(() => {
-    // A fresh browser document always enters Home, even if the URL came
-    // from a bookmarked tool or a reload while working in a tool.
     openTool('home');
-    function onHashChange() { openTool(routeFromHash()); }
+    const onHashChange = () => openTool(routeFromHash());
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, [openTool]);
@@ -145,161 +65,104 @@ export default function App() {
     [openTool],
   );
 
-  const current = tools.find((tool) => tool.id === activeTool);
+  const current = tools.find(tool => tool.id === activeTool);
   const isLogo = activeTool === 'logo-resizer';
   const isHome = activeTool === 'home';
 
   return (
-    <div
-      className={
-        (isLogo ? 'forge-app forge-v5-shell' : 'forge-app forge-collection-shell') +
-        ' forge-ctk-ui forge-sketch-ui' +
-        (isHome ? ' forge-ctk-home-route forge-sketch-home-route' : '') +
-        (isHome && introPhase === 'pending' ? ' forge-intro-before-home' : '') +
-        (isHome && introPhase === 'handoff' ? ' forge-intro-handoff' : '') +
-        (isHome && introPhase === 'finishing' ? ' forge-home-finishing' : '') +
-        (isHome && introPhase === 'settled' ? ' forge-home-resting' : '') +
-        (opening && !isHome ? ' forge-tool-opening' : '')
-      }
-    >
-      <SketchSvgDefs />
+    <div className={
+      (isLogo ? 'forge-app forge-v5-shell' : 'forge-app forge-collection-shell') +
+      ' forge-ctk-ui forge-sketch-ui forge-amoled-ui' +
+      (isHome ? ' forge-ctk-home-route forge-sketch-home-route' : '')
+    }>
       <div className="sketch-notebook-frame">
-        <SketchPageFrameBorder />
-        <span className="sketch-spiral-margin" aria-hidden="true">
-          {Array.from({ length: 18 }).map((_, idx) => (
-            <SketchSpiralRingSvg key={idx} />
-          ))}
-        </span>
-
         {!isHome && (
           <div className="sketch-sidebar-rail">
-          <aside className="sidebar sketch-sidebar" aria-label="Workspace navigation">
-            <SketchVerticalDivider />
-            <div className="brand sketch-brand">
-              <button
-                type="button"
-                className="sketch-brand-btn"
-                onClick={() => openTool('home')}
-                aria-label="The Forge home"
-                title="The Forge home"
-              >
-                <AnvilMark size={50} />
-                <span className="sketch-brand-word">{"THE FORGE"}</span>
-              </button>
-            </div>
-            <SketchDividerLine compact />
-
-            <nav className="tool-nav sketch-nav" aria-label="Select a tool">
-              <button
-                type="button"
-                className="sketch-nav-link"
-                onClick={() => openTool('home')}
-                aria-label="Home"
-                title="Home"
-              >
-                <span className="sketch-nav-icon" aria-hidden="true">
-                  <ToolGlyph tool="home" size={20} />
-                </span>
-                <span className="sketch-nav-label">{"Home"}</span>
-              </button>
-
-              <div className="sketch-tool-sublist" role="group" aria-label="Creative tools">
-                {tools.map((tool) => (
-                  <button
-                    key={tool.id}
-                    type="button"
-                    className={'sketch-subtool-link' + (activeTool === tool.id ? ' is-active' : '')}
-                    aria-current={activeTool === tool.id ? 'page' : undefined}
-                    aria-label={tool.label}
-                    title={tool.label}
-                    onClick={() => {
-                      if (tool.id === 'storyboard') storyboardRef.current?.openMode('story');
-                      openTool(tool.id);
-                    }}
-                  >
-                    <span className="sketch-subtool-icon" aria-hidden="true">
-                      <ToolGlyph tool={tool.id} size={19} />
-                    </span>
-                    <span className="sketch-subtool-label">{tool.label}</span>
-                  </button>
-                ))}
+            <aside className="sidebar sketch-sidebar" aria-label="Workspace navigation">
+              <div className="brand sketch-brand">
+                <button type="button" className="sketch-brand-btn"
+                  onClick={() => openTool('home')} aria-label="The Forge home" title="The Forge home">
+                  <strong className="forge-minimal-mark">F</strong>
+                  <span className="sketch-brand-word">THE FORGE</span>
+                </button>
               </div>
-            </nav>
-
-            <div className="sketch-sidebar-footer">
-              <SketchDividerLine compact />
-              <div className="sketch-sidebar-doodle" aria-hidden="true">
-                <MountainDoodle />
-              </div>
-              <p className="sketch-sidebar-tagline">
-                One place
-                <br />
-                for your
-                <br />
-                creative tools.
-              </p>
-            </div>
-          </aside>
+              <nav className="tool-nav sketch-nav" aria-label="Select a tool">
+                <button type="button" className="sketch-nav-link"
+                  onClick={() => openTool('home')} aria-label="Home" title="Home">
+                  <span className="sketch-nav-icon" aria-hidden="true">
+                    <ToolGlyph tool="home" size={20}/>
+                  </span>
+                  <span className="sketch-nav-label">Home</span>
+                </button>
+                <div className="sketch-tool-sublist" role="group" aria-label="Creative tools">
+                  {tools.map(tool => (
+                    <button key={tool.id} type="button"
+                      className={'sketch-subtool-link' + (activeTool === tool.id ? ' is-active' : '')}
+                      aria-current={activeTool === tool.id ? 'page' : undefined}
+                      aria-label={tool.label} title={tool.label}
+                      onClick={() => {
+                        if (tool.id === 'storyboard') storyboardRef.current?.openMode('story');
+                        openTool(tool.id);
+                      }}>
+                      <span className="sketch-subtool-icon" aria-hidden="true">
+                        <ToolGlyph tool={tool.id} size={19}/>
+                      </span>
+                      <span className="sketch-subtool-label">{tool.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </nav>
+            </aside>
           </div>
         )}
 
-        <main ref={mainRef} className="main-area sketch-main-area">
+        <main className="main-area sketch-main-area">
           {!isHome && current && (
-            <header className={'topbar sketch-topbar' +
-              (switching?.tool === activeTool ? ' forge-switching-tool' : '')}>
+            <header className="topbar sketch-topbar">
               <div className="forge-ctk-top-leading">
-                <span key={current.id} className="forge-ctk-header-icon" aria-hidden="true">
-                  <ToolGlyph tool={current.id} size={19} />
+                <span className="forge-ctk-header-icon" aria-hidden="true">
+                  <ToolGlyph tool={current.id} size={19}/>
                 </span>
               </div>
-              <h1 className="forge-ctk-tool-name">
-                <span key={current.id} className="sketch-highlight-mark">{current.label}</span>
-              </h1>
-              <span className="forge-ctk-top-privacy">{"LOCAL PROCESSING"}</span>
-              {switching?.tool === activeTool &&
-                <span key={switching.id} className="forge-route-pencil-stroke" aria-hidden="true" />}
-              <span className="sketch-topbar-seam" aria-hidden="true">
-                <SketchDividerLine />
-              </span>
+              <h1 className="forge-ctk-tool-name">{current.label}</h1>
+              <span className="forge-ctk-top-privacy">LOCAL PROCESSING</span>
             </header>
           )}
 
           <div className="native-tool" hidden={!isHome}>
-            <StableForgeHome
-              onOpenTool={openTool}
-              onReplayIntro={replayIntro}
-              animateWriting={isHome && (introPhase === 'handoff' || introPhase === 'finishing')}
-            />
+            <StableForgeHome onOpenTool={openTool}/>
           </div>
           <div className="native-tool" hidden={activeTool !== 'link-generator'}>
-            <StableLinkGenerator />
+            <StableLinkGenerator/>
           </div>
           <div className="native-tool" hidden={!isLogo}>
-            <StableLogoResizer />
+            <StableLogoResizer/>
           </div>
           <div className="native-tool" hidden={activeTool !== 'image-splitter'}>
-            <StableImageSplitter />
+            <StableImageSplitter/>
           </div>
           <div className="native-tool" hidden={activeTool !== 'pdf-to-image'}>
-            <StablePdfToImage />
+            {visited.has('pdf-to-image') && (
+              <Suspense fallback={<div className="forge-workroom-loading" role="status">Opening PDF to Image…</div>}>
+                <StablePdfToImage/>
+              </Suspense>
+            )}
           </div>
           <div className="native-tool" hidden={activeTool !== 'video-stills'}>
-            <StableVideoStills onTransfer={handleStillsTransfer} />
+            <StableVideoStills onTransfer={handleStillsTransfer}/>
           </div>
           <div className="native-tool" hidden={activeTool !== 'storyboard'}>
-            <StableStoryboard ref={storyboardRef} />
+            <StableStoryboard ref={storyboardRef}/>
           </div>
           <div className="native-tool" hidden={activeTool !== 'ad-downloader'}>
-            <StableAdDownloader />
+            {visited.has('ad-downloader') && (
+              <Suspense fallback={<div className="forge-workroom-loading" role="status">Opening Ad Downloader…</div>}>
+                <StableAdDownloader/>
+              </Suspense>
+            )}
           </div>
         </main>
       </div>
-      {opening?.origin && opening.tool === activeTool && (
-        <ToolOpenTransition key={opening.id} origin={opening.origin} targetRef={mainRef} />
-      )}
-      {isHome && (introPhase === 'pending' || introPhase === 'handoff') && (
-        <ForgeSketchIntro key={introRun} onHandoff={handoffIntro} onFinish={finishIntro} onSkip={skipIntro} />
-      )}
     </div>
   );
 }

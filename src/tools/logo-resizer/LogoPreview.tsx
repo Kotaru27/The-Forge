@@ -1,4 +1,4 @@
-import { memo, useEffect, useLayoutEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { drawLogoPreview, getLogoPreviewBitmap } from './renderer';
 import type { LogoAsset, LogoSettings } from './types';
 
@@ -92,12 +92,10 @@ function cancelPreview(canvas: HTMLCanvasElement) {
 
 export const LogoPreview = memo(function LogoPreview({ asset, settings, className = '' }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef<HTMLSpanElement>(null);
   const renderRef = useRef<() => void>(() => {});
   const inViewRef = useRef(false);
   const revisionRef = useRef(0);
   const paintedRevisionRef = useRef(0);
-  const previousSizeRef = useRef<{ width: number; height: number } | null>(null);
 
   const focused = className.split(' ').includes('logo-detail-preview');
   // Only the inspector receives an enlarged, high-DPI canvas preview.
@@ -108,21 +106,6 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
     : Math.min(1, maxSide / Math.max(settings.width, settings.height));
   const width = Math.max(1, Math.round(settings.width * scale));
   const height = Math.max(1, Math.round(settings.height * scale));
-
-  // Keep the small-batch resize cue; transform is compositor-only.
-  useLayoutEffect(() => {
-    const previous = previousSizeRef.current;
-    previousSizeRef.current = { width, height };
-    const frame = frameRef.current;
-    if (!previous || !frame || focused ||
-        frame.closest('.logo-bulk-workspace') ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-        (previous.width === width && previous.height === height)) return;
-    frame.animate([
-      { transform: 'scale(' + previous.width / width + ', ' + previous.height / height + ')' },
-      { transform: 'scale(1, 1)' },
-    ], { duration: 240, easing: 'cubic-bezier(.16, 1, .3, 1)' });
-  }, [width, height, focused]);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -189,7 +172,7 @@ export const LogoPreview = memo(function LogoPreview({ asset, settings, classNam
     };
   }, []);
 
-  return <span ref={frameRef} className={'logo-preview-frame ' + className}
+  return <span className={'logo-preview-frame ' + className}
     style={focused ? { width, height: 'auto', aspectRatio: `${width} / ${height}` } : { width, height }}>
     <canvas aria-label={'Preview of ' + (asset.filename || asset.source.name)}
       className="logo-preview" ref={ref} />

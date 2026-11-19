@@ -1,206 +1,49 @@
 import { test, expect } from '@playwright/test';
+import { openForgeRoute } from './helpers/forge-route';
 
-test('uploaded pencil drawing completes and continues into the actual seven-card Forge Home', async ({ page }, testInfo) => {
-  await page.setViewportSize({ width: 1586, height: 992 });
+test('AMOLED Home renders immediately without an intro overlay', async ({ page }) => {
   await page.goto('./');
-  const intro = page.getByRole('dialog', { name: 'The Forge opening pencil sketch' });
-  await expect(intro).toBeVisible();
-  await expect(intro).toHaveAttribute('data-intro-stage', 'drawing');
-  // Home carries ZERO per-letter SVGs before handoff. It starts to write
-  // only when the genuine opening intro reaches Home.
-  const homePencil = page.locator('.sketch-home .pencil-glyph-stroke').first();
-  await expect(homePencil).toHaveCount(0);
-  await expect(intro.locator('#forge-intro-layer-drafting-guides')).toHaveCount(1);
-  await expect(intro.locator('#forge-intro-layer-frame-and-emblem')).toHaveCount(1);
-  await expect(intro.locator('#forge-intro-layer-title')).toHaveCount(1);
-  await expect(intro.locator('#forge-intro-layer-caption')).toHaveCount(1);
-  // Exactly the SAME authored rough-pencil font/drawing in intro and Home.
-  // The old serif title + partial stroke paths produced the broken letters
-  // visible in the user screenshot; neither may render now.
-  const introTitle = intro.locator('.forge-intro-title-bridge .pencil-wordmark-art');
-  const homeTitle = page.locator('.sketch-hero-center .pencil-wordmark-art');
-  await expect(introTitle).toHaveCount(1);
-  await expect(introTitle.locator('text').last()).toHaveText('THE FORGE');
-  await expect(introTitle.locator('tspan.pencil-writing-glyph')).toHaveCount(8);
-  await expect(introTitle.locator('tspan.pencil-writing-glyph').last()).toHaveAttribute('style', /--glyph-index:\s*7/);
-  // The word space has no empty pencil-writing beat.
-  await expect(introTitle.locator('text').last().locator('tspan:not(.pencil-writing-glyph)')).toHaveCount(1);
-  await expect(introTitle).toHaveCSS('clip-path','none');
-  await expect(introTitle.locator('tspan.pencil-writing-glyph').first()).toHaveCSS('animation-name', /forgePencilGlyphTrace/);
-  await expect(introTitle.locator('pattern')).toHaveAttribute('id', 'forge-intro-graphite-grain');
-  await expect(homeTitle.locator('pattern')).toHaveAttribute('id', 'forge-graphite-grain');
-  expect(await introTitle.locator('text').last().getAttribute('font-family'))
-    .toEqual(await homeTitle.locator('text').last().getAttribute('font-family'));
-  await expect(intro.locator('.title-charcoal-ghost, .title-charcoal-fill, .title-stroke-6b')).toHaveCount(0);
+  await expect(page).toHaveURL(/#\/home$/);
+  await expect(page.locator('.forge-amoled-home')).toBeVisible();
   await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
-  const subtitleHighlight = page.locator('.sketch-subtitle .sketch-highlight-sweep');
-  const cardHighlight = page.locator('.sketch-home-grid .sketch-card-title .sketch-highlight-mark').first();
-  const highlightState = async (locator: typeof subtitleHighlight) => locator.evaluate(element => {
-    const css = getComputedStyle(element, '::before');
-    return { name: css.animationName, iterations: css.animationIterationCount };
-  });
-  // The intro is drawing on a separate sheet. Hidden Home highlights must
-  // not play the old theme animation underneath, then replay after the handoff.
-  expect((await highlightState(subtitleHighlight)).name).toBe('none');
-  expect((await highlightState(cardHighlight)).name).toBe('none');
-
-  await page.waitForTimeout(2150);
-  await page.screenshot({ path: testInfo.outputPath('intro-pencil-drawing.png') });
-  await expect(intro).toHaveAttribute('data-intro-stage', 'handoff', { timeout: 5500 });
-  // No ghosted intro anvil/guide drawing may overlay cards during the
-  // continuing graphite Home sketch; ONLY the shared wordmark flies.
-  await expect(intro.locator('.forge-intro-artwork')).toHaveCSS('visibility', 'hidden');
-  await expect(page.locator('.forge-app')).toHaveClass(/forge-intro-handoff/);
-  await expect(homePencil).toHaveCSS('animation-name', 'forgePencilContour');
-  expect(await highlightState(subtitleHighlight)).toEqual({ name: 'forgePencilShadeSweep', iterations: '1' });
-  expect(await highlightState(cardHighlight)).toEqual({ name: 'forgePencilShadeSweep', iterations: '1' });
-  await expect(introTitle.locator('g[filter]').first()).toHaveCSS('filter', 'none');
-  const border = page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first();
-  await expect(border).toHaveAttribute('pathLength', '1');
-  await expect(border).toHaveCSS('animation-name', 'none'); // Paper borders are NEVER traced.
-  const pencilGeometry = page.locator('.sketch-home-grid .sketch-card-art > svg path').first();
-  await expect(pencilGeometry).toHaveAttribute('pathLength','1');
-  await expect(pencilGeometry).toHaveCSS('animation-name', /forgePencilTraceRealPath/);
-  await expect(page.locator('.sketch-home-grid .sketch-card-art > svg').first()).toHaveCSS('clip-path','none');
-  const written = page.locator('.sketch-home-grid .pencil-written-glyph').first();
-  await expect(written).toHaveCSS('animation-name', 'none');
-  await expect(written.locator('.pencil-glyph-stroke')).toHaveCSS('animation-name', /forgePencilContour/);
-  await expect(written.locator('.pencil-glyph-vector')).toHaveCSS('animation-name', 'forgePencilVectorYield');
-  await expect(page.locator('.sketch-home-grid .pencil-written-word').first()).toBeVisible();
-  await expect(page.locator('.sketch-home-grid .sketch-card-border-svg path[stroke]').first()).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
-
-  await page.waitForTimeout(570);
-  await page.screenshot({ path: testInfo.outputPath('intro-home-handoff.png') });
-  await expect(intro).toHaveCount(0, { timeout: 3500 });
-  await expect(page.locator('.forge-app')).not.toHaveClass(/forge-intro-handoff/);
-  await expect(page.getByRole('heading', { name: 'THE FORGE', level: 1 })).toBeVisible();
-  await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
-  // The overlay ends while the last written lines finish ONCE, then Home
-  // becomes a completely static notebook page with no recurring SVGs.
-  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-finishing/);
-  expect((await highlightState(subtitleHighlight)).name).toBe('none');
-  expect((await highlightState(cardHighlight)).name).toBe('none');
-  await page.waitForTimeout(300);
-  expect((await highlightState(subtitleHighlight)).name).toBe('none');
-  expect((await highlightState(cardHighlight)).name).toBe('none');
-  const oldBorderLoop = page.locator('.sketch-card-border-svg .sketch-ongoing-card-border').first();
-  await expect(oldBorderLoop).toHaveCSS('animation-name', 'none');
-  await expect(oldBorderLoop).toBeHidden();
-  const ongoing = page.locator('.sketch-card-art .pencil-ongoing-illustration-detail').first();
-  await expect(ongoing).toHaveCSS('animation-name', 'none');
-  await expect(ongoing).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
-  await expect(page.locator('.sketch-card-art .pencil-ongoing-illustration-detail')).toHaveCount(7);
-  await expect(page.getByRole('button', {name:'Open Storyboard'})).toBeVisible();
-  // The intro-to-settled handoff must not restart the old full-line wipe:
-  // it used to blank all seven card descriptions for another frame.
-  const description = page.locator('.sketch-home-grid .sketch-card-desc').first();
-  await expect(description).toContainText(/.+/);
-  await expect(description).toHaveCSS('animation-name','none');
-  await expect(description).toHaveCSS('clip-path','none');
-  await expect(page.locator('.sketch-card-border-svg [data-pencil-trace]').first()).toHaveCSS('animation-name','none');
-  // SVG contours remain attached to every phrase; native letters are fully
-  // visible after the one-shot writing finishes, with no line-wide clipping.
-  await expect(page.locator('.sketch-home-grid .pencil-glyph-face').first()).toHaveCSS('opacity','1');
-  // The brief completion phase ends automatically, removing every
-  // expensive per-letter SVG while keeping ALL seven descriptions readable.
-  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/, { timeout: 6500 });
-  await expect(page.locator('.sketch-home-grid .pencil-written-glyph')).toHaveCount(0);
-  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
-  await expect(ongoing).toHaveCSS('animation-name', 'none');
-  await expect(description).toContainText(/.+/);
-
-  await page.screenshot({ path: testInfo.outputPath('intro-home-finished.png') });
-
-  // A second document load must replay the intro even within this tab.
-  await page.goto('./');
-  await expect(intro).toBeVisible();
-  await expect(intro).toHaveAttribute('data-intro-stage', 'drawing');
-  await page.getByRole('button', { name: /Skip intro/ }).click();
-  await expect(intro).toHaveCount(0);
+  await expect(page.locator('.forge-intro-portal, .forge-tool-opening')).toHaveCount(0);
+  await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.sketch-tool-card').first()).toHaveCSS('transition-property', 'none');
 });
 
-test('intro skip and user-triggered replay never change tool routing', async ({ page }) => {
-  await page.goto('./');
-  const intro = page.getByRole('dialog', { name: 'The Forge opening pencil sketch' });
-  await expect(intro).toBeVisible();
-  await page.getByRole('button', { name: /Skip intro/ }).click();
-  await expect(intro).toHaveCount(0);
-  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
-  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
-  await page.getByRole('button', { name: /Replay pencil sketch intro/ }).click();
-  await expect(intro).toBeVisible();
-
-  // Same-document hash navigation remains available throughout and cancels
-  // the in-progress intro without replaying it on later Home visits.
-  await page.evaluate(() => { window.location.hash = '#/logo-resizer'; });
-  await expect(intro).toHaveCount(0);
+test('Home search and tool opening are immediate and functional', async ({ page }) => {
+  await openForgeRoute(page, 'home');
+  await page.getByRole('searchbox', { name: 'Find a Forge tool' }).fill('Logo');
+  await expect(page.locator('.sketch-tool-card')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Open Logo Resizer' }).click();
+  await expect(page).toHaveURL(/#\/logo-resizer$/);
   await expect(page.locator('.logo-workspace')).toBeVisible();
-  await page.evaluate(() => { window.location.hash = '#/home'; });
-  await expect(intro).toHaveCount(0);
-  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
-  // Existing search matches card description text as well as tool names.
-  // Use a uniquely matching query; do not change the application's search.
-  await page.getByRole('searchbox', { name: 'Find a Forge tool' }).fill('ad downloader');
-  await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Open Ad Downloader' }).click();
-  await expect(page).toHaveURL(/#\/ad-downloader$/);
+  await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
 });
 
-test('a bookmarked tool URL always starts a new document with the Home intro', async ({ page }) => {
-  await page.goto('#/storyboard');
-  const intro = page.getByRole('dialog', { name: 'The Forge opening pencil sketch' });
+test('bookmarked tool routes open at Home on a fresh document', async ({ page }) => {
+  await page.goto('./#/storyboard');
   await expect(page).toHaveURL(/#\/home$/);
-  await expect(intro).toBeVisible();
-  await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
-  await page.getByRole('button', { name: /Skip intro/ }).click();
-  await expect(intro).toHaveCount(0);
-  await page.evaluate(() => { window.location.hash = '#/storyboard'; });
-  await expect(page.getByRole('heading', { name: 'Storyboard', level: 1 })).toBeVisible();
-
-  // A browser refresh from the tool loses only the visible route and returns
-  // to Home with a newly drawn intro, not to the bookmarked tool.
-  await page.reload();
-  await expect(page).toHaveURL(/#\/home$/);
-  await expect(intro).toBeVisible();
+  await expect(page.locator('.forge-amoled-home')).toBeVisible();
+  await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
 });
 
-test('refresh from every tool returns Home and restarts the pencil sketch', async ({ page }) => {
-  await page.goto('./');
-  const intro = page.getByRole('dialog', { name: 'The Forge opening pencil sketch' });
-  await expect(intro).toBeVisible();
-  await page.getByRole('button', { name: /Skip intro/ }).click();
-
-  for (const [route, title] of [
-    ['logo-resizer', 'Logo Resizer'],
-    ['image-splitter', 'Image Splitter'],
-    ['pdf-to-image', 'PDF to Image'],
-    ['video-stills', 'Video Stills'],
-    ['storyboard', 'Storyboard'],
-    ['link-generator', 'Link Generator'],
-    ['ad-downloader', 'Ad Downloader'],
-  ] as const) {
-    await page.evaluate(target => { window.location.hash = '#/' + target; }, route);
-    await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible();
-    await expect(intro).toHaveCount(0);
+test('refreshing a working tool returns to Home without motion', async ({ page }) => {
+  for (const route of ['logo-resizer', 'pdf-to-image', 'image-splitter', 'video-stills', 'storyboard', 'link-generator', 'ad-downloader']) {
+    await openForgeRoute(page, route);
+    await expect(page.locator('.native-tool:not([hidden])')).toBeVisible();
     await page.reload();
     await expect(page).toHaveURL(/#\/home$/);
-    await expect(intro).toBeVisible();
-    await expect(intro).toHaveAttribute('data-intro-stage', 'drawing');
-    await page.getByRole('button', { name: /Skip intro/ }).click();
+    await expect(page.locator('.forge-amoled-home')).toBeVisible();
+    await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
   }
-  await page.reload();
-  await expect(intro).toBeVisible();
 });
 
-test('reduced-motion preferences start at settled Home without replaying animation', async ({ page }) => {
+test('reduced motion preference has identical zero-motion navigation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('#/video-stills');
-  await expect(page).toHaveURL(/#\/home$/);
-  await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
-  await expect(page.locator('.sketch-home-grid .sketch-tool-card')).toHaveCount(7);
-  await expect(page.locator('.pencil-glyph-vector')).toHaveCount(0);
-  await expect(page.locator('.forge-app')).toHaveClass(/forge-home-resting/);
-  await page.reload();
-  await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
-  await expect(page).toHaveURL(/#\/home$/);
+  await openForgeRoute(page, 'home');
+  await page.getByRole('button', { name: 'Open Storyboard' }).click();
+  await expect(page).toHaveURL(/#\/storyboard$/);
+  await expect(page.locator('.native-tool:not([hidden])')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.forge-intro-portal, .forge-tool-opening')).toHaveCount(0);
 });

@@ -1,8 +1,6 @@
 /* CTK visual parity adapter for The Forge's native React/TypeScript workrooms.
  * Palette, typography, spatial hierarchy and control states follow CTK main.
  * Intentionally contains no legacy scripts, iframe, processing or export logic. */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-@import url('https://api.fontshare.com/v2/css?f[]=kola@400&display=swap');
 
 .forge-app.forge-ctk-ui {
   --ctk-ink: #173b29;

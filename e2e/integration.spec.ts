@@ -46,8 +46,7 @@ test('Storyboard in-app routing works and compressor/invalid links open Home', a
   await page.evaluate(() => { window.location.hash = '#/not-a-tool'; });
   await expect(page).toHaveURL(/#\/home$/);
   await page.reload();
-  await expect(page.getByRole('dialog', { name: 'The Forge opening pencil sketch' })).toBeVisible();
-  await page.getByRole('button', { name: /Skip intro/ }).click();
+  await expect(page.locator('.forge-intro-portal')).toHaveCount(0);
   // CTK's full-width Home intentionally replaces the tool rail with seven
   // actionable workbench cards. Verify the rail returns upon opening a tool.
   await expect(page.getByRole('region', { name: 'The Forge home' })).toBeVisible();
