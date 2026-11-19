@@ -1,0 +1,156 @@
+name: Publish The Forge AMOLED isolated Pages preview
+
+on:
+  push:
+    branches: [release/pages-preview]
+  workflow_dispatch:
+
+# The existing GitHub Pages production root is built from main unchanged.
+# AMOLED is deployed under /The-Forge/amoled-preview/ until approved.
+permissions:
+  contents: read
+
+concurrency:
+  group: the-forge-pages-amoled-isolated
+  cancel-in-progress: false
+
+jobs:
+  verify-and-assemble:
+    name: Verify AMOLED and preserve production root
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout production main without modifications
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: production
+          persist-credentials: false
+
+      - name: Checkout exactly the reviewed AMOLED implementation
+        uses: actions/checkout@v4
+        with:
+          ref: 339444140c69df78f41875335846877cf105d3d6
+          path: candidate
+          persist-credentials: false
+
+      - name: Checkout locked CTK oracle for regression tests
+        uses: actions/checkout@v4
+        with:
+          repository: Kotaru27/CTK
+          ref: 617615c0b4370c795ddfd6dc4c300920cd595883
+          path: candidate/legacy-source
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install AMOLED dependencies
+        working-directory: candidate
+        run: npm install --no-audit --no-fund
+
+      - name: Run Forge and pinned CTK tests
+        working-directory: candidate
+        run: npm test
+
+      - name: Build production-equivalent candidate for full browser tests
+        working-directory: candidate
+        run: npm run build
+        env:
+          FORGE_BASE_PATH: /The-Forge/
+
+      - name: Install Chromium
+        working-directory: candidate
+        run: npx playwright install --with-deps chromium
+
+      - name: Recheck all AMOLED browser workflows
+        working-directory: candidate
+        run: npm run test:e2e
+
+      - name: Archive visual QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-amoled-review-${{ github.run_id }}
+          path: candidate/test-results/
+          if-no-files-found: ignore
+          retention-days: 10
+
+      - name: Build isolated AMOLED subpath
+        working-directory: candidate
+        run: npm run build
+        env:
+          FORGE_BASE_PATH: /The-Forge/amoled-preview/
+
+      - name: Build production main with its unchanged content
+        working-directory: production
+        env:
+          FORGE_BASE_PATH: /The-Forge/
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Assemble root plus separate AMOLED preview
+        run: |
+          mkdir -p combined-site/amoled-preview
+          cp -a production/dist/. combined-site/
+          cp -a candidate/dist/. combined-site/amoled-preview/
+          test -s combined-site/index.html
+          test -s combined-site/amoled-preview/index.html
+          grep -q '/The-Forge/assets/' combined-site/index.html
+          grep -q '/The-Forge/amoled-preview/assets/' combined-site/amoled-preview/index.html
+          diff -qr production/dist combined-site --exclude=amoled-preview
+          echo 'Production root is byte-identical to fresh main build; AMOLED exists only in /amoled-preview/.'
+
+      - name: Upload combined Pages build
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: combined-site
+
+  deploy:
+    name: Publish isolated AMOLED preview
+    needs: verify-and-assemble
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}amoled-preview/
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    outputs:
+      site_url: ${{ steps.publish.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Publish verified combined site
+        id: publish
+        uses: actions/deploy-pages@v4
+
+  smoke:
+    name: Check actual Pages Home and all AMOLED workspaces
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/pages-preview
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Verify live HTTPS site, asset URLs, tools and an export
+        env:
+          FORGE_PAGES_ROOT: ${{ needs.deploy.outputs.site_url }}
+        run: node scripts/smoke-amoled-pages.mjs
+      - name: Archive live screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-amoled-live-${{ github.run_id }}
+          path: |
+            forge-amoled-home-live.png
+            forge-amoled-logo-live.png
+          if-no-files-found: ignore
+          retention-days: 10
