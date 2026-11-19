@@ -1,0 +1,549 @@
+/*
+ * THE FORGE — Zero-Motion AMOLED
+ * Layouts, tool engines, exports, inputs and routes are unchanged.
+ * Deliberately no transition, keyframe, paper texture, blur or glow.
+ */
+:root { color-scheme: dark; }
+html, body, #root { background: #000; }
+
+.forge-app.forge-amoled-ui {
+  --ctk-ink: #f2f2f3;
+  --ctk-forest: #f2f2f3;
+  --ctk-strong: #ededee;
+  --ctk-muted: #a1a1aa;
+  --ctk-paper: #000;
+  --ctk-canvas: #000;
+  --ctk-sheet: #0c0c0c;
+  --ctk-line: #27272a;
+  --ctk-line-strong: #38383b;
+  --ctk-soft: #101010;
+  --ctk-accent: #ededee;
+  --f-bg: #000;
+  --f-base: #000;
+  --f-rail: #070707;
+  --f-panel: #0b0b0b;
+  --f-panel-2: #111;
+  --f-border: #292929;
+  --f-border-soft: #202020;
+  --f-text: #f1f1f2;
+  --f-muted: #a3a3a9;
+  --f-faint: #818187;
+  --f-bright: #f1f1f2;
+  --f-bright-ink: #000;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  background: #000;
+  color: #f1f1f2;
+  font-family: Inter, 'Segoe UI', Arial, sans-serif;
+  color-scheme: dark;
+}
+
+/* User requirement: no visual motion, including workroom animations. */
+.forge-amoled-ui *,
+.forge-amoled-ui *::before,
+.forge-amoled-ui *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+  will-change: auto !important;
+}
+.forge-amoled-ui :is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid #e5e5e7 !important;
+  outline-offset: 2px !important;
+}
+.forge-amoled-ui :is(button, .sketch-tool-card, .logo-card):hover,
+.forge-amoled-ui :is(button, .sketch-tool-card, .logo-card):active {
+  transform: none !important;
+}
+.forge-amoled-ui :is(input, button, textarea, select) { font-family: inherit; }
+.forge-amoled-ui :is(input, textarea)::placeholder { color: #77777d; }
+.forge-amoled-ui :is(input[type=checkbox], input[type=radio], input[type=range]) { accent-color: #e4e4e7; }
+.forge-amoled-ui :is(.logo-preview, canvas, img) { filter: none !important; }
+.forge-amoled-ui ::selection { background: #46464b; color: #fff; }
+.forge-amoled-ui * { scrollbar-color: #424247 #080808; scrollbar-width: thin; }
+
+/* Preserve the existing desktop shell and compact navigation geometry. */
+.forge-amoled-ui .sketch-notebook-frame {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #000;
+  overflow: hidden;
+}
+.forge-amoled-ui .sketch-sidebar-rail {
+  flex: 0 0 78px;
+  width: 78px;
+  min-width: 78px;
+  overflow: hidden;
+  background: #050505;
+  border-right: 1px solid #242424;
+}
+.forge-amoled-ui .sketch-sidebar-rail:hover,
+.forge-amoled-ui .sketch-sidebar-rail:focus-within {
+  flex-basis: 210px;
+  width: 210px;
+  min-width: 210px;
+}
+.forge-amoled-ui .sidebar.sketch-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #050505;
+  border: 0;
+}
+.forge-amoled-ui .brand.sketch-brand {
+  display: flex;
+  align-items: center;
+  flex: 0 0 68px;
+  height: 68px;
+  min-height: 68px;
+  padding: 0 12px;
+  border-bottom: 1px solid #222;
+}
+.forge-amoled-ui .sketch-brand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  height: 44px;
+  padding: 0 6px;
+  background: transparent;
+  border: 0;
+  color: #f5f5f5;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.forge-amoled-ui .forge-minimal-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  font-size: 23px;
+  line-height: 1;
+  font-weight: 790;
+}
+.forge-amoled-ui .sketch-brand-word {
+  font-size: 13px;
+  font-weight: 760;
+  letter-spacing: .04em;
+}
+.forge-amoled-ui .tool-nav.sketch-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+  flex: 1;
+  padding: 14px 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.forge-amoled-ui .sketch-tool-sublist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.forge-amoled-ui :is(.sketch-nav-link, .sketch-subtool-link) {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 13px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: #99999f;
+  text-align: left;
+  cursor: pointer;
+}
+.forge-amoled-ui :is(.sketch-nav-link, .sketch-subtool-link):hover {
+  background: #141414;
+  color: #fff;
+}
+.forge-amoled-ui .sketch-subtool-link.is-active {
+  color: #fff;
+  background: #1a1a1a;
+  border-color: #3a3a3a;
+}
+.forge-amoled-ui :is(.sketch-nav-icon, .sketch-subtool-icon) {
+  display: grid;
+  flex: 0 0 26px;
+  place-items: center;
+}
+.forge-amoled-ui :is(.sketch-nav-label, .sketch-subtool-label) {
+  font-size: 12px;
+  white-space: nowrap;
+  font-weight: 550;
+}
+.forge-amoled-ui .sketch-sidebar-rail:not(:hover):not(:focus-within)
+  :is(.sketch-brand-word, .sketch-nav-label, .sketch-subtool-label) {
+  display: none;
+}
+.forge-amoled-ui .main-area.sketch-main-area {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: #000;
+  color: #f1f1f2;
+}
+.forge-amoled-ui .topbar.sketch-topbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  height: 60px;
+  min-height: 60px;
+  flex: 0 0 60px;
+  padding: 0 24px;
+  background: #060606;
+  border: 0;
+  border-bottom: 1px solid #242424;
+}
+.forge-amoled-ui .forge-ctk-top-leading { justify-self: start; }
+.forge-amoled-ui .forge-ctk-header-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: #121212;
+  border: 1px solid #303030;
+  border-radius: 6px;
+  color: #e6e6e8;
+}
+.forge-amoled-ui .topbar .forge-ctk-tool-name {
+  justify-self: center;
+  margin: 0;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 660;
+  letter-spacing: -.03em;
+  text-align: center;
+  color: #f4f4f5;
+}
+.forge-amoled-ui .forge-ctk-top-privacy {
+  justify-self: end;
+  color: #85858c;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .08em;
+}
+.forge-amoled-ui .native-tool {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  background: #000;
+}
+.forge-amoled-ui .native-tool[hidden] { display: none !important; }
+
+/* 4 + 3 Home composition retained. Typography and icons replace illustrations. */
+.forge-amoled-ui .forge-home.sketch-home {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 32px clamp(22px, 3.6vw, 62px) 45px;
+  background: #000;
+  color: #f2f2f3;
+}
+.forge-amoled-ui .sketch-header-band,
+.forge-amoled-ui .sketch-welcome-row,
+.forge-amoled-ui .sketch-home-grid {
+  width: min(1420px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+.forge-amoled-ui .sketch-header-band {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid #252525;
+}
+.forge-amoled-ui .sketch-hero-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.forge-amoled-ui .sketch-title-lockup h1 {
+  margin: 0;
+  font-family: inherit;
+  font-weight: 770;
+  font-size: clamp(42px, 5.2vw, 78px);
+  line-height: 1;
+  letter-spacing: -.075em;
+  color: #f2f2f3;
+}
+.forge-amoled-ui .sketch-subtitle {
+  margin: 14px 0 0;
+  font-size: 12px;
+  letter-spacing: .035em;
+  color: #96969e;
+}
+.forge-amoled-ui .sketch-welcome-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 18px;
+  padding: 25px 0 22px;
+}
+.forge-amoled-ui .sketch-welcome-copy h2 {
+  margin: 0;
+  color: #efeff0;
+  font: 650 21px/1.25 Inter, 'Segoe UI', Arial, sans-serif;
+  letter-spacing: -.035em;
+}
+.forge-amoled-ui .sketch-welcome-copy p {
+  margin: 5px 0 0;
+  color: #909097;
+  font-size: 12px;
+}
+.forge-amoled-ui .sketch-welcome-controls { display: flex; gap: 8px; align-items: center; }
+.forge-amoled-ui .sketch-search-field {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: min(270px, 100%);
+  padding: 0 12px;
+  height: 40px;
+  border: 1px solid #343434;
+  border-radius: 7px;
+  background: #101010;
+  color: #a5a5ab;
+}
+.forge-amoled-ui .sketch-search-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #f5f5f5;
+  font: 12px Inter, 'Segoe UI', Arial, sans-serif;
+}
+.forge-amoled-ui .sketch-search-field:focus-within { border-color: #a0a0a5; }
+.forge-amoled-ui .sketch-search-input:focus-visible { outline: none !important; }
+.forge-amoled-ui .sketch-reset-view,
+.forge-amoled-ui .sketch-empty-btn {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #333;
+  border-radius: 7px;
+  color: #e0e0e2;
+  background: #151515;
+  cursor: pointer;
+}
+.forge-amoled-ui .sketch-home-grid {
+  display: grid !important;
+  grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  gap: 17px !important;
+  padding: 0;
+}
+.forge-amoled-ui .sketch-home-grid > :is(
+  .sketch-slot-logo-resizer, .sketch-slot-pdf-to-image,
+  .sketch-slot-image-splitter, .sketch-slot-video-stills
+) { grid-column: span 3; }
+.forge-amoled-ui .sketch-home-grid > :is(
+  .sketch-slot-storyboard, .sketch-slot-link-generator, .sketch-slot-ad-downloader
+) { grid-column: span 4; }
+.forge-amoled-ui .sketch-home-grid.is-filtered {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+}
+.forge-amoled-ui .sketch-home-grid.is-filtered > .sketch-card-slot { grid-column: auto; }
+.forge-amoled-ui .sketch-card-slot { display: flex; min-width: 0; }
+.forge-amoled-ui .sketch-tool-card {
+  display: flex !important;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 25px;
+  width: 100%;
+  min-width: 0;
+  min-height: 235px;
+  padding: 22px !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 10px !important;
+  background: #0c0c0c !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: #ededee !important;
+  text-align: left;
+  cursor: pointer;
+}
+.forge-amoled-ui .sketch-tool-card:hover,
+.forge-amoled-ui .sketch-tool-card:focus-visible {
+  border-color: #707076 !important;
+  background: #131313 !important;
+}
+.forge-amoled-ui .sketch-card-art {
+  display: grid;
+  place-items: center;
+  width: 69px;
+  height: 69px;
+  flex: 0 0 auto;
+  border: 1px solid #303030;
+  border-radius: 10px;
+  background: #151515;
+  color: #d4d4d6;
+}
+.forge-amoled-ui .sketch-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  gap: 7px;
+}
+.forge-amoled-ui .sketch-card-title {
+  color: #f3f3f4;
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 670;
+  letter-spacing: -.035em;
+}
+.forge-amoled-ui .sketch-card-desc {
+  font: 12px/1.5 Inter, 'Segoe UI', Arial, sans-serif;
+  color: #a6a6ac;
+  text-align: left;
+}
+.forge-amoled-ui .sketch-card-meta {
+  margin-top: 8px;
+  font-size: 10px;
+  color: #85858c;
+}
+.forge-amoled-ui .sketch-empty-state {
+  width: min(1420px, 100%);
+  margin: 10px auto;
+  padding: 55px 20px;
+  text-align: center;
+  color: #b4b4bb;
+}
+.forge-amoled-ui .sketch-empty-state h3 { color: #f0f0f1; }
+
+/* Workroom color unification, without changing dimensions, canvases or exports. */
+.forge-amoled-ui :is(
+  .logo-workspace, .pdf-workspace, .split-workspace, .video-stills,
+  .storyboard-tool, .link-generator, .adw-workspace
+) {
+  background: #000 !important;
+  background-image: none !important;
+  color: #efeff0;
+}
+.forge-amoled-ui :is(
+  .forge-v5-head, .forge-v5-command-deck, .forge-v5-group, .logo-card,
+  .logo-detail, .pdf-setup, .pdf-results, .pdf-doc-card, .pdf-detail,
+  .split-settings, .split-results, .split-card, .split-dialog,
+  .vs-workbench-side, .vs-content, .vs-stack, .vs-modal,
+  .sb-controls, .sb-stage, .sb-dialog, .sb-project-row,
+  .link-panel, .link-import-box, .link-filename-preview,
+  .adw-header, .adw-controls, .adw-table-wrap
+) {
+  background-color: #0c0c0c !important;
+  background-image: none !important;
+  border-color: #2b2b2d !important;
+  box-shadow: none !important;
+  color: #e9e9eb;
+}
+.forge-amoled-ui :is(.logo-gallery, .pdf-list, .split-card-grid, .vs-stacks, .sb-canvas) {
+  background: #000 !important;
+  background-image: none !important;
+}
+.forge-amoled-ui .native-tool :is(
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]),
+  select, textarea
+) {
+  background: #121212 !important;
+  background-image: none !important;
+  border-color: #38383b !important;
+  color: #f4f4f5 !important;
+  box-shadow: none !important;
+  font-family: inherit;
+}
+.forge-amoled-ui .native-tool :is(input, select, textarea):focus-visible {
+  outline: 2px solid #c8c8cd !important;
+  outline-offset: 1px !important;
+}
+.forge-amoled-ui .native-tool button:not(.logo-preview-button) {
+  background: #191919 !important;
+  background-image: none !important;
+  border-color: #363639 !important;
+  color: #ededee !important;
+  box-shadow: none !important;
+}
+.forge-amoled-ui .native-tool button:not(.logo-preview-button):hover:not(:disabled) {
+  background: #262626 !important;
+  border-color: #646469 !important;
+}
+.forge-amoled-ui .native-tool button:is(
+  .forge-v5-primary, .logo-primary, .pdf-primary, .split-primary,
+  .adw-primary, .primary
+) {
+  color: #050505 !important;
+  background: #e4e4e7 !important;
+  border-color: #e4e4e7 !important;
+  font-weight: 680;
+}
+.forge-amoled-ui .native-tool button:is(
+  .forge-v5-primary, .logo-primary, .pdf-primary, .split-primary,
+  .adw-primary, .primary
+):hover:not(:disabled) { background: #fff !important; }
+.forge-amoled-ui .native-tool button:disabled { opacity: .43; cursor: not-allowed; }
+.forge-amoled-ui .native-tool button:is(.danger, .vs-danger, .split-clear) {
+  color: #f0a0a0 !important;
+  border-color: #664040 !important;
+}
+.forge-amoled-ui .native-tool :is(h1, h2, h3, h4, strong) {
+  font-family: inherit;
+  color: #f2f2f3;
+}
+.forge-amoled-ui .native-tool label { color: #cbcbcf; }
+.forge-amoled-ui .native-tool :is(small, .pdf-muted, .split-muted, .logo-subtle) { color: #96969e; }
+.forge-amoled-ui :is(.logo-modal-backdrop, .pdf-confirm-backdrop, .pdf-detail-backdrop, .split-dialog-backdrop, .vs-overlay, .sb-overlay) {
+  background: rgba(0,0,0,.88) !important;
+  backdrop-filter: none !important;
+}
+.forge-amoled-ui :is(.logo-modal, .pdf-confirm, .split-dialog, .vs-modal, .sb-dialog) {
+  background: #111 !important;
+  border-color: #3b3b3d !important;
+  box-shadow: none !important;
+}
+.forge-amoled-ui :is(.adw-table, .sb-project-list) { color: #dedee1; }
+.forge-amoled-ui :is(.adw-table th, .adw-table td) {
+  border-color: #303033 !important;
+}
+.forge-amoled-ui :is(.logo-error, .pdf-error, .split-error, .vs-error, .sb-error, .link-error) {
+  color: #f2aaaa !important;
+}
+@media (max-width: 1100px) {
+  .forge-amoled-ui .sketch-home-grid > .sketch-card-slot { grid-column: span 6; }
+  .forge-amoled-ui .sketch-home-grid.is-filtered > .sketch-card-slot { grid-column: auto; }
+}
+@media (max-width: 700px) {
+  .forge-amoled-ui .sketch-home-grid { grid-template-columns: 1fr !important; }
+  .forge-amoled-ui .sketch-home-grid > .sketch-card-slot { grid-column: span 1; }
+  .forge-amoled-ui .sketch-welcome-row { align-items: stretch; flex-direction: column; }
+  .forge-amoled-ui .sketch-search-field { width: 100%; }
+  .forge-amoled-ui .sketch-header-band { min-height: 130px; }
+  .forge-amoled-ui .topbar.sketch-topbar { padding: 0 12px; }
+  .forge-amoled-ui .forge-ctk-top-privacy { display: none; }
+}
