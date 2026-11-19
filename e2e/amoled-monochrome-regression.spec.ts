@@ -42,34 +42,48 @@ async function paletteLeaks(page: Page) {
 
 test('all eight Home/workroom surfaces render in a neutral monochrome palette', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
+  const issues: string[] = [];
   for (const route of routes) {
     await openForgeRoute(page, route);
     const host = page.locator('.forge-amoled-ui');
     await expect(host, route).toBeVisible();
     await expect(page.locator('.sketch-main-area')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
     const leaks = await paletteLeaks(page);
-    if (leaks.length) console.info('PALETTE LEAK', route, JSON.stringify(leaks.slice(0, 35)));
-    expect(leaks, route + ' has old non-neutral paint or text').toEqual([]);
+    if (leaks.length) {
+      console.info('PALETTE LEAK', route, JSON.stringify(leaks.slice(0, 35)));
+      issues.push(route + ': ' + JSON.stringify(leaks.slice(0, 35)));
+    }
     await page.screenshot({ path: testInfo.outputPath('amoled-pure-' + route + '.png'), animations: 'disabled' });
+    if (['home','logo-resizer','link-generator','storyboard','ad-downloader'].includes(route)) {
+      const capture = await page.screenshot({ type: 'jpeg', quality: 31, animations: 'disabled' });
+      console.info('AMOLED_CAPTURE_' + route + '=' + capture.toString('base64'));
+    }
   }
+  expect(issues, 'Remaining unapproved UI paint').toEqual([]);
 });
 
 test('hover and keyboard focus states do not restore old green palettes', async ({ page }) => {
+  const issues: string[] = [];
   for (const route of routes) {
     await openForgeRoute(page, route);
     const first = page.locator('.native-tool:not([hidden]) button:visible').first();
     if (await first.count()) {
       await first.hover();
       const leaks = await paletteLeaks(page);
-      if (leaks.length) console.info('HOVER PALETTE LEAK', route, JSON.stringify(leaks.slice(0, 20)));
-      expect(leaks, route + ' hover has green/paper paint').toEqual([]);
+      if (leaks.length) {
+        console.info('HOVER PALETTE LEAK', route, JSON.stringify(leaks.slice(0, 20)));
+        issues.push(route + ' hover: ' + JSON.stringify(leaks.slice(0, 20)));
+      }
     }
     const field = page.locator('.native-tool:not([hidden]) input:visible:not([type="file"]), .native-tool:not([hidden]) textarea:visible').first();
     if (await field.count()) {
       await field.focus();
       const leaks = await paletteLeaks(page);
-      if (leaks.length) console.info('FOCUS PALETTE LEAK', route, JSON.stringify(leaks.slice(0, 20)));
-      expect(leaks, route + ' focus has green/paper paint').toEqual([]);
+      if (leaks.length) {
+        console.info('FOCUS PALETTE LEAK', route, JSON.stringify(leaks.slice(0, 20)));
+        issues.push(route + ' focus: ' + JSON.stringify(leaks.slice(0, 20)));
+      }
     }
   }
+  expect(issues, 'Interactive states contain old colors').toEqual([]);
 });

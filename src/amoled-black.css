@@ -523,8 +523,8 @@ html, body, #root { background: #000; }
 ):hover:not(:disabled) { background: #fff !important; }
 .forge-amoled-ui .native-tool button:disabled { opacity: .43; cursor: not-allowed; }
 .forge-amoled-ui .native-tool button:is(.danger, .vs-danger, .split-clear) {
-  color: #f0a0a0 !important;
-  border-color: #664040 !important;
+  color: #d7d7db !important;
+  border-color: #444448 !important;
 }
 .forge-amoled-ui .native-tool :is(h1, h2, h3, h4, strong) {
   font-family: inherit;
