@@ -29,7 +29,7 @@ test('all seven workrooms retain native scrolling, with no parallax or smooth-sc
       el.appendChild(spacer);
       el.scrollTop = 190;
     });
-    await expect.poll(() => panel.evaluate(el => el.scrollTop), route).toBeGreaterThan(0);
+    await expect.poll(() => panel.evaluate(el => el.scrollTop), { message: route }).toBeGreaterThan(0);
     const after = await panel.evaluate(el => ({ width: el.scrollWidth, client: el.clientWidth }));
     expect(after.width).toBeLessThanOrEqual(Math.max(before.width, before.client) + 3);
   }

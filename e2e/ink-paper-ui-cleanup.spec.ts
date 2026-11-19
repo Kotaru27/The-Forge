@@ -71,7 +71,7 @@ test('all seven workspaces use legible static typography on AMOLED', async ({ pa
     await expect(target, route).toBeVisible();
     await expect(target).toHaveCSS('animation-name', 'none');
     const actual = await target.evaluate(el => getComputedStyle(el).color);
-    expect(actual, route + ': text should not be paper-dark').not.toMatch(/rgb\\(31, 35, 40\\)/);
+    expect(actual, route + ': text should not be paper-dark').not.toBe('rgb(31, 35, 40)');
   }
 });
 

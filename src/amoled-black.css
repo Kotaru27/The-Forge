@@ -393,7 +393,7 @@ html, body, #root { background: #000; }
   gap: 25px;
   width: 100%;
   min-width: 0;
-  min-height: 235px;
+  min-height: 282px;
   padding: 22px !important;
   border: 1px solid #2a2a2a !important;
   border-radius: 10px !important;
@@ -548,11 +548,11 @@ html, body, #root { background: #000; }
 .forge-amoled-ui :is(.logo-error, .pdf-error, .split-error, .vs-error, .sb-error, .link-error) {
   color: #f2aaaa !important;
 }
-@media (max-width: 1100px) {
+@media (max-width: 1380px) {
   .forge-amoled-ui .sketch-home-grid > .sketch-card-slot { grid-column: span 6; }
   .forge-amoled-ui .sketch-home-grid.is-filtered > .sketch-card-slot { grid-column: auto; }
 }
-@media (max-width: 700px) {
+@media (max-width: 740px) {
   .forge-amoled-ui .sketch-home-grid { grid-template-columns: 1fr !important; }
   .forge-amoled-ui .sketch-home-grid > .sketch-card-slot { grid-column: span 1; }
   .forge-amoled-ui .sketch-welcome-row { align-items: stretch; flex-direction: column; }
@@ -718,3 +718,8 @@ html, body, #root { background: #000; }
 @media (min-width: 1201px) {
  .forge-amoled-ui .sketch-tool-card { min-height: 282px !important; }
 }
+
+/* Keep queue rows distinct while retaining the original ready/prepared order. */
+.forge-amoled-ui .adw-table tbody tr { background: #0c0c0c !important; }
+.forge-amoled-ui .adw-table tbody tr[data-stage="prepared"] { background: #151515 !important; }
+.forge-amoled-ui .adw-table tbody td { color: #dedee0 !important; }

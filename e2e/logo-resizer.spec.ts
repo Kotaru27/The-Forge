@@ -298,7 +298,7 @@ test('switching tools preserves an imported batch and does not trigger navigatio
 
 
 
-test('Focus Mode closes with interruptible exit motion and preserves the gallery', async ({ page }) => {
+test('Focus Mode closes without visible exit motion and preserves the gallery', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 860 });
   await addFiles(page, [sample, { ...sample, name: 'FocusSecond.png' }]);
   const gallery = page.locator('.logo-gallery');
@@ -309,7 +309,7 @@ test('Focus Mode closes with interruptible exit motion and preserves the gallery
   await expect(focus).toHaveAttribute('data-exiting', 'false');
   await page.getByRole('button', { name: 'Close Focus Mode' }).click();
   await expect(focus).toHaveAttribute('data-exiting', 'true');
-  await expect(focus).toHaveCSS('animation-name', 'forgeFocusExit');
+  await expect(focus).toHaveCSS('animation-name', 'none');
   // The drawer remains rendered during the exit, then unmounts.
   await firstOpen.click({ force: true });
   await expect(focus).toHaveAttribute('data-exiting', 'false');
@@ -338,7 +338,7 @@ test('Focus Mode reserves a full-height lane and resizes both header and logo gr
   await page.getByRole('button', { name: /Open Focus Mode for/ }).first().click();
   const focus = page.getByLabel('Focus Mode', { exact: true });
   await expect(focus).toBeVisible();
-  await expect(focus).toHaveCSS('animation-name', 'forgeFocusEnter');
+  await expect(focus).toHaveCSS('animation-name', 'none');
   const after = await gallery.evaluate(el => el.getBoundingClientRect().width);
   const afterHeader = await header.evaluate(el => el.getBoundingClientRect().width);
   expect(after).toBeLessThan(before - 250);
