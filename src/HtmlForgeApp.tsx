@@ -66,7 +66,7 @@ export default function HtmlForgeApp() {
           className={'tool-link html-tool-link'+(active===tool.id?' is-active':'')}
           aria-current={active===tool.id?'page':undefined}
           onClick={()=>{if(tool.id==='storyboard')storyboard.current?.openMode('story');open(tool.id);}}>
-          <span className="html-tool-number">{String(index+1).padStart(2,'0')}</span><span>{tool.label}</span>
+          <span className="html-tool-number" aria-hidden="true">{String(index+1).padStart(2,'0')}</span><span>{tool.label}</span>
         </button>)}
       </nav>
       <div className="html-sidebar-footer">Seven tools · One local workspace</div>
