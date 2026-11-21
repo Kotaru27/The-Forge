@@ -39,7 +39,7 @@ export function AdDownloader() {
   const [buckets,setBuckets]=useState<Bucket[]>([]);
   const [busy,setBusy]=useState(false);
   const [importing,setImporting]=useState(false);
-  const [status,setStatus]=useState<{message:string;error:boolean}>({message:'Choose the Auto-name folder to enable Excel import.',error:false});
+  const [status,setStatus]=useState<{message:string;error:boolean}>({message:'Upload an Excel workbook to start. Auto-name folder is optional.',error:false});
   const fileInput=useRef<HTMLInputElement>(null);
   const renamer=useRef(new AutoNamer());
   const mounted=useRef(true);
@@ -60,17 +60,14 @@ export function AdDownloader() {
     try {
       const folder=await renamer.current.chooseFolder();
       setFolderName(folder);setFolderApproved(true);
-      report(`Folder ready: ${folder}. Upload Excel to continue.`);
+      report(`Auto-name folder ready: ${folder}. Excel import is available with or without a folder.`);
     } catch(error) {
-      if ((error as Error).name==='AbortError') {report(folderApproved?'Current folder remains selected.':'Choose an Auto-name folder before importing Excel.');return;}
-      report('Choose a writable folder to enable Excel import. '+showError(error),true);
+      if ((error as Error).name==='AbortError') {report(folderApproved?'Current Auto-name folder remains selected.':'Auto-name canceled. Excel import remains available.');return;}
+      report('Auto-name is unavailable, but Excel import and normal downloads still work. '+showError(error),true);
     }
   }
   async function upload(file?:File) {
     if (!file) return;
-    if (!folderApproved || !renamer.current.active || !await renamer.current.permissionGranted()) {
-      setFolderApproved(false); report('Auto-name folder access is required before importing Excel. Choose the folder again.',true);return;
-    }
     if (!/\.(xlsx|xls)$/i.test(file.name)) {report('Select an Excel workbook (.xlsx or .xls).',true);return;}
     setImporting(true);
     report('Reading '+file.name+'…');
@@ -78,13 +75,12 @@ export function AdDownloader() {
       const book=parseWorkbook(await file.arrayBuffer());
       setEntries(book.entries);setBuckets(book.buckets);
       report(`${book.entries.length} ready · ${book.skipped} invalid rows skipped · ${book.inferred} extensions inferred.`+
-        (book.entries.some(entry=>isSharePoint(entry.url))?' SharePoint uses native downloads with folder-based naming.':''));
+        (book.entries.some(entry=>isSharePoint(entry.url))?' SharePoint uses native browser downloads; choose Auto-name for optional folder-based renaming.':''));
     } catch(error) {report('Spreadsheet could not be parsed: '+showError(error),true);}
     finally {setImporting(false);if(fileInput.current)fileInput.current.value='';}
   }
   function onDrop(event:DragEvent<HTMLElement>) {
     event.preventDefault();
-    if (!folderApproved) {report('Choose an Auto-name folder before importing Excel.',true);return;}
     void upload(event.dataTransfer.files[0]);
   }
   function setSelected(value:boolean) {
@@ -122,14 +118,14 @@ export function AdDownloader() {
       report(`Download requested: ${name} (${(blob.size/1048576).toFixed(1)} MB).`);
     } catch(error) {
       const message=showError(error);
-      report(`${entry.displayName}: `+(/Failed to fetch|CORS|NetworkError/i.test(message)?'The host blocks cross-origin media access. The provider must allow CORS for custom naming.':message),true);
+      report(`${entry.displayName}: `+(/Failed to fetch|CORS|NetworkError/i.test(message)?'The host blocked direct media access (CORS/network). Use the Source button to open the original file in a browser tab.':message),true);
     } finally {changeEntry(entry.id,{inProgress:false});}
   }
   async function downloadBulk() {
     if (busyRef.current || !chosen.length) return;
     if (chosen.length>MAX_BATCH){report('Select at most 250 files per batch.',true);return;}
     if (chosen.some(e=>isSharePoint(e.url))) {
-      report('SharePoint cannot be added to a browser ZIP. Download SharePoint files individually; deselect them to ZIP other files.',true);return;
+      report('SharePoint files require native downloads. Deselect them to ZIP the remaining selected files.',true);return;
     }
     busyRef.current=true;setBusy(true);
     try {
@@ -184,11 +180,11 @@ export function AdDownloader() {
   function onInput(event:ChangeEvent<HTMLInputElement>) {void upload(event.target.files?.[0]);}
   return <section className="adw-workspace" aria-label="Ad Downloader">
     <header className="adw-header">
-      <div><h2>{"Ad Downloader"}</h2><p>{"Choose your download folder, import an Excel workbook, then manage campaign assets."}</p></div>
+      <div><h2>{"Ad Downloader"}</h2><p>{"Import an Excel workbook and manage campaign assets. Select a folder only for optional SharePoint auto-naming."}</p></div>
       <div className="adw-controls">
         <button type="button" onClick={()=>void chooseFolder()} aria-label="Choose Auto-name folder">{"Auto-name:"} {folderName||'Choose folder'}</button>
-        <label className={`adw-upload${!folderApproved?' adw-locked':''}`} aria-disabled={!folderApproved}>
-          <input ref={fileInput} type="file" accept=".xlsx,.xls" disabled={!folderApproved || importing} aria-label="Upload Excel workbook" onChange={onInput}/>
+        <label className="adw-upload">
+          <input ref={fileInput} type="file" accept=".xlsx,.xls" disabled={importing} aria-label="Upload Excel workbook" onChange={onInput}/>
           {importing?'Importing…':'Upload Excel'}
         </label>
         <button type="button" disabled={!entries.length} onClick={()=>void copy(entries.map(e=>e.displayName).join('\n'),'All names')}>{"Copy Names"}</button>
@@ -200,7 +196,7 @@ export function AdDownloader() {
     <div className="adw-status" role={status.error?'alert':'status'} data-error={status.error}>{status.message}</div>
     {!entries.length ?
       <div className="adw-empty" onDragOver={e=>e.preventDefault()} onDrop={onDrop} aria-label="Excel drop zone">
-        <strong>{"Waiting for a workbook"}</strong><span>{folderApproved?'Drop an .xlsx or .xls file here, or select Upload Excel.':'Choose a writable Auto-name folder to unlock Excel import.'}</span>
+        <strong>{"Waiting for a workbook"}</strong><span>{'Drop an .xlsx or .xls file here, or select Upload Excel.'}</span>
       </div> : <>
       <div className="adw-filters adw-selection-tools" role="group" aria-label="Ready asset selection">
         <button type="button" onClick={()=>setSelected(true)}>{"Select ready"}</button>
@@ -220,6 +216,7 @@ export function AdDownloader() {
             <td><div className="adw-row-actions">
               <button type="button" disabled={entry.inProgress} onClick={()=>downloadRow(entry)}>{entry.inProgress?'Preparing…':entry.downloaded||entry.requested?'Download again':'Download'}</button>
               <button type="button" onClick={()=>void copy(entry.displayName,entry.displayName)}>Copy</button>
+              <button type="button" onClick={()=>nativeSharePointDownload(entry.url)} title="Open the source in a new browser tab. Protected files use your existing browser session.">Source</button>
               {isSharePoint(entry.url) && <details onToggle={event => {
                 const details = event.currentTarget;
                 if (!details.open) {

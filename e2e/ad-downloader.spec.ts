@@ -33,13 +33,13 @@ test.beforeEach(async ({page})=>{
   await openForgeRoute(page, 'ad-downloader');
   await expect(app(page)).toBeVisible();
 });
-test('Excel cannot be uploaded before selecting an approved folder',async({page})=>{
+test('Excel imports without folder permission; Auto-name remains optional',async({page})=>{
   const upload=app(page).getByLabel('Upload Excel workbook');
-  await expect(upload).toBeDisabled();
-  await expect(app(page).getByText('Choose a writable Auto-name folder')).toBeVisible();
-  await app(page).getByRole('button',{name:'Choose Auto-name folder'}).click();
   await expect(upload).toBeEnabled();
-  await expect(app(page).getByRole('status')).toContainText('Folder ready');
+  await upload.setInputFiles({name:'ads.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:fixture()});
+  await expect(app(page).locator('.adw-table tbody tr[data-stage="ready"]')).toHaveCount(2);
+  await app(page).getByRole('button',{name:'Choose Auto-name folder'}).click();
+  await expect(app(page).getByRole('status')).toContainText('Auto-name folder ready');
 });
 test('Excel import parses names and exposes all copy/bucket controls',async({page})=>{
   await app(page).getByRole('button',{name:'Choose Auto-name folder'}).click();

@@ -20,7 +20,15 @@ export function guessType(blob: Blob, hint: ExtensionHint, signature: Uint8Array
   if (ascii(0,3) === 'GIF') return '.gif';
   if (ascii(0,4) === 'RIFF' && ascii(8,12) === 'WEBP') return '.webp';
   if (ascii(0,4) === 'RIFF' && ascii(8,12) === 'WAVE') return '.wav';
-  if (ascii(4,8) === 'ftyp') return '.mp4';
+  if (ascii(4,8) === 'ftyp') {
+    // QuickTime, MPEG-4 audio and M4V share the ISO BMFF ftyp marker.
+    // Calling every such file MP4 silently breaks video/audio workflows.
+    const brand = ascii(8,12).toLowerCase();
+    if (brand === 'qt  ') return '.mov';
+    if (brand === 'm4a ') return '.m4a';
+    if (brand === 'm4v ') return '.m4v';
+    return '.mp4';
+  }
   if (ascii(0,3) === 'ID3') return '.mp3';
   if (signature[0] === 0x50 && signature[1] === 0x4b && signature[2] === 0x03 && signature[3] === 0x04) return '.zip';
   if (mimeToExt[mime]) return '.' + mimeToExt[mime];
