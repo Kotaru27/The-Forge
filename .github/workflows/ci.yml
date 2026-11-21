@@ -26,6 +26,15 @@ jobs:
         env:
           CTK_SOURCE_DIR: legacy-source
           FORGE_BASE_PATH: /The-Forge/
+      - name: Build verified standalone HTML (does not publish Pages)
+        run: npm run build:html
+      - name: Attach downloadable single-file HTML for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: the-forge-standalone-html
+          path: dist-standalone/the-forge.html
+          if-no-files-found: error
+          retention-days: 14
 
   browser:
     if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/heads/migration/') || github.ref == 'refs/heads/release/pages-preview'
@@ -40,6 +49,7 @@ jobs:
       - run: npm run build
         env:
           FORGE_BASE_PATH: /The-Forge/
+      - run: npm run build:html
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - name: Archive desktop workroom screenshots
