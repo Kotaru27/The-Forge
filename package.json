@@ -16,7 +16,8 @@
     "test:unit": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:legacy": "node scripts/test-legacy.mjs",
     "test": "npm run test:unit && npm run test:legacy",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:html": "vite build --config vite.standalone.config.ts && node scripts/pack-standalone.mjs && node scripts/verify-standalone.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",
