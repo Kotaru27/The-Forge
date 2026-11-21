@@ -77,3 +77,12 @@ test('Media signature beats mime and source guess; HTML preview/login is never s
   assert.throws(()=>guessType(new Blob(['<html>login'],{type:'application/octet-stream'}),hint,new TextEncoder().encode('<html>login')), /web page/);
   assert.equal(guessType(new Blob(['??'],{type:'application/octet-stream'}),hint,new TextEncoder().encode('??')),'.bin');
 });
+
+test('ISOBMFF major brand preserves QuickTime MOV and MPEG-4 audio/video extensions',()=>{
+  const hint={ext:'.mp4',confidence:'inferred'};
+  const bytes=(brand)=>new Uint8Array([0,0,0,24,102,116,121,112,...new TextEncoder().encode(brand)]);
+  assert.equal(guessType(new Blob([],{type:'application/octet-stream'}),hint,bytes('qt  ')),'.mov');
+  assert.equal(guessType(new Blob([],{type:'application/octet-stream'}),hint,bytes('M4A ')),'.m4a');
+  assert.equal(guessType(new Blob([],{type:'application/octet-stream'}),hint,bytes('M4V ')),'.m4v');
+  assert.equal(guessType(new Blob([],{type:'application/octet-stream'}),hint,bytes('isom')),'.mp4');
+});
